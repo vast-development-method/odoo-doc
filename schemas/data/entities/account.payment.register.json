@@ -1,0 +1,3381 @@
+{
+ "catalog": {
+  "name": "entity:account.payment.register",
+  "description": "Complete definition of entity Pay (account.payment.register).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.payment.register",
+  "storage_name": "account_payment_register",
+  "full_name": "Pay",
+  "kind": "transient",
+  "description": "Pay",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "account_payment",
+   "hr_expense",
+   "l10n_account_withholding_tax",
+   "l10n_latam_check",
+   "l10n_ar_withholding",
+   "l10n_pl_bank_verification"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "payment_date",
+    "type": "Date",
+    "string": "Payment Date",
+    "required": true,
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "account",
+    "full_name": "Payment Date"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "currency_field": "currency_id",
+    "store": true,
+    "readonly": false,
+    "compute": "_compute_amount",
+    "defined_in_package": "account",
+    "string": "Amount",
+    "full_name": "Amount"
+   },
+   {
+    "name": "hide_writeoff_section",
+    "type": "Boolean",
+    "compute": "_compute_hide_writeoff_section",
+    "defined_in_package": "account",
+    "string": "Hide Writeoff Section",
+    "full_name": "Hide Writeoff Section"
+   },
+   {
+    "name": "communication",
+    "type": "Char",
+    "string": "Memo",
+    "store": true,
+    "readonly": false,
+    "compute": "_compute_communication",
+    "defined_in_package": "account",
+    "full_name": "Memo"
+   },
+   {
+    "name": "group_payment",
+    "type": "Boolean",
+    "string": "Group Payments",
+    "store": true,
+    "readonly": false,
+    "compute": "_compute_group_payment",
+    "help": "Only one payment will be created by partner (bank), instead of one per bill.",
+    "defined_in_package": "account",
+    "full_name": "Group Payments"
+   },
+   {
+    "name": "early_payment_discount_mode",
+    "type": "Boolean",
+    "compute": "_compute_early_payment_discount_mode",
+    "defined_in_package": "account",
+    "string": "Early Payment Discount Mode",
+    "full_name": "Early Payment Discount Mode"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "compute": "_compute_currency_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "help": "The payment's currency.",
+    "defined_in_package": "account",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "compute": "_compute_journal_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "check_company": true,
+    "domain": "[('id', 'in', available_journal_ids)]",
+    "defined_in_package": "account",
+    "string": "Journal",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "available_journal_ids",
+    "type": "Many2many",
+    "comodel": "account.journal",
+    "compute": "_compute_available_journal_ids",
+    "defined_in_package": "account",
+    "string": "Available Journal",
+    "full_name": "Available Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "available_partner_bank_ids",
+    "type": "Many2many",
+    "comodel": "res.partner.bank",
+    "compute": "_compute_available_partner_bank_ids",
+    "defined_in_package": "account",
+    "string": "Available Partner Bank",
+    "full_name": "Available Partner Bank",
+    "target_entity": "res.partner.bank"
+   },
+   {
+    "name": "partner_bank_id",
+    "type": "Many2one",
+    "comodel": "res.partner.bank",
+    "string": "Recipient Bank Account",
+    "readonly": false,
+    "store": true,
+    "compute": "_compute_partner_bank_id",
+    "domain": "[('id', 'in', available_partner_bank_ids)]",
+    "defined_in_package": "account",
+    "full_name": "Recipient Bank Account",
+    "target_entity": "res.partner.bank"
+   },
+   {
+    "name": "company_currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Company Currency",
+    "related": "company_id.currency_id",
+    "defined_in_package": "account",
+    "full_name": "Company Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "qr_code",
+    "type": "Html",
+    "string": "QR Code URL",
+    "compute": "_compute_qr_code",
+    "defined_in_package": "account",
+    "full_name": "quick response Code uniform resource locator"
+   },
+   {
+    "name": "batches",
+    "type": "Binary",
+    "compute": "_compute_batches",
+    "export_string_translation": false,
+    "defined_in_package": "account",
+    "string": "Batches",
+    "full_name": "Batches"
+   },
+   {
+    "name": "installments_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "next",
+      "Next Installment"
+     ],
+     [
+      "overdue",
+      "Overdue Amount"
+     ],
+     [
+      "before_date",
+      "Before Next Payment Date"
+     ],
+     [
+      "full",
+      "Full Amount"
+     ]
+    ],
+    "compute": "_compute_installments_mode",
+    "readonly": false,
+    "store": true,
+    "export_string_translation": false,
+    "defined_in_package": "account",
+    "string": "Installments Mode",
+    "full_name": "Installments Mode"
+   },
+   {
+    "name": "installments_switch_html",
+    "type": "Html",
+    "compute": "_compute_installments_switch_values",
+    "defined_in_package": "account",
+    "string": "Installments Switch Hypertext markup language",
+    "full_name": "Installments Switch Hypertext markup language"
+   },
+   {
+    "name": "installments_switch_amount",
+    "type": "Monetary",
+    "compute": "_compute_installments_switch_values",
+    "currency_field": "currency_id",
+    "defined_in_package": "account",
+    "string": "Installments Switch Amount",
+    "full_name": "Installments Switch Amount"
+   },
+   {
+    "name": "custom_user_amount",
+    "type": "Monetary",
+    "currency_field": "currency_id",
+    "defined_in_package": "account",
+    "string": "Custom User Amount",
+    "full_name": "Custom User Amount"
+   },
+   {
+    "name": "custom_user_currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "defined_in_package": "account",
+    "string": "Custom User Currency",
+    "full_name": "Custom User Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "line_ids",
+    "type": "Many2many",
+    "comodel": "account.move.line",
+    "relation": "account_payment_register_move_line_rel",
+    "column1": "wizard_id",
+    "column2": "line_id",
+    "string": "Journal items",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "account",
+    "full_name": "Journal items",
+    "target_entity": "account.move.line"
+   },
+   {
+    "name": "payment_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "outbound",
+      "Send Money"
+     ],
+     [
+      "inbound",
+      "Receive Money"
+     ]
+    ],
+    "string": "Payment Type",
+    "store": true,
+    "copy": false,
+    "compute": "_compute_from_lines",
+    "defined_in_package": "account",
+    "full_name": "Payment Type"
+   },
+   {
+    "name": "partner_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "customer",
+      "Customer"
+     ],
+     [
+      "supplier",
+      "Vendor"
+     ]
+    ],
+    "store": true,
+    "copy": false,
+    "compute": "_compute_from_lines",
+    "defined_in_package": "account",
+    "string": "Partner Type",
+    "full_name": "Partner Type"
+   },
+   {
+    "name": "source_amount",
+    "type": "Monetary",
+    "string": "Amount to Pay (company currency)",
+    "store": true,
+    "copy": false,
+    "currency_field": "company_currency_id",
+    "compute": "_compute_from_lines",
+    "defined_in_package": "account",
+    "full_name": "Amount to Pay (company currency)"
+   },
+   {
+    "name": "source_amount_currency",
+    "type": "Monetary",
+    "string": "Amount to Pay (foreign currency)",
+    "store": true,
+    "copy": false,
+    "currency_field": "source_currency_id",
+    "compute": "_compute_from_lines",
+    "defined_in_package": "account",
+    "full_name": "Amount to Pay (foreign currency)"
+   },
+   {
+    "name": "source_currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Source Currency",
+    "store": true,
+    "copy": false,
+    "compute": "_compute_from_lines",
+    "defined_in_package": "account",
+    "full_name": "Source Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "can_edit_wizard",
+    "type": "Boolean",
+    "store": true,
+    "copy": false,
+    "compute": "_compute_from_lines",
+    "defined_in_package": "account",
+    "string": "Can Edit Wizard",
+    "full_name": "Can Edit Wizard"
+   },
+   {
+    "name": "can_group_payments",
+    "type": "Boolean",
+    "store": true,
+    "copy": false,
+    "compute": "_compute_can_group_payments",
+    "defined_in_package": "account",
+    "string": "Can Group Payments",
+    "full_name": "Can Group Payments"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "store": true,
+    "copy": false,
+    "compute": "_compute_from_lines",
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Customer/Vendor",
+    "store": true,
+    "copy": false,
+    "ondelete": "restrict",
+    "compute": "_compute_from_lines",
+    "defined_in_package": "account",
+    "full_name": "Customer/Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "payment_method_line_id",
+    "type": "Many2one",
+    "comodel": "account.payment.method.line",
+    "string": "Payment Method",
+    "readonly": false,
+    "store": true,
+    "compute": "_compute_payment_method_line_id",
+    "domain": "[('id', 'in', available_payment_method_line_ids)]",
+    "help": "Manual: Pay or Get paid by any method outside of the system.\nPayment Providers: Each payment provider has its own Payment Method. Request a transaction on/to a card thanks to a payment token saved by the partner when buying or subscribing online.\nCheck: Pay bills by check and print it from the system.\nBatch Deposit: Collect several customer checks at once generating and submitting a batch deposit to your bank. Module account_batch_payment is necessary.\nSEPA Credit Transfer: Pay in the SEPA zone by submitting a SEPA Credit Transfer file to your bank. Module account_sepa is necessary.\nSEPA Direct Debit: Get paid in the SEPA zone thanks to a mandate your partner will have granted to you. Module account_sepa is necessary.\n",
+    "defined_in_package": "account",
+    "full_name": "Payment Method",
+    "target_entity": "account.payment.method.line"
+   },
+   {
+    "name": "available_payment_method_line_ids",
+    "type": "Many2many",
+    "comodel": "account.payment.method.line",
+    "compute": "_compute_payment_method_line_fields",
+    "defined_in_package": "account",
+    "string": "Available Payment Method Line",
+    "full_name": "Available Payment Method Line",
+    "target_entity": "account.payment.method.line"
+   },
+   {
+    "name": "payment_method_code",
+    "type": "Char",
+    "related": "payment_method_line_id.code",
+    "defined_in_package": "account",
+    "string": "Payment Method Code",
+    "full_name": "Payment Method Code"
+   },
+   {
+    "name": "payment_difference",
+    "type": "Monetary",
+    "compute": "_compute_payment_difference",
+    "defined_in_package": "account",
+    "string": "Payment Difference",
+    "full_name": "Payment Difference"
+   },
+   {
+    "name": "payment_difference_handling",
+    "type": "Selection",
+    "string": "Payment Difference Handling",
+    "selection": [
+     [
+      "open",
+      "Keep open"
+     ],
+     [
+      "reconcile",
+      "Mark as fully paid"
+     ]
+    ],
+    "compute": "_compute_payment_difference_handling",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "account",
+    "full_name": "Payment Difference Handling"
+   },
+   {
+    "name": "writeoff_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Difference Account",
+    "copy": false,
+    "check_company": true,
+    "defined_in_package": "account",
+    "full_name": "Difference Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "writeoff_label",
+    "type": "Char",
+    "string": "Journal Item Label",
+    "default": "Write-Off",
+    "help": "Change label of the counterpart that will hold the payment difference",
+    "defined_in_package": "account",
+    "full_name": "Journal Item Label"
+   },
+   {
+    "name": "writeoff_is_exchange_account",
+    "type": "Boolean",
+    "compute": "_compute_writeoff_is_exchange_account",
+    "defined_in_package": "account",
+    "string": "Writeoff Is Exchange Account",
+    "full_name": "Writeoff Is Exchange Account"
+   },
+   {
+    "name": "show_payment_difference",
+    "type": "Boolean",
+    "compute": "_compute_show_payment_difference",
+    "defined_in_package": "account",
+    "string": "Show Payment Difference",
+    "full_name": "Show Payment Difference"
+   },
+   {
+    "name": "show_partner_bank_account",
+    "type": "Boolean",
+    "compute": "_compute_show_require_partner_bank",
+    "defined_in_package": "account",
+    "string": "Show Partner Bank Account",
+    "full_name": "Show Partner Bank Account"
+   },
+   {
+    "name": "require_partner_bank_account",
+    "type": "Boolean",
+    "compute": "_compute_show_require_partner_bank",
+    "defined_in_package": "account",
+    "string": "Require Partner Bank Account",
+    "full_name": "Require Partner Bank Account"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_id.account_fiscal_country_id.code",
+    "readonly": true,
+    "defined_in_package": "account",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "duplicate_payment_ids",
+    "type": "Many2many",
+    "comodel": "account.payment",
+    "compute": "_compute_duplicate_moves",
+    "defined_in_package": "account",
+    "string": "Duplicate Payment",
+    "full_name": "Duplicate Payment",
+    "target_entity": "account.payment"
+   },
+   {
+    "name": "is_register_payment_on_draft",
+    "type": "Boolean",
+    "compute": "_compute_is_register_payment_on_draft",
+    "defined_in_package": "account",
+    "string": "Is Register Payment On Draft",
+    "full_name": "Is Register Payment On Draft"
+   },
+   {
+    "name": "actionable_errors",
+    "type": "Json",
+    "compute": "_compute_actionable_errors",
+    "defined_in_package": "account",
+    "string": "Actionable Errors",
+    "full_name": "Actionable Errors"
+   },
+   {
+    "name": "untrusted_bank_ids",
+    "type": "Many2many",
+    "comodel": "res.partner.bank",
+    "compute": "_compute_trust_values",
+    "defined_in_package": "account",
+    "string": "Untrusted Bank",
+    "full_name": "Untrusted Bank",
+    "target_entity": "res.partner.bank"
+   },
+   {
+    "name": "total_payments_amount",
+    "type": "Integer",
+    "compute": "_compute_trust_values",
+    "defined_in_package": "account",
+    "string": "Total Payments Amount",
+    "full_name": "Total Payments Amount"
+   },
+   {
+    "name": "untrusted_payments_count",
+    "type": "Integer",
+    "compute": "_compute_trust_values",
+    "defined_in_package": "account",
+    "string": "Untrusted Payments Count",
+    "full_name": "Untrusted Payments Count"
+   },
+   {
+    "name": "missing_account_partners",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_trust_values",
+    "defined_in_package": "account",
+    "string": "Missing Account Partners",
+    "full_name": "Missing Account Partners",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "payment_token_id",
+    "type": "Many2one",
+    "comodel": "payment.token",
+    "string": "Saved payment token",
+    "store": true,
+    "readonly": false,
+    "compute": "_compute_payment_token_id",
+    "domain": "[\n            ('id', 'in', suitable_payment_token_ids),\n        ]",
+    "help": "Note that tokens from providers set to only authorize transactions (instead of capturing the amount) are not available.",
+    "defined_in_package": "account_payment",
+    "full_name": "Saved payment token",
+    "target_entity": "payment.token"
+   },
+   {
+    "name": "suitable_payment_token_ids",
+    "type": "Many2many",
+    "comodel": "payment.token",
+    "compute": "_compute_suitable_payment_token_ids",
+    "defined_in_package": "account_payment",
+    "string": "Suitable Payment Token",
+    "full_name": "Suitable Payment Token",
+    "target_entity": "payment.token"
+   },
+   {
+    "name": "use_electronic_payment_method",
+    "type": "Boolean",
+    "compute": "_compute_use_electronic_payment_method",
+    "defined_in_package": "account_payment",
+    "string": "Use Electronic Payment Method",
+    "full_name": "Use Electronic Payment Method"
+   },
+   {
+    "name": "display_withholding",
+    "type": "Boolean",
+    "compute": "_compute_display_withholding",
+    "defined_in_package": "l10n_account_withholding_tax",
+    "string": "Display Withholding",
+    "full_name": "Display Withholding"
+   },
+   {
+    "name": "should_withhold_tax",
+    "type": "Boolean",
+    "string": "Withhold Tax Amounts",
+    "compute": "_compute_should_withhold_tax",
+    "readonly": false,
+    "store": true,
+    "copy": false,
+    "defined_in_package": "l10n_account_withholding_tax",
+    "full_name": "Withhold Tax Amounts"
+   },
+   {
+    "name": "withholding_line_ids",
+    "type": "One2many",
+    "string": "Withholding Lines",
+    "comodel": "account.payment.register.withholding.line",
+    "inverse_name": "payment_register_id",
+    "compute": "_compute_withholding_line_ids",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_account_withholding_tax",
+    "full_name": "Withholding Lines",
+    "target_entity": "account.payment.register.withholding.line"
+   },
+   {
+    "name": "withholding_net_amount",
+    "type": "Monetary",
+    "string": "Net Amount",
+    "help": "Net amount after deducting the withholding lines",
+    "compute": "_compute_withholding_net_amount",
+    "store": true,
+    "defined_in_package": "l10n_account_withholding_tax",
+    "full_name": "Net Amount"
+   },
+   {
+    "name": "withholding_default_account_id",
+    "type": "Many2one",
+    "related": "journal_id.default_account_id",
+    "defined_in_package": "l10n_account_withholding_tax",
+    "string": "Withholding Default Account",
+    "full_name": "Withholding Default Account"
+   },
+   {
+    "name": "withholding_outstanding_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Outstanding Account",
+    "copy": false,
+    "domain": "['|', ('account_type', 'in', ('asset_current', 'liability_current')), ('id', '=', withholding_default_account_id)]",
+    "check_company": true,
+    "compute": "_compute_withholding_outstanding_account_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_account_withholding_tax",
+    "full_name": "Outstanding Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "withholding_payment_account_id",
+    "type": "Many2one",
+    "related": "payment_method_line_id.payment_account_id",
+    "defined_in_package": "l10n_account_withholding_tax",
+    "string": "Withholding Payment Account",
+    "full_name": "Withholding Payment Account"
+   },
+   {
+    "name": "withholding_hide_tax_base_account",
+    "type": "Boolean",
+    "compute": "_compute_withholding_hide_tax_base_account",
+    "defined_in_package": "l10n_account_withholding_tax",
+    "string": "Withholding Hide Tax Base Account",
+    "full_name": "Withholding Hide Tax Base Account"
+   },
+   {
+    "name": "l10n_latam_new_check_ids",
+    "type": "One2many",
+    "comodel": "l10n_latam.payment.register.check",
+    "inverse_name": "payment_register_id",
+    "string": "New Checks",
+    "defined_in_package": "l10n_latam_check",
+    "full_name": "New Checks",
+    "target_entity": "l10n_latam.payment.register.check"
+   },
+   {
+    "name": "l10n_latam_move_check_ids",
+    "type": "Many2many",
+    "comodel": "l10n_latam.check",
+    "string": "Checks",
+    "defined_in_package": "l10n_latam_check",
+    "full_name": "Checks",
+    "target_entity": "l10n_latam.check"
+   },
+   {
+    "name": "l10n_ar_withholding_ids",
+    "type": "One2many",
+    "comodel": "l10n_ar.payment.register.withholding",
+    "inverse_name": "payment_register_id",
+    "string": "Withholdings",
+    "compute": "_compute_l10n_ar_withholding_ids",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "l10n_ar_withholding",
+    "full_name": "Withholdings",
+    "target_entity": "l10n_ar.payment.register.withholding"
+   },
+   {
+    "name": "l10n_ar_net_amount",
+    "type": "Monetary",
+    "compute": "_compute_l10n_ar_net_amount",
+    "readonly": true,
+    "help": "Net amount after withholdings",
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Localization Ar Net Amount",
+    "full_name": "Localization Ar Net Amount"
+   },
+   {
+    "name": "l10n_ar_adjustment_warning",
+    "type": "Boolean",
+    "compute": "_compute_l10n_ar_adjustment_warning",
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Localization Ar Adjustment Warning",
+    "full_name": "Localization Ar Adjustment Warning"
+   },
+   {
+    "name": "l10n_pl_bank_verification_ids",
+    "type": "Many2many",
+    "comodel": "l10n_pl.bank.account.verification",
+    "compute": "_compute_l10n_pl_bank_verification",
+    "defined_in_package": "l10n_pl_bank_verification",
+    "string": "Localization Pl Bank Verification",
+    "full_name": "Localization Pl Bank Verification",
+    "target_entity": "l10n_pl.bank.account.verification"
+   },
+   {
+    "name": "l10n_pl_bank_verification_invalid_bank_account_ids",
+    "type": "Many2many",
+    "comodel": "res.partner.bank",
+    "compute": "_compute_l10n_pl_bank_verification",
+    "defined_in_package": "l10n_pl_bank_verification",
+    "string": "Localization Pl Bank Verification Invalid Bank Account",
+    "full_name": "Localization Pl Bank Verification Invalid Bank Account",
+    "target_entity": "res.partner.bank"
+   },
+   {
+    "name": "l10n_pl_not_found_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_l10n_pl_bank_verification",
+    "defined_in_package": "l10n_pl_bank_verification",
+    "string": "Localization Pl Not Found Partner",
+    "full_name": "Localization Pl Not Found Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "l10n_pl_incomplete_data_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_l10n_pl_bank_verification",
+    "defined_in_package": "l10n_pl_bank_verification",
+    "string": "Localization Pl Incomplete Data Partner",
+    "full_name": "Localization Pl Incomplete Data Partner",
+    "target_entity": "res.partner"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_communication",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "lines"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper to compute the communication based on lines.\n:param lines:           A recordset of the `account.move.line`'s that will be reconciled.\n:return:                A string representing a communication to be set on payment.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_batch_available_journals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "batch_result"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper to compute the available journals based on the batch.\n\n:param batch_result:    A batch computed by '_compute_batches'.\n:return:                A recordset of account.journal.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_batch_journal",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "batch_result"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper to compute the journal based on the batch.\n\n:param batch_result:    A batch computed by '_compute_batches'.\n:return:                An account.journal record.",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_batch_available_partner_banks",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "batch_result",
+     "journal"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_line_batch_key",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "line"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Turn the line passed as parameter to a dictionary defining on which way the lines\nwill be grouped together.\n:return: A python dictionary.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_wizard_values_from_batch",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "batch_result"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Extract values from the batch passed as parameter (see '_compute_batches')\nto be mounted in the wizard view.\n:param batch_result:    A batch computed by '_compute_batches'.\n:return:                A dictionary containing valid fields",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_from_sibling_companies",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "lines"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_payment_difference",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "early_payment_discount_mode",
+         "can_edit_wizard",
+         "can_group_payments",
+         "group_payment",
+         "payment_method_line_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_batches",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Group the account.move.line linked to the wizard together.\nLines are grouped if they share 'partner_id','account_id','currency_id' & 'partner_type' and if\n0 or 1 partner_bank_id can be determined for the group.\n\nComputes a list of batches, each one containing:\n    * payment_values:   A dictionary of payment values.\n    * moves:        An account.move recordset.",
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't create payments for entries belonging to different companies.",
+        "line": 345
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't open the register payment wizard without at least one receivable/payable line.",
+        "line": 347
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_trust_values",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_line_id",
+         "line_ids",
+         "group_payment",
+         "partner_bank_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_from_lines",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Load initial values from the account.moves passed through the context. ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_group_payments",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "batches",
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_communication",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_group_payment",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_latam_move_check_ids.currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_journal_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_type",
+         "company_id",
+         "can_edit_wizard"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_journal_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "available_journal_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_partner_bank_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_bank_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "journal_id",
+         "available_partner_bank_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_payment_method_line_fields",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_type",
+         "journal_id",
+         "currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_payment_method_line_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_type",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_require_partner_bank",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_line_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computes if the destination bank account must be displayed in the payment form view. By default, it\nwon't be displayed but some modules might change that, depending on the payment type.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_actionable_errors",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_to_wizard_currency",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "installments"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_total_amounts_to_pay",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "batch_results"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 74,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_amount",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_currency_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_payment_date",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "payment_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "source_amount",
+         "source_amount_currency",
+         "source_currency_id",
+         "company_id",
+         "currency_id",
+         "payment_date",
+         "installments_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_latam_move_check_ids.amount",
+         "l10n_latam_new_check_ids.amount",
+         "payment_method_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "source_amount",
+         "source_amount_currency",
+         "source_currency_id",
+         "company_id",
+         "currency_id",
+         "payment_date",
+         "installments_mode",
+         "l10n_latam_move_check_ids.amount",
+         "l10n_latam_new_check_ids.amount",
+         "payment_method_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_installments_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_installments_switch_values",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "installments_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_early_payment_discount_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "payment_date",
+         "currency_id",
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_payment_difference",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "amount",
+         "installments_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_writeoff_is_exchange_account",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "writeoff_account_id",
+         "payment_difference_handling",
+         "currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_payment_difference_handling",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "early_payment_discount_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_hide_writeoff_section",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "early_payment_discount_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qr_code",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_bank_id",
+         "amount",
+         "currency_id",
+         "payment_method_line_id",
+         "payment_type",
+         "communication"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duplicate_moves",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "amount",
+         "payment_date",
+         "payment_type",
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_register_payment_on_draft",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_duplicate_reference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "matching_states"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Retrieve move ids for possible duplicates of payments. Duplicates moves:\n- Have the same partner_id, amount and date as the payment\n- Are not reconciled\n- Represent a credit in the same account receivable or a debit in the same account payable as the payment, or\n- Represent a credit in outstanding receipts or debit in outstanding payments, so bank statement lines with an\n outstanding counterpart can be matched, or\n- Are in the suspense account",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 54,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There's nothing left to pay for the selected journal items, so no payment registration is necessary. You've got your finances under control like a boss!",
+        "line": 975
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't create payments for entries belonging to different companies.",
+        "line": 977
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't create payments for entries belonging to different branches without access to parent company.",
+        "line": 979
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't register payments for both inbound and outbound moves at the same time.",
+        "line": 981
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot register payments for blocked invoices.",
+        "line": 983
+       },
+       {
+        "kind": "UserError",
+        "message": "The register payment wizard should only be called on account.move or account.move.line records.",
+        "line": 947
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_payment_vals_from_wizard",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "batch_result"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [],
+      "documentation": "Update the computation of the payment vals in order to correctly set the outstanding account as well as the\nwithholding line when needed.",
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The withholding net amount cannot be negative.",
+        "line": 205
+       }
+      ]
+     },
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 53,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please enter withholding number for tax %s",
+        "line": 89
+       }
+      ]
+     },
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_payment_vals_from_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "batch_result"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_init_payments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "to_process",
+     "edit_mode"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Create the payments.\n\n:param to_process:  A list of python dictionary, one for each payment to create, containing:\n                    * create_vals:  The values used for the 'create' method.\n                    * to_reconcile: The journal items to perform the reconciliation.\n                    * batch:        A python dict containing everything you want about the source journal items\n                                    to which a payment will be created (see '_compute_batches').\n:param edit_mode:   Is the wizard in edition mode.",
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_payments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "to_process",
+     "edit_mode"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Post the newly created payments.\n\n:param to_process:  A list of python dictionary, one for each payment to create, containing:\n                    * create_vals:  The values used for the 'create' method.\n                    * to_reconcile: The journal items to perform the reconciliation.\n                    * batch:        A python dict containing everything you want about the source journal items\n                                    to which a payment will be created (see '_compute_batches').\n:param edit_mode:   Is the wizard in edition mode.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reconcile_payments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "to_process",
+     "edit_mode"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Reconcile the payments.\n\n:param to_process:  A list of python dictionary, one for each payment to create, containing:\n                    * create_vals:  The values used for the 'create' method.\n                    * to_reconcile: The journal items to perform the reconciliation.\n                    * batch:        A python dict containing everything you want about the source journal items\n                                    to which a payment will be created (see '_compute_batches').\n:param edit_mode:   Is the wizard in edition mode.",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_payments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 82,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "To record payments with %(payment_method)s, the recipient bank account must be manually validated. You should go on the partner bank account in order to validate it.",
+        "line": 1229
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_next_payment_date_in_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_payments",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You can't mix checks of different currencies in one payment, and you can't change the payment's currency if checks are already created in that currency.\nPlease create separate payments for each currency.",
+        "line": 58
+       }
+      ]
+     },
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A payment cannot have withholding if the payment method has no outstanding accounts",
+        "line": 154
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_batch_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "batch_result"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_untrusted_bank_accounts",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_missing_account_partners",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_suitable_payment_token_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_line_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_electronic_payment_method",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_line_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_payment_token_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "suitable_payment_token_ids",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_withholding_net_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "withholding_line_ids.amount",
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "The net amount is the one that will actually be paid by the payer.\nIt is simply the payment amount - the sum of withholding taxes.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_withholding_outstanding_account_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "withholding_payment_account_id",
+         "should_withhold_tax"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "We propose a default account by getting one from the latest payment which:\n - Has the same payment method line id (and thus indirectly the same journal, and thus the same company)\n - That payment method has no payment_account_id\n - Yet the payment has an outstanding_account_id\n ",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_withholding",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "can_edit_wizard",
+         "can_group_payments",
+         "group_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "The withholding feature should not show on companies which does not contain any withholding taxes. ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_withholding_line_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_edit_wizard",
+         "display_withholding"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When opening the wizard, we want to compute the default withholding lines by looking at the invoice lines to see\nif they have withholding taxes set on them.",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_should_withhold_tax",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "withholding_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensures that we display the line table if any withholding line has been added to the payment. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_withholding_hide_tax_base_account",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When the withholding tax base account is set in the setting, simplify the view by hiding the account\ncolumn on the lines as we will default to that tax base account.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_withholding_line_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "withholding_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Any time a line is edited, we want to check if we need to recompute the placeholders.\nThe idea is to try and display accurate placeholders on lines whose tax have a sequence set.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_total_amount_in_wizard_currency",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_account_withholding_tax",
+      "decorators": [],
+      "documentation": "Returns the total amount of the first batch, in the currency of the wizard.\nThis information can be used to determine if we are doing a partial payment or not.",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_latam_check_payment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "check_subtype"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_ar_adjustment_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount",
+         "l10n_latam_move_check_ids",
+         "l10n_latam_new_check_ids",
+         "payment_method_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_ar_net_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount",
+         "l10n_ar_withholding_ids.amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_conversion_rate",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_ar_withholding_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "payment_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_pl_bank_verification",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids",
+         "partner_bank_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_batch_need_check",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "batch"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Does batch need a government API call to check if the partner vat is linked to its account number",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_payment_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_vals",
+     "batch_result"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_bank_from_batch",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "batch"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_compute_batches",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can't create payments for entries belonging to different companies."
+   },
+   {
+    "operation": "_compute_batches",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can't open the register payment wizard without at least one receivable/payable line."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "There's nothing left to pay for the selected journal items, so no payment registration is necessary. You've got your finances under control like a boss!"
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can't create payments for entries belonging to different companies."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can't create payments for entries belonging to different branches without access to parent company."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can't register payments for both inbound and outbound moves at the same time."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot register payments for blocked invoices."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "The register payment wizard should only be called on account.move or account.move.line records."
+   },
+   {
+    "operation": "_create_payments",
+    "package": "account",
+    "kind": "UserError",
+    "message": "To record payments with %(payment_method)s, the recipient bank account must be manually validated. You should go on the partner bank account in order to validate it."
+   },
+   {
+    "operation": "_create_payment_vals_from_wizard",
+    "package": "l10n_account_withholding_tax",
+    "kind": "UserError",
+    "message": "The withholding net amount cannot be negative."
+   },
+   {
+    "operation": "action_create_payments",
+    "package": "l10n_latam_check",
+    "kind": "ValidationError",
+    "message": "You can't mix checks of different currencies in one payment, and you can't change the payment's currency if checks are already created in that currency.\nPlease create separate payments for each currency."
+   },
+   {
+    "operation": "_create_payment_vals_from_wizard",
+    "package": "l10n_ar_withholding",
+    "kind": "UserError",
+    "message": "Please enter withholding number for tax %s"
+   },
+   {
+    "operation": "action_create_payments",
+    "package": "l10n_ar_withholding",
+    "kind": "ValidationError",
+    "message": "A payment cannot have withholding if the payment method has no outstanding accounts"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_payment_register",
+    "package": "account",
+    "name": "access.account.payment.register",
+    "entity": "account.payment.register",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.view_account_payment_register_form",
+    "package": "account",
+    "name": "account.payment.register.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Pay"
+     },
+     "fields": [
+      {
+       "name": "line_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "can_edit_wizard",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "can_group_payments",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "early_payment_discount_mode",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "installments_mode",
+       "invisible": "1"
+      },
+      {
+       "name": "installments_switch_amount",
+       "invisible": "1"
+      },
+      {
+       "name": "installments_switch_html",
+       "invisible": "1"
+      },
+      {
+       "name": "payment_type",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "partner_type",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "source_amount",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "source_amount_currency",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "source_currency_id",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "partner_id",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "country_code",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "custom_user_amount",
+       "invisible": "1"
+      },
+      {
+       "name": "custom_user_currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "show_partner_bank_account",
+       "invisible": "1"
+      },
+      {
+       "name": "require_partner_bank_account",
+       "invisible": "1"
+      },
+      {
+       "name": "available_journal_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "available_payment_method_line_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "available_partner_bank_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "company_currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "hide_writeoff_section",
+       "invisible": "1"
+      },
+      {
+       "name": "writeoff_is_exchange_account",
+       "invisible": "1"
+      },
+      {
+       "name": "untrusted_bank_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "missing_account_partners",
+       "invisible": "1"
+      },
+      {
+       "name": "payment_difference"
+      },
+      {
+       "name": "untrusted_payments_count"
+      },
+      {
+       "name": "total_payments_amount"
+      },
+      {
+       "name": "duplicate_payment_ids",
+       "widget": "x2many_buttons",
+       "string": "Duplicated Payments"
+      },
+      {
+       "name": "actionable_errors",
+       "widget": "actionable_errors"
+      },
+      {
+       "name": "journal_id",
+       "required": "1",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "payment_method_line_id",
+       "required": "1",
+       "context": "{'hide_payment_journal_id': 1}",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "partner_bank_id",
+       "invisible": "not show_partner_bank_account or not can_edit_wizard or (can_group_payments and not group_payment)",
+       "readonly": "payment_type == 'inbound'",
+       "required": "require_partner_bank_account and can_edit_wizard and (not can_group_payments or not group_payment)",
+       "context": "{'display_account_trust': True, 'default_partner_id': partner_id}",
+       "placeholder": "Account Number"
+      },
+      {
+       "name": "group_payment",
+       "invisible": "not can_group_payments"
+      },
+      {
+       "name": "payment_difference"
+      },
+      {
+       "name": "payment_difference_handling",
+       "widget": "radio",
+       "invisible": "is_register_payment_on_draft",
+       "nolabel": "1"
+      },
+      {
+       "name": "writeoff_account_id",
+       "required": "payment_difference_handling == 'reconcile' and not early_payment_discount_mode",
+       "string": "Post Difference In",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "writeoff_label",
+       "invisible": "writeoff_is_exchange_account",
+       "required": "payment_difference_handling == 'reconcile'"
+      },
+      {
+       "name": "amount",
+       "readonly": "not can_edit_wizard or can_group_payments and not group_payment",
+       "force_save": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "not can_edit_wizard or can_group_payments and not group_payment",
+       "required": "1",
+       "options": "{'no_create': True, 'no_open': True}",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "installments_switch_html",
+       "widget": "account_payment_register_html",
+       "invisible": "not installments_switch_html",
+       "string": ""
+      },
+      {
+       "name": "payment_date"
+      },
+      {
+       "name": "communication",
+       "invisible": "not can_edit_wizard or (can_group_payments and not group_payment)"
+      },
+      {
+       "name": "qr_code",
+       "invisible": "1"
+      },
+      {
+       "name": "qr_code"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_untrusted_bank_accounts",
+       "type": "object",
+       "class": "oe_link p-0 align-baseline"
+      },
+      {
+       "name": "action_open_missing_account_partners",
+       "type": "object",
+       "class": "oe_link p-0 align-baseline"
+      },
+      {
+       "name": "action_create_payments",
+       "string": "Create Payments",
+       "type": "object",
+       "invisible": "total_payments_amount == 1",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_create_payments",
+       "string": "Create Payment",
+       "type": "object",
+       "invisible": "total_payments_amount != 1",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "x2many_buttons": 1,
+      "actionable_errors": 1,
+      "radio": 1,
+      "account_payment_register_html": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "account_payment.view_account_payment_register_form_inherit_payment",
+    "package": "account_payment",
+    "name": "account.payment.register.form.inherit.payment",
+    "view_type": "field",
+    "inherits_view": "account.view_account_payment_register_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "payment_method_line_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "payment_method_line_id",
+       "position": "after"
+      },
+      {
+       "name": "payment_method_code",
+       "invisible": "1"
+      },
+      {
+       "name": "suitable_payment_token_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "use_electronic_payment_method",
+       "invisible": "1"
+      },
+      {
+       "name": "payment_token_id",
+       "invisible": "not use_electronic_payment_method or not can_edit_wizard or (can_group_payments and not group_payment)",
+       "options": "{'no_create': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_account_withholding_tax.view_account_payment_register_form",
+    "package": "l10n_account_withholding_tax",
+    "name": "account.payment.register.form",
+    "view_type": "group",
+    "inherits_view": "account.view_account_payment_register_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "group1",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "should_withhold_tax",
+       "invisible": "not display_withholding"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "group1",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_ar_withholding.view_account_payment_register_form",
+    "package": "l10n_ar_withholding",
+    "name": "account.payment.register.form",
+    "view_type": "page",
+    "inherits_view": "l10n_latam_check.view_account_payment_register_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "page",
+     "root_attributes": {
+      "name": "latam_checks_page",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_ar_withholding_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "withholding_sequence_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "tax_id",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "name",
+       "readonly": "withholding_sequence_id"
+      },
+      {
+       "name": "base_amount"
+      },
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "latam_checks_page",
+       "string": null,
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "withholdings_page",
+       "string": "Withholdings",
+       "invisible": "country_code != 'AR'",
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_latam_check.view_account_payment_register_form",
+    "package": "l10n_latam_check",
+    "name": "account.payment.register.form",
+    "view_type": "group",
+    "inherits_view": "account.view_account_payment_register_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "l10n_latam_new_check_ids",
+       "invisible": "payment_method_code not in ['new_third_party_checks', 'own_checks']",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "bank_id",
+       "column_invisible": "parent.payment_method_code == 'own_checks'"
+      },
+      {
+       "name": "issuer_vat",
+       "column_invisible": "parent.payment_method_code == 'own_checks'"
+      },
+      {
+       "name": "payment_date"
+      },
+      {
+       "name": "amount"
+      },
+      {
+       "name": "l10n_latam_move_check_ids",
+       "invisible": "payment_method_code not in ['in_third_party_checks', 'out_third_party_checks', 'return_third_party_checks']",
+       "domain": "                                     [('payment_method_code', '=', 'new_third_party_checks'), ('current_journal_id', '=', journal_id), ('company_id', '=', company_id)]                                         if payment_type == 'outbound' else                                     [('payment_method_code', '=', 'new_third_party_checks'), ('current_journal_id', '=', False), ('company_id', '=', company_id)]",
+       "options": "{'no_create': True}",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "bank_id",
+       "optional": "hide"
+      },
+      {
+       "name": "issuer_vat",
+       "optional": "hide"
+      },
+      {
+       "name": "payment_date",
+       "optional": "show"
+      },
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "latam_checks_page",
+       "string": "Checks",
+       "invisible": "payment_method_code not in ['in_third_party_checks', 'out_third_party_checks', 'return_third_party_checks', 'new_third_party_checks', 'own_checks']",
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_pl_bank_verification.l10n_pl_view_account_payment_register_form",
+    "package": "l10n_pl_bank_verification",
+    "name": "account.payment.register.form",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_payment_register_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='missing_account_partners']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_pl_bank_verification_invalid_bank_account_ids",
+       "widget": "x2many_buttons"
+      },
+      {
+       "name": "l10n_pl_not_found_partner_ids",
+       "widget": "x2many_buttons"
+      },
+      {
+       "name": "l10n_pl_incomplete_data_partner_ids",
+       "widget": "x2many_buttons"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "x2many_buttons": 3
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='missing_account_partners']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

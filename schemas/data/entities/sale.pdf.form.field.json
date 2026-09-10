@@ -1,0 +1,471 @@
+{
+ "catalog": {
+  "name": "entity:sale.pdf.form.field",
+  "description": "Complete definition of entity Form fields of inside quotation documents. (sale.pdf.form.field).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sale.pdf.form.field",
+  "storage_name": "sale_pdf_form_field",
+  "full_name": "Form fields of inside quotation documents.",
+  "kind": "persistent",
+  "description": "Form fields of inside quotation documents.",
+  "defined_by_package": "sale_pdf_quote_builder",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "name",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Form Field Name",
+    "help": "The form field name as written in the PDF.",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "sale_pdf_quote_builder",
+    "full_name": "Form Field Name"
+   },
+   {
+    "name": "document_type",
+    "type": "Selection",
+    "string": "Document Type",
+    "selection": [
+     [
+      "quotation_document",
+      "Header/Footer"
+     ],
+     [
+      "product_document",
+      "Product Document"
+     ]
+    ],
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "sale_pdf_quote_builder",
+    "full_name": "Document Type"
+   },
+   {
+    "name": "path",
+    "type": "Char",
+    "string": "Path",
+    "help": "The path to follow to dynamically fill the form field. \nLeave empty to be able to customized it in the quotation form.",
+    "defined_in_package": "sale_pdf_quote_builder",
+    "full_name": "Path"
+   },
+   {
+    "name": "product_document_ids",
+    "type": "Many2many",
+    "string": "Product Documents",
+    "comodel": "product.document",
+    "defined_in_package": "sale_pdf_quote_builder",
+    "full_name": "Product Documents",
+    "target_entity": "product.document"
+   },
+   {
+    "name": "quotation_document_ids",
+    "type": "Many2many",
+    "string": "Quotation Documents",
+    "comodel": "quotation.document",
+    "defined_in_package": "sale_pdf_quote_builder",
+    "full_name": "Quotation Documents",
+    "target_entity": "quotation.document"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_name_per_doc_type",
+    "kind": "Constraint",
+    "definition": "UNIQUE(name, document_type)",
+    "message": "Form field name must be unique for a given document type.",
+    "defined_in_package": "sale_pdf_quote_builder"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_check_form_field_name_follows_pattern",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure the names only contains alphanumerics, hyphens and underscores.\n\n:return: None\n:raises: ValidationError if the names aren't alphanumerics, hyphens and underscores.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid form field name %(field_name)s. It should only contain alphanumerics, hyphens or underscores.",
+        "line": 61
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Invalid form field name %(field_name)s. A form field name in a header or a footer can not start with \"sol_id_\".",
+        "line": 67
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_valid_and_existing_paths",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "path"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Verify that the paths exist and are valid.\n\n:return: None\n:raises: ValidationError if at least one of the paths isn't valid.",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid path %(path)s. It should only contain alphanumerics, hyphens, underscores or points.",
+        "line": 83
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Please use only relational fields until the last value of your path.",
+        "line": 95
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The field %(field_name)s doesn't exist on model %(model_name)s",
+        "line": 99
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_document_type_and_document_linked_compatibility",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "document_type",
+         "product_document_ids",
+         "quotation_document_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A form field set as used in product documents can't be linked to a quotation document.",
+        "line": 112
+       },
+       {
+        "kind": "ValidationError",
+        "message": "A form field set as used in quotation documents can't be linked to a product document.",
+        "line": 117
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_add_basic_mapped_form_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_post_upgrade_assign_missing_form_fields",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_or_update_form_fields_on_pdf_records",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "doc_type"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_form_field_name_follows_pattern",
+    "package": "sale_pdf_quote_builder",
+    "kind": "ValidationError",
+    "message": "Invalid form field name %(field_name)s. It should only contain alphanumerics, hyphens or underscores."
+   },
+   {
+    "operation": "_check_form_field_name_follows_pattern",
+    "package": "sale_pdf_quote_builder",
+    "kind": "ValidationError",
+    "message": "Invalid form field name %(field_name)s. A form field name in a header or a footer can not start with \"sol_id_\"."
+   },
+   {
+    "operation": "_check_valid_and_existing_paths",
+    "package": "sale_pdf_quote_builder",
+    "kind": "ValidationError",
+    "message": "Invalid path %(path)s. It should only contain alphanumerics, hyphens, underscores or points."
+   },
+   {
+    "operation": "_check_valid_and_existing_paths",
+    "package": "sale_pdf_quote_builder",
+    "kind": "ValidationError",
+    "message": "Please use only relational fields until the last value of your path."
+   },
+   {
+    "operation": "_check_valid_and_existing_paths",
+    "package": "sale_pdf_quote_builder",
+    "kind": "ValidationError",
+    "message": "The field %(field_name)s doesn't exist on model %(model_name)s"
+   },
+   {
+    "operation": "_check_document_type_and_document_linked_compatibility",
+    "package": "sale_pdf_quote_builder",
+    "kind": "ValidationError",
+    "message": "A form field set as used in product documents can't be linked to a quotation document."
+   },
+   {
+    "operation": "_check_document_type_and_document_linked_compatibility",
+    "package": "sale_pdf_quote_builder",
+    "kind": "ValidationError",
+    "message": "A form field set as used in quotation documents can't be linked to a product document."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "sale_pdf_quote_builder.access_sale_pdf_form_field_system",
+    "package": "sale_pdf_quote_builder",
+    "name": "access_sale_pdf_form_field_user",
+    "entity": "sale.pdf.form.field",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale_pdf_quote_builder.access_sale_pdf_form_field_user",
+    "package": "sale_pdf_quote_builder",
+    "name": "access_sale_pdf_form_field_user",
+    "entity": "sale.pdf.form.field",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "sale_pdf_quote_builder.sale_pdf_form_field_list",
+    "package": "sale_pdf_quote_builder",
+    "name": "sale.pdf.form.field.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "top",
+      "multi_edit": "true",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "path"
+      },
+      {
+       "name": "document_type"
+      },
+      {
+       "name": "product_document_ids",
+       "widget": "many2many_tags",
+       "optional": "hide"
+      },
+      {
+       "name": "quotation_document_ids",
+       "widget": "many2many_tags",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 2
+     },
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "sale_pdf_quote_builder.quotation_document_search",
+    "package": "sale_pdf_quote_builder",
+    "name": "sale.pdf.form.field.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "customizable",
+       "string": "Customizable",
+       "domain": "[('path', '=', False)]"
+      },
+      {
+       "name": "context_document",
+       "string": "This document",
+       "domain": "[                         ('document_type', '=', context.get('default_document_type')),                         ('product_document_ids', '=', context.get('default_product_document_ids')),                         ('quotation_document_ids', '=', context.get('default_quotation_document_ids'))                     ]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "sale_pdf_quote_builder.cron_post_upgrade_assign_missing_form_fields",
+    "package": "sale_pdf_quote_builder",
+    "name": "Sale Pdf Quote Builder: assign form fields to documents post upgrade",
+    "interval_number": "9999",
+    "interval_type": "months",
+    "priority": null,
+    "active": null,
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "sale.pdf.form.field",
+    "operation": "_cron_post_upgrade_assign_missing_form_fields",
+    "operation_call": "model._cron_post_upgrade_assign_missing_form_fields()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

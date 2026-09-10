@@ -1,0 +1,2040 @@
+{
+ "catalog": {
+  "name": "entity:ir.mail_server",
+  "description": "Complete definition of entity Mail Server (ir.mail_server).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.mail_server",
+  "storage_name": "ir_mail_server",
+  "full_name": "Mail Server",
+  "kind": "persistent",
+  "description": "Mail Server",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "mail",
+   "google_gmail",
+   "mass_mailing",
+   "microsoft_outlook"
+  ],
+  "mixins": [
+   "google.gmail.mixin",
+   "microsoft.outlook.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_allow_sudo_commands": false,
+   "_email_field": "smtp_user",
+   "_OUTLOOK_SCOPE": "https://outlook.office.com/SMTP.Send"
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "index": true,
+    "defined_in_package": "base",
+    "full_name": "Name"
+   },
+   {
+    "name": "from_filter",
+    "type": "Char",
+    "string": "FROM Filtering",
+    "help": "Comma-separated list of addresses or domains for which this server can be used.\ne.g.: \"notification@the system.com\" or \"the system.com\"",
+    "defined_in_package": "base",
+    "full_name": "FROM Filtering"
+   },
+   {
+    "name": "smtp_host",
+    "type": "Char",
+    "string": "SMTP Server",
+    "help": "Hostname or IP of SMTP server",
+    "defined_in_package": "base",
+    "full_name": "mail transfer protocol Server"
+   },
+   {
+    "name": "smtp_port",
+    "type": "Integer",
+    "string": "SMTP Port",
+    "default": 25,
+    "help": "SMTP Port. Usually 465 for SSL, and 25 or 587 for other cases.",
+    "defined_in_package": "base",
+    "full_name": "mail transfer protocol Port"
+   },
+   {
+    "name": "smtp_authentication",
+    "type": "Selection",
+    "selection": [
+     [
+      "login",
+      "Username"
+     ],
+     [
+      "certificate",
+      "SSL Certificate"
+     ],
+     [
+      "cli",
+      "Command Line Interface"
+     ],
+     [
+      "gmail",
+      "Gmail OAuth Authentication"
+     ],
+     [
+      "outlook",
+      "Outlook OAuth Authentication"
+     ]
+    ],
+    "string": "Authenticate with",
+    "required": true,
+    "default": "login",
+    "defined_in_package": "base",
+    "selection_added_by": [
+     "google_gmail",
+     "microsoft_outlook"
+    ],
+    "ondelete": {
+     "outlook": "set default"
+    },
+    "extended_in_packages": [
+     "google_gmail",
+     "microsoft_outlook"
+    ],
+    "full_name": "Authenticate with"
+   },
+   {
+    "name": "smtp_authentication_info",
+    "type": "Text",
+    "string": "Authentication Info",
+    "compute": "_compute_smtp_authentication_info",
+    "defined_in_package": "base",
+    "full_name": "Authentication Info"
+   },
+   {
+    "name": "smtp_user",
+    "type": "Char",
+    "string": "Username",
+    "help": "Optional username for SMTP authentication",
+    "groups": "base.group_system",
+    "defined_in_package": "base",
+    "full_name": "Username"
+   },
+   {
+    "name": "smtp_pass",
+    "type": "Char",
+    "string": "Password",
+    "help": "Optional password for SMTP authentication",
+    "groups": "base.group_system",
+    "defined_in_package": "base",
+    "full_name": "Password"
+   },
+   {
+    "name": "smtp_encryption",
+    "type": "Selection",
+    "selection": [
+     [
+      "none",
+      "None"
+     ],
+     [
+      "starttls_strict",
+      "TLS (STARTTLS), encryption and validation"
+     ],
+     [
+      "starttls",
+      "TLS (STARTTLS), encryption only"
+     ],
+     [
+      "ssl_strict",
+      "SSL/TLS, encryption and validation"
+     ],
+     [
+      "ssl",
+      "SSL/TLS, encryption only"
+     ]
+    ],
+    "string": "Connection Encryption",
+    "required": true,
+    "default": "none",
+    "help": "Choose the connection encryption scheme:\n- None: SMTP sessions are done in cleartext.\n- TLS (STARTTLS): TLS encryption is requested at start of SMTP session (Recommended)\n- SSL/TLS: SMTP sessions are encrypted with SSL/TLS through a dedicated port (default: 465)\n\nChoose an additionnal variant for SSL or TLS:\n- encryption and validation: encrypt the data and authentify the server using its SSL certificate (Recommended)\n- encryption only: encrypt the data but skip server authentication",
+    "defined_in_package": "base",
+    "full_name": "Connection Encryption"
+   },
+   {
+    "name": "smtp_ssl_certificate",
+    "type": "Binary",
+    "string": "SSL Certificate",
+    "groups": "base.group_system",
+    "attachment": false,
+    "help": "SSL certificate used for authentication",
+    "defined_in_package": "base",
+    "full_name": "SSL Certificate"
+   },
+   {
+    "name": "smtp_ssl_private_key",
+    "type": "Binary",
+    "string": "SSL Private Key",
+    "groups": "base.group_system",
+    "attachment": false,
+    "help": "SSL private key used for authentication",
+    "defined_in_package": "base",
+    "full_name": "SSL Private Key"
+   },
+   {
+    "name": "smtp_debug",
+    "type": "Boolean",
+    "string": "Debugging",
+    "help": "If enabled, the full output of SMTP sessions will be written to the server log at DEBUG level (this is very verbose and may include confidential info!)",
+    "defined_in_package": "base",
+    "full_name": "Debugging"
+   },
+   {
+    "name": "max_email_size",
+    "type": "Float",
+    "string": "Max Email Size",
+    "defined_in_package": "base",
+    "full_name": "Max Email Size"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Priority",
+    "default": 10,
+    "help": "When no specific mail server is requested for a mail, the highest priority one is used. Default priority is 10 (smaller number = higher priority)",
+    "defined_in_package": "base",
+    "full_name": "Priority"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "base",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "mail_template_ids",
+    "type": "One2many",
+    "comodel": "mail.template",
+    "inverse_name": "mail_server_id",
+    "string": "Mail template using this mail server",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Mail template using this mail server",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "owner_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Owner",
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Owner",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "owner_limit_time",
+    "type": "Datetime",
+    "string": "Owner Limit Time",
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Owner Limit Time"
+   },
+   {
+    "name": "owner_limit_count",
+    "type": "Integer",
+    "string": "Owner Limit Count",
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Owner Limit Count"
+   },
+   {
+    "name": "active_mailing_ids",
+    "type": "One2many",
+    "comodel": "mailing.mailing",
+    "inverse_name": "mail_server_id",
+    "string": "Active mailing using this mail server",
+    "readonly": true,
+    "domain": [
+     [
+      "state",
+      "!=",
+      "done"
+     ],
+     [
+      "active",
+      "=",
+      true
+     ]
+    ],
+    "defined_in_package": "mass_mailing",
+    "full_name": "Active mailing using this mail server",
+    "target_entity": "mailing.mailing"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_certificate_requires_tls",
+    "kind": "Constraint",
+    "definition": "CHECK(smtp_encryption != 'none' OR smtp_authentication != 'certificate')",
+    "message": "Certificate-based authentication requires a TLS transport",
+    "defined_in_package": "base"
+   },
+   {
+    "name": "_unique_owner_user_id",
+    "kind": "Constraint",
+    "definition": "UNIQUE(owner_user_id)",
+    "message": "owner_user_id must be unique",
+    "defined_in_package": "mail"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_smtp_authentication_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "smtp_authentication"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_smtp_ssl_files",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "smtp_authentication",
+         "smtp_ssl_certificate",
+         "smtp_ssl_private_key"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "SSL private key is missing for %s.",
+        "line": 211
+       },
+       {
+        "kind": "UserError",
+        "message": "SSL certificate is missing for %s.",
+        "line": 213
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Ensure we cannot archive a server in-use",
+      "size_in_lines": 34,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot archive this Outgoing Mail Server (%(server_usage)s) because it is still used in the following case(s):\n%(usage_details)s",
+        "line": 246
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot archive these Outgoing Mail Servers (%(server_usage)s) because they are still used in the following case(s):\n%(usage_details)s",
+        "line": 243
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_active_usages_compute",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Compute a dict server id to list of user-friendly outgoing mail servers usage of this record set.\n\nThis method must be overridden by all modules that uses this class in order to complete the list with\nuser-friendly string describing the active elements that could send mail through the instance of this class.\n:return dict: { ir_mail_server.id: usage_str_list }.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_max_email_size",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_test_email_from",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please configure an email on the current user to simulate sending an email message via this outgoing server",
+        "line": 277
+       }
+      ]
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_test_email_to",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "test_smtp_connection",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "autodetect_max_email_size"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Test the connection and if autodetect_max_email_size, set auto-detected max email size.\n\n:param bool autodetect_max_email_size: whether to autodetect the max email size\n:return: client action to notify the user of the result of the operation (connection test or\n    auto-detection successful depending on the ``autodetect_max_email_size`` parameter)\n:rtype: dict\n\n:raises UserError: if the connection fails and if ``autodetect_max_email_size`` and\n    the server doesn't support the auto-detection of email max size",
+      "size_in_lines": 83,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The server refused the sender address (%(email_from)s) with error %(repl)s",
+        "line": 305
+       },
+       {
+        "kind": "UserError",
+        "message": "The server refused the test recipient (%(email_to)s) with error %(repl)s",
+        "line": 309
+       },
+       {
+        "kind": "UserError",
+        "message": "The server refused the test connection with error %(repl)s",
+        "line": 315
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid server name!\n %s",
+        "line": 323
+       },
+       {
+        "kind": "UserError",
+        "message": "No response received. Check server address and port number.\n %s",
+        "line": 325
+       },
+       {
+        "kind": "UserError",
+        "message": "The server has closed the connection unexpectedly. Check configuration served on this port number.\n %s",
+        "line": 327
+       },
+       {
+        "kind": "UserError",
+        "message": "Server replied with following exception:\n %s",
+        "line": 329
+       },
+       {
+        "kind": "UserError",
+        "message": "An option is not supported by the server:\n %s",
+        "line": 331
+       },
+       {
+        "kind": "UserError",
+        "message": "An SMTP exception occurred. Check port number and connection security type.\n %s",
+        "line": 333
+       },
+       {
+        "kind": "UserError",
+        "message": "An SSL exception occurred. Check connection security type.\n CertificateError: %s",
+        "line": 335
+       },
+       {
+        "kind": "UserError",
+        "message": "An SSL exception occurred. Check connection security type.\n %s",
+        "line": 337
+       },
+       {
+        "kind": "UserError",
+        "message": "Connection Test Failed! Here is what we got instead:\n %s",
+        "line": 342
+       },
+       {
+        "kind": "UserError",
+        "message": "The server \"%(server_name)s\" doesn't return the maximum email size.",
+        "line": 319
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_retrieve_max_email_size",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_disable_send",
+    "kind": "internal_rule",
+    "arguments": [
+     "cls"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "classmethod",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Whether to disable sending e-mails",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_connect__",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "host",
+     "port",
+     "user",
+     "password",
+     "encryption",
+     "smtp_from",
+     "ssl_certificate",
+     "ssl_private_key",
+     "smtp_debug",
+     "mail_server_id",
+     "allow_archived"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Returns a new SMTP connection to the given SMTP server.\nWhen running in test mode, this method does nothing and returns `None`.\n\n:param host: host or IP of SMTP server to connect to, if mail_server_id not passed\n:param int port: SMTP port to connect to\n:param user: optional username to authenticate with\n:param password: optional password to authenticate with\n:param str encryption: optional, ``'none'`` | ``'ssl'`` | ``'ssl_strict'`` | ``'starttls'`` | ``'starttls_strict'``.\n    The 'strict' variants verify the remote server's certificate against the operating system trust store.\n:param smtp_from: FROM SMTP envelop, used to find the best mail server\n:param ssl_certificate: filename of the SSL certificate used for authentication\n    Used when no mail server is given and overwrite  the the system-bin argument \"smtp_ssl_certificate\"\n:param ssl_private_key: filename of the SSL private key used for authentication\n    Used when no mail server is given and overwrite  the the system-bin argument \"smtp_ssl_private_key\"\n:param bool smtp_debug: toggle debugging of SMTP sessions (all i/o\n                   will be output in logs)\n:param mail_server_id: ID of specific mail server to use (overrides other parameters)\n:param bool allow_archived: by default (False), an exception is raised when calling this method on an\n    archived record (using mail_server_id param). It can be set to True for testing so that the exception is\n    no longer raised.",
+      "size_in_lines": 152,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Missing SMTP Server\nPlease define at least one SMTP server, or provide the SMTP parameters explicitly.",
+        "line": 492
+       },
+       {
+        "kind": "UserError",
+        "message": "The private key or the certificate is not a valid file. \n%s",
+        "line": 449
+       },
+       {
+        "kind": "UserError",
+        "message": "Could not load your certificate / private key. \n%s",
+        "line": 451
+       },
+       {
+        "kind": "UserError",
+        "message": "The private key or the certificate is not a valid file. \n%s",
+        "line": 487
+       },
+       {
+        "kind": "UserError",
+        "message": "Could not load your certificate / private key. \n%s",
+        "line": 489
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_forced_mail_server",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "mail_server",
+     "allow_archived",
+     "smtp_from"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The server \"%s\" cannot be used because it is archived.",
+        "line": 533
+       }
+      ]
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The server \"%s\" cannot be forced as it belongs to a user.",
+        "line": 95
+       },
+       {
+        "kind": "UserError",
+        "message": "The server \"%s\" cannot be forced as it belongs to a user and is archived.",
+        "line": 97
+       },
+       {
+        "kind": "UserError",
+        "message": "The server \"%s\" cannot be forced as the owner does not use it anymore.",
+        "line": 99
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_smtp_login__",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "connection",
+     "smtp_user",
+     "smtp_password"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Authenticate the SMTP connection.\n\nCan be overridden in other module for different authentication methods.Can be\ncalled on the model itself or on a singleton.\n\n:param connection: The SMTP connection to authenticate\n:param smtp_user: The user to used for the authentication\n:param smtp_password: The password to used for the authentication",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_email__",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "email_from",
+     "email_to",
+     "subject",
+     "body",
+     "email_cc",
+     "email_bcc",
+     "reply_to",
+     "attachments",
+     "message_id",
+     "references",
+     "object_id",
+     "subtype",
+     "headers",
+     "body_alternative",
+     "subtype_alternative"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Constructs an RFC2822 email.message.Message object based on the keyword arguments passed, and returns it.\n\n:param string email_from: sender email address\n:param list email_to: list of recipient addresses (to be joined with commas)\n:param string subject: email subject (no pre-encoding/quoting necessary)\n:param string body: email body, of the type ``subtype`` (by default, plaintext).\n                    If html subtype is used, the message will be automatically converted\n                    to plaintext and wrapped in multipart/alternative, unless an explicit\n                    ``body_alternative`` version is passed.\n:param string body_alternative: optional alternative body, of the type specified in ``subtype_alternative``\n:param string reply_to: optional value of Reply-To header\n:param string object_id: optional tracking identifier, to be included in the message-id for\n                         recognizing replies. Suggested format for object-id is \"res_id-model\",\n                         e.g. \"12345-crm.lead\".\n:param string subtype: optional mime subtype for the text body (usually 'plain' or 'html'),\n                       must match the format of the ``body`` parameter. Default is 'plain',\n                       making the content part of the mail \"text/plain\".\n:param string subtype_alternative: optional mime subtype of ``body_alternative`` (usually 'plain'\n                                   or 'html'). Default is 'plain'.\n:param list attachments: list of (filename, filecontents) pairs, where filecontents is a string\n                         containing the bytes of the attachment\n:param message_id:\n:param references:\n:param list email_cc: optional list of string values for CC header (to be joined with commas)\n:param list email_bcc: optional list of string values for BCC header (to be joined with commas)\n:param dict headers: optional map of headers to set on the outgoing mail (may override the\n                     other headers, including Subject, Reply-To, Message-Id, etc.)\n:rtype: email.message.EmailMessage\n:return: the new RFC2822 email message",
+      "size_in_lines": 82,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_bounce_address",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Computes the default bounce address. It is used to set the envelop\naddress if no envelop address is provided in the message.\n\n:return: defaults to the ``--email-from`` CLI/config parameter.\n:rtype: str | None",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the default bounce address. Try to use mail-defined config\nparameter bounce alias if set. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_from_address",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Computes the default from address. It is used for the \"header from\"\naddress when no other has been received.\n\n:return: defaults to the ``--email-from`` CLI/config parameter.\n:rtype: str | None",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Default from: try to use default_from defined on company's alias\ndomain. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_from_filter",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Computes the default from_filter. It is used when no specific\nir.mail_server is used when sending emails, hence having no value for\nfrom_filter.\n\n:return: defaults to 'mail.default.from_filter', then\n  ``--from-filter`` CLI/config parameter.\n:rtype: str | None",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_email_message__",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "message",
+     "smtp_session"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Prepare the SMTP information (from, to, message) before sending.\n\n:param message: the email.message.Message to send, information like the\n    Return-Path, the From, etc... will be used to find the smtp_from and to smtp_to\n:param smtp_session: the opened SMTP session to use to authenticate the sender\n\n:return: smtp_from, smtp_to_list, message\n    smtp_from: email to used during the authentication to the mail server\n    smtp_to_list: list of email address which will receive the email\n    message: the email.message.Message to send",
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alter_message__",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "smtp_from",
+     "smtp_to_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_smtp_to_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "message",
+     "smtp_session"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Prepare SMTP To address list, based on To / Cc / Bcc.\n\nOptional 'send_validated_to' context key filter restricts addresses to\nbe part of that list.\n\nOptional 'send_smtp_skip_to' context key holds a recipients block list",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send_email",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "message",
+     "mail_server_id",
+     "smtp_server",
+     "smtp_port",
+     "smtp_user",
+     "smtp_password",
+     "smtp_encryption",
+     "smtp_ssl_certificate",
+     "smtp_ssl_private_key",
+     "smtp_debug",
+     "smtp_session"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Sends an email directly (no queuing).\n\nNo retries are done, the caller should handle MailDeliveryException in order to ensure that\nthe mail is never lost.\n\nIf the mail_server_id is provided, sends using this mail server, ignoring other smtp_* arguments.\nIf mail_server_id is None and smtp_server is None, use the default mail server (highest priority).\nIf mail_server_id is None and smtp_server is not None, use the provided smtp_* arguments.\nIf both mail_server_id and smtp_server are None, look for an 'smtp_server' value in server config,\nand fails if not found.\n\n:param message: the email.message.Message to send. The envelope sender will be extracted from the\n                ``Return-Path`` (if present), or will be set to the default bounce address.\n                The envelope recipients will be extracted from the combined list of ``To``,\n                ``CC`` and ``BCC`` headers.\n:param smtp_session: optional pre-established SMTP session. When provided,\n                     overrides `mail_server_id` and all the `smtp_*` parameters.\n                     Passing the matching `mail_server_id` may yield better debugging/log\n                     messages. The caller is in charge of disconnecting the session.\n:param mail_server_id: optional id of ir.mail_server to use for sending. overrides other smtp_* arguments.\n:param smtp_server: optional hostname of SMTP server to use\n:param smtp_encryption: optional TLS mode, one of 'none', 'starttls', 'starttls_strict', 'ssl', or 'ssl_strict'.\n    The 'strict' variants verify the remote server's certificate against the operating system trust store.\n:param smtp_port: optional SMTP port, if mail_server_id is not passed\n:param smtp_user: optional SMTP user, if mail_server_id is not passed\n:param smtp_password: optional SMTP password to use, if mail_server_id is not passed\n:param smtp_ssl_certificate: filename of the SSL certificate used for authentication\n:param smtp_ssl_private_key: filename of the SSL private key used for authentication\n:param smtp_debug: optional SMTP debug flag, if mail_server_id is not passed\n:return: the Message-ID of the message that was just sent, if successfully sent, otherwise raises\n         MailDeliveryException and logs root cause.",
+      "size_in_lines": 70,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_mail_server_allowed_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Overridable domain getter for all mail servers that may be used as default.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Restrict search to 'public' servers.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_mail_server",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "email_from",
+     "mail_servers"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Find the appropriate mail server for the given email address.\n\n:rtype: tuple[IrMail_Server | None, str]\n:returns: A two-elements tuple: ``(Record<ir.mail_server>, email_from)``\n\n  1. Mail server to use to send the email (``None`` if we use the the system-bin arguments)\n  2. Email FROM to use to send the email (in some case, it might be impossible\n     to use the given email address directly if no mail server is configured for)",
+      "size_in_lines": 75,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_mail_servers_fallback",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "servers"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Filter the mail servers that can be used as fallback, or for default email from.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_match_from_filter",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "email_from",
+     "from_filter"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return True is the given email address match the \"from_filter\" field.\n\nThe from filter can be Falsy (always match),\na domain name or an full email address.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_from_filter",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "from_filter"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_encryption",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "smtp_encryption"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_gmail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "smtp_encryption"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Do not change the SMTP configuration if it's a Gmail server\n(e.g. the port which is already set)",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_outlook",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "smtp_encryption"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Do not change the SMTP configuration if it's a Outlook server\n\n(e.g. the port which is already set)",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_personal_mail_servers_limit",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the number of email we can send in 1 minutes for this outgoing server.\n\n0 fallbacks to 30 to avoid blocking servers.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Return the number of email we can send in 1 minutes for this outgoing server.\n\n0 fallbacks to 30 to avoid blocking servers.",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_smtp_authentication_gmail",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "smtp_authentication"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_on_change_smtp_user_gmail",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "smtp_user",
+         "smtp_authentication"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "The Gmail mail servers can only be used for the user personal email address.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_use_google_gmail_service",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "smtp_authentication",
+         "smtp_pass",
+         "smtp_encryption",
+         "from_filter",
+         "smtp_user"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please leave the password field empty for Gmail mail server “%s”. The OAuth process does not require it",
+        "line": 57
+       },
+       {
+        "kind": "UserError",
+        "message": "Incorrect Connection Security for Gmail mail server “%s”. Please set it to \"TLS (STARTTLS)\".",
+        "line": 62
+       },
+       {
+        "kind": "UserError",
+        "message": "Please fill the \"Username\" field with your Gmail username (your email address). This should be the same account as the one used for the Gmail OAuthentication Token.",
+        "line": 67
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_owner_user_id_not_mass_mailing",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "owner_user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Cannot set an owner on '%(server)s': it is configured as the dedicated Email Marketing server.",
+        "line": 46
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Cannot set an owner on '%(server)s': it is used by mailing '%(mailing)s'.",
+        "line": 56
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_use_microsoft_outlook_service",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "smtp_authentication",
+         "smtp_pass",
+         "smtp_encryption",
+         "smtp_user"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please leave the password field empty for Outlook mail server “%s”. The OAuth process does not require it",
+        "line": 35
+       },
+       {
+        "kind": "UserError",
+        "message": "Incorrect Connection Security for Outlook mail server “%s”. Please set it to \"TLS (STARTTLS)\".",
+        "line": 40
+       },
+       {
+        "kind": "UserError",
+        "message": "Please fill the \"Username\" field with your Outlook/Office365 username (your email address). This should be the same account as the one used for the Outlook OAuthentication Token.",
+        "line": 45
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_smtp_authentication_outlook",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "smtp_authentication"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_on_change_smtp_user_outlook",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "smtp_user",
+         "smtp_authentication"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "The Outlook mail servers can only be used for the user personal email address.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_smtp_ssl_files",
+    "package": "base",
+    "kind": "UserError",
+    "message": "SSL private key is missing for %s."
+   },
+   {
+    "operation": "_check_smtp_ssl_files",
+    "package": "base",
+    "kind": "UserError",
+    "message": "SSL certificate is missing for %s."
+   },
+   {
+    "operation": "write",
+    "package": "base",
+    "kind": "UserError",
+    "message": "You cannot archive this Outgoing Mail Server (%(server_usage)s) because it is still used in the following case(s):\n%(usage_details)s"
+   },
+   {
+    "operation": "write",
+    "package": "base",
+    "kind": "UserError",
+    "message": "You cannot archive these Outgoing Mail Servers (%(server_usage)s) because they are still used in the following case(s):\n%(usage_details)s"
+   },
+   {
+    "operation": "_get_test_email_from",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Please configure an email on the current user to simulate sending an email message via this outgoing server"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The server refused the sender address (%(email_from)s) with error %(repl)s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The server refused the test recipient (%(email_to)s) with error %(repl)s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The server refused the test connection with error %(repl)s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Invalid server name!\n %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "No response received. Check server address and port number.\n %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The server has closed the connection unexpectedly. Check configuration served on this port number.\n %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Server replied with following exception:\n %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "An option is not supported by the server:\n %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "An SMTP exception occurred. Check port number and connection security type.\n %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "An SSL exception occurred. Check connection security type.\n CertificateError: %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "An SSL exception occurred. Check connection security type.\n %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Connection Test Failed! Here is what we got instead:\n %s"
+   },
+   {
+    "operation": "test_smtp_connection",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The server \"%(server_name)s\" doesn't return the maximum email size."
+   },
+   {
+    "operation": "_connect__",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Missing SMTP Server\nPlease define at least one SMTP server, or provide the SMTP parameters explicitly."
+   },
+   {
+    "operation": "_connect__",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The private key or the certificate is not a valid file. \n%s"
+   },
+   {
+    "operation": "_connect__",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Could not load your certificate / private key. \n%s"
+   },
+   {
+    "operation": "_connect__",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The private key or the certificate is not a valid file. \n%s"
+   },
+   {
+    "operation": "_connect__",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Could not load your certificate / private key. \n%s"
+   },
+   {
+    "operation": "_check_forced_mail_server",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The server \"%s\" cannot be used because it is archived."
+   },
+   {
+    "operation": "_check_forced_mail_server",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "The server \"%s\" cannot be forced as it belongs to a user."
+   },
+   {
+    "operation": "_check_forced_mail_server",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "The server \"%s\" cannot be forced as it belongs to a user and is archived."
+   },
+   {
+    "operation": "_check_forced_mail_server",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "The server \"%s\" cannot be forced as the owner does not use it anymore."
+   },
+   {
+    "operation": "_check_use_google_gmail_service",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "Please leave the password field empty for Gmail mail server “%s”. The OAuth process does not require it"
+   },
+   {
+    "operation": "_check_use_google_gmail_service",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "Incorrect Connection Security for Gmail mail server “%s”. Please set it to \"TLS (STARTTLS)\"."
+   },
+   {
+    "operation": "_check_use_google_gmail_service",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "Please fill the \"Username\" field with your Gmail username (your email address). This should be the same account as the one used for the Gmail OAuthentication Token."
+   },
+   {
+    "operation": "_check_owner_user_id_not_mass_mailing",
+    "package": "mass_mailing",
+    "kind": "ValidationError",
+    "message": "Cannot set an owner on '%(server)s': it is configured as the dedicated Email Marketing server."
+   },
+   {
+    "operation": "_check_owner_user_id_not_mass_mailing",
+    "package": "mass_mailing",
+    "kind": "ValidationError",
+    "message": "Cannot set an owner on '%(server)s': it is used by mailing '%(mailing)s'."
+   },
+   {
+    "operation": "_check_use_microsoft_outlook_service",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Please leave the password field empty for Outlook mail server “%s”. The OAuth process does not require it"
+   },
+   {
+    "operation": "_check_use_microsoft_outlook_service",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Incorrect Connection Security for Outlook mail server “%s”. Please set it to \"TLS (STARTTLS)\"."
+   },
+   {
+    "operation": "_check_use_microsoft_outlook_service",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Please fill the \"Username\" field with your Outlook/Office365 username (your email address). This should be the same account as the one used for the Outlook OAuthentication Token."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_mail_server",
+    "package": "base",
+    "name": "ir_mail_server",
+    "entity": "ir.mail_server",
+    "group": "group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mass_mailing.access_ir_mail_server",
+    "package": "mass_mailing",
+    "name": "access_ir_mail_server",
+    "entity": "ir.mail_server",
+    "group": "mass_mailing.group_mass_mailing_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.ir_mail_server_form",
+    "package": "base",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Outgoing Mail Servers"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. My Outgoing Server"
+      },
+      {
+       "name": "from_filter",
+       "placeholder": "e.g. email@domain.com, domain.com"
+      },
+      {
+       "name": "sequence"
+      },
+      {
+       "name": "max_email_size"
+      },
+      {
+       "name": "smtp_authentication",
+       "widget": "radio"
+      },
+      {
+       "name": "smtp_authentication_info"
+      },
+      {
+       "name": "smtp_encryption",
+       "widget": "radio"
+      },
+      {
+       "name": "smtp_debug",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "smtp_host",
+       "required": "smtp_authentication != 'cli'"
+      },
+      {
+       "name": "smtp_port",
+       "required": "smtp_authentication != 'cli'",
+       "options": "{'enable_formatting': false}"
+      },
+      {
+       "name": "smtp_user",
+       "invisible": "smtp_authentication == 'certificate'",
+       "nolabel": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "smtp_pass",
+       "invisible": "smtp_authentication != 'login'",
+       "force_save": "1"
+      },
+      {
+       "name": "smtp_ssl_certificate",
+       "invisible": "smtp_authentication != 'certificate'",
+       "force_save": "1"
+      },
+      {
+       "name": "smtp_ssl_private_key",
+       "invisible": "smtp_authentication != 'certificate'",
+       "force_save": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "test_smtp_connection",
+       "string": "Test Connection",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_retrieve_max_email_size",
+       "type": "object",
+       "class": "btn btn-link pt-0"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "connection",
+       "string": "Connection",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "radio": 2
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Test Connection",
+       "type": "object",
+       "name": "test_smtp_connection",
+       "class": "btn-primary"
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.ir_mail_server_list",
+    "package": "base",
+    "name": null,
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Outgoing Mail Servers"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "smtp_host"
+      },
+      {
+       "name": "smtp_user"
+      },
+      {
+       "name": "smtp_encryption"
+      },
+      {
+       "name": "from_filter",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.view_ir_mail_server_search",
+    "package": "base",
+    "name": null,
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Outgoing Mail Servers"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Outgoing Mail Server",
+       "filter_domain": "['|', '|',                                         ('name', 'ilike', self),                                         ('smtp_host', 'ilike', self),                                         ('smtp_user', 'ilike', self)]"
+      },
+      {
+       "name": "smtp_encryption"
+      },
+      {
+       "name": "from_filter"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "google_gmail.ir_mail_server_view_form",
+    "package": "google_gmail",
+    "name": "ir.mail_server.view.form.inherit.gmail",
+    "view_type": "field",
+    "inherits_view": "base.ir_mail_server_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "smtp_ssl_private_key",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "smtp_ssl_private_key",
+       "position": "after"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "open_google_gmail_uri",
+       "type": "object",
+       "invisible": "smtp_authentication != 'gmail' or google_gmail_refresh_token",
+       "class": "btn-link px-0"
+      },
+      {
+       "name": "open_google_gmail_uri",
+       "type": "object",
+       "invisible": "smtp_authentication != 'gmail' or not google_gmail_refresh_token",
+       "class": "btn-link px-0 ms-2"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.ir_mail_server_view_form",
+    "package": "mail",
+    "name": "ir.mail_server.view.form.inherit.mail",
+    "view_type": "xpath",
+    "inherits_view": "base.ir_mail_server_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//label[@for='smtp_user']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//label[@for='smtp_user']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "microsoft_outlook.ir_mail_server_view_form",
+    "package": "microsoft_outlook",
+    "name": "ir.mail_server.view.form.inherit.outlook",
+    "view_type": "field",
+    "inherits_view": "base.ir_mail_server_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "smtp_ssl_private_key",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "smtp_ssl_private_key",
+       "position": "after"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "open_microsoft_outlook_uri",
+       "type": "object",
+       "invisible": "smtp_authentication != 'outlook' or microsoft_outlook_refresh_token",
+       "class": "btn-link px-0"
+      },
+      {
+       "name": "open_microsoft_outlook_uri",
+       "type": "object",
+       "invisible": "smtp_authentication != 'outlook' or not microsoft_outlook_refresh_token",
+       "class": "btn-link px-0 ms-2"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.action_ir_mail_server_list",
+    "package": "base",
+    "name": "Outgoing Mail Servers",
+    "view_mode": "list,form",
+    "view_id": "ir_mail_server_list",
+    "search_view_id": "view_ir_mail_server_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <div>\n                    <b class=\"o_view_nocontent_smiling_face\">\n                        No Outgoing Servers yet\n                    </b>\n                </div>\n            </field>\n        ",
+    "usage": null,
+    "entity": "ir.mail_server"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

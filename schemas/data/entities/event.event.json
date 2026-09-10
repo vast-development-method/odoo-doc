@@ -1,0 +1,5751 @@
+{
+ "catalog": {
+  "name": "entity:event.event",
+  "description": "Complete definition of entity Event (event.event).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.event",
+  "storage_name": "event_event",
+  "full_name": "Event",
+  "kind": "persistent",
+  "description": "Event",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "event_booth",
+   "event_product",
+   "event_sale",
+   "event_crm",
+   "hr_skills_event",
+   "mass_mailing_event",
+   "mass_mailing_event_sms",
+   "website_event",
+   "website_event_track",
+   "mass_mailing_event_track",
+   "mass_mailing_event_track_sms",
+   "pos_event",
+   "website_event_booth",
+   "website_event_exhibitor",
+   "website_event_track_quiz"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "website.seo.metadata",
+   "website.published.multi.mixin",
+   "website.cover_properties.mixin",
+   "website.searchable.mixin",
+   "website.page_visibility_options.mixin",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "date_begin, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Event",
+    "translate": true,
+    "required": true,
+    "defined_in_package": "event",
+    "full_name": "Event"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Note",
+    "store": true,
+    "compute": "_compute_note",
+    "readonly": false,
+    "defined_in_package": "event",
+    "full_name": "Note"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "string": "Description",
+    "translate": {
+     "expression": "html_translate"
+    },
+    "sanitize_attributes": false,
+    "sanitize_form": false,
+    "default": {
+     "dynamic": "_default_description"
+    },
+    "defined_in_package": "event",
+    "full_name": "Description"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "event",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "tracking": true,
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "defined_in_package": "event",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "use_barcode",
+    "type": "Boolean",
+    "compute": "_compute_use_barcode",
+    "defined_in_package": "event",
+    "string": "Use Barcode",
+    "full_name": "Use Barcode"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "change_default": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "required": false,
+    "defined_in_package": "event",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "organizer_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Organizer",
+    "tracking": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company.partner_id"
+    },
+    "check_company": true,
+    "defined_in_package": "event",
+    "full_name": "Organizer",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "event_type_id",
+    "type": "Many2one",
+    "comodel": "event.type",
+    "string": "Template",
+    "ondelete": "set null",
+    "help": "Choose a template to auto-fill tickets, communications, descriptions and other fields.",
+    "defined_in_package": "event",
+    "full_name": "Template",
+    "target_entity": "event.type"
+   },
+   {
+    "name": "event_mail_ids",
+    "type": "One2many",
+    "comodel": "event.mail",
+    "inverse_name": "event_id",
+    "string": "Mail Schedule",
+    "copy": true,
+    "compute": "_compute_event_mail_ids",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event",
+    "full_name": "Mail Schedule",
+    "target_entity": "event.mail"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "event.tag",
+    "string": "Tags",
+    "readonly": false,
+    "store": true,
+    "compute": "_compute_tag_ids",
+    "defined_in_package": "event",
+    "full_name": "Tags",
+    "target_entity": "event.tag"
+   },
+   {
+    "name": "registration_properties_definition",
+    "type": "PropertiesDefinition",
+    "string": "Registration Properties",
+    "defined_in_package": "event",
+    "full_name": "Registration Properties"
+   },
+   {
+    "name": "kanban_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "normal",
+      "In Progress"
+     ],
+     [
+      "done",
+      "Ready for Next Stage"
+     ],
+     [
+      "blocked",
+      "Blocked"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "default": "normal",
+    "copy": false,
+    "compute": "_compute_kanban_state",
+    "readonly": false,
+    "store": true,
+    "tracking": true,
+    "defined_in_package": "event",
+    "string": "Kanban State",
+    "full_name": "Kanban State"
+   },
+   {
+    "name": "stage_id",
+    "type": "Many2one",
+    "comodel": "event.stage",
+    "ondelete": "restrict",
+    "default": {
+     "dynamic": "_get_default_stage_id"
+    },
+    "group_expand": "_read_group_expand_full",
+    "tracking": true,
+    "copy": false,
+    "defined_in_package": "event",
+    "string": "Stage",
+    "full_name": "Stage",
+    "target_entity": "event.stage"
+   },
+   {
+    "name": "seats_max",
+    "type": "Integer",
+    "string": "Maximum Attendees",
+    "compute": "_compute_seats_max",
+    "readonly": false,
+    "store": true,
+    "help": "For each event you can define a maximum registration of seats(number of attendees), above this number the registrations are not accepted. If the event has multiple slots, this maximum number is applied per slot.",
+    "defined_in_package": "event",
+    "full_name": "Maximum Attendees"
+   },
+   {
+    "name": "seats_limited",
+    "type": "Boolean",
+    "string": "Limit Attendees",
+    "required": true,
+    "compute": "_compute_seats_limited",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event",
+    "full_name": "Limit Attendees"
+   },
+   {
+    "name": "seats_reserved",
+    "type": "Integer",
+    "string": "Number of Registrations",
+    "store": false,
+    "readonly": true,
+    "compute": "_compute_seats",
+    "defined_in_package": "event",
+    "full_name": "Number of Registrations"
+   },
+   {
+    "name": "seats_available",
+    "type": "Integer",
+    "string": "Available Seats",
+    "store": false,
+    "readonly": true,
+    "compute": "_compute_seats",
+    "defined_in_package": "event",
+    "full_name": "Available Seats"
+   },
+   {
+    "name": "seats_used",
+    "type": "Integer",
+    "string": "Number of Attendees",
+    "store": false,
+    "readonly": true,
+    "compute": "_compute_seats",
+    "defined_in_package": "event",
+    "full_name": "Number of Attendees"
+   },
+   {
+    "name": "seats_taken",
+    "type": "Integer",
+    "string": "Number of Taken Seats",
+    "store": false,
+    "readonly": true,
+    "compute": "_compute_seats",
+    "defined_in_package": "event",
+    "full_name": "Number of Taken Seats"
+   },
+   {
+    "name": "registration_ids",
+    "type": "One2many",
+    "comodel": "event.registration",
+    "inverse_name": "event_id",
+    "string": "Attendees",
+    "defined_in_package": "event",
+    "full_name": "Attendees",
+    "target_entity": "event.registration"
+   },
+   {
+    "name": "is_multi_slots",
+    "type": "Boolean",
+    "string": "Is Multi Slots",
+    "copy": true,
+    "help": "Allow multiple time slots. The communications, the maximum number of attendees and the maximum number of tickets registrations are defined for each time slot instead of the whole event.",
+    "defined_in_package": "event",
+    "full_name": "Is Multi Slots"
+   },
+   {
+    "name": "event_slot_ids",
+    "type": "One2many",
+    "comodel": "event.slot",
+    "inverse_name": "event_id",
+    "string": "Slots",
+    "copy": true,
+    "defined_in_package": "event",
+    "full_name": "Slots",
+    "target_entity": "event.slot"
+   },
+   {
+    "name": "event_slot_count",
+    "type": "Integer",
+    "string": "Slots Count",
+    "compute": "_compute_event_slot_count",
+    "defined_in_package": "event",
+    "full_name": "Slots Count"
+   },
+   {
+    "name": "event_ticket_ids",
+    "type": "One2many",
+    "comodel": "event.event.ticket",
+    "inverse_name": "event_id",
+    "string": "Event Ticket",
+    "copy": true,
+    "compute": "_compute_event_ticket_ids",
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "event",
+    "full_name": "Event Ticket",
+    "target_entity": "event.event.ticket"
+   },
+   {
+    "name": "event_registrations_started",
+    "type": "Boolean",
+    "string": "Registrations started",
+    "compute": "_compute_event_registrations_started",
+    "help": "registrations have started if the current datetime is after the earliest starting date of tickets.",
+    "defined_in_package": "event",
+    "full_name": "Registrations started"
+   },
+   {
+    "name": "event_registrations_open",
+    "type": "Boolean",
+    "string": "Registration open",
+    "compute": "_compute_event_registrations_open",
+    "compute_sudo": true,
+    "help": "Registrations are open if:\n- the event is not ended or not cancelled\n- there are seats available on event\n- the tickets are sellable (if ticketing is used)",
+    "defined_in_package": "event",
+    "full_name": "Registration open"
+   },
+   {
+    "name": "event_registrations_sold_out",
+    "type": "Boolean",
+    "string": "Sold Out",
+    "compute": "_compute_event_registrations_sold_out",
+    "compute_sudo": true,
+    "help": "The event is sold out if no more seats are available on event. If ticketing is used and all tickets are sold out, the event will be sold out.",
+    "defined_in_package": "event",
+    "full_name": "Sold Out"
+   },
+   {
+    "name": "start_sale_datetime",
+    "type": "Datetime",
+    "string": "Start sale date",
+    "compute": "_compute_start_sale_date",
+    "help": "If ticketing is used, contains the earliest starting sale date of tickets.",
+    "defined_in_package": "event",
+    "full_name": "Start sale date"
+   },
+   {
+    "name": "date_tz",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "string": "Display Timezone",
+    "required": true,
+    "compute": "_compute_date_tz",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "help": "Indicates the timezone in which the event dates/times will be displayed on the website.",
+    "defined_in_package": "event",
+    "full_name": "Display Timezone"
+   },
+   {
+    "name": "date_begin",
+    "type": "Datetime",
+    "string": "Start Date",
+    "required": true,
+    "tracking": true,
+    "help": "When the event is scheduled to take place (expressed in your local timezone on the form view).",
+    "defined_in_package": "event",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_end",
+    "type": "Datetime",
+    "string": "End Date",
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "event",
+    "full_name": "End Date"
+   },
+   {
+    "name": "is_ongoing",
+    "type": "Boolean",
+    "string": "Is Ongoing",
+    "compute": "_compute_time_data",
+    "search": "_search_is_ongoing",
+    "defined_in_package": "event",
+    "help": "Whether event has begun",
+    "extended_in_packages": [
+     "website_event"
+    ],
+    "full_name": "Is Ongoing"
+   },
+   {
+    "name": "is_one_day",
+    "type": "Boolean",
+    "compute": "_compute_field_is_one_day",
+    "defined_in_package": "event",
+    "string": "Is One Day",
+    "full_name": "Is One Day"
+   },
+   {
+    "name": "is_finished",
+    "type": "Boolean",
+    "compute": "_compute_is_finished",
+    "search": "_search_is_finished",
+    "defined_in_package": "event",
+    "string": "Is Finished",
+    "full_name": "Is Finished"
+   },
+   {
+    "name": "address_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Venue",
+    "default": {
+     "dynamic": "lambda self: self.env.company.partner_id.id"
+    },
+    "check_company": true,
+    "tracking": true,
+    "defined_in_package": "event",
+    "full_name": "Venue",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "address_search",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Address",
+    "compute": "_compute_address_search",
+    "search": "_search_address_search",
+    "defined_in_package": "event",
+    "full_name": "Address",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "address_inline",
+    "type": "Char",
+    "string": "Venue (formatted for one line uses)",
+    "compute": "_compute_address_inline",
+    "compute_sudo": true,
+    "defined_in_package": "event",
+    "full_name": "Venue (formatted for one line uses)"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Country",
+    "related": "address_id.country_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "event_url",
+    "type": "Char",
+    "string": "Online Event URL",
+    "compute": "_compute_event_url",
+    "readonly": false,
+    "store": true,
+    "help": "Link where the online event will take place.",
+    "defined_in_package": "event",
+    "full_name": "Online Event uniform resource locator"
+   },
+   {
+    "name": "event_share_url",
+    "type": "Char",
+    "string": "Event Share URL",
+    "compute": "_compute_event_share_url",
+    "defined_in_package": "event",
+    "full_name": "Event Share uniform resource locator"
+   },
+   {
+    "name": "lang",
+    "type": "Selection",
+    "selection": {
+     "expression": "_lang_get"
+    },
+    "string": "Language",
+    "help": "All the communication emails sent to attendees will be translated in this language.",
+    "defined_in_package": "event",
+    "full_name": "Language"
+   },
+   {
+    "name": "badge_format",
+    "type": "Selection",
+    "string": "Badge Dimension",
+    "selection": [
+     [
+      "A4_french_fold",
+      "A4 foldable"
+     ],
+     [
+      "A6",
+      "A6"
+     ],
+     [
+      "four_per_sheet",
+      "4 per sheet"
+     ]
+    ],
+    "default": "A6",
+    "required": true,
+    "defined_in_package": "event",
+    "full_name": "Badge Dimension"
+   },
+   {
+    "name": "badge_image",
+    "type": "Image",
+    "string": "Badge Background",
+    "max_width": 1024,
+    "max_height": 1024,
+    "defined_in_package": "event",
+    "full_name": "Badge Background"
+   },
+   {
+    "name": "ticket_instructions",
+    "type": "Html",
+    "string": "Ticket Instructions",
+    "translate": true,
+    "compute": "_compute_ticket_instructions",
+    "store": true,
+    "readonly": false,
+    "help": "This information will be printed on your tickets.",
+    "defined_in_package": "event",
+    "full_name": "Ticket Instructions"
+   },
+   {
+    "name": "question_ids",
+    "type": "Many2many",
+    "comodel": "event.question",
+    "relation": "event_event_event_question_rel",
+    "string": "Questions",
+    "compute": "_compute_question_ids",
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "event",
+    "full_name": "Questions",
+    "target_entity": "event.question"
+   },
+   {
+    "name": "general_question_ids",
+    "type": "Many2many",
+    "comodel": "event.question",
+    "relation": "event_event_event_question_rel",
+    "string": "General Questions",
+    "domain": [
+     [
+      "once_per_order",
+      "=",
+      true
+     ]
+    ],
+    "defined_in_package": "event",
+    "full_name": "General Questions",
+    "target_entity": "event.question"
+   },
+   {
+    "name": "specific_question_ids",
+    "type": "Many2many",
+    "comodel": "event.question",
+    "relation": "event_event_event_question_rel",
+    "string": "Specific Questions",
+    "domain": [
+     [
+      "once_per_order",
+      "=",
+      false
+     ]
+    ],
+    "defined_in_package": "event",
+    "full_name": "Specific Questions",
+    "target_entity": "event.question"
+   },
+   {
+    "name": "event_booth_ids",
+    "type": "One2many",
+    "comodel": "event.booth",
+    "inverse_name": "event_id",
+    "string": "Booths",
+    "copy": true,
+    "compute": "_compute_event_booth_ids",
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "event_booth",
+    "full_name": "Booths",
+    "target_entity": "event.booth"
+   },
+   {
+    "name": "event_booth_count",
+    "type": "Integer",
+    "string": "Total Booths",
+    "compute": "_compute_event_booth_count",
+    "defined_in_package": "event_booth",
+    "full_name": "Total Booths"
+   },
+   {
+    "name": "event_booth_count_available",
+    "type": "Integer",
+    "string": "Available Booths",
+    "compute": "_compute_event_booth_count",
+    "defined_in_package": "event_booth",
+    "full_name": "Available Booths"
+   },
+   {
+    "name": "event_booth_category_ids",
+    "type": "Many2many",
+    "comodel": "event.booth.category",
+    "compute": "_compute_event_booth_category_ids",
+    "defined_in_package": "event_booth",
+    "string": "Event Booth Category",
+    "full_name": "Event Booth Category",
+    "target_entity": "event.booth.category"
+   },
+   {
+    "name": "event_booth_category_available_ids",
+    "type": "Many2many",
+    "comodel": "event.booth.category",
+    "compute": "_compute_event_booth_category_available_ids",
+    "help": "Booth Category for which booths are still available. Used in frontend",
+    "defined_in_package": "event_booth",
+    "string": "Event Booth Category Available",
+    "full_name": "Event Booth Category Available",
+    "target_entity": "event.booth.category"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "related": "company_id.currency_id",
+    "readonly": true,
+    "defined_in_package": "event_product",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "sale_order_lines_ids",
+    "type": "One2many",
+    "comodel": "sale.order.line",
+    "inverse_name": "event_id",
+    "groups": "sales_team.group_sale_salesman",
+    "string": "All sale order lines pointing to this event",
+    "defined_in_package": "event_sale",
+    "full_name": "All sale order lines pointing to this event",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "sale_price_total",
+    "type": "Monetary",
+    "string": "Sales (Tax Included)",
+    "compute": "_compute_sale_price_total",
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "event_sale",
+    "full_name": "Sales (Tax Included)"
+   },
+   {
+    "name": "lead_ids",
+    "type": "One2many",
+    "comodel": "crm.lead",
+    "inverse_name": "event_id",
+    "string": "Leads",
+    "groups": "sales_team.group_sale_salesman",
+    "help": "Leads generated from this event",
+    "defined_in_package": "event_crm",
+    "full_name": "Leads",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "lead_count",
+    "type": "Integer",
+    "string": "# Leads",
+    "compute": "_compute_lead_count",
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "event_crm",
+    "full_name": "# Leads"
+   },
+   {
+    "name": "subtitle",
+    "type": "Char",
+    "string": "Event Subtitle",
+    "translate": true,
+    "defined_in_package": "website_event",
+    "full_name": "Event Subtitle"
+   },
+   {
+    "name": "is_participating",
+    "type": "Boolean",
+    "string": "Is Participating",
+    "compute": "_compute_is_participating",
+    "search": "_search_is_participating",
+    "defined_in_package": "website_event",
+    "full_name": "Is Participating"
+   },
+   {
+    "name": "is_visible_on_website",
+    "type": "Boolean",
+    "string": "Visible On Website",
+    "compute": "_compute_is_visible_on_website",
+    "search": "_search_is_visible_on_website",
+    "defined_in_package": "website_event",
+    "full_name": "Visible On Website"
+   },
+   {
+    "name": "event_register_url",
+    "type": "Char",
+    "string": "Event Registration Link",
+    "compute": "_compute_event_register_url",
+    "defined_in_package": "website_event",
+    "full_name": "Event Registration Link"
+   },
+   {
+    "name": "website_visibility",
+    "type": "Selection",
+    "selection": [
+     [
+      "public",
+      "Public"
+     ],
+     [
+      "link",
+      "Via a Link"
+     ],
+     [
+      "logged_users",
+      "Logged Users"
+     ]
+    ],
+    "string": "Website Visibility",
+    "required": true,
+    "default": "public",
+    "tracking": true,
+    "help": "Defines the Visibility of the Event on the Website and searches.\n\n            Note that the EventEvent is however always available via its link.",
+    "defined_in_package": "website_event",
+    "full_name": "Website Visibility"
+   },
+   {
+    "name": "website_published",
+    "type": "Boolean",
+    "tracking": true,
+    "defined_in_package": "website_event",
+    "string": "Website Published",
+    "full_name": "Website Published"
+   },
+   {
+    "name": "website_menu",
+    "type": "Boolean",
+    "string": "Website Menu",
+    "compute": "_compute_website_menu",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "help": "Allows to display and manage event-specific menus on website.",
+    "defined_in_package": "website_event",
+    "full_name": "Website Menu"
+   },
+   {
+    "name": "menu_id",
+    "type": "Many2one",
+    "comodel": "website.menu",
+    "string": "Event Menu",
+    "copy": false,
+    "defined_in_package": "website_event",
+    "full_name": "Event Menu",
+    "target_entity": "website.menu"
+   },
+   {
+    "name": "introduction_menu",
+    "type": "Boolean",
+    "string": "Introduction Menu",
+    "compute": "_compute_website_menu_data",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event",
+    "full_name": "Introduction Menu"
+   },
+   {
+    "name": "introduction_menu_ids",
+    "type": "One2many",
+    "comodel": "website.event.menu",
+    "inverse_name": "event_id",
+    "string": "Introduction Menus",
+    "domain": [
+     [
+      "menu_type",
+      "=",
+      "introduction"
+     ]
+    ],
+    "defined_in_package": "website_event",
+    "full_name": "Introduction Menus",
+    "target_entity": "website.event.menu"
+   },
+   {
+    "name": "address_name",
+    "type": "Char",
+    "related": "address_id.name",
+    "defined_in_package": "website_event",
+    "string": "Address Name",
+    "full_name": "Address Name"
+   },
+   {
+    "name": "register_menu",
+    "type": "Boolean",
+    "string": "Register Menu",
+    "compute": "_compute_website_menu_data",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event",
+    "full_name": "Register Menu"
+   },
+   {
+    "name": "register_menu_ids",
+    "type": "One2many",
+    "comodel": "website.event.menu",
+    "inverse_name": "event_id",
+    "string": "Register Menus",
+    "domain": [
+     [
+      "menu_type",
+      "=",
+      "register"
+     ]
+    ],
+    "defined_in_package": "website_event",
+    "full_name": "Register Menus",
+    "target_entity": "website.event.menu"
+   },
+   {
+    "name": "community_menu",
+    "type": "Boolean",
+    "string": "Community Menu",
+    "compute": "_compute_community_menu",
+    "readonly": false,
+    "store": true,
+    "help": "Display community tab on website",
+    "defined_in_package": "website_event",
+    "full_name": "Community Menu"
+   },
+   {
+    "name": "community_menu_ids",
+    "type": "One2many",
+    "comodel": "website.event.menu",
+    "inverse_name": "event_id",
+    "string": "Event Community Menus",
+    "domain": [
+     [
+      "menu_type",
+      "=",
+      "community"
+     ]
+    ],
+    "defined_in_package": "website_event",
+    "full_name": "Event Community Menus",
+    "target_entity": "website.event.menu"
+   },
+   {
+    "name": "other_menu_ids",
+    "type": "One2many",
+    "comodel": "website.event.menu",
+    "inverse_name": "event_id",
+    "string": "Other Menus",
+    "domain": [
+     [
+      "menu_type",
+      "=",
+      "other"
+     ]
+    ],
+    "defined_in_package": "website_event",
+    "full_name": "Other Menus",
+    "target_entity": "website.event.menu"
+   },
+   {
+    "name": "is_done",
+    "type": "Boolean",
+    "string": "Is Done",
+    "compute": "_compute_time_data",
+    "defined_in_package": "website_event",
+    "full_name": "Is Done"
+   },
+   {
+    "name": "start_today",
+    "type": "Boolean",
+    "string": "Start Today",
+    "compute": "_compute_time_data",
+    "help": "Whether event is going to start today if still not ongoing",
+    "defined_in_package": "website_event",
+    "full_name": "Start Today"
+   },
+   {
+    "name": "start_remaining",
+    "type": "Integer",
+    "string": "Remaining before start",
+    "compute": "_compute_time_data",
+    "help": "Remaining time before event starts (minutes)",
+    "defined_in_package": "website_event",
+    "full_name": "Remaining before start"
+   },
+   {
+    "name": "track_ids",
+    "type": "One2many",
+    "comodel": "event.track",
+    "inverse_name": "event_id",
+    "string": "Tracks",
+    "defined_in_package": "website_event_track",
+    "full_name": "Tracks",
+    "target_entity": "event.track"
+   },
+   {
+    "name": "track_count",
+    "type": "Integer",
+    "string": "Track Count",
+    "compute": "_compute_track_count",
+    "defined_in_package": "website_event_track",
+    "full_name": "Track Count"
+   },
+   {
+    "name": "website_track",
+    "type": "Boolean",
+    "string": "Tracks on Website",
+    "compute": "_compute_website_track",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Tracks on Website"
+   },
+   {
+    "name": "website_track_proposal",
+    "type": "Boolean",
+    "string": "Proposals on Website",
+    "compute": "_compute_website_track_proposal",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Proposals on Website"
+   },
+   {
+    "name": "track_menu_ids",
+    "type": "One2many",
+    "comodel": "website.event.menu",
+    "inverse_name": "event_id",
+    "string": "Event Tracks Menus",
+    "domain": [
+     [
+      "menu_type",
+      "=",
+      "track"
+     ]
+    ],
+    "defined_in_package": "website_event_track",
+    "full_name": "Event Tracks Menus",
+    "target_entity": "website.event.menu"
+   },
+   {
+    "name": "track_proposal_menu_ids",
+    "type": "One2many",
+    "comodel": "website.event.menu",
+    "inverse_name": "event_id",
+    "string": "Event Proposals Menus",
+    "domain": [
+     [
+      "menu_type",
+      "=",
+      "track_proposal"
+     ]
+    ],
+    "defined_in_package": "website_event_track",
+    "full_name": "Event Proposals Menus",
+    "target_entity": "website.event.menu"
+   },
+   {
+    "name": "allowed_track_tag_ids",
+    "type": "Many2many",
+    "comodel": "event.track.tag",
+    "relation": "event_allowed_track_tags_rel",
+    "string": "Available Track Tags",
+    "defined_in_package": "website_event_track",
+    "full_name": "Available Track Tags",
+    "target_entity": "event.track.tag"
+   },
+   {
+    "name": "tracks_tag_ids",
+    "type": "Many2many",
+    "comodel": "event.track.tag",
+    "relation": "event_track_tags_rel",
+    "string": "Track Tags",
+    "compute": "_compute_tracks_tag_ids",
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Track Tags",
+    "target_entity": "event.track.tag"
+   },
+   {
+    "name": "image_1024",
+    "type": "Image",
+    "string": "PoS Image",
+    "max_width": 1024,
+    "max_height": 1024,
+    "defined_in_package": "pos_event",
+    "full_name": "PoS Image"
+   },
+   {
+    "name": "exhibition_map",
+    "type": "Image",
+    "string": "Exhibition Map",
+    "max_width": 1024,
+    "max_height": 1024,
+    "defined_in_package": "website_event_booth",
+    "full_name": "Exhibition Map"
+   },
+   {
+    "name": "booth_menu",
+    "type": "Boolean",
+    "string": "Booth Register",
+    "compute": "_compute_booth_menu",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_booth",
+    "full_name": "Booth Register"
+   },
+   {
+    "name": "booth_menu_ids",
+    "type": "One2many",
+    "comodel": "website.event.menu",
+    "inverse_name": "event_id",
+    "string": "Event Booths Menus",
+    "domain": [
+     [
+      "menu_type",
+      "=",
+      "booth"
+     ]
+    ],
+    "defined_in_package": "website_event_booth",
+    "full_name": "Event Booths Menus",
+    "target_entity": "website.event.menu"
+   },
+   {
+    "name": "sponsor_ids",
+    "type": "One2many",
+    "comodel": "event.sponsor",
+    "inverse_name": "event_id",
+    "string": "Sponsors",
+    "defined_in_package": "website_event_exhibitor",
+    "full_name": "Sponsors",
+    "target_entity": "event.sponsor"
+   },
+   {
+    "name": "sponsor_count",
+    "type": "Integer",
+    "string": "Sponsor Count",
+    "compute": "_compute_sponsor_count",
+    "defined_in_package": "website_event_exhibitor",
+    "full_name": "Sponsor Count"
+   },
+   {
+    "name": "exhibitor_menu",
+    "type": "Boolean",
+    "string": "Showcase Exhibitors",
+    "compute": "_compute_exhibitor_menu",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_exhibitor",
+    "full_name": "Showcase Exhibitors"
+   },
+   {
+    "name": "exhibitor_menu_ids",
+    "type": "One2many",
+    "comodel": "website.event.menu",
+    "inverse_name": "event_id",
+    "string": "Exhibitors Menus",
+    "domain": [
+     [
+      "menu_type",
+      "=",
+      "exhibitor"
+     ]
+    ],
+    "defined_in_package": "website_event_exhibitor",
+    "full_name": "Exhibitors Menus",
+    "target_entity": "website.event.menu"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_kiosk_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_stage_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_event_mail_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_lang_get",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_question_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_barcode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_share_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Get the URL to use to redirect to the event, overriden in website for fallback.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Fall back on the website_url to share the event.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_question_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Update event questions from its event type. Depends are set only on\nevent_type_id itself to emulate an onchange. Changing event type content\nitself should not trigger this method.\n\nWhen synchronizing questions:\n\n  * lines with no registered answers for the event are removed;\n  * type lines are added;",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_seats",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_slot_count",
+         "is_multi_slots",
+         "seats_max",
+         "registration_ids.state",
+         "registration_ids.active"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Determine available, reserved, used and taken seats. ",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_registrations_started",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_tz",
+         "start_sale_datetime"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_registrations_open",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_tz",
+         "event_registrations_started",
+         "date_end",
+         "seats_available",
+         "seats_limited",
+         "seats_max",
+         "event_ticket_ids.sale_available"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute whether people may take registrations for this event\n\n* for cancelled events, registrations are not open;\n* event.date_end -> if event is done, registrations are not open anymore;\n* event.start_sale_datetime -> lowest start date of tickets (if any; start_sale_datetime\n  is False if no ticket are defined, see _compute_start_sale_date);\n* any ticket is available for sale (seats available) if any;\n* seats are unlimited or seats are available;",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_start_sale_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_ticket_ids.start_sale_datetime"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the start sale date of an event. Currently lowest starting sale\ndate of tickets if they are used, of False. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_registrations_sold_out",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_slot_ids",
+         "event_ticket_ids.sale_available",
+         "seats_available",
+         "seats_limited"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Note that max seats limits for events and sum of limits for all its tickets may not be\nequal to enable flexibility.\nE.g. max 20 seats for ticket A, 20 seats for ticket B\n    * With max 20 seats for the event\n    * Without limit set on the event (=40, but the customer didn't explicitly write 40)\nWhen the event is multi slots, instead of checking if every tickets is sold out,\nchecking if every slot-ticket combination is sold out.",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_ongoing",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_begin",
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_ongoing",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_field_is_one_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_begin",
+         "date_end",
+         "date_tz"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_finished",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_finished",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_tz",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_slot_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_slot_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_address_search",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "address_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_address_search",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_seats_max",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Update event configuration from its event type. Depends are set only\non event_type_id itself, not its sub fields. Purpose is to emulate an\nonchange: if event type is changed, update event configuration. Changing\nevent type content itself should not trigger this method. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_seats_limited",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Update event configuration from its event type. Depends are set only\non event_type_id itself, not its sub fields. Purpose is to emulate an\nonchange: if event type is changed, update event configuration. Changing\nevent type content itself should not trigger this method. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_mail_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Update event configuration from its event type. Depends are set only\non event_type_id itself, not its sub fields. Purpose is to emulate an\nonchange: if event type is changed, update event configuration. Changing\nevent type content itself should not trigger this method.\n\nWhen synchronizing mails:\n\n  * lines that are not sent and have no registrations linked are remove;\n  * type lines are added;",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tag_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Update event configuration from its event type. Depends are set only\non event_type_id itself, not its sub fields. Purpose is to emulate an\nonchange: if event type is changed, update event configuration. Changing\nevent type content itself should not trigger this method. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_ticket_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Update event configuration from its event type. Depends are set only\non event_type_id itself, not its sub fields. Purpose is to emulate an\nonchange: if event type is changed, update event configuration. Changing\nevent type content itself should not trigger this method.\n\nWhen synchronizing tickets:\n\n  * lines that have no registrations linked are remove;\n  * type lines are added;\n\nNote that updating event_ticket_ids triggers _compute_start_sale_date\n(start_sale_datetime computation) so ensure result to avoid cache miss.",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_note",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_kanban_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "stage_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_ticket_instructions",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_address_inline",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "address_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Use venue address if available, otherwise its name, finally ''. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "address_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Reset url field as it should only be used for events with no physical location.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_slots_dates",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date_begin",
+         "date_end",
+         "event_slot_ids",
+         "is_multi_slots"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "These events cannot have slots scheduled outside of their time range:\n%(event_names)s",
+        "line": 605
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_closing_date",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date_begin",
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The closing date cannot be earlier than the beginning date.",
+        "line": 614
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_event_url",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "event_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please enter a valid event URL.",
+        "line": 621
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_event_url",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "event_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Correct the url by adding scheme if it is missing.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_seats_max",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "seats_max"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "*a",
+     "**kw"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_registrations_sold_out",
+         "seats_limited",
+         "seats_max",
+         "seats_available"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "name_with_seats_availability"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Adds ticket seats availability if requested by context.",
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mail_get_operation_for_mail_message_operation",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message_operation"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_tz_context",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_seats_availability",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "slot_tickets"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Get availabilities for given combinations of slot / ticket. Returns\na list following input order. None denotes no limit. ",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_verify_seats_availability",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "slot_tickets"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Check event seats availability, for combinations of slot / ticket.\n\n:param slot_tickets: a list of tuples(slot, ticket, count). Slot and\n  ticket are optional, depending on event configuration. If count is 0\n  it is a simple check current values do not overflow limit. If count\n  is given, it serves as a check there are enough remaining seats.\n:raises ValidationError: if the event / slot / ticket do not have\n  enough available seats",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "There are not enough seats available for %(event_name)s:\n%(sold_out_info)s",
+        "line": 756
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_open_slot_calendar",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Action which will move the events\ninto the first next (by sequence) stage defined as \"Ended\"\n(if they are not already in an ended stage)",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_date_range_str",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start_datetime",
+     "lang_code"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_external_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Description of the event shortened to maximum 1900 characters to\nleave some space for addition by sub-modules.\nMeant to be used for external content (ics/icalc/Gcal).\n\nReference Docs for URL limit -: https://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_external_description_url_encoded",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Get a url-encoded version of the description for mail templates.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ics_file",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "slot"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Returns iCalendar file for the event invitation.\n:param slot: If a slot is given, schedule with the given slot datetimes\n:returns a dict of .ics file content for each event",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_tickets_access_hash",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "registration_ids"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Returns the ground truth hash for accessing the tickets in route /event/<int:event_id>/my_tickets.\nThe dl links are always made event-dependant, hence the method linked to the record in self.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_mark_events_done",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "move every ended events in the next 'ended stage' ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_booth_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Update event configuration from its event type. Depends are set only\non event_type_id itself, not its sub fields. Purpose is to emulate an\nonchange: if event type is changed, update event configuration. Changing\nevent type content itself should not trigger this method.\n\nWhen synchronizing booths:\n\n  * lines that are available are removed;\n  * template lines are added;",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_booth_stat_count",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_booth_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_booth_ids",
+         "event_booth_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_booth_category_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_booth_ids.booth_category_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_booth_category_available_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_booth_ids.is_available"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_price_total",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id.currency_id",
+         "sale_order_lines_ids.price_total",
+         "sale_order_lines_ids.currency_id",
+         "sale_order_lines_ids.company_id",
+         "sale_order_lines_ids.order_id.date_order"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Takes only confirmed the sale.order.lines related to this event and converts amounts\nfrom the currency of the sale order to the currency of the event company.\n\nTo avoid extra overhead, we use conversion rates as of 'today'.\nMeaning we have a number that can change over time, but using the conversion rates\nat the time of the related sale.order would mean thousands of extra requests as we would\nhave to do one conversion per sale.order (and a sale.order is created every time\nwe sell a single event ticket). ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_linked_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": "Redirects to only the confirmed orders linked to the current events ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lead_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lead_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_generate_leads",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "event_lead_rules"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Re-generate leads based on event.lead.rules.\nThe method is ran synchronously if there is a low amount of registrations, otherwise it\ngoes through a CRON job that runs in batches. ",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only Event Managers are allowed to re-generate all leads.",
+        "line": 33
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills_event",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mass_mailing_attendees",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_event_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_invite_contacts",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_event_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_cover_properties",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_participating",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "registration_ids"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_participating",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_is_participating_events",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Heuristic\n\n* public, no visitor: not participating as we have no information;\n* check only confirmed and attended registrations, a draft registration\n  does not make the attendee participating;\n* public and visitor: check visitor is linked to a registration. As\n  visitors are merged on the top parent, current visitor check is\n  sufficient even for successive visits;\n* logged, no visitor: check partner is linked to a registration. Do\n  not check the email as it is not really secure;\n* logged as visitor: check partner or visitor are linked to a\n  registration;",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_visible_on_website",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_visibility",
+         "is_participating"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_visible_on_website",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_register_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_menu",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Also ensure a value for website_menu as it is a trigger notably for\ntrack related menus. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_community_menu",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id",
+         "website_menu",
+         "community_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Set False in base module. Sub modules will add their own logic\n(meet or track_quiz). ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id",
+         "website_menu",
+         "community_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "At type onchange: synchronize. At website_menu update: synchronize. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_menu_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Synchronize with website_menu at change and let people update them\nat will afterwards. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_time_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_begin",
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute start and remaining time. Do everything in UTC as we compute only\ntime deltas here. ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_website_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "website_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The website must be from the same company as the event.",
+        "line": 236
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_event_menus",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "old_events"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "toggle_website_menu",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "val"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_menu_update_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "\" Return a list of fields triggering a split of menu to activate /\nmenu to de-activate. Due to saas-13.3 improvement of menu management\nthis is done using side-methods to ease inheritance.\n\n:returns: list of fields, each of which triggering a menu update\n  like website_menu, website_track, ...\n:rtype: list",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_menu_type_field_matching",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_menus_state_by_field",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "For each field linked to a menu, get the set of events having this\nmenu activated and de-activated. Purpose is to find those whose value\nchanged and update the underlying menus.\n\n:returns: key = name of field triggering a website menu update, get {\n  'activated': subset of self having its menu currently set to True\n  'deactivated': subset of self having its menu currently set to False\n} ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_menus_update_by_field",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "menus_state_by_field",
+     "force_update"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "For each field linked to a menu, get the set of events requiring\nthis menu to be activated or de-activated based on previous recorded\nvalue.\n\n:param menus_state_by_field: see ``_split_menus_state_by_field``;\n:param force_update: list of field to which we force update of menus. This\n  is used notably when a direct write to a stored editable field messes with\n  its pre-computed value, notably in a transient mode (aka demo for example);\n\n:returns: key = name of field triggering a website menu update, get {\n  'activated': subset of self having its menu toggled to True\n  'deactivated': subset of self having its menu toggled to False\n} ",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_website_menu_entries",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Method returning menu entries to display on the website view of the\nevent, possibly depending on some options in inheriting modules.\n\nEach menu entry is a tuple containing :\n  * name: menu item name\n  * url: if set, url to a route (do not use xml_id in that case);\n  * xml_id: template linked to the page (do not use url in that case);\n  * sequence: specific sequence of menu entry to be set on the menu;\n  * menu_type: type of menu entry (used in inheriting modules to ease\n    menu management; not used in this module in 13.3 due to technical\n    limitations);\n  * parent_menu_type: menu_type of already created menu entry (used for\n    making submenu of existing menu entry)",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_website_menus",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "menus_update_by_field"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Synchronize event configuration and its menu entries for frontend.\n\n:param menus_update_by_field: see ``_get_menus_update_by_field``",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_website_menu_entry",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fname_bool",
+     "fname_o2m",
+     "fmenu_type"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Generic method to create menu entries based on a flag on event. This\nmethod is a bit obscure, but is due to preparation of adding new menus\nentries and pages for event in a stable version, leading to some constraints\nwhile developing.\n\n:param fname_bool: field name (e.g. website_track)\n:param fname_o2m: o2m linking towards website.event.menu matching the\n  boolean fields (normally an entry of website.event.menu with type matching\n  the boolean field name)\n:param fmenu_type:",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_menu",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sequence",
+     "name",
+     "url",
+     "xml_id",
+     "menu_type",
+     "parent_menu_type"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Create a new menu for the current event.\n\nIf url: create a website menu. Menu leads directly to the URL that\nshould be a valid route.\n\nIf xml_id: create a new page using the qweb template given by its\nxml_id. Take its url back thanks to new_page of website, then link\nit to a menu. Template is duplicated and linked to a new url, meaning\neach menu will have its own copy of the template. This is currently\nlimited to one menu: introduction(Home).\n\n:param menu_type: type of menu. Mainly used for inheritance purpose\n  allowing more fine-grain tuning of menus.\n:param parent_menu_type: The type of the parent menu. If specified, the\n  menu will be created as a child of the parent menu with the given type.",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "google_map_link",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "zoom"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Temporary method for stable ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_google_map_link",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "zoom"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_subtype",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "init_values"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_event_resource_urls",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "slot"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Prepare the Google and iCal urls for the event.\n:param slot: If a slot is given, prepare the urls for the given slot.\nReturns:\n    The google and iCal url in a dictionnary",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_website_meta",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_backend_menu_id",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_build_dates",
+    "kind": "search_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_get_detail",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "website",
+     "order",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 83,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_render_results",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "fetch_fields",
+     "mapping",
+     "icon",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_track_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_track",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id",
+         "website_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Propagate event_type configuration (only at change); otherwise propagate\nwebsite_menu updated value. Also force True is track_proposal changes. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_track_proposal",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id",
+         "website_track"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Propagate event_type configuration (only at change); otherwise propagate\nwebsite_track updated value (both together True or False at update). ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tracks_tag_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "track_ids.tag_ids",
+         "track_ids.tag_ids.color"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_published_track",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "toggle_website_track",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "val"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "toggle_website_track_proposal",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "val"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mass_mailing_track_speakers",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_event_track_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_slot_tickets_availability_pos",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "slot_ticket_ids"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_booth_menu",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id",
+         "website_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "toggle_booth_menu",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "val"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sponsor_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_exhibitor_menu",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_type_id",
+         "website_menu",
+         "exhibitor_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "toggle_exhibitor_menu",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "val"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_slots_dates",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "These events cannot have slots scheduled outside of their time range:\n%(event_names)s"
+   },
+   {
+    "operation": "_check_closing_date",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "The closing date cannot be earlier than the beginning date."
+   },
+   {
+    "operation": "_check_event_url",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "Please enter a valid event URL."
+   },
+   {
+    "operation": "_verify_seats_availability",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "There are not enough seats available for %(event_name)s:\n%(sold_out_info)s"
+   },
+   {
+    "operation": "action_generate_leads",
+    "package": "event_crm",
+    "kind": "UserError",
+    "message": "Only Event Managers are allowed to re-generate all leads."
+   },
+   {
+    "operation": "_check_website_id",
+    "package": "website_event",
+    "kind": "ValidationError",
+    "message": "The website must be from the same company as the event."
+   }
+  ],
+  "state_fields": [
+   "kanban_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_event_registration",
+    "package": "event",
+    "name": "event.event.registration",
+    "entity": "event.event",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_event_user",
+    "package": "event",
+    "name": "event.event.user",
+    "entity": "event.event",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_event_manager",
+    "package": "event",
+    "name": "event.event.manager",
+    "entity": "event.event",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "pos_event.access_event_event",
+    "package": "pos_event",
+    "name": "event.event",
+    "entity": "event.event",
+    "group": "point_of_sale.group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_event_public",
+    "package": "website_event",
+    "name": "event.event",
+    "entity": "event.event",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_event_portal",
+    "package": "website_event",
+    "name": "event.event",
+    "entity": "event.event",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_event_employee",
+    "package": "website_event",
+    "name": "event.event",
+    "entity": "event.event",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "event.event_event_company_rule",
+    "package": "event",
+    "name": "Event: multi-company",
+    "entity": "event.event",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_event.event_event_public",
+    "package": "website_event",
+    "name": "Event: public/portal: published read",
+    "entity": "event.event",
+    "domain": "[('website_published', '=', True)]",
+    "groups": "[(4, ref('base.group_public')), (4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "event.view_event_form",
+    "package": "event",
+    "name": "event.event.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Events",
+      "class": "o_event_form_view"
+     },
+     "fields": [
+      {
+       "name": "stage_id",
+       "widget": "statusbar",
+       "options": "{'clickable': '1'}"
+      },
+      {
+       "name": "seats_taken",
+       "widget": "statinfo",
+       "string": "Attendees"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "kanban_state",
+       "widget": "event_state_selection"
+      },
+      {
+       "name": "name",
+       "widget": "text",
+       "options": "{'line_breaks': False}",
+       "placeholder": "e.g. Conference for Architects"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "date_begin",
+       "widget": "daterange",
+       "string": "Date",
+       "options": "{'end_date_field': 'date_end'}"
+      },
+      {
+       "name": "date_end",
+       "invisible": "1"
+      },
+      {
+       "name": "date_tz"
+      },
+      {
+       "name": "is_multi_slots",
+       "string": "Multiple Slots"
+      },
+      {
+       "name": "event_slot_count"
+      },
+      {
+       "name": "lang"
+      },
+      {
+       "name": "event_type_id",
+       "string": "Template"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color', 'no_quick_create': True}"
+      },
+      {
+       "name": "organizer_id"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "address_id",
+       "context": "{'show_address': 1}",
+       "placeholder": "Online if not set"
+      },
+      {
+       "name": "event_url",
+       "widget": "url",
+       "invisible": "address_id",
+       "placeholder": "e.g. \"https://www.the system.com\""
+      },
+      {
+       "name": "seats_limited"
+      },
+      {
+       "name": "seats_max"
+      },
+      {
+       "name": "event_ticket_ids",
+       "context": "{                                 'default_event_name': name,                                 'is_event_multi_slots': is_multi_slots,                                 'list_view_ref': 'event.event_event_ticket_view_tree_from_event',                                 'form_view_ref': 'event.event_event_ticket_view_form_from_event',                                 'kanban_view_ref': 'event.event_event_ticket_view_kanban_from_event'}",
+       "mode": "list,kanban"
+      },
+      {
+       "name": "event_mail_ids"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "template_ref",
+       "widget": "EventMailTemplateReferenceField",
+       "context": "{'filter_template_on_event': True, 'default_model': 'event.registration'}",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "interval_nbr",
+       "readonly": "interval_unit == 'now'"
+      },
+      {
+       "name": "interval_unit"
+      },
+      {
+       "name": "interval_type"
+      },
+      {
+       "name": "scheduled_date",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "mail_count_done"
+      },
+      {
+       "name": "mail_state",
+       "widget": "event_icon_selection",
+       "string": " ",
+       "options": "{                                             'error': 'fa fa-exclamation-triangle',                                             'sent': 'fa fa-check',                                             'scheduled': 'fa fa-hourglass-half',                                             'running': 'fa fa-cogs',                                             'cancelled': 'fa fa-times-circle'                                         }",
+       "nolabel": "1"
+      },
+      {
+       "name": "question_ids",
+       "string": "Question",
+       "domain": "[('is_reusable', '=', True)]",
+       "context": "{'list_view_ref': 'event.event_question_view_list_add'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "title"
+      },
+      {
+       "name": "is_mandatory_answer",
+       "string": "Mandatory"
+      },
+      {
+       "name": "once_per_order",
+       "string": "Once per Order"
+      },
+      {
+       "name": "question_type",
+       "string": "Type"
+      },
+      {
+       "name": "answer_ids",
+       "widget": "many2many_tags",
+       "invisible": "question_type != 'simple_choice'"
+      },
+      {
+       "name": "is_default",
+       "optional": "hide"
+      },
+      {
+       "name": "is_reusable",
+       "optional": "hide"
+      },
+      {
+       "name": "badge_format"
+      },
+      {
+       "name": "badge_image"
+      },
+      {
+       "name": "ticket_instructions",
+       "nolabel": "1",
+       "placeholder": "e.g. How to get to your event, door closing time, ..."
+      },
+      {
+       "name": "note",
+       "nolabel": "1",
+       "placeholder": "Add some internal notes (to do lists, contact info, ...)"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(event_barcode_action_main_view)d",
+       "type": "action",
+       "invisible": "not seats_taken",
+       "class": "btn btn-primary",
+       "context": "{'default_event_id': id}"
+      },
+      {
+       "name": "%(event.event_registration_action_stats_from_event)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-line-chart"
+      },
+      {
+       "name": "%(event.act_event_registration_from_event)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "context": "{'search_default_expected': True}",
+       "icon": "fa-users"
+      },
+      {
+       "name": "action_open_slot_calendar",
+       "type": "object",
+       "class": "btn-link p-0 pb-sm-1"
+      },
+      {
+       "name": "action_view_question_answers",
+       "string": "Stats",
+       "type": "object",
+       "invisible": "question_type not in ['simple_choice', 'text_box']",
+       "class": "p-0",
+       "context": "{'search_default_event_id': parent.id}",
+       "icon": "fa-bar-chart pe-1"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "tickets",
+       "string": "Tickets",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "event_communication",
+       "string": "Communication",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "questions",
+       "string": "Questions",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "event_notes",
+       "string": "Notes & Documents",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 1,
+      "event_state_selection": 1,
+      "text": 1,
+      "daterange": 1,
+      "many2many_tags": 2,
+      "many2one_avatar_user": 1,
+      "url": 1,
+      "handle": 2,
+      "EventMailTemplateReferenceField": 1,
+      "event_icon_selection": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "%(event_barcode_action_main_view)d",
+       "type": "action",
+       "class": "btn btn-primary",
+       "invisible": "not seats_taken",
+       "context": "{'default_event_id': id}"
+      }
+     ],
+     "statusbar_field": "stage_id",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "%(event.event_registration_action_stats_from_event)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-line-chart"
+      },
+      {
+       "name": "%(event.act_event_registration_from_event)d",
+       "type": "action",
+       "context": "{'search_default_expected': True}",
+       "class": "oe_stat_button",
+       "icon": "fa-users",
+       "help": "Total Registrations for this Event"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event.view_event_tree",
+    "package": "event",
+    "name": "event.event.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Events",
+      "multi_edit": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "address_id",
+       "readonly": "1"
+      },
+      {
+       "name": "organizer_id",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "1"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "date_begin",
+       "readonly": "1"
+      },
+      {
+       "name": "date_end",
+       "readonly": "1"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}",
+       "optional": "hide"
+      },
+      {
+       "name": "seats_taken",
+       "readonly": "1",
+       "string": "Total Attendees",
+       "sum": "Total"
+      },
+      {
+       "name": "seats_used",
+       "readonly": "1",
+       "sum": "Total"
+      },
+      {
+       "name": "seats_max",
+       "readonly": "1",
+       "string": "Maximum Seats",
+       "optional": "hide",
+       "sum": "Total"
+      },
+      {
+       "name": "seats_reserved",
+       "readonly": "1",
+       "optional": "hide",
+       "sum": "Total"
+      },
+      {
+       "name": "stage_id",
+       "readonly": "1"
+      },
+      {
+       "name": "message_needaction",
+       "readonly": "1",
+       "column_invisible": "True"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "many2many_tags": 1,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.event_event_view_activity",
+    "package": "event",
+    "name": "event.event.view.activity",
+    "view_type": "activity",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "activity",
+     "root_attributes": {
+      "string": "Event"
+     },
+     "fields": [
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "name",
+       "string": "Event Name"
+      },
+      {
+       "name": "date_begin",
+       "widget": "daterange",
+       "options": "{'end_date_field': 'date_end'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "daterange": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event.event_event_view_form_quick_create",
+    "package": "event",
+    "name": "event.event.form.quick_create",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. Conference for Architects"
+      },
+      {
+       "name": "date_begin",
+       "widget": "daterange",
+       "string": "Date",
+       "options": "{'end_date_field': 'date_end'}"
+      },
+      {
+       "name": "date_end",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "daterange": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event.view_event_kanban",
+    "package": "event",
+    "name": "event.event.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_event_kanban_view",
+      "default_group_by": "stage_id",
+      "quick_create_view": "event.event_event_view_form_quick_create",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "stage_id",
+       "options": "{\"group_by_tooltip\": {\"description\": \"Description\"}}"
+      },
+      {
+       "name": "date_begin"
+      },
+      {
+       "name": "date_end"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "address_id"
+      },
+      {
+       "name": "seats_taken"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "kanban_activity"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "kanban_state",
+       "widget": "event_state_selection"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "kanban_activity": 1,
+      "many2one_avatar_user": 1,
+      "event_state_selection": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": "stage_id",
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "event.view_event_calendar",
+    "package": "event",
+    "name": "event.event.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "date_start": "date_begin",
+      "date_stop": "date_end",
+      "string": "Event Organization",
+      "mode": "month",
+      "color": "event_type_id",
+      "event_limit": "5"
+     },
+     "fields": [
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "seats_taken"
+      },
+      {
+       "name": "seats_reserved"
+      },
+      {
+       "name": "seats_used"
+      },
+      {
+       "name": "event_type_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date_begin",
+      "date_stop": "date_end",
+      "date_delay": null,
+      "color": "event_type_id",
+      "mode": "month",
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "event.view_event_search",
+    "package": "event",
+    "name": "event.event.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Events"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Event"
+      },
+      {
+       "name": "event_type_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "address_search"
+      },
+      {
+       "name": "stage_id"
+      },
+      {
+       "name": "activity_user_id",
+       "string": "Activities of"
+      },
+      {
+       "name": "activity_type_id",
+       "string": "Activity type"
+      },
+      {
+       "name": "question_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "myevents",
+       "string": "My Events",
+       "domain": "[('user_id', '=', uid)]",
+       "help": "My Events"
+      },
+      {
+       "name": "upcoming",
+       "string": "Upcoming/Running",
+       "domain": "[('date_end', '>=', 'now')]",
+       "help": "Upcoming events from today"
+      },
+      {
+       "name": "start_date",
+       "string": "Start Date",
+       "date": "date_begin"
+      },
+      {
+       "name": "filter_inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "filter_online",
+       "string": "Online",
+       "domain": "[('address_id', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "responsible",
+       "string": "Responsible",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "event_type_id",
+       "string": "Template",
+       "context": "{'group_by': 'event_type_id'}"
+      },
+      {
+       "name": "stage_id",
+       "string": "Stage",
+       "context": "{'group_by': 'stage_id'}",
+       "groups": "event.group_event_registration_desk"
+      },
+      {
+       "name": "date_begin",
+       "string": "Start Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date_begin'}"
+      },
+      {
+       "name": "venue",
+       "string": "Venue",
+       "context": "{'group_by': 'address_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_event_view_form",
+    "package": "event_booth",
+    "name": "event.event.view.form.inherit.event.booth",
+    "view_type": "div",
+    "inherits_view": "event.view_event_form",
+    "mode": null,
+    "priority": "4",
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "event_booth_count_available"
+      },
+      {
+       "name": "event_booth_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(event_booth_action_from_event)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-university"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_crm.event_view_form",
+    "package": "event_crm",
+    "name": "event.event.form.inherit.event.crm",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_form",
+    "mode": null,
+    "priority": "30",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='%(event.act_event_registration_from_event)d']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "lead_count",
+       "widget": "statinfo",
+       "string": "Leads"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(crm_lead_action_from_event)d",
+       "type": "action",
+       "invisible": "lead_count == 0",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-star"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='%(event.act_event_registration_from_event)d']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_crm.event_view_tree",
+    "package": "event_crm",
+    "name": "event.event.list.inherit.event.crm",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='user_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "lead_count",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='user_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_sale.view_event_form_inherit_ticket",
+    "package": "event_sale",
+    "name": "event.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_form",
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='%(event.act_event_registration_from_event)d']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "sale_price_total",
+       "widget": "monetary",
+       "string": "Sales",
+       "options": "{'currency_field': 'currency_id'}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_linked_orders",
+       "type": "object",
+       "invisible": "sale_price_total == 0 or not sale_price_total",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-dollar"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='%(event.act_event_registration_from_event)d']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_event.event_event_view_form_inherit_mass_mailing",
+    "package": "mass_mailing_event",
+    "name": "event.event.view.form.inherit.mass.mailing",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_form",
+    "mode": null,
+    "priority": "4",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='stage_id']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "event_registrations_open",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_invite_contacts",
+       "string": "Invite",
+       "type": "object",
+       "invisible": "is_finished or not event_registrations_open",
+       "class": "btn btn-primary",
+       "groups": "mass_mailing.group_mass_mailing_user"
+      },
+      {
+       "name": "action_invite_contacts",
+       "string": "Invite",
+       "type": "object",
+       "invisible": "is_finished or event_registrations_open",
+       "class": "btn btn-secondary",
+       "groups": "mass_mailing.group_mass_mailing_user"
+      },
+      {
+       "name": "action_mass_mailing_attendees",
+       "string": "Contact Attendees",
+       "type": "object",
+       "invisible": "seats_taken == 0",
+       "groups": "mass_mailing.group_mass_mailing_user"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='stage_id']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_event_track.event_event_view_form_inherit_mass_mailing_track",
+    "package": "mass_mailing_event_track",
+    "name": "event.event.view.form.inherit.mass.mailing.track",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_form",
+    "mode": null,
+    "priority": "4",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='stage_id']",
+      "position": "before"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_mass_mailing_track_speakers",
+       "string": "Contact Speakers",
+       "type": "object",
+       "invisible": "track_count == 0",
+       "groups": "mass_mailing.group_mass_mailing_user"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='stage_id']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_event.event_event_view_form_inherit_pos_event",
+    "package": "pos_event",
+    "name": "event.event.view.form.inherit.pos.event",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_title')]",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "image_1024",
+       "widget": "image"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_title')]",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_event_view_form",
+    "package": "website_event",
+    "name": "event.event.view.form.inherit.website",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_form",
+    "mode": null,
+    "priority": "5",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='right_event_details']/field[@name='company_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "website_id",
+       "invisible": "1"
+      },
+      {
+       "name": "website_published",
+       "invisible": "1"
+      },
+      {
+       "name": "website_id",
+       "domain": "['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+       "options": "{'no_create': True}",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "website_visibility"
+      },
+      {
+       "name": "event_register_url",
+       "widget": "CopyClipboardButton"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "website_publish_button",
+       "string": "Publish",
+       "type": "object",
+       "invisible": "website_published or website_visibility == 'public'",
+       "class": "btn btn-sm btn-link h-100 ms-2"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "CopyClipboardButton": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='right_event_details']/field[@name='company_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_event_view_list",
+    "package": "website_event",
+    "name": "event.event.view.list.inherit.website",
+    "view_type": "field",
+    "inherits_view": "event.view_event_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "company_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "position": "after"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "website_id",
+       "domain": "['|', ('company_id', '=', company_id), ('company_id', '=', False)]",
+       "optional": "show",
+       "groups": "website.group_multi_website"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event.event_event_view_search",
+    "package": "website_event",
+    "name": "event.event.search.inherit.website",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='upcoming']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_published",
+       "string": "Published",
+       "domain": "[('website_published', '=', True)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='upcoming']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_pages_tree_view",
+    "package": "website_event",
+    "name": "Event Pages List",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_tree",
+    "mode": "primary",
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_pages_kanban_view",
+    "package": "website_event",
+    "name": "Event Pages Kanban",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_kanban",
+    "mode": "primary",
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//kanban",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//kanban",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_event_view_form_website_create",
+    "package": "website_event",
+    "name": "event.event.form.website_create",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_form",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_booth.event_event_view_form",
+    "package": "website_event_booth",
+    "name": "event.event.view.form.inherit.website.event.booth",
+    "view_type": "field",
+    "inherits_view": "website_event.event_event_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "badge_format",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "badge_format",
+       "position": "before"
+      },
+      {
+       "name": "exhibition_map"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_exhibitor.event_event_view_form",
+    "package": "website_event_exhibitor",
+    "name": "event.event.view.form.inherit.exhibitor",
+    "view_type": "field",
+    "inherits_view": "website_event.event_event_view_form",
+    "mode": null,
+    "priority": "5",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "website_url",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "website_url",
+       "position": "before"
+      },
+      {
+       "name": "sponsor_count",
+       "widget": "statinfo",
+       "string": "Sponsors"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(event_sponsor_action_from_event)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-black-tie"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_exhibitor.event_event_view_list",
+    "package": "website_event_exhibitor",
+    "name": "event.event.view.list.inherit.exhibitor",
+    "view_type": "field",
+    "inherits_view": "event.view_event_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "stage_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "stage_id",
+       "position": "after"
+      },
+      {
+       "name": "sponsor_count",
+       "readonly": "1",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_sale.event_form_mandatory_company",
+    "package": "website_event_sale",
+    "name": "event.event.view.form.inherit.company.mandatory",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group//field[@name='company_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group//field[@name='company_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track.event_event_view_form",
+    "package": "website_event_track",
+    "name": "event.event.view.from.inherit.track",
+    "view_type": "xpath",
+    "inherits_view": "website_event.event_event_view_form",
+    "mode": null,
+    "priority": "3",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='website_url']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "track_count",
+       "widget": "statinfo",
+       "string": "Tracks"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(action_event_track_from_event)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-microphone"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='website_url']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track.event_event_view_list",
+    "package": "website_event_track",
+    "name": "event.event.view.list.inherit.website.event.track",
+    "view_type": "field",
+    "inherits_view": "event.view_event_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "stage_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "stage_id",
+       "position": "after"
+      },
+      {
+       "name": "track_count",
+       "readonly": "1",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_track_quiz.event_event_view_form",
+    "package": "website_event_track_quiz",
+    "name": "event.event.view.form.inherit.track.quiz",
+    "view_type": "xpath",
+    "inherits_view": "website_event.event_event_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//label[@for='community_menu']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//label[@for='community_menu']",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event.action_event_view",
+    "package": "event",
+    "name": "Events",
+    "view_mode": "kanban,calendar,list,form,pivot,graph,activity",
+    "view_id": null,
+    "search_view_id": "view_event_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Create an Event\n          </p><p>\n            Schedule and organize your events: handle registrations, send automated confirmation emails, sell tickets, etc.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.event"
+   },
+   {
+    "external_identifier": "hr_skills_event.event_training_onsite_action",
+    "package": "hr_skills_event",
+    "name": "Onsite Courses",
+    "view_mode": "kanban,calendar,list,form,pivot,graph,activity",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('registration_ids', 'any', [('partner_id.employee', '=', True)])]",
+    "context": "{'hr_skills_event_add_employee': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Create an Event\n          </p><p>\n            Schedule and organize your events: handle registrations, send automated confirmation emails, sell tickets, etc.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.event"
+   },
+   {
+    "external_identifier": "website_event.action_event_pages_list",
+    "package": "website_event",
+    "name": "Event Pages",
+    "view_mode": "list,kanban",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'create_action': 'website_event.event_event_action_add'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "event.event"
+   },
+   {
+    "external_identifier": "website_event.event_event_action_add",
+    "package": "website_event",
+    "name": "New Event",
+    "view_mode": "form",
+    "view_id": "event_event_view_form_website_create",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_address_id': False}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "event.event"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "event_crm.action_generate_leads",
+    "package": "event_crm",
+    "name": "Generate Leads",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [
+   {
+    "external_identifier": "event.action_report_event_event_full_page_ticket",
+    "package": "event",
+    "name": "Full Page Ticket Example",
+    "report_type": "qweb-pdf",
+    "report_name": "event.event_event_report_template_full_page_ticket",
+    "report_file": "event.event_event_report_template_full_page_ticket",
+    "print_report_name": "'Full Page Ticket - %s' % (object.name or 'Event').replace('/','')",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_event_event",
+    "binding_type": "report",
+    "paperformat_id": "paperformat_event_full_page_ticket",
+    "groups_id": null,
+    "multi": null,
+    "entity": "event.event"
+   },
+   {
+    "external_identifier": "event.action_report_event_event_badge",
+    "package": "event",
+    "name": "Badge Example",
+    "report_type": "qweb-pdf",
+    "report_name": "event.event_event_report_template_badge",
+    "report_file": "event.event_event_report_template_badge",
+    "print_report_name": "'Badge - %s' % (object.name or 'Event').replace('/','')",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_event_event",
+    "binding_type": "report",
+    "paperformat_id": "paperformat_event_badge",
+    "groups_id": null,
+    "multi": null,
+    "entity": "event.event"
+   },
+   {
+    "external_identifier": "event.action_report_event_event_attendee_list",
+    "package": "event",
+    "name": "Attendee List",
+    "report_type": "qweb-pdf",
+    "report_name": "event.event_event_attendee_list",
+    "report_file": "event.event_event_attendee_list",
+    "print_report_name": "'Attendee List - %s' % (object.name)",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "event.model_event_event",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "event.event"
+   }
+  ],
+  "menus": [
+   {
+    "external_identifier": "event.menu_event_event",
+    "package": "event",
+    "name": null,
+    "parent_id": null,
+    "action": "event.action_event_view",
+    "sequence": null,
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

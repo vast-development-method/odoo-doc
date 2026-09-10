@@ -1,0 +1,355 @@
+{
+ "catalog": {
+  "name": "entity:product.wishlist",
+  "description": "Complete definition of entity Product Wishlist (product.wishlist).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.wishlist",
+  "storage_name": "product_wishlist",
+  "full_name": "Product Wishlist",
+  "kind": "persistent",
+  "description": "Product Wishlist",
+  "defined_by_package": "website_sale_wishlist",
+  "extended_by_packages": [
+   "website_sale_stock_wishlist"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Owner",
+    "index": "btree_not_null",
+    "defined_in_package": "website_sale_wishlist",
+    "full_name": "Owner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "required": true,
+    "defined_in_package": "website_sale_wishlist",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "website_id.currency_id",
+    "readonly": true,
+    "defined_in_package": "website_sale_wishlist",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "pricelist_id",
+    "type": "Many2one",
+    "comodel": "product.pricelist",
+    "string": "Pricelist",
+    "help": "Pricelist when added",
+    "defined_in_package": "website_sale_wishlist",
+    "full_name": "Pricelist",
+    "target_entity": "product.pricelist"
+   },
+   {
+    "name": "price",
+    "type": "Monetary",
+    "currency_field": "currency_id",
+    "string": "Price",
+    "help": "Price of the product when it has been added in the wishlist",
+    "defined_in_package": "website_sale_wishlist",
+    "full_name": "Price"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "comodel": "website",
+    "ondelete": "cascade",
+    "required": true,
+    "defined_in_package": "website_sale_wishlist",
+    "string": "Website",
+    "full_name": "Website",
+    "target_entity": "website"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "required": true,
+    "defined_in_package": "website_sale_wishlist",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "stock_notification",
+    "type": "Boolean",
+    "compute": "_compute_stock_notification",
+    "default": false,
+    "required": true,
+    "defined_in_package": "website_sale_stock_wishlist",
+    "string": "Stock Notification",
+    "full_name": "Stock Notification"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_product_unique_partner_id",
+    "kind": "Constraint",
+    "definition": "UNIQUE(product_id, partner_id)",
+    "message": "Duplicated wishlisted product for this partner.",
+    "defined_in_package": "website_sale_wishlist"
+   }
+  ],
+  "operations": [
+   {
+    "name": "current",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_wishlist",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get all wishlist items that belong to current user or session,\nfilter products that are unpublished.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_to_wishlist",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "pricelist_id",
+     "currency_id",
+     "website_id",
+     "price",
+     "product_id",
+     "partner_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_wishlist",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_wishlist_from_session",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_wishlist",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Assign all wishlist withtout partner from this the current session",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_sessions",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "*args",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_wishlist",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Remove wishlists for unexisting sessions.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_stock_notification",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_stock_wishlist",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_stock_notification",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_stock_wishlist",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_sale_wishlist.access_product_wishlist_default",
+    "package": "website_sale_wishlist",
+    "name": "access_product_wishlist_default",
+    "entity": "product.wishlist",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale_wishlist.access_product_wishlist_public",
+    "package": "website_sale_wishlist",
+    "name": "access_product_wishlist_public",
+    "entity": "product.wishlist",
+    "group": "base.group_public",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale_wishlist.access_product_wishlist_portal",
+    "package": "website_sale_wishlist",
+    "name": "access_product_wishlist_portal",
+    "entity": "product.wishlist",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_sale_wishlist.access_product_wishlist_user",
+    "package": "website_sale_wishlist",
+    "name": "access_product_wishlist_user",
+    "entity": "product.wishlist",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_sale_wishlist.product_wishlist_rule",
+    "package": "website_sale_wishlist",
+    "name": "See own Wishlist",
+    "entity": "product.wishlist",
+    "domain": "[('partner_id','=', user.partner_id.id)]",
+    "groups": "[(4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_sale_wishlist.all_product_wishlist_rule",
+    "package": "website_sale_wishlist",
+    "name": "See all wishlist",
+    "entity": "product.wishlist",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('sales_team.group_sale_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

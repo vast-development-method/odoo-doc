@@ -1,0 +1,976 @@
+{
+ "catalog": {
+  "name": "reference_data:gamification.goal.definition",
+  "description": "Shipped reference records of entity gamification.goal.definition.",
+  "record_count": 47,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "gamification.definition_base_timezone",
+   "package": "gamification",
+   "values": {
+    "name": "Set your Timezone",
+    "description": "Configure your profile and specify your timezone",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "base.model_res_users"
+    },
+    "domain": "[('partner_id.tz', '!=', False)]",
+    "action_id": {
+     "reference": "base.action_res_users_my"
+    },
+    "res_id_field": "user.id",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "base.field_res_users__id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification.definition_base_company_data",
+   "package": "gamification",
+   "values": {
+    "name": "Set your Company Data",
+    "description": "Write some information about your company (specify at least a name)",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "base.model_res_company"
+    },
+    "domain": "[('user_ids', 'in', [user.id]), ('name', '=', 'YourCompany')]",
+    "condition": "lower",
+    "action_id": {
+     "reference": "base.action_res_company_form"
+    },
+    "res_id_field": "user.company_id.id"
+   }
+  },
+  {
+   "external_identifier": "gamification.definition_base_company_logo",
+   "package": "gamification",
+   "values": {
+    "name": "Set your Company Logo",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "base.model_res_company"
+    },
+    "domain": "[('user_ids', 'in', [user.id]),('logo', '!=', False)]",
+    "action_id": {
+     "reference": "base.action_res_company_form"
+    },
+    "res_id_field": "user.company_id.id"
+   }
+  },
+  {
+   "external_identifier": "gamification.definition_base_invite",
+   "package": "gamification",
+   "values": {
+    "name": "Invite new Users",
+    "description": "Create at least another user",
+    "display_mode": "boolean",
+    "computation_mode": "count",
+    "model_id": {
+     "reference": "base.model_res_users"
+    },
+    "domain": "[('id', '!=', user.id)]",
+    "action_id": {
+     "reference": "action_new_simplified_res_users"
+    }
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_tot_invoices",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "Total Invoiced",
+    "description": "",
+    "computation_mode": "sum",
+    "monetary": "True",
+    "model_id": {
+     "reference": "account.model_account_invoice_report"
+    },
+    "field_id": {
+     "reference": "account.field_account_invoice_report__price_subtotal"
+    },
+    "field_date_id": {
+     "reference": "account.field_account_invoice_report__invoice_date"
+    },
+    "domain": "[('state','!=','cancel'),('move_type','=','out_invoice')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "account.field_account_invoice_report__invoice_user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_nbr_new_leads",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "New Leads",
+    "description": "Based on the creation date",
+    "computation_mode": "count",
+    "suffix": "leads",
+    "model_id": {
+     "reference": "crm.model_crm_lead"
+    },
+    "field_date_id": {
+     "search": "[('model','=','crm.lead'),('name','=','create_date')]",
+     "entity": null
+    },
+    "domain": "['|', ('type', '=', 'lead'), ('type', '=', 'opportunity')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "crm.field_crm_lead__user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_lead_delay_open",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "Time to Qualify a Lead",
+    "description": "The average number of days to open the case (lower than)",
+    "computation_mode": "sum",
+    "condition": "lower",
+    "suffix": "days",
+    "model_id": {
+     "reference": "crm.model_crm_lead"
+    },
+    "field_id": {
+     "reference": "crm.field_crm_lead__day_close"
+    },
+    "field_date_id": {
+     "reference": "crm.field_crm_lead__date_closed"
+    },
+    "domain": "[('type', '=', 'lead')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "crm.field_crm_lead__user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_lead_delay_close",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "Days to Close a Deal",
+    "description": "The average number of days to close the case (lower than)",
+    "computation_mode": "sum",
+    "condition": "lower",
+    "suffix": "days",
+    "model_id": {
+     "reference": "crm.model_crm_lead"
+    },
+    "field_id": {
+     "reference": "crm.field_crm_lead__day_open"
+    },
+    "field_date_id": {
+     "reference": "crm.field_crm_lead__date_open"
+    },
+    "domain": "[]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "crm.field_crm_lead__user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_nbr_new_opportunities",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "New Opportunities",
+    "description": "Based on the opening date",
+    "computation_mode": "count",
+    "suffix": "opportunities",
+    "model_id": {
+     "reference": "crm.model_crm_lead"
+    },
+    "field_date_id": {
+     "reference": "crm.field_crm_lead__date_open"
+    },
+    "domain": "[('type','=','opportunity')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "crm.field_crm_lead__user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_nbr_sale_order_created",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "New Sales Orders",
+    "description": "Based on the creation date",
+    "computation_mode": "count",
+    "suffix": "orders",
+    "model_id": {
+     "reference": "sale.model_sale_order"
+    },
+    "field_date_id": {
+     "reference": "sale.field_sale_order__date_order"
+    },
+    "domain": "[('state','not in',('draft', 'sent', 'cancel'))]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "sale.field_sale_order__user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_nbr_paid_sale_order",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "Paid Sales Orders",
+    "description": "Based on the invoice date",
+    "computation_mode": "count",
+    "suffix": "orders",
+    "model_id": {
+     "reference": "account.model_account_invoice_report"
+    },
+    "field_date_id": {
+     "reference": "account.field_account_invoice_report__invoice_date"
+    },
+    "domain": "[('payment_state','in',('paid', 'in_payment')),('move_type','=','out_invoice')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "account.field_account_invoice_report__invoice_user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_tot_paid_sale_order",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "Total Paid Sales Orders",
+    "description": "Based on the invoice date",
+    "computation_mode": "count",
+    "monetary": "True",
+    "model_id": {
+     "reference": "account.model_account_invoice_report"
+    },
+    "field_id": {
+     "reference": "account.field_account_invoice_report__price_subtotal"
+    },
+    "field_date_id": {
+     "reference": "account.field_account_invoice_report__invoice_date"
+    },
+    "domain": "[('payment_state','in',('paid', 'in_payment')),('move_type','=','out_invoice')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "account.field_account_invoice_report__invoice_user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_nbr_customer_refunds",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "Customer Credit Notes",
+    "description": "Add credit note to the least customers (lower than)",
+    "computation_mode": "count",
+    "condition": "lower",
+    "suffix": "invoices",
+    "model_id": {
+     "reference": "account.model_account_invoice_report"
+    },
+    "field_date_id": {
+     "reference": "account.field_account_invoice_report__invoice_date"
+    },
+    "domain": "[('state','!=','cancel'),('move_type','=','out_refund')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "account.field_account_invoice_report__invoice_user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "gamification_sale_crm.definition_crm_tot_customer_refunds",
+   "package": "gamification_sale_crm",
+   "values": {
+    "name": "Total Customer Credit Notes",
+    "description": "The total credit note value is negative. Validated when higher (min credit note value).",
+    "computation_mode": "sum",
+    "condition": "higher",
+    "monetary": "True",
+    "model_id": {
+     "reference": "account.model_account_invoice_report"
+    },
+    "field_id": {
+     "reference": "account.field_account_invoice_report__price_subtotal"
+    },
+    "field_date_id": {
+     "reference": "account.field_account_invoice_report__invoice_date"
+    },
+    "domain": "[('state','!=','cancel'),('move_type','=','out_refund')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "account.field_account_invoice_report__invoice_user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_popular_question",
+   "package": "website_forum",
+   "values": {
+    "name": "Popular Question (150)",
+    "description": "Asked a question with at least 150 views",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('views', '>=', 150)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_notable_question",
+   "package": "website_forum",
+   "values": {
+    "name": "Popular Question (250)",
+    "description": "Asked a question with at least 250 views",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('views', '>=', 250)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_famous_question",
+   "package": "website_forum",
+   "values": {
+    "name": "Popular Question (500)",
+    "description": "Asked a question with at least 500 views",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('views', '>=', 500)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_favorite_question_1",
+   "package": "website_forum",
+   "values": {
+    "name": "Favourite Question (1)",
+    "description": "Question set as favorite by 1 user",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('favourite_count', '>=', 1)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_favorite_question_5",
+   "package": "website_forum",
+   "values": {
+    "name": "Favourite Question (5)",
+    "description": "Question set as favorite by 5 user",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('favourite_count', '>=', 5)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_stellar_question_25",
+   "package": "website_forum",
+   "values": {
+    "name": "Favourite Question (25)",
+    "description": "Question set as favorite by 25 user",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('favourite_count', '>=', 25)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_student",
+   "package": "website_forum",
+   "values": {
+    "name": "Upvoted question (1)",
+    "description": "Asked first question with at least one up vote",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('vote_count', '>=', 1)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_nice_question",
+   "package": "website_forum",
+   "values": {
+    "name": "Upvoted question (4)",
+    "description": "Asked first question with at least 4 up votes",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('vote_count', '>=', 4)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_good_question",
+   "package": "website_forum",
+   "values": {
+    "name": "Upvoted question (6)",
+    "description": "Asked first question with at least 6 up votes",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('vote_count', '>=', 6)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_great_question",
+   "package": "website_forum",
+   "values": {
+    "name": "Upvoted question (15)",
+    "description": "Asked first question with at least 15 up votes",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('vote_count', '>=', 15)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_scholar",
+   "package": "website_forum",
+   "values": {
+    "name": "Scholar",
+    "description": "Ask a question and accept an answer",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent_id', '=', False), ('has_validated_answer', '=', True)]",
+    "condition": "higher",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_teacher",
+   "package": "website_forum",
+   "values": {
+    "name": "Teacher",
+    "description": "Received at least 3 upvote for an answer for the first time",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('parent_id', '!=', False), ('vote_count', '>=', 3)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_nice_answer",
+   "package": "website_forum",
+   "values": {
+    "name": "Nice Answer (4)",
+    "description": "Answer voted up 4 times",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('parent_id', '!=', False), ('vote_count', '>=', 4)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_good_answer",
+   "package": "website_forum",
+   "values": {
+    "name": "Good Answer (6)",
+    "description": "Answer voted up 6 times",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('parent_id', '!=', False), ('vote_count', '>=', 6)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_great_answer",
+   "package": "website_forum",
+   "values": {
+    "name": "Great Answer (15)",
+    "description": "Answer voted up 15 times",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('parent_id', '!=', False), ('vote_count', '>=', 15)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_enlightened",
+   "package": "website_forum",
+   "values": {
+    "name": "Enlightened",
+    "description": "Answer was accepted with 3 or more votes",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('parent_id', '!=', False), ('vote_count', '>=', 3), ('is_correct', '=', True)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_guru",
+   "package": "website_forum",
+   "values": {
+    "name": "Guru (15)",
+    "description": "Answer accepted with 15 or more votes",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('parent_id', '!=', False), ('vote_count', '>=', 15), ('is_correct', '=', True)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_self_learner",
+   "package": "website_forum",
+   "values": {
+    "name": "Self-Learner",
+    "description": "Answer own question with at least 4 up votes",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('self_reply', '=', True), ('vote_count', '>=', 4)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_configure_profile",
+   "package": "website_forum",
+   "values": {
+    "name": "Completed own biography",
+    "description": "Write some information about yourself",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "base.model_res_users"
+    },
+    "condition": "higher",
+    "domain": "[\n                ('partner_id.country_id', '!=', False),\n                ('partner_id.city', '!=', False),\n                ('partner_id.email', '!=', False)\n            ]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "base.field_res_users__id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_commentator",
+   "package": "website_forum",
+   "values": {
+    "name": "Commentator",
+    "description": "Comment an answer or a question",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "mail.model_mail_message"
+    },
+    "condition": "higher",
+    "domain": {
+     "expression": "[('message_type', '=', 'comment'), ('subtype_id', '=', ref('mail.mt_comment')), ('model', '=', 'forum.post')]"
+    },
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "mail.field_mail_message__author_id"
+    },
+    "batch_user_expression": "user.partner_id.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_pundit",
+   "package": "website_forum",
+   "values": {
+    "name": "Pundit",
+    "description": "Post 10 answers with score of 10 or more",
+    "display_mode": "boolean",
+    "condition": "higher",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "domain": "[('parent', '!=', False), ('vote_count' '>=', 10)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_taxonomist",
+   "package": "website_forum",
+   "values": {
+    "name": "Taxonomist",
+    "description": "Create a tag which can used in minimum 15 questions",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_tag"
+    },
+    "condition": "higher",
+    "domain": "[('posts_count', '>=', 15)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_tag__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_critic",
+   "package": "website_forum",
+   "values": {
+    "name": "Critic",
+    "description": "First downvote",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post_vote"
+    },
+    "condition": "higher",
+    "domain": "[('vote', '=', '-1')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post_vote__user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_disciplined",
+   "package": "website_forum",
+   "values": {
+    "name": "Disciplined",
+    "description": "Delete own post with 3 or more upvotes",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('vote_count', '>=', 3), ('active', '=', False)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_editor",
+   "package": "website_forum",
+   "values": {
+    "name": "Editor",
+    "description": "First edit of answer or question",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "mail.model_mail_message"
+    },
+    "condition": "higher",
+    "domain": {
+     "expression": "[('model', '=', 'forum.post'), ('subtype_id', 'in', [ref('website_forum.mt_answer_edit'), ref('website_forum.mt_question_edit')])]"
+    },
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "mail.field_mail_message__author_id"
+    },
+    "batch_user_expression": "user.partner_id.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_supporter",
+   "package": "website_forum",
+   "values": {
+    "name": "Supporter",
+    "description": "First upvote",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post_vote"
+    },
+    "condition": "higher",
+    "domain": "[('vote', '=', '1')]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post_vote__user_id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_forum.definition_peer_pressure",
+   "package": "website_forum",
+   "values": {
+    "name": "Peer Pressure",
+    "description": "Delete own post with 3 or more down votes",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_forum.model_forum_post"
+    },
+    "condition": "higher",
+    "domain": "[('vote_count', '<=', -3), ('active', '=', False)]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_forum.field_forum_post__create_uid"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_slides.badge_data_register_goal",
+   "package": "website_slides",
+   "values": {
+    "name": "Get started",
+    "description": "Register to the platform",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "base.model_res_users"
+    },
+    "condition": "higher",
+    "domain": "[\n            ('active', '!=', False),\n            ('karma', '>', 0),\n        ]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "base.field_res_users__id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_slides.badge_data_profile_goal",
+   "package": "website_slides",
+   "values": {
+    "name": "Know yourself",
+    "description": "Complete your profile",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "base.model_res_users"
+    },
+    "condition": "higher",
+    "domain": "[\n            ('partner_id.country_id', '!=', False),\n            ('partner_id.city', '!=', False),\n            ('partner_id.email', '!=', False)\n        ]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "base.field_res_users__id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_slides.badge_data_course_goal",
+   "package": "website_slides",
+   "values": {
+    "name": "Power User",
+    "description": "Complete a course",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_slides.model_slide_channel_partner"
+    },
+    "condition": "higher",
+    "domain": "[\n            ('member_status', '=', 'completed')\n        ]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_slides.field_slide_channel_partner__partner_id"
+    },
+    "batch_user_expression": "user.partner_id.id"
+   }
+  },
+  {
+   "external_identifier": "website_slides.badge_data_certification_goal",
+   "package": "website_slides",
+   "values": {
+    "name": "Certified Knowledge",
+    "description": "Get a certification",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "website_slides.model_slide_slide_partner"
+    },
+    "condition": "higher",
+    "domain": "[\n            ('completed', '=', True),\n            (0, '=', 1)\n        ]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "website_slides.field_slide_slide_partner__partner_id"
+    },
+    "batch_user_expression": "user.partner_id.id"
+   }
+  },
+  {
+   "external_identifier": "website_slides.badge_data_karma_goal",
+   "package": "website_slides",
+   "values": {
+    "name": "Community hero",
+    "description": "Reach 2000 XP",
+    "computation_mode": "count",
+    "display_mode": "boolean",
+    "model_id": {
+     "reference": "base.model_res_users"
+    },
+    "condition": "higher",
+    "domain": "[\n            ('karma', '>=', 2000)\n        ]",
+    "batch_mode": "True",
+    "batch_distinctive_field": {
+     "reference": "base.field_res_users__id"
+    },
+    "batch_user_expression": "user.id"
+   }
+  },
+  {
+   "external_identifier": "website_slides.badge_data_certification_goal",
+   "package": "website_slides_survey",
+   "values": {
+    "domain": "[\n            ('survey_scoring_success', '=', True),\n            ('slide_id.slide_category', '=', 'certification')\n        ]"
+   }
+  }
+ ]
+}

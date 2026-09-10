@@ -1,0 +1,1171 @@
+{
+ "catalog": {
+  "name": "entity:link.tracker",
+  "description": "Complete definition of entity Link Tracker (link.tracker).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "link.tracker",
+  "storage_name": "link_tracker",
+  "full_name": "Link Tracker",
+  "kind": "persistent",
+  "description": "Link Tracker",
+  "defined_by_package": "link_tracker",
+  "extended_by_packages": [
+   "mass_mailing",
+   "website_links"
+  ],
+  "mixins": [
+   "utm.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "count DESC",
+  "display_name_field": "short_url",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "url",
+    "type": "Char",
+    "string": "Target URL",
+    "required": true,
+    "defined_in_package": "link_tracker",
+    "full_name": "Target uniform resource locator"
+   },
+   {
+    "name": "absolute_url",
+    "type": "Char",
+    "string": "Absolute URL",
+    "compute": "_compute_absolute_url",
+    "defined_in_package": "link_tracker",
+    "full_name": "Absolute uniform resource locator"
+   },
+   {
+    "name": "short_url",
+    "type": "Char",
+    "string": "Tracked URL",
+    "compute": "_compute_short_url",
+    "search": "_search_short_url",
+    "defined_in_package": "link_tracker",
+    "full_name": "Tracked uniform resource locator"
+   },
+   {
+    "name": "redirected_url",
+    "type": "Char",
+    "string": "Redirected URL",
+    "compute": "_compute_redirected_url",
+    "defined_in_package": "link_tracker",
+    "full_name": "Redirected uniform resource locator"
+   },
+   {
+    "name": "short_url_host",
+    "type": "Char",
+    "string": "Host of the short URL",
+    "compute": "_compute_short_url_host",
+    "defined_in_package": "link_tracker",
+    "full_name": "Host of the short uniform resource locator"
+   },
+   {
+    "name": "title",
+    "type": "Char",
+    "string": "Page Title",
+    "store": true,
+    "defined_in_package": "link_tracker",
+    "full_name": "Page Title"
+   },
+   {
+    "name": "label",
+    "type": "Char",
+    "string": "Button label",
+    "defined_in_package": "link_tracker",
+    "full_name": "Button label"
+   },
+   {
+    "name": "link_code_ids",
+    "type": "One2many",
+    "comodel": "link.tracker.code",
+    "inverse_name": "link_id",
+    "string": "Codes",
+    "defined_in_package": "link_tracker",
+    "full_name": "Codes",
+    "target_entity": "link.tracker.code"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "string": "Short URL code",
+    "compute": "_compute_code",
+    "inverse": "_inverse_code",
+    "readonly": false,
+    "defined_in_package": "link_tracker",
+    "full_name": "Short uniform resource locator code"
+   },
+   {
+    "name": "link_click_ids",
+    "type": "One2many",
+    "comodel": "link.tracker.click",
+    "inverse_name": "link_id",
+    "string": "Clicks",
+    "defined_in_package": "link_tracker",
+    "full_name": "Clicks",
+    "target_entity": "link.tracker.click"
+   },
+   {
+    "name": "count",
+    "type": "Integer",
+    "string": "Number of Clicks",
+    "compute": "_compute_count",
+    "store": true,
+    "defined_in_package": "link_tracker",
+    "full_name": "Number of Clicks"
+   },
+   {
+    "name": "campaign_id",
+    "type": "Many2one",
+    "ondelete": "set null",
+    "defined_in_package": "link_tracker",
+    "string": "Campaign",
+    "full_name": "Campaign"
+   },
+   {
+    "name": "medium_id",
+    "type": "Many2one",
+    "ondelete": "set null",
+    "defined_in_package": "link_tracker",
+    "string": "Medium",
+    "full_name": "Medium"
+   },
+   {
+    "name": "source_id",
+    "type": "Many2one",
+    "ondelete": "set null",
+    "defined_in_package": "link_tracker",
+    "string": "Source",
+    "full_name": "Source"
+   },
+   {
+    "name": "mass_mailing_id",
+    "type": "Many2one",
+    "comodel": "mailing.mailing",
+    "string": "Mass Mailing",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mass Mailing",
+    "target_entity": "mailing.mailing"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_search_short_url",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [],
+      "documentation": "Remove the base url and the `/r/` from the given value, and only search for link trackers\nthat have a code that matches the entered value.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_absolute_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "link_click_ids.link_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_short_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please enter valid short URL code.",
+        "line": 95
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_short_url_host",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_links",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_code",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_code",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_redirected_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the URL to which we will redirect the user.\n\nBy default, add UTM values as GET parameters. But if the system parameter\n`link_tracker.no_external_tracking` is set, we add the UTM values in the URL\n*only* for URLs that redirect to the local website (base URL).",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_title_from_url",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "url"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_unicity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         {
+          "expression": "*LINK_TRACKER_UNIQUE_FIELDS"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check that the link trackers are unique.",
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Combinations of Link Tracker values (URL, campaign, medium, source, and label) must be unique.\nThe following combinations are already used: \n- %(error_lines)s",
+        "line": 187
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "“%s” is not a valid link, links cannot redirect to the current page.",
+        "line": 199
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "search_or_create",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get existing or newly created records matching vals_list items in preserved order supporting duplicates.",
+      "size_in_lines": 49,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "'\\n'.join(errors)",
+        "line": 255
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "convert_links",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "html",
+     "vals",
+     "blacklist"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_links_text",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "body",
+     "vals",
+     "blacklist"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_statistics",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_visit_page",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "recent_links",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "filter",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_url_from_code",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "code"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_visit_page_statistics",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_links",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_compute_short_url",
+    "package": "link_tracker",
+    "kind": "UserError",
+    "message": "Please enter valid short URL code."
+   },
+   {
+    "operation": "_check_unicity",
+    "package": "link_tracker",
+    "kind": "UserError",
+    "message": "Combinations of Link Tracker values (URL, campaign, medium, source, and label) must be unique.\nThe following combinations are already used: \n- %(error_lines)s"
+   },
+   {
+    "operation": "create",
+    "package": "link_tracker",
+    "kind": "UserError",
+    "message": "“%s” is not a valid link, links cannot redirect to the current page."
+   },
+   {
+    "operation": "search_or_create",
+    "package": "link_tracker",
+    "kind": "UserError",
+    "message": "'\\n'.join(errors)"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "link_tracker.access_link_tracker_user",
+    "package": "link_tracker",
+    "name": "access.link.tracker.user",
+    "entity": "link.tracker",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "link_tracker.access_link_tracker_public",
+    "package": "link_tracker",
+    "name": "access.link.tracker.public",
+    "entity": "link.tracker",
+    "group": "base.group_public",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "link_tracker.access_link_tracker_system",
+    "package": "link_tracker",
+    "name": "access.link.tracker.system",
+    "entity": "link.tracker",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mass_mailing.access_link_tracker_mailing",
+    "package": "mass_mailing",
+    "name": "access.link.tracker.mailing",
+    "entity": "link.tracker",
+    "group": "mass_mailing.group_mass_mailing_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_links.access_link_tracker_manager",
+    "package": "website_links",
+    "name": "link.tracker",
+    "entity": "link.tracker",
+    "group": "website.group_website_designer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "link_tracker.link_tracker_view_search",
+    "package": "link_tracker",
+    "name": "link.tracker.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Links"
+     },
+     "fields": [
+      {
+       "name": "url",
+       "string": "Link Tracker",
+       "filter_domain": "['|', ('title', 'ilike', self), ('url', 'ilike', self)]"
+      },
+      {
+       "name": "label"
+      },
+      {
+       "name": "campaign_id"
+      },
+      {
+       "name": "medium_id"
+      },
+      {
+       "name": "source_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "groupby_campaign_id",
+       "string": "Campaign",
+       "context": "{'group_by': 'campaign_id'}"
+      },
+      {
+       "name": "groupby_medium_id",
+       "string": "Medium",
+       "context": "{'group_by': 'medium_id'}"
+      },
+      {
+       "name": "groupby_source_id",
+       "string": "Source",
+       "context": "{'group_by': 'source_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "link_tracker.link_tracker_view_form",
+    "package": "link_tracker",
+    "name": "link.tracker.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Website Link",
+      "duplicate": "0"
+     },
+     "fields": [
+      {
+       "name": "count",
+       "widget": "statinfo",
+       "string": "Clicks"
+      },
+      {
+       "name": "short_url_host",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "code",
+       "invisible": "not code",
+       "readonly": "not code",
+       "nolabel": "1"
+      },
+      {
+       "name": "url",
+       "string": "Target Link"
+      },
+      {
+       "name": "title"
+      },
+      {
+       "name": "label"
+      },
+      {
+       "name": "campaign_id",
+       "options": "{'create_name_field': 'title'}"
+      },
+      {
+       "name": "medium_id"
+      },
+      {
+       "name": "source_id"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_visit_page",
+       "string": "Visit Page",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-sign-out"
+      },
+      {
+       "name": "action_view_statistics",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-mouse-pointer"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "type": "object",
+       "icon": "fa-sign-out",
+       "name": "action_visit_page",
+       "string": "Visit Page",
+       "class": "oe_stat_button"
+      },
+      {
+       "type": "object",
+       "class": "oe_stat_button",
+       "name": "action_view_statistics",
+       "icon": "fa-mouse-pointer"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "link_tracker.link_tracker_view_tree",
+    "package": "link_tracker",
+    "name": "link.tracker.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Links",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date",
+       "string": "Create Date"
+      },
+      {
+       "name": "short_url",
+       "string": "Link Tracker",
+       "optional": "show"
+      },
+      {
+       "name": "title"
+      },
+      {
+       "name": "url",
+       "optional": "hide"
+      },
+      {
+       "name": "label",
+       "optional": "hide"
+      },
+      {
+       "name": "count",
+       "string": "# Clicks"
+      },
+      {
+       "name": "campaign_id",
+       "optional": "hide"
+      },
+      {
+       "name": "medium_id",
+       "optional": "hide"
+      },
+      {
+       "name": "source_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "link_tracker.link_tracker_view_graph",
+    "package": "link_tracker",
+    "name": "link.tracker.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Links",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "url"
+      },
+      {
+       "name": "count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "url"
+      },
+      {
+       "name": "count",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.link_tracker_view_search",
+    "package": "mass_mailing",
+    "name": "link.tracker.view.search.inherit.mass.mail",
+    "view_type": "xpath",
+    "inherits_view": "link_tracker.link_tracker_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='url']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mass_mailing_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='url']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.link_tracker_view_form",
+    "package": "mass_mailing",
+    "name": "link.tracker.view.form.inherit.mass.mail",
+    "view_type": "xpath",
+    "inherits_view": "link_tracker.link_tracker_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='campaign_id']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "mass_mailing_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='campaign_id']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.link_tracker_view_tree",
+    "package": "mass_mailing",
+    "name": "link.tracker.view.list.inherit.mass.mail",
+    "view_type": "xpath",
+    "inherits_view": "link_tracker.link_tracker_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='campaign_id']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "mass_mailing_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='campaign_id']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_links.link_tracker_view_tree",
+    "package": "website_links",
+    "name": "link.tracker.view.list.inherit.website.links",
+    "view_type": "xpath",
+    "inherits_view": "link_tracker.link_tracker_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='source_id']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_visit_page_statistics",
+       "string": "Statistics",
+       "type": "object",
+       "icon": "fa-bar-chart"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='source_id']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "link_tracker.link_tracker_action",
+    "package": "link_tracker",
+    "name": "Link Tracker",
+    "view_mode": "list,form,graph",
+    "view_id": "link_tracker_view_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a link tracker\n                </p><p>\n                    Trackers are used to collect count stat about click on links and generate short URLs.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "link.tracker"
+   },
+   {
+    "external_identifier": "link_tracker.link_tracker_action_campaign",
+    "package": "link_tracker",
+    "name": "Statistics of Clicks",
+    "view_mode": "list,form,graph",
+    "view_id": "link_tracker.link_tracker_view_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_campaign_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a link tracker\n                </p><p>\n                    Trackers are used to collect count stat about click on links and generate short URLs.\n                </p>\n            </field>\n            ",
+    "usage": null,
+    "entity": "link.tracker"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "mass_mailing.link_tracker_menu_mass_mailing",
+    "package": "mass_mailing",
+    "name": "Link Tracker",
+    "parent_id": "mass_mailing_configuration",
+    "action": "link_tracker.link_tracker_action",
+    "sequence": "10",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "mass_mailing_sms.link_tracker_menu",
+    "package": "mass_mailing_sms",
+    "name": "Link Tracker",
+    "parent_id": "mass_mailing_sms_menu_configuration",
+    "action": "link_tracker.link_tracker_action",
+    "sequence": "2",
+    "groups_id": "mass_mailing.group_mass_mailing_user",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

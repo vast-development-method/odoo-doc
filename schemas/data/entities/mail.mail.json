@@ -1,0 +1,1514 @@
+{
+ "catalog": {
+  "name": "entity:mail.mail",
+  "description": "Complete definition of entity Outgoing Mails (mail.mail).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.mail",
+  "storage_name": "mail_mail",
+  "full_name": "Outgoing Mails",
+  "kind": "persistent",
+  "description": "Outgoing Mails",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "mass_mailing"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {
+   "mail.message": "mail_message_id"
+  },
+  "ordering": "id desc",
+  "display_name_field": "subject",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "mail_message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "string": "Message",
+    "required": true,
+    "ondelete": "cascade",
+    "index": true,
+    "bypass_search_access": true,
+    "defined_in_package": "mail",
+    "full_name": "Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "mail_message_id_int",
+    "type": "Integer",
+    "compute": "_compute_mail_message_id_int",
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "string": "Mail Message Identifier Int",
+    "full_name": "Mail Message Identifier Int"
+   },
+   {
+    "name": "message_type",
+    "type": "Selection",
+    "related": "mail_message_id.message_type",
+    "inherited": true,
+    "default": "email_outgoing",
+    "defined_in_package": "mail",
+    "string": "Message Type",
+    "full_name": "Message Type"
+   },
+   {
+    "name": "body_html",
+    "type": "Text",
+    "string": "Text Contents",
+    "help": "Rich-text/HTML message",
+    "defined_in_package": "mail",
+    "full_name": "Text Contents"
+   },
+   {
+    "name": "body_content",
+    "type": "Html",
+    "string": "Rich-text Contents",
+    "sanitize": true,
+    "compute": "_compute_body_content",
+    "search": "_search_body_content",
+    "defined_in_package": "mail",
+    "full_name": "Rich-text Contents"
+   },
+   {
+    "name": "references",
+    "type": "Text",
+    "string": "References",
+    "help": "Message references, such as identifiers of previous messages",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "References"
+   },
+   {
+    "name": "headers",
+    "type": "Text",
+    "string": "Headers",
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Headers"
+   },
+   {
+    "name": "restricted_attachment_count",
+    "type": "Integer",
+    "string": "Restricted attachments",
+    "compute": "_compute_restricted_attachments",
+    "defined_in_package": "mail",
+    "full_name": "Restricted attachments"
+   },
+   {
+    "name": "unrestricted_attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "string": "Unrestricted Attachments",
+    "compute": "_compute_restricted_attachments",
+    "inverse": "_inverse_unrestricted_attachment_ids",
+    "defined_in_package": "mail",
+    "full_name": "Unrestricted Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "is_notification",
+    "type": "Boolean",
+    "string": "Notification Email",
+    "help": "Mail has been created to notify people of an existing mail.message",
+    "defined_in_package": "mail",
+    "full_name": "Notification Email"
+   },
+   {
+    "name": "email_to",
+    "type": "Text",
+    "string": "To",
+    "help": "Message recipients (emails)",
+    "defined_in_package": "mail",
+    "full_name": "To"
+   },
+   {
+    "name": "email_cc",
+    "type": "Char",
+    "string": "Cc",
+    "help": "Carbon copy message recipients",
+    "defined_in_package": "mail",
+    "full_name": "Cc"
+   },
+   {
+    "name": "recipient_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "string": "To (Partners)",
+    "context": {
+     "active_test": false
+    },
+    "defined_in_package": "mail",
+    "full_name": "To (Partners)",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "outgoing",
+      "Outgoing"
+     ],
+     [
+      "sent",
+      "Sent"
+     ],
+     [
+      "received",
+      "Received"
+     ],
+     [
+      "exception",
+      "Delivery Failed"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "readonly": true,
+    "copy": false,
+    "default": "outgoing",
+    "defined_in_package": "mail",
+    "full_name": "Status"
+   },
+   {
+    "name": "failure_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "unknown",
+      "Unknown error"
+     ],
+     [
+      "mail_spam",
+      "Detected As Spam"
+     ],
+     [
+      "mail_email_invalid",
+      "Invalid email address"
+     ],
+     [
+      "mail_email_missing",
+      "Missing email"
+     ],
+     [
+      "mail_from_invalid",
+      "Invalid from address"
+     ],
+     [
+      "mail_from_missing",
+      "Missing from address"
+     ],
+     [
+      "mail_smtp",
+      "Connection failed (outgoing mail server problem)"
+     ],
+     [
+      "mail_bl",
+      "Blacklisted Address"
+     ],
+     [
+      "mail_optout",
+      "Opted Out"
+     ],
+     [
+      "mail_dup",
+      "Duplicated Email"
+     ]
+    ],
+    "string": "Failure type",
+    "defined_in_package": "mail",
+    "full_name": "Failure type"
+   },
+   {
+    "name": "failure_reason",
+    "type": "Text",
+    "string": "Failure Reason",
+    "readonly": true,
+    "copy": false,
+    "help": "Failure reason. This is usually the exception thrown by the email server, stored to ease the debugging of mailing issues.",
+    "defined_in_package": "mail",
+    "full_name": "Failure Reason"
+   },
+   {
+    "name": "auto_delete",
+    "type": "Boolean",
+    "string": "Auto Delete",
+    "help": "This option permanently removes any track of email after it's been sent, including from the Technical menu in the Settings, in order to preserve storage space of your the system database.",
+    "defined_in_package": "mail",
+    "full_name": "Auto Delete"
+   },
+   {
+    "name": "scheduled_date",
+    "type": "Datetime",
+    "string": "Scheduled Send Date",
+    "help": "If set, the queue manager will send the email after the date. If not set, the email will be send as soon as possible. Unless a timezone is specified, it is considered as being in UTC timezone.",
+    "defined_in_package": "mail",
+    "full_name": "Scheduled Send Date"
+   },
+   {
+    "name": "fetchmail_server_id",
+    "type": "Many2one",
+    "comodel": "fetchmail.server",
+    "string": "Inbound Mail Server",
+    "readonly": true,
+    "index": "btree_not_null",
+    "defined_in_package": "mail",
+    "full_name": "Inbound Mail Server",
+    "target_entity": "fetchmail.server"
+   },
+   {
+    "name": "mailing_id",
+    "type": "Many2one",
+    "comodel": "mailing.mailing",
+    "string": "Mass Mailing",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mass Mailing",
+    "target_entity": "mailing.mailing"
+   },
+   {
+    "name": "mailing_trace_ids",
+    "type": "One2many",
+    "comodel": "mailing.trace",
+    "inverse_name": "mail_mail_id",
+    "string": "Statistics",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Statistics",
+    "target_entity": "mailing.trace"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_mail_server_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "mail_message_id",
+         "mail_server_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You may not create a message using another user's mail server.",
+        "line": 105
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_body_content",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mail_message_id_int",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_restricted_attachments",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attachment_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "We might not have access to all the attachments of the emails.\nCompute the attachments we have access to,\nand the number of attachments we do not have access to.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_unrestricted_attachment_ids",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "We can only remove the attachments we have access to.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_body_content",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_retry",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_document",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Opens the related record based on the model and ID ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mark_outgoing",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "cancel",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "process_email_queue",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "email_ids",
+     "batch_size"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Send immediately queued messages, committing after each\n   message is sent - this is not transactional and should\n   not be called during another transaction!\n\nA maximum of 1K MailMail (configurable using 'mail.mail.queue.batch.size'\noptional ICP) are fetched in order to keep time under control.\n\n:param list email_ids: optional list of emails ids to send. If given only\n                 scheduled and outgoing emails within this ids list\n                 are sent;",
+      "size_in_lines": 55,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_postprocess_sent_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "success_pids",
+     "success_emails",
+     "failure_reason",
+     "failure_type"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Perform any post-processing necessary after sending ``mail``\nsuccessfully, including deleting it completely along with its\nattachment if the ``auto_delete`` flag of the mail was set.\nOverridden by subclasses for extra post-processing behaviors.\n\n:return: True",
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_scheduled_datetime",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "scheduled_datetime"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Taking an arbitrary datetime (either as a date, a datetime or a string)\ntry to parse it and return a datetime timezoned to UTC.\n\nIf no specific timezone information is given, we consider it as being\ngiven in UTC, as all datetime values given to the server. Trying to\nguess its timezone based on user or flow would be strange as this is\nnot standard. When manually creating datetimes for mail.mail scheduled\ndate, business code should ensure either a timezone info is set, either\nit is converted into UTC.\n\nUsing yearfirst when parsing str datetimes eases parser's job when\ndealing with the hard-to-parse trio (01/04/09 -> ?). In most use cases\nyear will be given first as this is the expected default formatting.\n\n:returns: parsed datetime (or False if parser failed)\n:rtype: datetime.datetime | bool",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_estimate_email_size",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "headers",
+     "body",
+     "attachments_size"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Estimate the email size, incorporating a small added security margin.\n\n:param dict headers: email headers\n:param str body: email body\n:param list attachments_size: list of attachment size in bytes",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_mail_mail_servers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "mail_servers"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_outgoing_body",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return a specific ir_email body. The main purpose of this method\nis to be inherited to add custom content depending on some module.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Override to add the tracking URL to the body and to add trace ID in\nshortened urls ",
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_personalize_outgoing_body",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "body",
+     "partner",
+     "doc_to_followers"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return a modified body based on the recipient (partner).\n\nIt must be called when using standard notification layouts\neven for message without partners.\n\n:param str body: body to personalize for the recipient\n:param partner: <res.partner> recipient\n:param dict doc_to_followers: see ``Followers._get_mail_doc_to_followers()``",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_outgoing_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mail_server",
+     "doc_to_followers"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return a list of emails to send based on current mail.mail. Each\nis a dictionary for specific email values, depending on a partner, or\ngeneric to the whole recipients given by mail.email_to.\n\n:param mail_server: <ir.mail_server> mail server that will be used to send the mails,\n  False if it is the default one\n:param dict doc_to_followers: see ``Followers._get_mail_doc_to_followers()``\n:returns: list of dicts used in IrMailServer._build_email__()\n:rtype: list[dict]",
+      "size_in_lines": 148,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Update mailing specific links to replace generic unsubscribe and\nview links by email-specific links. Also add headers to allow\nunsubscribe from email managers. ",
+      "size_in_lines": 48,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_by_mail_configuration",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Group the <mail.mail> based on their \"email_from\", their \"alias domain\"\nand their \"mail_server_id\".\n\nThe <mail.mail> will have the \"same sending configuration\" if they have the same\nmail server, alias domain and mail from. For performance purpose, we can use an SMTP\nsession in batch and therefore we need to group them by the parameter that will\ninfluence the mail server used.\n\nThe same \"sending configuration\" may repeat in order to limit batch size\naccording to the `mail.session.batch.size` system parameter.\n\nReturn iterators over\n    mail_server_id, email_from, Records<mail.mail>.ids",
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_by_delayed_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "mail_server"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "To not flag personal email servers as spam, we throttle them at X emails / minutes.",
+      "size_in_lines": 87,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send_after_commit",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Queues the email to be sent after the commit of the current cursor.\n\nUseful to send an email only if a transaction is successful.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "auto_commit",
+     "raise_exception",
+     "post_send_callback"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Sends the selected emails immediately, ignoring their current\nstate (mails that have already been sent should not be passed\nunless they should actually be re-sent).\nEmails successfully delivered are marked as 'sent', and those\nthat fail to be deliver are marked as 'exception', and the\ncorresponding error mail is output in the server logs.\n\n:param bool auto_commit: whether to force a commit of the mail status\n    after sending each mail (meant only for scheduler processing);\n    should never be True during normal transactions (default: False)\n:param bool raise_exception: whether to raise an exception if the\n    email sending process has failed\n:param post_send_callback: an optional function, called as ``post_send_callback(ids, force=False)``,\n    with the mail ids that have been sent; calls with redundant ids\n    are possible\n:return: True",
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_and_close",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "An action sending the selected mail and redirecting to mail.mail list view. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "auto_commit",
+     "raise_exception",
+     "smtp_session",
+     "alias_domain_id",
+     "mail_server",
+     "post_send_callback"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 217,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unauthorized server for some of the sending mails.",
+        "line": 777
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_notification_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Get list of base notification values to create a notification for existing emails.\n\nRecipient-specific values should be added separately.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_notification_status",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the equivalent status for notifications based on state.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_tracking_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_mail_recipient_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "mail_id"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_canceled_mail_mail",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Garbage collects old canceled mail.mail records as we consider\nnobody is going to look at them anymore, becoming noise.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_mail_server_id",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "You may not create a message using another user's mail server."
+   },
+   {
+    "operation": "_send",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Unauthorized server for some of the sending mails."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_mail_system",
+    "package": "mail",
+    "name": "mail.mail.system",
+    "entity": "mail.mail",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mail.view_mail_form",
+    "package": "mail",
+    "name": "mail.mail.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Email message",
+      "duplicate": "0"
+     },
+     "fields": [
+      {
+       "name": "message_type",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "model",
+       "invisible": "1"
+      },
+      {
+       "name": "res_id",
+       "invisible": "1"
+      },
+      {
+       "name": "mail_message_id_int",
+       "invisible": "1",
+       "required": "0"
+      },
+      {
+       "name": "subject"
+      },
+      {
+       "name": "author_id",
+       "string": "User"
+      },
+      {
+       "name": "date",
+       "readonly": "1"
+      },
+      {
+       "name": "email_from"
+      },
+      {
+       "name": "email_to"
+      },
+      {
+       "name": "recipient_ids",
+       "widget": "many2many_tags",
+       "domain": "[('active', '=', True)]"
+      },
+      {
+       "name": "email_cc"
+      },
+      {
+       "name": "reply_to"
+      },
+      {
+       "name": "scheduled_date",
+       "placeholder": "YYYY-MM-DD HH:MM:SS"
+      },
+      {
+       "name": "body_content"
+      },
+      {
+       "name": "auto_delete",
+       "invisible": "state != 'outgoing' and state != 'exception'"
+      },
+      {
+       "name": "is_notification"
+      },
+      {
+       "name": "message_type"
+      },
+      {
+       "name": "mail_server_id"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "message_id"
+      },
+      {
+       "name": "references"
+      },
+      {
+       "name": "fetchmail_server_id"
+      },
+      {
+       "name": "headers"
+      },
+      {
+       "name": "restricted_attachment_count"
+      },
+      {
+       "name": "unrestricted_attachment_ids",
+       "domain": "[('res_field','=', False)]"
+      },
+      {
+       "name": "failure_reason"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send_and_close",
+       "string": "Send & Close",
+       "type": "object",
+       "invisible": "state != 'outgoing' or message_type == 'user_notification'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "mark_outgoing",
+       "string": "Retry",
+       "type": "object",
+       "invisible": "state not in ('exception', 'cancel')"
+      },
+      {
+       "name": "cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state != 'outgoing'"
+      },
+      {
+       "name": "action_open_document",
+       "type": "object",
+       "invisible": "not model or res_id == 0",
+       "class": "oe_link",
+       "icon": "fa-file-text-o"
+      },
+      {
+       "name": "%(action_email_compose_message_wizard)d",
+       "string": "Reply",
+       "type": "action",
+       "invisible": "state not in ('received', 'sent', 'exception', 'cancel')",
+       "context": "{'default_composition_mode':'comment', 'default_parent_id': mail_message_id_int}",
+       "icon": "fa-reply text-warning"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "body",
+       "string": "Body",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "advanced",
+       "string": "Advanced",
+       "invisible": null,
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "attachments",
+       "string": "Attachments",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "failure_reason",
+       "string": "Failure Reason",
+       "invisible": "state != 'exception'",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_send_and_close",
+       "string": "Send & Close",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "state != 'outgoing' or message_type == 'user_notification'"
+      },
+      {
+       "name": "mark_outgoing",
+       "string": "Retry",
+       "type": "object",
+       "invisible": "state not in ('exception', 'cancel')"
+      },
+      {
+       "name": "cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state != 'outgoing'"
+      }
+     ],
+     "statusbar_field": "message_type",
+     "statusbar_visible": null,
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_open_document",
+       "type": "object",
+       "class": "oe_link",
+       "icon": "fa-file-text-o",
+       "invisible": "not model or res_id == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.view_mail_tree",
+    "package": "mail",
+    "name": "mail.mail.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Emails"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "subject"
+      },
+      {
+       "name": "author_id",
+       "string": "User"
+      },
+      {
+       "name": "message_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "recipient_ids",
+       "column_invisible": "True"
+      },
+      {
+       "name": "model",
+       "column_invisible": "True"
+      },
+      {
+       "name": "res_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "email_from",
+       "column_invisible": "True"
+      },
+      {
+       "name": "message_type",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-danger": "state=='exception'",
+       "decoration-info": "state=='outgoing'",
+       "decoration-muted": "state in ('sent', 'cancel')"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_retry",
+       "string": "Retry",
+       "type": "object"
+      },
+      {
+       "name": "send",
+       "string": "Send Now",
+       "type": "object",
+       "invisible": "state != 'outgoing' or message_type == 'user_notification'",
+       "icon": "fa-paper-plane"
+      },
+      {
+       "name": "mark_outgoing",
+       "string": "Retry",
+       "type": "object",
+       "invisible": "state not in ('exception', 'cancel')",
+       "icon": "fa-repeat"
+      },
+      {
+       "name": "cancel",
+       "string": "Cancel Email",
+       "type": "object",
+       "invisible": "state != 'outgoing'",
+       "icon": "fa-times-circle"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.view_mail_search",
+    "package": "mail",
+    "name": "mail.mail.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Email Search"
+     },
+     "fields": [
+      {
+       "name": "email_from",
+       "string": "Email",
+       "filter_domain": "['|', '|',('email_from','ilike',self), ('email_to','ilike',self), ('subject','ilike',self)]"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "author_id"
+      },
+      {
+       "name": "recipient_ids"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "res_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "received",
+       "string": "Received",
+       "domain": "[('state','=','received')]"
+      },
+      {
+       "name": "outgoing",
+       "string": "Outgoing",
+       "domain": "[('state','=','outgoing')]"
+      },
+      {
+       "name": "sent",
+       "string": "Sent",
+       "domain": "[('state','=','sent')]"
+      },
+      {
+       "name": "exception",
+       "string": "Failed",
+       "domain": "[('state','=','exception')]"
+      },
+      {
+       "name": "filter_type_email_outgoing",
+       "string": "Outgoing Email",
+       "domain": "[('message_type','=','email_outgoing')]"
+      },
+      {
+       "name": "filter_type_email",
+       "string": "Incoming Email",
+       "domain": "[('message_type','=','email')]"
+      },
+      {
+       "name": "filter_type_comment",
+       "string": "Comment",
+       "domain": "[('message_type','=','comment')]"
+      },
+      {
+       "name": "filter_type_notification",
+       "string": "Notification",
+       "domain": "[('message_type','=','notification')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "status",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by':'state'}"
+      },
+      {
+       "name": "author",
+       "string": "Author",
+       "context": "{'group_by':'author_id'}"
+      },
+      {
+       "name": "thread",
+       "string": "Thread",
+       "domain": "[]",
+       "context": "{'group_by':'message_id'}"
+      },
+      {
+       "name": "month",
+       "string": "Date",
+       "domain": "[]",
+       "context": "{'group_by':'date'}",
+       "help": "Creation Date"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.action_view_mail_mail",
+    "package": "mail",
+    "name": "Emails",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_mail_search",
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.mail"
+   },
+   {
+    "external_identifier": "mail.act_server_history",
+    "package": "mail",
+    "name": "Messages",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('email_from', '!=', False), ('fetchmail_server_id', '=', active_id)]",
+    "context": "{'search_default_server_id': active_id, 'default_fetchmail_server_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_fetchmail_server",
+    "binding_type": null,
+    "binding_view_types": "form",
+    "help": null,
+    "usage": null,
+    "entity": "mail.mail"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "mail.ir_cron_mail_scheduler_action",
+    "package": "mail",
+    "name": "Mail: Email Queue Manager",
+    "interval_number": "1",
+    "interval_type": "hours",
+    "priority": "6",
+    "active": null,
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "mail.mail",
+    "operation": "process_email_queue",
+    "operation_call": "model.process_email_queue(batch_size=1000)"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

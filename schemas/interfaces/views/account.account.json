@@ -1,0 +1,625 @@
+{
+ "catalog": {
+  "name": "views:account.account",
+  "description": "View declarations for entity account.account.",
+  "record_count": 8,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account.init_accounts_tree",
+   "package": "account",
+   "name": "account.setup.opening.move.line.list",
+   "entity": "account.account",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "editable": "top",
+     "create": "1",
+     "delete": "1",
+     "decoration-muted": "opening_debit == 0 and opening_credit == 0",
+     "open_form_view": "True"
+    },
+    "fields": [
+     {
+      "name": "code"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "company_ids",
+      "column_invisible": "True"
+     },
+     {
+      "name": "account_type",
+      "widget": "account_type_selection"
+     },
+     {
+      "name": "reconcile",
+      "widget": "boolean_toggle",
+      "optional": "hide"
+     },
+     {
+      "name": "active",
+      "widget": "boolean_toggle",
+      "optional": "show"
+     },
+     {
+      "name": "opening_debit",
+      "options": "{'no_symbol': True}"
+     },
+     {
+      "name": "opening_credit",
+      "options": "{'no_symbol': True}"
+     },
+     {
+      "name": "opening_balance",
+      "options": "{'no_symbol': True}",
+      "optional": "hide"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "optional": "hide"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "account_type_selection": 1,
+     "boolean_toggle": 2,
+     "many2many_tax_tags": 1,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "editable": "top",
+    "create": "1",
+    "delete": "1",
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "opening_debit == 0 and opening_credit == 0"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list editable=\"top\" create=\"1\" delete=\"1\" decoration-muted=\"opening_debit == 0 and opening_credit == 0\" open_form_view=\"True\">\n                    <field name=\"code\"/>\n                    <field name=\"name\"/>\n                    <field name=\"company_ids\" column_invisible=\"True\"/>\n                    <field name=\"account_type\" widget=\"account_type_selection\"/>\n                    <field name=\"reconcile\" optional=\"hide\" widget=\"boolean_toggle\"/>\n                    <field name=\"active\" optional=\"show\" widget=\"boolean_toggle\"/>\n                    <field name=\"opening_debit\" options=\"{'no_symbol': True}\"/>\n                    <field name=\"opening_credit\" options=\"{'no_symbol': True}\"/>\n                    <field name=\"opening_balance\" optional=\"hide\" options=\"{'no_symbol': True}\"/>\n                    <field name=\"tax_ids\" optional=\"hide\" widget=\"many2many_tax_tags\"/>\n                    <field name=\"tag_ids\" optional=\"hide\" widget=\"many2many_tags\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_form",
+   "package": "account",
+   "name": "account.account.form",
+   "entity": "account.account",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Account"
+    },
+    "fields": [
+     {
+      "name": "related_taxes_amount"
+     },
+     {
+      "name": "current_balance"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. Current Assets"
+     },
+     {
+      "name": "placeholder_code",
+      "invisible": "1"
+     },
+     {
+      "name": "code",
+      "options": "{'placeholder_field': 'placeholder_code'}",
+      "placeholder": "e.g. 101000"
+     },
+     {
+      "name": "account_type",
+      "widget": "account_type_selection"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "invisible": "account_type == 'off_balance'",
+      "options": "{'no_quick_create': True}"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "domain": "[('applicability', '=', 'accounts')]",
+      "context": "{'default_applicability': 'accounts'}",
+      "options": "{'no_create_edit': True}"
+     },
+     {
+      "name": "internal_group",
+      "invisible": "1",
+      "readonly": "1"
+     },
+     {
+      "name": "currency_id",
+      "string": "Currency",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_currency",
+      "placeholder": "Any currency"
+     },
+     {
+      "name": "active",
+      "widget": "boolean_toggle"
+     },
+     {
+      "name": "group_id",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "company_ids",
+      "widget": "many2many_tags",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "description"
+     },
+     {
+      "name": "code_mapping_ids",
+      "nolabel": "1"
+     },
+     {
+      "name": "company_id",
+      "force_save": "1"
+     },
+     {
+      "name": "code"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_related_taxes",
+      "type": "object",
+      "invisible": "related_taxes_amount == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     },
+     {
+      "name": "account.action_move_line_select",
+      "type": "action",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "accounting",
+      "string": "Accounting",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "Description",
+      "string": null,
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "mapping",
+      "string": "Mapping",
+      "invisible": "not display_mapping_tab",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "widgets": {
+     "account_type_selection": 1,
+     "many2many_tax_tags": 1,
+     "many2many_tags": 2,
+     "boolean_toggle": 1
+    },
+    "inheritance_operations": [],
+    "chatter": true,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "name": "action_open_related_taxes",
+      "type": "object",
+      "icon": "fa-bars",
+      "invisible": "related_taxes_amount == 0"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "account.action_move_line_select",
+      "type": "action",
+      "icon": "fa-bars"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Account\">\n                    <sheet>\n                        <div class=\"oe_button_box\" name=\"button_box\">\n                            <button class=\"oe_stat_button\" name=\"action_open_related_taxes\" type=\"object\" icon=\"fa-bars\" invisible=\"related_taxes_amount == 0\">\n                                <div class=\"o_stat_info\">\n                                    <span class=\"o_stat_value\">\n                                        <field name=\"related_taxes_amount\"/>\n                                    </span>\n                                    <span class=\"o_stat_text\">\n                                        Taxes\n                                    </span>\n                                </div>\n                            </button>\n                            <button class=\"oe_stat_button\" name=\"account.action_move_line_select\" type=\"action\" icon=\"fa-bars\">\n                                <div class=\"o_stat_info\">\n                                    <span class=\"o_stat_value\">\n                                        <field name=\"current_balance\"/>\n                                    </span>\n                                    <span class=\"o_stat_text\">\n                                        Balance\n                                    </span>\n                                </div>\n                            </button>\n                        </div>\n                        <div>\n                            <h1 style=\"font-size: 1.9rem;\">\n                                <div class=\"row\">\n                                    <div class=\"col col-md-8\">\n                                        <label for=\"name\" string=\"Account Name\"/>\n                                        <div>\n                                            <field name=\"name\" placeholder=\"e.g. Current Assets\" style=\"width:80% !important;\"/>\n                                        </div>\n                                    </div>\n                                </div>\n                                <div class=\"row\">\n                                    <div class=\"col col-md-auto\">\n                                        <label for=\"code\" string=\"Code\"/>\n                                        <div>\n                                            <field name=\"placeholder_code\" invisible=\"1\"/>\n                                            <field name=\"code\" placeholder=\"e.g. 101000\" class=\"oe_inline\" options=\"{'placeholder_field': 'placeholder_code'}\"/>\n                                        </div>\n                                    </div>\n                                </div>\n                            </h1>\n                        </div>\n                        <notebook>\n                            <page name=\"accounting\" string=\"Accounting\">\n                                <group>\n                                    <group>\n                                        <field name=\"account_type\" widget=\"account_type_selection\"/>\n                                        <field name=\"tax_ids\" widget=\"many2many_tax_tags\" invisible=\"account_type == 'off_balance'\" options=\"{'no_quick_create': True}\"/>\n                                        <field name=\"tag_ids\" widget=\"many2many_tags\" domain=\"[('applicability', '=', 'accounts')]\" context=\"{'default_applicability': 'accounts'}\" options=\"{'no_create_edit': True}\"/>\n                                    </group>\n                                    <group>\n                                        <field name=\"internal_group\" invisible=\"1\" readonly=\"1\"/>\n                                        <field name=\"currency_id\" options=\"{'no_create': True}\" groups=\"base.group_multi_currency\" string=\"Currency\" placeholder=\"Any currency\"/>\n                                        <field name=\"active\" widget=\"boolean_toggle\"/>\n                                        <field name=\"group_id\" groups=\"base.group_no_one\"/>\n                                        <field name=\"company_ids\" widget=\"many2many_tags\" options=\"{'no_create': True}\" groups=\"base.group_multi_company\"/>\n                                    </group>\n                                </group>\n                            </page>\n                            <page name=\"Description\">\n                                <field name=\"description\"/>\n                            </page>\n                            <page name=\"mapping\" string=\"Mapping\" groups=\"base.group_multi_company\" invisible=\"not display_mapping_tab\">\n                                <field name=\"code_mapping_ids\" nolabel=\"1\">\n                                    <list editable=\"bottom\">\n                                        <field name=\"company_id\" force_save=\"1\"/>\n                                        <field name=\"code\"/>\n                                    </list>\n                                </field>\n                            </page>\n                        </notebook>\n                    </sheet>\n                    \n                    <chatter/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_list",
+   "package": "account",
+   "name": "account.account.list",
+   "entity": "account.account",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "create": "1",
+     "delete": "1",
+     "multi_edit": "1",
+     "string": "Chart of accounts"
+    },
+    "fields": [
+     {
+      "name": "placeholder_code",
+      "column_invisible": "1"
+     },
+     {
+      "name": "code",
+      "widget": "char_with_placeholder_field",
+      "string": "Code",
+      "options": "{'placeholder_field': 'placeholder_code'}"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "account_type",
+      "widget": "account_type_selection"
+     },
+     {
+      "name": "group_id",
+      "optional": "hide"
+     },
+     {
+      "name": "internal_group",
+      "column_invisible": "True"
+     },
+     {
+      "name": "reconcile",
+      "widget": "boolean_toggle",
+      "invisible": "account_type in ('asset_cash', 'liability_credit_card', 'off_balance')"
+     },
+     {
+      "name": "active",
+      "widget": "boolean_toggle",
+      "optional": "hide"
+     },
+     {
+      "name": "non_trade",
+      "widget": "boolean_toggle",
+      "invisible": "account_type not in ('liability_payable', 'asset_receivable')",
+      "optional": "hide"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "optional": "hide"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "domain": "[('applicability', '=', 'accounts')]",
+      "optional": "hide"
+     },
+     {
+      "name": "currency_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "company_ids",
+      "widget": "many2many_tags",
+      "readonly": "True",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "char_with_placeholder_field": 1,
+     "account_type_selection": 1,
+     "boolean_toggle": 3,
+     "many2many_tax_tags": 1,
+     "many2many_tags": 2
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "1",
+    "delete": "1",
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list create=\"1\" delete=\"1\" multi_edit=\"1\" string=\"Chart of accounts\">\n                    <field name=\"placeholder_code\" column_invisible=\"1\"/>\n                    <field name=\"code\" string=\"Code\" widget=\"char_with_placeholder_field\" options=\"{'placeholder_field': 'placeholder_code'}\"/>\n                    <field name=\"name\"/>\n                    <field name=\"account_type\" widget=\"account_type_selection\"/>\n                    <field name=\"group_id\" optional=\"hide\"/>\n                    <field name=\"internal_group\" column_invisible=\"True\"/>\n                    <field name=\"reconcile\" widget=\"boolean_toggle\" invisible=\"account_type in ('asset_cash', 'liability_credit_card', 'off_balance')\"/>\n                    <field name=\"active\" optional=\"hide\" widget=\"boolean_toggle\"/>\n                    <field name=\"non_trade\" widget=\"boolean_toggle\" invisible=\"account_type not in ('liability_payable', 'asset_receivable')\" optional=\"hide\"/>\n                    <field name=\"tax_ids\" optional=\"hide\" widget=\"many2many_tax_tags\"/>\n                    <field name=\"tag_ids\" domain=\"[('applicability', '=', 'accounts')]\" optional=\"hide\" widget=\"many2many_tags\"/>\n                    <field name=\"currency_id\" options=\"{'no_create': True}\" groups=\"base.group_multi_currency\"/>\n                    <field name=\"company_ids\" widget=\"many2many_tags\" readonly=\"True\" groups=\"base.group_multi_company\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_account_kanban",
+   "package": "account",
+   "name": "account.account.kanban",
+   "entity": "account.account",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "code"
+     },
+     {
+      "name": "account_type"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban class=\"o_kanban_mobile\">\n                    <templates>\n                        <t t-name=\"card\">\n                            <div class=\"row\">\n                                <div class=\"col-8\">\n                                    <field class=\"fw-bolder\" name=\"name\"/>\n                                </div>\n                                <div class=\"col-4 text-end\">\n                                    <field class=\"badge rounded-pill\" name=\"code\"/>\n                                </div>\n                            </div>\n                            <div>\n                                <strong>Type: </strong>\n                                <field name=\"account_type\"/>\n                            </div>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_search",
+   "package": "account",
+   "name": "account.account.search",
+   "entity": "account.account",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Accounts"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Account",
+      "filter_domain": "['|', '|', ('name', 'ilike', self), ('code', '=ilike', self + '%'), ('description', 'ilike', self)]"
+     },
+     {
+      "name": "account_type"
+     },
+     {
+      "name": "root_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "receivableacc",
+      "string": "Receivable",
+      "domain": "[('account_type','=','asset_receivable')]"
+     },
+     {
+      "name": "payableacc",
+      "string": "Payable",
+      "domain": "[('account_type','=','liability_payable')]"
+     },
+     {
+      "name": "equityacc",
+      "string": "Equity",
+      "domain": "[('internal_group','=', 'equity')]"
+     },
+     {
+      "name": "assetsacc",
+      "string": "Assets",
+      "domain": "[('internal_group','=', 'asset')]"
+     },
+     {
+      "name": "liabilityacc",
+      "string": "Liability",
+      "domain": "[('internal_group','=', 'liability')]"
+     },
+     {
+      "name": "incomeacc",
+      "string": "Income",
+      "domain": "[('internal_group','=', 'income')]"
+     },
+     {
+      "name": "expensesacc",
+      "string": "Expenses",
+      "domain": "[('internal_group','=', 'expense')]"
+     },
+     {
+      "name": "type_asset_fixed",
+      "string": "Fixed Assets",
+      "domain": "[('account_type', '=', 'asset_fixed')]",
+      "invisible": "True"
+     },
+     {
+      "name": "type_expense",
+      "string": "Frequent Expenses",
+      "domain": "[('account_type', '=', 'expense')]",
+      "invisible": "True"
+     },
+     {
+      "name": "type_expense_direct_cost",
+      "string": "Cost of revenue",
+      "domain": "[('account_type', '=', 'expense_direct_cost')]",
+      "invisible": "True"
+     },
+     {
+      "name": "used",
+      "string": "Account with Entries",
+      "domain": "[('used', '=', True)]"
+     },
+     {
+      "name": "inactiveacc",
+      "string": "Inactive Accounts",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "accounttype",
+      "string": "Account Type",
+      "domain": "",
+      "context": "{'group_by':'account_type'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Accounts\">\n                    <field name=\"name\" filter_domain=\"['|', '|', ('name', 'ilike', self), ('code', '=ilike', self + '%'), ('description', 'ilike', self)]\" string=\"Account\"/>\n                    <filter string=\"Receivable\" name=\"receivableacc\" domain=\"[('account_type','=','asset_receivable')]\"/>\n                    <filter string=\"Payable\" name=\"payableacc\" domain=\"[('account_type','=','liability_payable')]\"/>\n                    <filter string=\"Equity\" name=\"equityacc\" domain=\"[('internal_group','=', 'equity')]\"/>\n                    <filter string=\"Assets\" name=\"assetsacc\" domain=\"[('internal_group','=', 'asset')]\"/>\n                    <filter string=\"Liability\" name=\"liabilityacc\" domain=\"[('internal_group','=', 'liability')]\"/>\n                    <filter string=\"Income\" name=\"incomeacc\" domain=\"[('internal_group','=', 'income')]\"/>\n                    <filter string=\"Expenses\" name=\"expensesacc\" domain=\"[('internal_group','=', 'expense')]\"/>\n                    <filter string=\"Fixed Assets\" name=\"type_asset_fixed\" domain=\"[('account_type', '=', 'asset_fixed')]\" invisible=\"True\"/>\n                    <filter string=\"Frequent Expenses\" name=\"type_expense\" domain=\"[('account_type', '=', 'expense')]\" invisible=\"True\"/>\n                    <filter string=\"Cost of revenue\" name=\"type_expense_direct_cost\" domain=\"[('account_type', '=', 'expense_direct_cost')]\" invisible=\"True\"/>\n                    <separator/>\n                    <filter string=\"Account with Entries\" name=\"used\" domain=\"[('used', '=', True)]\"/>\n                    <filter string=\"Inactive Accounts\" name=\"inactiveacc\" domain=\"[('active', '=', False)]\"/>\n                    <separator/>\n                    <field name=\"account_type\"/>\n                    <group>\n                        <filter string=\"Account Type\" name=\"accounttype\" domain=\"\" context=\"{'group_by':'account_type'}\"/>\n                    </group>\n                    <searchpanel class=\"account_root w-auto\">\n                        <field name=\"root_id\" icon=\"fa-filter\" limit=\"false\"/>\n                    </searchpanel>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "l10n_in.account_account_tds_tcs_view_form_inherit",
+   "package": "l10n_in",
+   "name": "account.account.tds.tcs.view.form.inherit",
+   "entity": "account.account",
+   "view_type": "xpath",
+   "inherits_view": "account.view_account_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='tax_ids']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_in_tds_tcs_section_id",
+      "invisible": "company_fiscal_country_code != 'IN' or (not l10n_in_tds_feature_enabled and not l10n_in_tcs_feature_enabled)"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='tax_ids']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='tax_ids']\" position=\"after\">\n                <field name=\"l10n_in_tds_tcs_section_id\" invisible=\"company_fiscal_country_code != 'IN' or (not l10n_in_tds_feature_enabled and not l10n_in_tcs_feature_enabled)\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_in.account_account_tds_tcs_view_tree_inherit",
+   "package": "l10n_in",
+   "name": "account.account.tds.tcs.view.list.inherit",
+   "entity": "account.account",
+   "view_type": "xpath",
+   "inherits_view": "account.view_account_list",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='account_type']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_in_tds_tcs_section_id",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='account_type']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='account_type']\" position=\"after\">\n                <field name=\"l10n_in_tds_tcs_section_id\" optional=\"hide\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_account.view_account_form",
+   "package": "stock_account",
+   "name": "account.account.form",
+   "entity": "account.account",
+   "view_type": "field",
+   "inherits_view": "account.view_account_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "tag_ids",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "tag_ids",
+      "position": "after"
+     },
+     {
+      "name": "account_stock_variation_id",
+      "invisible": "account_type != 'asset_current'"
+     },
+     {
+      "name": "account_stock_expense_id",
+      "invisible": "account_type != 'asset_current'",
+      "groups": "base.group_no_one",
+      "placeholder": "For Perpetual Continental Only"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"tag_ids\" position=\"after\">\n                <field name=\"account_stock_variation_id\" invisible=\"account_type != 'asset_current'\"/>\n                <field name=\"account_stock_expense_id\" invisible=\"account_type != 'asset_current'\" placeholder=\"For Perpetual Continental Only\" groups=\"base.group_no_one\"/>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

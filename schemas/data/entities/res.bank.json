@@ -1,0 +1,788 @@
+{
+ "catalog": {
+  "name": "entity:res.bank",
+  "description": "Complete definition of entity Bank (res.bank).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "res.bank",
+  "storage_name": "res_bank",
+  "full_name": "Bank",
+  "kind": "persistent",
+  "description": "Bank",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "l10n_cl",
+   "l10n_mx",
+   "l10n_pe",
+   "l10n_us_account"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "name, id",
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "name",
+   "bic"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "defined_in_package": "base",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "street",
+    "type": "Char",
+    "defined_in_package": "base",
+    "string": "Street",
+    "full_name": "Street"
+   },
+   {
+    "name": "street2",
+    "type": "Char",
+    "defined_in_package": "base",
+    "string": "Street2",
+    "full_name": "Street2"
+   },
+   {
+    "name": "zip",
+    "type": "Char",
+    "defined_in_package": "base",
+    "string": "Zip",
+    "full_name": "Zip"
+   },
+   {
+    "name": "city",
+    "type": "Char",
+    "defined_in_package": "base",
+    "string": "City",
+    "full_name": "City"
+   },
+   {
+    "name": "state",
+    "type": "Many2one",
+    "comodel": "res.country.state",
+    "string": "Fed. State",
+    "domain": "[('country_id', '=?', country)]",
+    "defined_in_package": "base",
+    "full_name": "Fed. State",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "country",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "defined_in_package": "base",
+    "string": "Country",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "country.code",
+    "string": "Country Code",
+    "defined_in_package": "base",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "defined_in_package": "base",
+    "string": "Email",
+    "full_name": "Email"
+   },
+   {
+    "name": "phone",
+    "type": "Char",
+    "defined_in_package": "base",
+    "string": "Phone",
+    "full_name": "Phone"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "base",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "bic",
+    "type": "Char",
+    "string": "Bank Identifier Code",
+    "index": true,
+    "help": "Sometimes called BIC or Swift.",
+    "defined_in_package": "base",
+    "full_name": "Bank Identifier Code"
+   },
+   {
+    "name": "l10n_cl_sbif_code",
+    "type": "Char",
+    "string": "Cod. SBIF",
+    "size": 10,
+    "defined_in_package": "l10n_cl",
+    "full_name": "Cod. SBIF"
+   },
+   {
+    "name": "fiscal_country_codes",
+    "type": "Char",
+    "store": false,
+    "default": {
+     "dynamic": "_get_fiscal_country_codes"
+    },
+    "defined_in_package": "l10n_cl",
+    "extended_in_packages": [
+     "l10n_mx"
+    ],
+    "string": "Fiscal Country Codes",
+    "full_name": "Fiscal Country Codes"
+   },
+   {
+    "name": "l10n_mx_edi_code",
+    "type": "Char",
+    "string": "ABM Code",
+    "help": "Three-digit number assigned by the ABM to identify banking institutions (ABM is an acronym for Asociación de Bancos de México)",
+    "defined_in_package": "l10n_mx",
+    "full_name": "ABM Code"
+   },
+   {
+    "name": "l10n_pe_edi_code",
+    "type": "Char",
+    "string": "Code (PE)",
+    "help": "Bank code assigned by the SUNAT to identify banking institutions.",
+    "defined_in_package": "l10n_pe",
+    "full_name": "Code (PE)"
+   },
+   {
+    "name": "intermediary_bank_id",
+    "type": "Many2one",
+    "comodel": "res.bank",
+    "domain": "[('id', '!=', id)]",
+    "help": "An intermediary bank facilitates international wire transfers between your bank and the beneficiary's bank when they don’t have a direct relationship.",
+    "defined_in_package": "l10n_us_account",
+    "string": "Intermediary Bank",
+    "full_name": "Intermediary Bank",
+    "target_entity": "res.bank"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "bic"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_display_name",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_country_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "country"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_state",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fiscal_country_codes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_cl",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_mx",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constrains_intermediary_bank_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_us_account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "intermediary_bank_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A bank cannot be its own intermediary bank.",
+        "line": 19
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constrains_intermediary_bank_id",
+    "package": "l10n_us_account",
+    "kind": "ValidationError",
+    "message": "A bank cannot be its own intermediary bank."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_res_bank_group_system",
+    "package": "base",
+    "name": "res_bank_group_system",
+    "entity": "res.bank",
+    "group": "group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "base.access_res_bank_group_partner_manager",
+    "package": "base",
+    "name": "res_bank_group_partner_manager",
+    "entity": "res.bank",
+    "group": "group_partner_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "base.access_res_bank_user",
+    "package": "base",
+    "name": "res_bank user",
+    "entity": "res.bank",
+    "group": "group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.view_res_bank_form",
+    "package": "base",
+    "name": "res.bank.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Bank"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "bic"
+      },
+      {
+       "name": "street",
+       "placeholder": "Street..."
+      },
+      {
+       "name": "street2",
+       "placeholder": "Street 2..."
+      },
+      {
+       "name": "city",
+       "placeholder": "City"
+      },
+      {
+       "name": "state",
+       "options": "{\"no_open\": True}",
+       "placeholder": "State"
+      },
+      {
+       "name": "zip",
+       "placeholder": "ZIP"
+      },
+      {
+       "name": "country",
+       "options": "{\"no_open\": True, \"no_create\": True}",
+       "placeholder": "Country"
+      },
+      {
+       "name": "phone"
+      },
+      {
+       "name": "email",
+       "widget": "email"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "email": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.view_res_bank_tree",
+    "package": "base",
+    "name": "res.bank.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Banks"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "bic"
+      },
+      {
+       "name": "country"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.res_bank_view_search",
+    "package": "base",
+    "name": "res.bank.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Bank"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_cl.view_res_bank_form",
+    "package": "l10n_cl",
+    "name": "res.bank.form",
+    "view_type": "field",
+    "inherits_view": "base.view_res_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "before"
+      },
+      {
+       "name": "fiscal_country_codes",
+       "invisible": "1"
+      },
+      {
+       "name": "l10n_cl_sbif_code",
+       "invisible": "'CL' not in fiscal_country_codes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_cl.view_res_bank_tree",
+    "package": "l10n_cl",
+    "name": "bank.bank.list",
+    "view_type": "field",
+    "inherits_view": "base.view_res_bank_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "before"
+      },
+      {
+       "name": "l10n_cl_sbif_code",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_mx.view_res_bank_inherit_l10n_mx_edi_bank",
+    "package": "l10n_mx",
+    "name": "view.res.bank.inherit.l10n_mx_edi_bank",
+    "view_type": "xpath",
+    "inherits_view": "base.view_res_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='bic']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "fiscal_country_codes",
+       "invisible": "1"
+      },
+      {
+       "name": "l10n_mx_edi_code",
+       "invisible": "'MX' not in fiscal_country_codes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='bic']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_pe.view_res_bank_inherit_l10n_pe_bank",
+    "package": "l10n_pe",
+    "name": "view.res.bank.inherit.l10n_pe_bank",
+    "view_type": "xpath",
+    "inherits_view": "base.view_res_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='bic']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "country_code",
+       "invisible": "1"
+      },
+      {
+       "name": "l10n_pe_edi_code",
+       "invisible": "country_code != 'PE'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='bic']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_us_account.res_bank_view_form",
+    "package": "l10n_us_account",
+    "name": "res.bank.view.form.inherit.intermediary",
+    "view_type": "field",
+    "inherits_view": "base.view_res_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "bic",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "bic",
+       "position": "after"
+      },
+      {
+       "name": "intermediary_bank_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.action_res_bank_form",
+    "package": "base",
+    "name": "Banks",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "res_bank_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a Bank\n              </p><p>\n                Banks are the financial institutions at which you and your contacts have their accounts.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "res.bank"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "contacts.menu_action_res_bank_form",
+    "package": "contacts",
+    "name": null,
+    "parent_id": "menu_config_bank_accounts",
+    "action": "base.action_res_bank_form",
+    "sequence": "1",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

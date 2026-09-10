@@ -1,0 +1,282 @@
+{
+ "catalog": {
+  "name": "entity:report.stock.quantity",
+  "description": "Complete definition of entity Stock Quantity Report (report.stock.quantity).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "report.stock.quantity",
+  "storage_name": "report_stock_quantity",
+  "full_name": "Stock Quantity Report",
+  "kind": "persistent",
+  "description": "Stock Quantity Report",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "product_expiry"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_depends": {
+    "product.product": [
+     "product_tmpl_id"
+    ],
+    "product.template": [
+     "type"
+    ],
+    "stock.location": [
+     "parent_path"
+    ],
+    "stock.move": [
+     "company_id",
+     "date",
+     "location_dest_id",
+     "location_final_id",
+     "location_id",
+     "product_id",
+     "product_qty",
+     "state"
+    ],
+    "stock.quant": [
+     "company_id",
+     "location_id",
+     "product_id",
+     "quantity"
+    ],
+    "stock.warehouse": [
+     "view_location_id"
+    ]
+   }
+  },
+  "fields": [
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Date",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "Date"
+   },
+   {
+    "name": "product_tmpl_id",
+    "type": "Many2one",
+    "comodel": "product.template",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Product Tmpl",
+    "full_name": "Product Tmpl",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "forecast",
+      "Forecasted Stock"
+     ],
+     [
+      "in",
+      "Forecasted Receipts"
+     ],
+     [
+      "out",
+      "Forecasted Deliveries"
+     ]
+    ],
+    "string": "State",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "State"
+   },
+   {
+    "name": "product_qty",
+    "type": "Float",
+    "string": "Quantity",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "warehouse_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Warehouse",
+    "full_name": "Warehouse",
+    "target_entity": "stock.warehouse"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_product_qty_col",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "product_expiry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Because we can transfer a product from a warehouse to another one thanks to a stock move, we need to\ngenerate some fake stock moves before processing all of them. That way, in case of an interwarehouse\ntransfer, we will have an outgoing stock move for the source warehouse and an incoming stock move\nfor the destination one. To do so, we select all relevant SM (incoming, outgoing and interwarehouse),\nthen we duplicate all these SM and edit the values:\n    - product_qty is kept if the SM is not the duplicated one or if the SM is an interwarehouse one\n        otherwise, we set the value to 0 (this allows us to filter it out during the SM processing)\n    - the source warehouse is kept if the SM is not the duplicated one\n    - the dest warehouse is kept if the SM is not the duplicated one and is not an interwarehouse\n        OR the SM is the duplicated one and is an interwarehouse",
+      "size_in_lines": 159,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "stock.access_report_stock_quantity",
+    "package": "stock",
+    "name": "access_report_stock_quantity",
+    "entity": "report.stock.quantity",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "stock.report_stock_quantity_flow_comp_rule",
+    "package": "stock",
+    "name": "report_stock_quantity_flow multi-company",
+    "entity": "report.stock.quantity",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "stock.stock_report_view_graph",
+    "package": "stock",
+    "name": "stock_report_view_graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "js_class": "stock_forecasted_graph",
+      "string": "report_stock_quantity_graph",
+      "type": "line",
+      "sample": "1",
+      "disable_linking": "1"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "product_qty"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date",
+       "interval": "day"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "product_qty",
+       "type": "measure"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

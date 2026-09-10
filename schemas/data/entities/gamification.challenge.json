@@ -1,0 +1,1334 @@
+{
+ "catalog": {
+  "name": "entity:gamification.challenge",
+  "description": "Complete definition of entity Gamification Challenge (gamification.challenge).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "gamification.challenge",
+  "storage_name": "gamification_challenge",
+  "full_name": "Gamification Challenge",
+  "kind": "persistent",
+  "description": "Gamification Challenge",
+  "defined_by_package": "gamification",
+  "extended_by_packages": [
+   "survey",
+   "website_slides",
+   "website_forum"
+  ],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "end_date, start_date, name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_CUSTOMER_HEADERS_LIMIT_COUNT": 0
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Challenge Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "gamification",
+    "full_name": "Challenge Name"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Description",
+    "translate": true,
+    "defined_in_package": "gamification",
+    "full_name": "Description"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "inprogress",
+      "In Progress"
+     ],
+     [
+      "done",
+      "Done"
+     ]
+    ],
+    "default": "draft",
+    "copy": false,
+    "string": "State",
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "gamification",
+    "full_name": "State"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "default": {
+     "dynamic": "lambda self: self.env.uid"
+    },
+    "string": "Responsible",
+    "defined_in_package": "gamification",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "relation": "gamification_challenge_users_rel",
+    "string": "Participants",
+    "defined_in_package": "gamification",
+    "full_name": "Participants",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "user_domain",
+    "type": "Char",
+    "string": "User domain",
+    "defined_in_package": "gamification",
+    "full_name": "User domain"
+   },
+   {
+    "name": "user_count",
+    "type": "Integer",
+    "string": "# Users",
+    "compute": "_compute_user_count",
+    "defined_in_package": "gamification",
+    "full_name": "# Users"
+   },
+   {
+    "name": "period",
+    "type": "Selection",
+    "selection": [
+     [
+      "once",
+      "Non recurring"
+     ],
+     [
+      "daily",
+      "Daily"
+     ],
+     [
+      "weekly",
+      "Weekly"
+     ],
+     [
+      "monthly",
+      "Monthly"
+     ],
+     [
+      "yearly",
+      "Yearly"
+     ]
+    ],
+    "default": "once",
+    "string": "Periodicity",
+    "help": "Period of automatic goal assignment. If none is selected, should be launched manually.",
+    "required": true,
+    "defined_in_package": "gamification",
+    "full_name": "Periodicity"
+   },
+   {
+    "name": "start_date",
+    "type": "Date",
+    "string": "Start Date",
+    "help": "The day a new challenge will be automatically started. If no periodicity is set, will use this date as the goal start date.",
+    "defined_in_package": "gamification",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "end_date",
+    "type": "Date",
+    "string": "End Date",
+    "help": "The day a new challenge will be automatically closed. If no periodicity is set, will use this date as the goal end date.",
+    "defined_in_package": "gamification",
+    "full_name": "End Date"
+   },
+   {
+    "name": "invited_user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "relation": "gamification_invited_user_ids_rel",
+    "string": "Suggest to users",
+    "defined_in_package": "gamification",
+    "full_name": "Suggest to users",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "line_ids",
+    "type": "One2many",
+    "comodel": "gamification.challenge.line",
+    "inverse_name": "challenge_id",
+    "string": "Lines",
+    "help": "List of goals that will be set",
+    "required": true,
+    "copy": true,
+    "defined_in_package": "gamification",
+    "full_name": "Lines",
+    "target_entity": "gamification.challenge.line"
+   },
+   {
+    "name": "reward_id",
+    "type": "Many2one",
+    "comodel": "gamification.badge",
+    "string": "For Every Succeeding User",
+    "index": "btree_not_null",
+    "defined_in_package": "gamification",
+    "full_name": "For Every Succeeding User",
+    "target_entity": "gamification.badge"
+   },
+   {
+    "name": "reward_first_id",
+    "type": "Many2one",
+    "comodel": "gamification.badge",
+    "string": "For 1st user",
+    "defined_in_package": "gamification",
+    "full_name": "For 1st user",
+    "target_entity": "gamification.badge"
+   },
+   {
+    "name": "reward_second_id",
+    "type": "Many2one",
+    "comodel": "gamification.badge",
+    "string": "For 2nd user",
+    "defined_in_package": "gamification",
+    "full_name": "For 2nd user",
+    "target_entity": "gamification.badge"
+   },
+   {
+    "name": "reward_third_id",
+    "type": "Many2one",
+    "comodel": "gamification.badge",
+    "string": "For 3rd user",
+    "defined_in_package": "gamification",
+    "full_name": "For 3rd user",
+    "target_entity": "gamification.badge"
+   },
+   {
+    "name": "reward_failure",
+    "type": "Boolean",
+    "string": "Reward Bests if not Succeeded?",
+    "defined_in_package": "gamification",
+    "full_name": "Reward Bests if not Succeeded?"
+   },
+   {
+    "name": "reward_realtime",
+    "type": "Boolean",
+    "string": "Reward as soon as every goal is reached",
+    "default": true,
+    "help": "With this option enabled, a user can receive a badge only once. The top 3 badges are still rewarded only at the end of the challenge.",
+    "defined_in_package": "gamification",
+    "full_name": "Reward as soon as every goal is reached"
+   },
+   {
+    "name": "visibility_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "personal",
+      "Individual Goals"
+     ],
+     [
+      "ranking",
+      "Leader Board (Group Ranking)"
+     ]
+    ],
+    "default": "personal",
+    "string": "Display Mode",
+    "required": true,
+    "defined_in_package": "gamification",
+    "full_name": "Display Mode"
+   },
+   {
+    "name": "report_message_frequency",
+    "type": "Selection",
+    "selection": [
+     [
+      "never",
+      "Never"
+     ],
+     [
+      "onchange",
+      "On change"
+     ],
+     [
+      "daily",
+      "Daily"
+     ],
+     [
+      "weekly",
+      "Weekly"
+     ],
+     [
+      "monthly",
+      "Monthly"
+     ],
+     [
+      "yearly",
+      "Yearly"
+     ]
+    ],
+    "default": "never",
+    "string": "Report Frequency",
+    "required": true,
+    "defined_in_package": "gamification",
+    "full_name": "Report Frequency"
+   },
+   {
+    "name": "report_message_group_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel",
+    "string": "Send a copy to",
+    "help": "Group that will receive a copy of the report in addition to the user",
+    "defined_in_package": "gamification",
+    "full_name": "Send a copy to",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "report_template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "default": {
+     "dynamic": "lambda self: self._get_report_template()"
+    },
+    "string": "Report Template",
+    "required": true,
+    "defined_in_package": "gamification",
+    "full_name": "Report Template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "remind_update_delay",
+    "type": "Integer",
+    "string": "Non-updated manual goals will be reminded after",
+    "help": "Never reminded if no value or zero is specified.",
+    "defined_in_package": "gamification",
+    "full_name": "Non-updated manual goals will be reminded after"
+   },
+   {
+    "name": "last_report_date",
+    "type": "Date",
+    "string": "Last Report Date",
+    "default": {
+     "dynamic": "fields.Date.today"
+    },
+    "defined_in_package": "gamification",
+    "full_name": "Last Report Date"
+   },
+   {
+    "name": "next_report_date",
+    "type": "Date",
+    "string": "Next Report Date",
+    "compute": "_get_next_report_date",
+    "store": true,
+    "defined_in_package": "gamification",
+    "full_name": "Next Report Date"
+   },
+   {
+    "name": "challenge_category",
+    "type": "Selection",
+    "selection": [
+     [
+      "hr",
+      "Human Resources / Engagement"
+     ],
+     [
+      "other",
+      "Settings / Gamification Tools"
+     ],
+     [
+      "certification",
+      "Certifications"
+     ],
+     [
+      "slides",
+      "Website / Slides"
+     ],
+     [
+      "forum",
+      "Website / Forum"
+     ]
+    ],
+    "string": "Appears in",
+    "required": true,
+    "default": "hr",
+    "help": "Define the visibility of the challenge through menus",
+    "defined_in_package": "gamification",
+    "selection_added_by": [
+     "survey",
+     "website_slides",
+     "website_forum"
+    ],
+    "ondelete": {
+     "forum": "set default"
+    },
+    "extended_in_packages": [
+     "survey",
+     "website_slides",
+     "website_forum"
+    ],
+    "full_name": "Appears in"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "user_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_report_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "last_report_date",
+         "report_message_frequency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the next report date based on the last report date and\nreport period.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_report_template",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Overwrite the create method to add the user of groups",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can not reset a challenge with unfinished goals.",
+        "line": 224
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_cron_update",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "ids",
+     "commit"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Daily cron check.\n\n- Start planned challenges (in draft and with start_date = today)\n- Create the missing goals (eg: modified the challenge to add lines)\n- Update every running challenge",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_all",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Update the challenges and related goals.",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_challenger_users",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_recompute_challenge_users",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Recompute the domain to add new users and remove the one no longer matching the domain",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_start",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Start a challenge",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_check",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Check a challenge\n\nCreate goals that haven't been created yet (eg: if added users)\nRecompute the current value for each goal related",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_report_progress",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Manual report of a goal, does not influence automatic report frequency",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_users",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Redirect to the participants (users) list. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_goals_from_challenge",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Generate the goals for each line and user.\n\nIf goals already exist for this line and user, the line is skipped. This\ncan be called after each change in the list of users or lines.\n:param list(int) ids: the list of challenge concerned",
+      "size_in_lines": 74,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_serialized_challenge_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "user",
+     "restrict_goals",
+     "restrict_top"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Return a serialised version of the goals information if the user has not completed every goal\n\n:param user: user retrieving progress (False if no distinction,\n             only for ranking challenges)\n:param restrict_goals: compute only the results for this subset of\n                       gamification.goal ids, if False retrieve every\n                       goal of current running challenge\n:param int restrict_top: for challenge lines where visibility_mode is\n                         ``ranking``, retrieve only the best\n                         ``restrict_top`` results and itself, if 0\n                         retrieve all restrict_goal_ids has priority\n                         over restrict_top\n\nformat list\n# if visibility_mode == 'ranking'\n{\n    'name': <gamification.goal.description name>,\n    'description': <gamification.goal.description description>,\n    'condition': <reach condition {lower,higher}>,\n    'computation_mode': <target computation {manually,count,sum,python}>,\n    'monetary': <{True,False}>,\n    'suffix': <value suffix>,\n    'action': <{True,False}>,\n    'display_mode': <{progress,boolean}>,\n    'target': <challenge line target>,\n    'own_goal_id': <gamification.goal id where user_id == uid>,\n    'goals': [\n        {\n            'id': <gamification.goal id>,\n            'rank': <user ranking>,\n            'user_id': <res.users id>,\n            'name': <res.users name>,\n            'state': <gamification.goal state {draft,inprogress,reached,failed,canceled}>,\n            'completeness': <percentage>,\n            'current': <current value>,\n        }\n    ]\n},\n# if visibility_mode == 'personal'\n{\n    'id': <gamification.goal id>,\n    'name': <gamification.goal.description name>,\n    'description': <gamification.goal.description description>,\n    'condition': <reach condition {lower,higher}>,\n    'computation_mode': <target computation {manually,count,sum,python}>,\n    'monetary': <{True,False}>,\n    'suffix': <value suffix>,\n    'action': <{True,False}>,\n    'display_mode': <{progress,boolean}>,\n    'target': <challenge line target>,\n    'state': <gamification.goal state {draft,inprogress,reached,failed,canceled}>,\n    'completeness': <percentage>,\n    'current': <current value>,\n}",
+      "size_in_lines": 144,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Retrieving progress for personal challenge without user information",
+        "line": 524
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "report_progress",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "users",
+     "subset_goals"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Post report about the progress of the goals\n\n:param users: users that are concerned by the report. If False, will\n              send the report to every user concerned (goal users and\n              group that receive a copy). Only used for challenge with\n              a visibility mode set to 'personal'.\n:param subset_goals: goals to restrict the report",
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "accept_challenge",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "discard_challenge",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "The user discard the suggested challenge",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_challenge_reward",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "force"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Actions for the end of a challenge\n\nIf a reward was selected, grant it to the correct users.\nRewards granted at:\n    - the end date for a challenge with no periodicity\n    - the end of a period for challenge with periodicity\n    - when a challenge is manually closed\n(if no end date, a running challenge is never rewarded)",
+      "size_in_lines": 92,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_topN_users",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "n"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Get the top N users for a defined challenge\n\nRanking criterias:\n    1. succeed every goal of the challenge\n    2. total completeness of each goal (can be over 100)\n\nOnly users having reached every goal of the challenge will be returned\nunless the challenge ``reward_failure`` is set, in which case any user\nmay be considered.\n\n:returns: an iterable of exactly N records, either User objects or\n          False if there was no user for the rank. There can be no\n          False between two users (if users[k] = False then\n          users[k+1] = False",
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reward_user",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user",
+     "badge"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Create a badge user and send the badge to him\n\n:param user: the user to reward\n:param badge: the concerned badge",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "write",
+    "package": "gamification",
+    "kind": "UserError",
+    "message": "You can not reset a challenge with unfinished goals."
+   },
+   {
+    "operation": "_get_serialized_challenge_lines",
+    "package": "gamification",
+    "kind": "UserError",
+    "message": "Retrieving progress for personal challenge without user information"
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "gamification.challenge_employee",
+    "package": "gamification",
+    "name": "Goal Challenge Employee",
+    "entity": "gamification.challenge",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "gamification.challenge_manager",
+    "package": "gamification",
+    "name": "Goal Challenge Manager",
+    "entity": "gamification.challenge",
+    "group": "base.group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "gamification.challenge_portal",
+    "package": "gamification",
+    "name": "Goal Challenge Portal",
+    "entity": "gamification.challenge",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_gamification.challenge_officer",
+    "package": "hr_gamification",
+    "name": "Challenge Officer",
+    "entity": "gamification.challenge",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "gamification.challenge_list_view",
+    "package": "gamification",
+    "name": "Challenges List",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Challenges",
+      "decoration-info": "state == 'draft'",
+      "decoration-muted": "state == 'done'"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "period"
+      },
+      {
+       "name": "manager_id"
+      },
+      {
+       "name": "state"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state == 'draft'",
+      "decoration-muted": "state == 'done'"
+     }
+    }
+   },
+   {
+    "external_identifier": "gamification.challenge_form_view",
+    "package": "gamification",
+    "name": "Challenge Form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Challenge"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "options": "{'clickable': '1'}"
+      },
+      {
+       "name": "user_count",
+       "widget": "statinfo",
+       "string": "Participants"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Monthly Sales Objectives"
+      },
+      {
+       "name": "user_domain",
+       "widget": "domain",
+       "options": "{'model': 'res.users'}"
+      },
+      {
+       "name": "period",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "visibility_mode",
+       "widget": "radio"
+      },
+      {
+       "name": "manager_id"
+      },
+      {
+       "name": "start_date",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "end_date",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "line_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "definition_id"
+      },
+      {
+       "name": "condition"
+      },
+      {
+       "name": "target_goal",
+       "string": "Target"
+      },
+      {
+       "name": "definition_full_suffix"
+      },
+      {
+       "name": "description",
+       "placeholder": "Describe the challenge: what is does, who it targets, why it matters..."
+      },
+      {
+       "name": "reward_id",
+       "required": "reward_realtime"
+      },
+      {
+       "name": "reward_first_id"
+      },
+      {
+       "name": "reward_second_id",
+       "invisible": "not reward_first_id"
+      },
+      {
+       "name": "reward_third_id",
+       "invisible": "not reward_first_id or not reward_second_id"
+      },
+      {
+       "name": "reward_failure",
+       "invisible": "not reward_first_id"
+      },
+      {
+       "name": "reward_realtime"
+      },
+      {
+       "name": "invited_user_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "report_message_frequency"
+      },
+      {
+       "name": "report_template_id",
+       "invisible": "report_message_frequency == 'never'"
+      },
+      {
+       "name": "report_message_group_id",
+       "invisible": "report_message_frequency == 'never'"
+      },
+      {
+       "name": "remind_update_delay"
+      },
+      {
+       "name": "challenge_category",
+       "widget": "radio"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_start",
+       "string": "Start Challenge",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_check",
+       "string": "Refresh Challenge",
+       "type": "object",
+       "invisible": "state != 'inprogress'"
+      },
+      {
+       "name": "action_report_progress",
+       "string": "Send Report",
+       "type": "object",
+       "invisible": "state not in ('inprogress', 'done')",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "action_view_users",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-users"
+      },
+      {
+       "name": "%(goals_from_challenge_act)d",
+       "type": "action",
+       "invisible": "state == 'draft'",
+       "class": "oe_stat_button",
+       "icon": "fa-gift"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "goals",
+       "string": "Goals",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "reward",
+       "string": "Reward",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "advanced_options",
+       "string": "Advanced Options",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 1,
+      "domain": 1,
+      "radio": 2,
+      "handle": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Start Challenge",
+       "type": "object",
+       "name": "action_start",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight"
+      },
+      {
+       "string": "Refresh Challenge",
+       "type": "object",
+       "name": "action_check",
+       "invisible": "state != 'inprogress'"
+      },
+      {
+       "string": "Send Report",
+       "type": "object",
+       "name": "action_report_progress",
+       "invisible": "state not in ('inprogress', 'done')",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": [
+      {
+       "type": "object",
+       "name": "action_view_users",
+       "class": "oe_stat_button",
+       "icon": "fa-users"
+      },
+      {
+       "type": "action",
+       "name": "%(goals_from_challenge_act)d",
+       "class": "oe_stat_button",
+       "icon": "fa-gift",
+       "invisible": "state == 'draft'"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "gamification.view_challenge_kanban",
+    "package": "gamification",
+    "name": "Challenge Kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "string": "Challenges"
+     },
+     "fields": [
+      {
+       "name": "line_ids"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "user_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "gamification.challenge_search_view",
+    "package": "gamification",
+    "name": "Challenge Search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Challenges"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inprogress",
+       "string": "Running Challenges",
+       "domain": "[('state', '=', 'inprogress')]"
+      },
+      {
+       "name": "hr_challenges",
+       "string": "HR Challenges",
+       "domain": "[('challenge_category', '=', 'hr')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "state",
+       "string": "State",
+       "domain": "[]",
+       "context": "{'group_by':'state'}"
+      },
+      {
+       "name": "period",
+       "string": "Period",
+       "domain": "[]",
+       "context": "{'group_by':'period'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "gamification.challenge_list_action",
+    "package": "gamification",
+    "name": "Challenges",
+    "view_mode": "kanban,list",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_inprogress':True, 'default_inprogress':True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a new challenge\n            </p><p>\n                Assign a list of goals to chosen users to evaluate them.\n                The challenge can use a period (weekly, monthly...) for automatic creation of goals.\n                The goals are created for the specified users or member of the group.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "gamification.challenge"
+   },
+   {
+    "external_identifier": "hr_gamification.challenge_list_action2",
+    "package": "hr_gamification",
+    "name": "Challenges",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('challenge_category', '=', 'hr')]",
+    "context": "{'search_default_inprogress':True, 'default_inprogress':True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a new challenge\n                </p><p>\n                    Assign a list of goals to chosen users to evaluate them.\n                    The challenge can use a period (weekly, monthly...) for automatic creation of goals.\n                    The goals are created for the specified users or member of the group.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "gamification.challenge"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "gamification.ir_cron_check_challenge",
+    "package": "gamification",
+    "name": "Gamification: Goal Challenge Check",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "gamification.challenge",
+    "operation": "_cron_update",
+    "operation_call": "model._cron_update()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "gamification.simple_report_template",
+    "package": "gamification",
+    "name": "Gamification: Challenge Report",
+    "subject": null
+   }
+  ]
+ }
+}

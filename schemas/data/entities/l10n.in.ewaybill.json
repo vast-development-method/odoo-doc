@@ -1,0 +1,2318 @@
+{
+ "catalog": {
+  "name": "entity:l10n.in.ewaybill",
+  "description": "Complete definition of entity e-Waybill (l10n.in.ewaybill).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n.in.ewaybill",
+  "storage_name": "l10n_in_ewaybill",
+  "full_name": "e-Waybill",
+  "kind": "persistent",
+  "description": "e-Waybill",
+  "defined_by_package": "l10n_in_ewaybill",
+  "extended_by_packages": [
+   "l10n_in_ewaybill_irn",
+   "l10n_in_ewaybill_stock"
+  ],
+  "mixins": [
+   "portal.mixin",
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "e-Waybill Number",
+    "copy": false,
+    "readonly": true,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "e-Waybill Number"
+   },
+   {
+    "name": "ewaybill_date",
+    "type": "Date",
+    "string": "e-Waybill Date",
+    "copy": false,
+    "readonly": true,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "e-Waybill Date"
+   },
+   {
+    "name": "ewaybill_expiry_date",
+    "type": "Date",
+    "string": "e-Waybill Valid Upto",
+    "copy": false,
+    "readonly": true,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "e-Waybill Valid Upto"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "string": "Status",
+    "selection": [
+     [
+      "pending",
+      "Pending"
+     ],
+     [
+      "generated",
+      "Generated"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ],
+     [
+      "challan",
+      "Challan"
+     ]
+    ],
+    "required": true,
+    "readonly": true,
+    "copy": false,
+    "tracking": true,
+    "default": "pending",
+    "defined_in_package": "l10n_in_ewaybill",
+    "selection_added_by": [
+     "l10n_in_ewaybill_stock"
+    ],
+    "ondelete": {
+     "challan": "cascade"
+    },
+    "extended_in_packages": [
+     "l10n_in_ewaybill_stock"
+    ],
+    "full_name": "Status"
+   },
+   {
+    "name": "account_move_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Account Move",
+    "full_name": "Account Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "document_date",
+    "type": "Datetime",
+    "string": "Document Date",
+    "compute": "_compute_ewaybill_document_details",
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Document Date"
+   },
+   {
+    "name": "document_number",
+    "type": "Char",
+    "string": "Document",
+    "compute": "_compute_ewaybill_document_details",
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Document"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "compute": "_compute_ewaybill_company",
+    "store": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "company_currency_id",
+    "type": "Many2one",
+    "related": "company_id.currency_id",
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Company Currency",
+    "full_name": "Company Currency"
+   },
+   {
+    "name": "supply_type",
+    "type": "Selection",
+    "string": "Supply Type",
+    "selection": [
+     [
+      "O",
+      "Outward"
+     ],
+     [
+      "I",
+      "Inward"
+     ]
+    ],
+    "compute": "_compute_supply_type",
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Supply Type"
+   },
+   {
+    "name": "partner_bill_from_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Bill From",
+    "compute": "_compute_document_partners_details",
+    "check_company": true,
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Bill From",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_bill_to_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Bill To",
+    "compute": "_compute_document_partners_details",
+    "check_company": true,
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Bill To",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_ship_from_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Dispatch From",
+    "compute": "_compute_document_partners_details",
+    "check_company": true,
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Dispatch From",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_ship_to_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Ship To",
+    "compute": "_compute_document_partners_details",
+    "check_company": true,
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Ship To",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "is_bill_to_editable",
+    "type": "Boolean",
+    "compute": "_compute_is_editable",
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Is Bill To Editable",
+    "full_name": "Is Bill To Editable"
+   },
+   {
+    "name": "is_bill_from_editable",
+    "type": "Boolean",
+    "compute": "_compute_is_editable",
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Is Bill From Editable",
+    "full_name": "Is Bill From Editable"
+   },
+   {
+    "name": "is_ship_to_editable",
+    "type": "Boolean",
+    "compute": "_compute_is_editable",
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Is Ship To Editable",
+    "full_name": "Is Ship To Editable"
+   },
+   {
+    "name": "is_ship_from_editable",
+    "type": "Boolean",
+    "compute": "_compute_is_editable",
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Is Ship From Editable",
+    "full_name": "Is Ship From Editable"
+   },
+   {
+    "name": "type_id",
+    "type": "Many2one",
+    "comodel": "l10n.in.ewaybill.type",
+    "string": "Document Type",
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Document Type",
+    "target_entity": "l10n.in.ewaybill.type"
+   },
+   {
+    "name": "sub_type_code",
+    "type": "Char",
+    "related": "type_id.sub_type_code",
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Sub Type Code",
+    "full_name": "Sub Type Code"
+   },
+   {
+    "name": "distance",
+    "type": "Integer",
+    "string": "Distance",
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Distance"
+   },
+   {
+    "name": "mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "1",
+      "By Road"
+     ],
+     [
+      "2",
+      "Rail"
+     ],
+     [
+      "3",
+      "Air"
+     ],
+     [
+      "4",
+      "Ship or Ship Cum Road/Rail"
+     ]
+    ],
+    "string": "Transportation Mode",
+    "copy": false,
+    "tracking": true,
+    "default": "1",
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Transportation Mode"
+   },
+   {
+    "name": "vehicle_no",
+    "type": "Char",
+    "string": "Vehicle Number",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Vehicle Number"
+   },
+   {
+    "name": "vehicle_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "R",
+      "Regular"
+     ],
+     [
+      "O",
+      "Over Dimensional Cargo"
+     ]
+    ],
+    "string": "Vehicle Type",
+    "compute": "_compute_vehicle_type",
+    "store": true,
+    "copy": false,
+    "tracking": true,
+    "readonly": false,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Vehicle Type"
+   },
+   {
+    "name": "transportation_doc_no",
+    "type": "Char",
+    "string": "Transporter Doc No",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Transporter Doc No"
+   },
+   {
+    "name": "transportation_doc_date",
+    "type": "Date",
+    "string": "Transporter Doc Date",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Transporter Doc Date"
+   },
+   {
+    "name": "transporter_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Transporter",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Transporter",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "error_message",
+    "type": "Html",
+    "readonly": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Error Message",
+    "full_name": "Error Message"
+   },
+   {
+    "name": "blocking_level",
+    "type": "Selection",
+    "selection": [
+     [
+      "warning",
+      "Warning"
+     ],
+     [
+      "error",
+      "Error"
+     ]
+    ],
+    "string": "Blocking Level",
+    "readonly": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Blocking Level"
+   },
+   {
+    "name": "content",
+    "type": "Binary",
+    "compute": "_compute_content",
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Content",
+    "full_name": "Content"
+   },
+   {
+    "name": "cancel_reason",
+    "type": "Selection",
+    "selection": [
+     [
+      "1",
+      "Duplicate"
+     ],
+     [
+      "2",
+      "Data Entry Mistake"
+     ],
+     [
+      "3",
+      "Order Cancelled"
+     ],
+     [
+      "4",
+      "Others"
+     ]
+    ],
+    "string": "Cancel reason",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Cancel reason"
+   },
+   {
+    "name": "cancel_remarks",
+    "type": "Char",
+    "string": "Cancel remarks",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "full_name": "Cancel remarks"
+   },
+   {
+    "name": "attachment_id",
+    "type": "Many2one",
+    "comodel": "ir.attachment",
+    "compute": "fields.Many2one('ir.attachment', compute=lambda self: self._compute_linked_attachment_id('attachment_id', 'attachment_file'), depends=['attachment_file'])",
+    "depends": [
+     "attachment_file"
+    ],
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Attachment",
+    "full_name": "Attachment",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "attachment_file",
+    "type": "Binary",
+    "copy": false,
+    "attachment": true,
+    "defined_in_package": "l10n_in_ewaybill",
+    "string": "Attachment File",
+    "full_name": "Attachment File"
+   },
+   {
+    "name": "is_process_through_irn",
+    "type": "Boolean",
+    "compute": "_compute_is_process_through_irn",
+    "defined_in_package": "l10n_in_ewaybill_irn",
+    "string": "Is Process Through Invoice reference number",
+    "full_name": "Is Process Through Invoice reference number"
+   },
+   {
+    "name": "is_sent_through_irn",
+    "type": "Boolean",
+    "readonly": true,
+    "defined_in_package": "l10n_in_ewaybill_irn",
+    "string": "Is Sent Through Invoice reference number",
+    "full_name": "Is Sent Through Invoice reference number"
+   },
+   {
+    "name": "type_description",
+    "type": "Char",
+    "string": "Description",
+    "defined_in_package": "l10n_in_ewaybill_stock",
+    "full_name": "Description"
+   },
+   {
+    "name": "picking_id",
+    "type": "Many2one",
+    "comodel": "stock.picking",
+    "string": "Stock Transfer",
+    "copy": false,
+    "defined_in_package": "l10n_in_ewaybill_stock",
+    "full_name": "Stock Transfer",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "move_ids",
+    "type": "One2many",
+    "related": "picking_id.move_ids",
+    "defined_in_package": "l10n_in_ewaybill_stock",
+    "string": "Move",
+    "full_name": "Move"
+   },
+   {
+    "name": "fiscal_position_id",
+    "type": "Many2one",
+    "comodel": "account.fiscal.position",
+    "string": "Fiscal Position",
+    "compute": "_compute_fiscal_position",
+    "check_company": true,
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_in_ewaybill_stock",
+    "full_name": "Fiscal Position",
+    "target_entity": "account.fiscal.position"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_ewaybill_dependencies",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ewaybill_document_details",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": "Returns document details\n:return: {'document_number': document_number, 'document_date': document_date}\n:rtype: dict",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": "Returns document details\n:return: {'document_number': document_number, 'document_date': document_date}\n:rtype: dict",
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ewaybill_company",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_seller_buyer_details",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_incoming",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_linked_attachment_id",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "attachment_field",
+     "binary_field"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": "Helper to retreive Attachment from Binary fields\nThis is needed because fields.Many2one('ir.attachment') makes all\nattachments available to the user.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_ewaybill_document_details",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._get_ewaybill_dependencies()"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_ewaybill_company",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._get_ewaybill_dependencies()"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_supply_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._get_ewaybill_dependencies()"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_document_partners_details",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._get_ewaybill_dependencies()"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_editable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_ship_from_id",
+         "partner_ship_to_id",
+         "partner_bill_from_id",
+         "partner_bill_to_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_content",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_vehicle_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "when transportation mode is ship then vehicle type should be Over Dimensional Cargo (ODC)",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_export_content_json",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_generate_ewaybill",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "'\\n'.join(errors)",
+        "line": 284
+       }
+      ]
+     },
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "'\\n'.join(errors)",
+        "line": 69
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_cancel_ewaybill",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reset_to_pending",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only Cancelled E-waybill can be resent.",
+        "line": 296
+       }
+      ]
+     },
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only Delivery Challan and Cancelled E-waybill can be reset to pending.",
+        "line": 113
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_print",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please generate the E-Waybill to print it.",
+        "line": 307
+       }
+      ]
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please generate the E-Waybill or mark the document as a Challan to print it.",
+        "line": 140
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_default_help_message",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "status"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_configuration",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_transporter",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_partners",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_state",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_pincode",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_validate_partner",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Validation method for Ewaybill (different from EDI)",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_document_number",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_lines",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_gst_treatment",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_billing_partner",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_write_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "error_message",
+     "blocking_level"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_write_successfully_response",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "response_vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_lock_ewaybill",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This document is being sent by another process already.",
+        "line": 446
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_ewaybill_handle_zero_distance_alert_if_present",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "response_data"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_handle_internal_warning_if_present",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "response"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_handle_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "ewaybill_error"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_and_post_response_attachment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "ewb_name",
+     "response",
+     "is_cancel"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_cancellation_request_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ewaybill_cancel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_log_retry_message_on_generate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_ewaybill",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_str_datetime_to_date",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "str_datetime"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Expected datetime formats:\n- 25/05/2025 11:59:00 PM\n- 09/04/2025 23:59:59 (trailing with extra whitespace)\n- 2025-05-24 23:59:00",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_state_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partner",
+     "is_to_state"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_l10n_in_ewaybill_line_details",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "line",
+     "tax_details"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_ewaybill_base_json_payload",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 66,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_ewaybill_transportation_json_payload",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_ewaybill_tax_details_json_payload",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ewaybill_generate_direct_json",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_data_from_attachment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": "This method is used for upgrade, to migrate the old edi_ewaybill\nIn any case this method should not be removed\nsee https://github.com/the system/upgrade/pull/6624 for futher information",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_and_attach_pdf",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "doc_label"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_l10n_in_ewaybill_prevent",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a generated E-waybill. Instead, you should cancel it.",
+        "line": 780
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_process_through_irn",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_move_id.l10n_in_edi_status"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ewaybill_generate_irn_json",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_ewaybill_by_irn",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_edi_irn_number",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ewaybill_generate_by_irn",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "json_payload"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_irn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_fiscal_position",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_bill_from_id",
+         "partner_bill_to_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_to_challan",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The challan can only be generated in the Pending state.",
+        "line": 128
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_tax_details_for_stock",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_tax_details_by_stock_move",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_generate_ewaybill",
+    "package": "l10n_in_ewaybill",
+    "kind": "UserError",
+    "message": "'\\n'.join(errors)"
+   },
+   {
+    "operation": "action_reset_to_pending",
+    "package": "l10n_in_ewaybill",
+    "kind": "UserError",
+    "message": "Only Cancelled E-waybill can be resent."
+   },
+   {
+    "operation": "action_print",
+    "package": "l10n_in_ewaybill",
+    "kind": "UserError",
+    "message": "Please generate the E-Waybill to print it."
+   },
+   {
+    "operation": "_lock_ewaybill",
+    "package": "l10n_in_ewaybill",
+    "kind": "UserError",
+    "message": "This document is being sent by another process already."
+   },
+   {
+    "operation": "_unlink_l10n_in_ewaybill_prevent",
+    "package": "l10n_in_ewaybill",
+    "kind": "UserError",
+    "message": "You cannot delete a generated E-waybill. Instead, you should cancel it."
+   },
+   {
+    "operation": "action_generate_ewaybill",
+    "package": "l10n_in_ewaybill_irn",
+    "kind": "UserError",
+    "message": "'\\n'.join(errors)"
+   },
+   {
+    "operation": "action_reset_to_pending",
+    "package": "l10n_in_ewaybill_stock",
+    "kind": "UserError",
+    "message": "Only Delivery Challan and Cancelled E-waybill can be reset to pending."
+   },
+   {
+    "operation": "action_set_to_challan",
+    "package": "l10n_in_ewaybill_stock",
+    "kind": "UserError",
+    "message": "The challan can only be generated in the Pending state."
+   },
+   {
+    "operation": "action_print",
+    "package": "l10n_in_ewaybill_stock",
+    "kind": "UserError",
+    "message": "Please generate the E-Waybill or mark the document as a Challan to print it."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_in_ewaybill.l10n_in_ewaybill.access_l10n_in_ewaybill",
+    "package": "l10n_in_ewaybill",
+    "name": "access_l10n_in_ewaybill",
+    "entity": "l10n.in.ewaybill",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "l10n_in_ewaybill.l10n_in_ewaybill.view_l10n_in_ewaybill",
+    "package": "l10n_in_ewaybill",
+    "name": "view_l10n_in_ewaybill",
+    "entity": "l10n.in.ewaybill",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_in_ewaybill_stock.l10n_in_ewaybill_stock.access_l10n_in_ewaybill_stock",
+    "package": "l10n_in_ewaybill_stock",
+    "name": "access_l10n_in_ewaybill_stock",
+    "entity": "l10n.in.ewaybill",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "l10n_in_ewaybill.l10n_in_ewaybill_comp_rule",
+    "package": "l10n_in_ewaybill",
+    "name": "L10nIn Ewaybill multi-company",
+    "entity": "l10n.in.ewaybill",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "l10n_in_ewaybill.l10n_in_ewaybill_form_view",
+    "package": "l10n_in_ewaybill",
+    "name": "l10n.in.ewaybill.form.view",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Ewaybill",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "error_message"
+      },
+      {
+       "name": "error_message"
+      },
+      {
+       "name": "name",
+       "readonly": "1"
+      },
+      {
+       "name": "type_id",
+       "widget": "selection",
+       "readonly": "state != 'pending'",
+       "required": "True",
+       "domain": "[('allowed_supply_type', 'in', (supply_type == 'I' and 'in' or 'out', 'both'))]"
+      },
+      {
+       "name": "ewaybill_date",
+       "invisible": "not ewaybill_date"
+      },
+      {
+       "name": "document_number"
+      },
+      {
+       "name": "document_date",
+       "widget": "datetime",
+       "readonly": "1",
+       "options": "{'show_time': false}"
+      },
+      {
+       "name": "account_move_id",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_bill_from_id",
+       "readonly": "state == 'pending' and not is_bill_from_editable or state != 'pending'",
+       "force_save": "1"
+      },
+      {
+       "name": "partner_bill_to_id",
+       "readonly": "state == 'pending' and not is_bill_to_editable or state != 'pending'",
+       "force_save": "1"
+      },
+      {
+       "name": "partner_ship_from_id",
+       "readonly": "state == 'pending' and not is_ship_from_editable or state != 'pending'",
+       "force_save": "1"
+      },
+      {
+       "name": "partner_ship_to_id",
+       "readonly": "state == 'pending' and not is_ship_to_editable or state != 'pending'",
+       "force_save": "1"
+      },
+      {
+       "name": "transporter_id",
+       "readonly": "state != 'pending'",
+       "required": "not mode"
+      },
+      {
+       "name": "mode",
+       "readonly": "state != 'pending'"
+      },
+      {
+       "name": "vehicle_type",
+       "invisible": "mode not in ('1','4')",
+       "readonly": "state != 'pending'",
+       "required": "mode == '1'"
+      },
+      {
+       "name": "vehicle_no",
+       "invisible": "mode not in ('1','4')",
+       "readonly": "state != 'pending'",
+       "required": "mode == '1' and not transportation_doc_no"
+      },
+      {
+       "name": "distance",
+       "readonly": "state != 'pending'"
+      },
+      {
+       "name": "transportation_doc_no",
+       "invisible": "not mode",
+       "readonly": "state != 'pending'",
+       "required": "mode in ('2', '3', '4')"
+      },
+      {
+       "name": "transportation_doc_date",
+       "invisible": "not mode",
+       "readonly": "state != 'pending'",
+       "required": "mode in ('2', '3', '4')"
+      },
+      {
+       "name": "cancel_reason",
+       "readonly": "state != 'generated'"
+      },
+      {
+       "name": "cancel_remarks",
+       "readonly": "state != 'generated'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_generate_ewaybill",
+       "string": "Generate e-Waybill",
+       "type": "object",
+       "invisible": "state != 'pending'",
+       "class": "oe_highlight",
+       "data-hotkey": "g"
+      },
+      {
+       "name": "action_cancel_ewaybill",
+       "string": "Cancel e-Waybill",
+       "type": "object",
+       "invisible": "state != 'generated'",
+       "data-hotkey": "c"
+      },
+      {
+       "name": "action_reset_to_pending",
+       "string": "Reset to Pending",
+       "type": "object",
+       "invisible": "state in ['pending', 'generated']",
+       "confirm": "Are you sure you want to re-send the e-Waybill?",
+       "data-hotkey": "r"
+      },
+      {
+       "name": "action_print",
+       "string": "Print",
+       "type": "object",
+       "invisible": "state != 'generated'",
+       "class": "oe_highlight",
+       "data-hotkey": "f"
+      },
+      {
+       "name": "action_export_content_json",
+       "string": "Download Content JSON",
+       "type": "object",
+       "invisible": "not error_message",
+       "class": "oe_highlight",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "selection": 1,
+      "datetime": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_generate_ewaybill",
+       "string": "Generate e-Waybill",
+       "class": "oe_highlight",
+       "type": "object",
+       "invisible": "state != 'pending'",
+       "data-hotkey": "g"
+      },
+      {
+       "name": "action_cancel_ewaybill",
+       "string": "Cancel e-Waybill",
+       "type": "object",
+       "invisible": "state != 'generated'",
+       "data-hotkey": "c"
+      },
+      {
+       "name": "action_reset_to_pending",
+       "string": "Reset to Pending",
+       "type": "object",
+       "invisible": "state in ['pending', 'generated']",
+       "data-hotkey": "r",
+       "confirm": "Are you sure you want to re-send the e-Waybill?"
+      },
+      {
+       "name": "action_print",
+       "string": "Print",
+       "class": "oe_highlight",
+       "type": "object",
+       "invisible": "state != 'generated'",
+       "data-hotkey": "f"
+      },
+      {
+       "name": "action_export_content_json",
+       "string": "Download Content JSON",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "not error_message",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "pending,generated",
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "l10n_in_ewaybill_irn.view_l10n_in_ewaybill_irn_inherit",
+    "package": "l10n_in_ewaybill_irn",
+    "name": "l10n.in.ewaybill.irn.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "l10n_in_ewaybill.l10n_in_ewaybill_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='document_details']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='document_details']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_in_ewaybill_stock.view_l10n_in_ewaybill_stock_inherit",
+    "package": "l10n_in_ewaybill_stock",
+    "name": "l10n.in.ewaybill.stock.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "l10n_in_ewaybill.l10n_in_ewaybill_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_reset_to_pending']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_set_to_challan",
+       "string": "Use as Challan",
+       "type": "object",
+       "invisible": "state != 'pending' or not picking_id",
+       "data-hotkey": "d"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_reset_to_pending']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "l10n_in_ewaybill.l10n_in_ewaybill_form_action",
+    "package": "l10n_in_ewaybill",
+    "name": "e-Waybill",
+    "view_mode": "form",
+    "view_id": "l10n_in_ewaybill_form_view",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "l10n.in.ewaybill"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "l10n_in_ewaybill.action_report_ewaybill",
+    "package": "l10n_in_ewaybill",
+    "name": "Ewaybill",
+    "report_type": "qweb-pdf",
+    "report_name": "l10n_in_ewaybill.report_ewaybill",
+    "report_file": "l10n_in_ewaybill.report_ewaybill",
+    "print_report_name": "'Ewaybill - %s' % (object.document_number)",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_l10n_in_ewaybill",
+    "binding_type": "report",
+    "paperformat_id": "l10n_in_ewaybill.paperformat_ewaybill",
+    "groups_id": null,
+    "multi": null,
+    "entity": "l10n.in.ewaybill"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

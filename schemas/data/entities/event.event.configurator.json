@@ -1,0 +1,339 @@
+{
+ "catalog": {
+  "name": "entity:event.event.configurator",
+  "description": "Complete definition of entity Event Configurator (event.event.configurator).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.event.configurator",
+  "storage_name": "event_event_configurator",
+  "full_name": "Event Configurator",
+  "kind": "transient",
+  "description": "Event Configurator",
+  "defined_by_package": "event_sale",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "readonly": true,
+    "defined_in_package": "event_sale",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "defined_in_package": "event_sale",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "event_slot_id",
+    "type": "Many2one",
+    "comodel": "event.slot",
+    "string": "Slot",
+    "domain": "[('event_id', '=', event_id)]",
+    "compute": "_compute_event_slot_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event_sale",
+    "full_name": "Slot",
+    "target_entity": "event.slot"
+   },
+   {
+    "name": "event_ticket_id",
+    "type": "Many2one",
+    "comodel": "event.event.ticket",
+    "string": "Ticket Type",
+    "domain": "[('event_id', '=', event_id)]",
+    "compute": "_compute_event_ticket_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event_sale",
+    "full_name": "Ticket Type",
+    "target_entity": "event.event.ticket"
+   },
+   {
+    "name": "is_multi_slots",
+    "type": "Boolean",
+    "related": "event_id.is_multi_slots",
+    "defined_in_package": "event_sale",
+    "string": "Is Multi Slots",
+    "full_name": "Is Multi Slots"
+   },
+   {
+    "name": "has_available_tickets",
+    "type": "Boolean",
+    "string": "Has Available Tickets",
+    "compute": "_compute_has_available_tickets",
+    "defined_in_package": "event_sale",
+    "full_name": "Has Available Tickets"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "check_event_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "event_id",
+         "event_slot_id",
+         "event_ticket_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "'\\n'.join(error_messages)",
+        "line": 32
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_available_tickets",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_slot_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_multi_slots"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Pre-select the slot of the multi slots event selected if it is the only one ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_ticket_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Pre-select the ticket of the event selected if it is the only one ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "check_event_id",
+    "package": "event_sale",
+    "kind": "ValidationError",
+    "message": "'\\n'.join(error_messages)"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event_sale.access_event_event_configurator",
+    "package": "event_sale",
+    "name": "access.event.event.configurator",
+    "entity": "event.event.configurator",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "event_sale.event_configurator_view_form",
+    "package": "event_sale",
+    "name": "event.configurator.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "js_class": "event_configurator_form"
+     },
+     "fields": [
+      {
+       "name": "has_available_tickets",
+       "invisible": "1"
+      },
+      {
+       "name": "event_id",
+       "required": "1",
+       "domain": "[                             ('event_ticket_ids.product_id','=', product_id),                             ('date_end','>=',time.strftime('%Y-%m-%d 00:00:00'))                         ]",
+       "context": "{'name_with_seats_availability': True}",
+       "options": "{'no_open': True, 'no_create': True}",
+       "placeholder": "All Events"
+      },
+      {
+       "name": "event_slot_id",
+       "invisible": "not is_multi_slots",
+       "required": "is_multi_slots",
+       "domain": "[('event_id', '=', event_id)]",
+       "context": "{'name_with_seats_availability': True}",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "event_ticket_id",
+       "invisible": "not event_id",
+       "required": "event_id",
+       "domain": "[('event_id', '=', event_id), ('product_id', '=', product_id)]",
+       "context": "{'name_with_seats_availability': True}",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "product_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "string": "Add",
+       "invisible": "not has_available_tickets",
+       "class": "btn-primary o_event_sale_js_event_configurator_ok",
+       "special": "save",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "invisible": "not has_available_tickets",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      },
+      {
+       "string": "Close",
+       "invisible": "has_available_tickets",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event_sale.event_configurator_action",
+    "package": "event_sale",
+    "name": "Select an Event",
+    "view_mode": "form",
+    "view_id": "event_configurator_view_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'name_with_seats_availability': True}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "event.event.configurator"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

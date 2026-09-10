@@ -1,0 +1,4967 @@
+{
+ "catalog": {
+  "name": "entity:account.analytic.line",
+  "description": "Complete definition of entity Analytic Line (account.analytic.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.analytic.line",
+  "storage_name": "account_analytic_line",
+  "full_name": "Analytic Line",
+  "kind": "persistent",
+  "description": "Analytic Line",
+  "defined_by_package": "analytic",
+  "extended_by_packages": [
+   "account",
+   "sale",
+   "hr_timesheet",
+   "mrp_account",
+   "project_stock_account",
+   "project_timesheet_holidays",
+   "sale_timesheet",
+   "website_timesheet"
+  ],
+  "mixins": [
+   "analytic.plan.fields.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "date desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Description",
+    "required": true,
+    "defined_in_package": "analytic",
+    "full_name": "Description"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Date",
+    "required": true,
+    "index": true,
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "analytic",
+    "full_name": "Date"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "string": "Amount",
+    "required": true,
+    "default": 0.0,
+    "defined_in_package": "analytic",
+    "full_name": "Amount"
+   },
+   {
+    "name": "unit_amount",
+    "type": "Float",
+    "string": "Quantity",
+    "default": 0.0,
+    "defined_in_package": "analytic",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "defined_in_package": "analytic",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Partner",
+    "check_company": true,
+    "defined_in_package": "analytic",
+    "readonly": false,
+    "compute": "_compute_partner_id",
+    "store": true,
+    "extended_in_packages": [
+     "account",
+     "hr_timesheet"
+    ],
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('user_id', self.env.user.id)"
+    },
+    "index": true,
+    "defined_in_package": "analytic",
+    "compute": "_compute_user_id",
+    "store": true,
+    "readonly": false,
+    "extended_in_packages": [
+     "hr_timesheet"
+    ],
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "analytic",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "company_id.currency_id",
+    "string": "Currency",
+    "readonly": true,
+    "store": true,
+    "compute_sudo": true,
+    "defined_in_package": "analytic",
+    "full_name": "Currency"
+   },
+   {
+    "name": "category",
+    "type": "Selection",
+    "selection": [
+     [
+      "other",
+      "Other"
+     ],
+     [
+      "invoice",
+      "Customer Invoice"
+     ],
+     [
+      "vendor_bill",
+      "Vendor Bill"
+     ],
+     [
+      "manufacturing_order",
+      "Manufacturing Order"
+     ],
+     [
+      "picking_entry",
+      "Inventory Transfer"
+     ]
+    ],
+    "default": "other",
+    "defined_in_package": "analytic",
+    "selection_added_by": [
+     "account",
+     "mrp_account",
+     "project_stock_account"
+    ],
+    "extended_in_packages": [
+     "account",
+     "mrp_account",
+     "project_stock_account"
+    ],
+    "string": "Category",
+    "full_name": "Category"
+   },
+   {
+    "name": "fiscal_year_search",
+    "type": "Boolean",
+    "search": "_search_fiscal_date",
+    "store": false,
+    "exportable": false,
+    "export_string_translation": false,
+    "defined_in_package": "analytic",
+    "string": "Fiscal Year Search",
+    "full_name": "Fiscal Year Search"
+   },
+   {
+    "name": "analytic_distribution",
+    "type": "Json",
+    "string": "Analytic Distribution",
+    "compute": "_compute_analytic_distribution",
+    "inverse": "_inverse_analytic_distribution",
+    "defined_in_package": "analytic",
+    "full_name": "Analytic Distribution"
+   },
+   {
+    "name": "analytic_precision",
+    "type": "Integer",
+    "store": false,
+    "default": {
+     "dynamic": "lambda self: self.env['decimal.precision'].precision_get('Percentage Analytic')"
+    },
+    "defined_in_package": "analytic",
+    "string": "Analytic Precision",
+    "full_name": "Analytic Precision"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "account",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_category",
+    "type": "Many2one",
+    "related": "product_id.categ_id",
+    "defined_in_package": "account",
+    "string": "Product Category",
+    "full_name": "Product Category"
+   },
+   {
+    "name": "general_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Financial Account",
+    "ondelete": "restrict",
+    "check_company": true,
+    "compute": "_compute_general_account_id",
+    "store": true,
+    "readonly": false,
+    "index": "btree_not_null",
+    "defined_in_package": "account",
+    "full_name": "Financial Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Financial Journal",
+    "check_company": true,
+    "readonly": true,
+    "related": "move_line_id.journal_id",
+    "store": true,
+    "defined_in_package": "account",
+    "full_name": "Financial Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "move_line_id",
+    "type": "Many2one",
+    "comodel": "account.move.line",
+    "string": "Journal Item",
+    "ondelete": "cascade",
+    "index": true,
+    "check_company": true,
+    "defined_in_package": "account",
+    "full_name": "Journal Item",
+    "target_entity": "account.move.line"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "size": 8,
+    "defined_in_package": "account",
+    "string": "Code",
+    "full_name": "Code"
+   },
+   {
+    "name": "ref",
+    "type": "Char",
+    "string": "Ref.",
+    "defined_in_package": "account",
+    "full_name": "Ref."
+   },
+   {
+    "name": "analytic_profitability",
+    "type": "Selection",
+    "string": "Profitability",
+    "selection": [
+     [
+      "uncategorized",
+      "Uncategorized"
+     ],
+     [
+      "revenue",
+      "Revenue"
+     ],
+     [
+      "loss",
+      "Loss"
+     ]
+    ],
+    "compute": "_compute_analytic_profitability",
+    "search": "_search_analytic_profitability",
+    "defined_in_package": "account",
+    "full_name": "Profitability"
+   },
+   {
+    "name": "so_line",
+    "type": "Many2one",
+    "comodel": "sale.order.line",
+    "string": "Sales Order Item",
+    "domain": {
+     "dynamic": "_domain_so_line"
+    },
+    "index": "btree_not_null",
+    "defined_in_package": "sale",
+    "compute": "_compute_so_line",
+    "store": true,
+    "readonly": false,
+    "falsy_value_label": "Non-billable",
+    "help": "Sales order item to which the time spent will be added in order to be invoiced to your customer. Remove the sales order item for the timesheet entry to be non-billable.",
+    "extended_in_packages": [
+     "sale_timesheet"
+    ],
+    "full_name": "Sales Order Item",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "task_id",
+    "type": "Many2one",
+    "comodel": "project.task",
+    "string": "Task",
+    "index": "btree_not_null",
+    "compute": "_compute_task_id",
+    "store": true,
+    "readonly": false,
+    "domain": "[('allow_timesheets', '=', True), ('project_id', '=?', project_id), ('has_template_ancestor', '=', False), ('is_timeoff_task', '=', False)]",
+    "defined_in_package": "hr_timesheet",
+    "extended_in_packages": [
+     "project_timesheet_holidays"
+    ],
+    "full_name": "Task",
+    "target_entity": "project.task"
+   },
+   {
+    "name": "parent_task_id",
+    "type": "Many2one",
+    "comodel": "project.task",
+    "related": "task_id.parent_id",
+    "store": true,
+    "index": "btree_not_null",
+    "defined_in_package": "hr_timesheet",
+    "string": "Parent Task",
+    "full_name": "Parent Task",
+    "target_entity": "project.task"
+   },
+   {
+    "name": "project_id",
+    "type": "Many2one",
+    "comodel": "project.project",
+    "string": "Project",
+    "domain": {
+     "dynamic": "_domain_project_id"
+    },
+    "index": true,
+    "compute": "_compute_project_id",
+    "inverse": "_inverse_project_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "hr_timesheet",
+    "full_name": "Project",
+    "target_entity": "project.project"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "domain": {
+     "dynamic": "_domain_employee_id"
+    },
+    "context": {
+     "active_test": false
+    },
+    "index": true,
+    "help": "Define an 'hourly cost' on the employee to track the cost of their time.",
+    "defined_in_package": "hr_timesheet",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "job_title",
+    "type": "Char",
+    "related": "employee_id.job_title",
+    "export_string_translation": false,
+    "defined_in_package": "hr_timesheet",
+    "string": "Job Title",
+    "full_name": "Job Title"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "string": "Department",
+    "compute": "_compute_department_id",
+    "store": true,
+    "compute_sudo": true,
+    "defined_in_package": "hr_timesheet",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Manager",
+    "related": "employee_id.parent_id",
+    "store": true,
+    "defined_in_package": "hr_timesheet",
+    "full_name": "Manager",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "encoding_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "compute": "_compute_encoding_uom_id",
+    "export_string_translation": false,
+    "defined_in_package": "hr_timesheet",
+    "string": "Encoding Unit of measure",
+    "full_name": "Encoding Unit of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "readonly_timesheet",
+    "type": "Boolean",
+    "compute": "_compute_readonly_timesheet",
+    "compute_sudo": true,
+    "export_string_translation": false,
+    "defined_in_package": "hr_timesheet",
+    "string": "Readonly Timesheet",
+    "full_name": "Readonly Timesheet"
+   },
+   {
+    "name": "milestone_id",
+    "type": "Many2one",
+    "comodel": "project.milestone",
+    "related": "task_id.milestone_id",
+    "defined_in_package": "hr_timesheet",
+    "string": "Milestone",
+    "full_name": "Milestone",
+    "target_entity": "project.milestone"
+   },
+   {
+    "name": "message_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_message_partner_ids",
+    "search": "_search_message_partner_ids",
+    "defined_in_package": "hr_timesheet",
+    "string": "Message Partner",
+    "full_name": "Message Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "calendar_display_name",
+    "type": "Char",
+    "compute": "_compute_calendar_display_name",
+    "export_string_translation": false,
+    "defined_in_package": "hr_timesheet",
+    "string": "Calendar Display Name",
+    "full_name": "Calendar Display Name"
+   },
+   {
+    "name": "holiday_id",
+    "type": "Many2one",
+    "comodel": "hr.leave",
+    "string": "Time Off Request",
+    "copy": false,
+    "index": "btree_not_null",
+    "export_string_translation": false,
+    "defined_in_package": "project_timesheet_holidays",
+    "full_name": "Time Off Request",
+    "target_entity": "hr.leave"
+   },
+   {
+    "name": "global_leave_id",
+    "type": "Many2one",
+    "comodel": "resource.calendar.leaves",
+    "string": "Global Time Off",
+    "index": "btree_not_null",
+    "ondelete": "cascade",
+    "export_string_translation": false,
+    "defined_in_package": "project_timesheet_holidays",
+    "full_name": "Global Time Off",
+    "target_entity": "resource.calendar.leaves"
+   },
+   {
+    "name": "timesheet_invoice_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "TIMESHEET_INVOICE_TYPES"
+    },
+    "string": "Billable Type",
+    "compute": "_compute_timesheet_invoice_type",
+    "compute_sudo": true,
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "sale_timesheet",
+    "full_name": "Billable Type"
+   },
+   {
+    "name": "commercial_partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "compute": "_compute_commercial_partner",
+    "defined_in_package": "sale_timesheet",
+    "string": "Commercial Partner",
+    "full_name": "Commercial Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "timesheet_invoice_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "string": "Invoice",
+    "readonly": true,
+    "copy": false,
+    "help": "Invoice created from the timesheet",
+    "index": "btree_not_null",
+    "defined_in_package": "sale_timesheet",
+    "full_name": "Invoice",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "order_id",
+    "type": "Many2one",
+    "related": "so_line.order_id",
+    "store": true,
+    "readonly": true,
+    "index": true,
+    "defined_in_package": "sale_timesheet",
+    "string": "Order",
+    "full_name": "Order"
+   },
+   {
+    "name": "is_so_line_edited",
+    "type": "Boolean",
+    "string": "Is Sales Order Item Manually Edited",
+    "defined_in_package": "sale_timesheet",
+    "full_name": "Is Sales Order Item Manually Edited"
+   },
+   {
+    "name": "allow_billable",
+    "type": "Boolean",
+    "related": "project_id.allow_billable",
+    "defined_in_package": "sale_timesheet",
+    "string": "Allow Billable",
+    "full_name": "Allow Billable"
+   },
+   {
+    "name": "sale_order_state",
+    "type": "Selection",
+    "related": "order_id.state",
+    "defined_in_package": "sale_timesheet",
+    "string": "Sale Order State",
+    "full_name": "Sale Order State"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_timeoff_timesheet_idx",
+    "kind": "Index",
+    "definition": "(task_id) WHERE (global_leave_id IS NOT NULL OR holiday_id IS NOT NULL) AND project_id IS NOT NULL",
+    "message": null,
+    "defined_in_package": "project_timesheet_holidays"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_analytic_distribution",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_analytic_distribution",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_amount_fname",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_fiscal_date",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_general_account_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_line_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_general_account_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "move_line_id",
+         "general_account_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The journal item is not linked to the correct financial account",
+        "line": 70
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_line_id.partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "task_id.partner_id",
+         "project_id.partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "timesheet_invoice_id.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_analytic_profitability",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "general_account_id",
+         "category",
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "on_change_unit_amount",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id",
+         "product_uom_id",
+         "unit_amount",
+         "currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "view_header_get",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "view_id",
+     "view_type"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 143,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "error_msg",
+        "line": 337
+       },
+       {
+        "kind": "ValidationError",
+        "message": "error_msg",
+        "line": 315
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Timesheets cannot be created on a private task.",
+        "line": 252
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_field_to_sql",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "alias",
+     "field_expr",
+     "query"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_analytic_profitability",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Timesheets cannot be created on a private task.",
+        "line": 371
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot set an archived employee on existing timesheets.",
+        "line": 383
+       }
+      ]
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_favorite_project_id_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "employee_id"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_favorite_project_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "employee_id"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_project_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_employee_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_message_partner_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_message_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "project_id.message_partner_ids",
+         "task_id.message_partner_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "project_id",
+         "task_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_readonly",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_readonly_timesheet",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_encoding_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_project_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "task_id.project_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "timesheet_invoice_id.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_project_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_task_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "project_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_project_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "project_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id.user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_department_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_calendar_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_can_write",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You cannot access timesheets that are not yours.",
+        "line": 213
+       }
+      ]
+     },
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Timesheets linked to public holidays cannot be modified.",
+        "line": 44
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot modify timesheets that are linked to time off requests. Please use the Time Off application to modify your time off requests instead.",
+        "line": 46
+       }
+      ]
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot modify timesheets that are already invoiced.",
+        "line": 106
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_can_create",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot create timesheets for a task that is linked to a time off type. Please use the Time Off application to request new time off instead.",
+        "line": 51
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "get_views",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "views",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_get_portal_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": "Only the timesheets with a product invoiced on delivered quantity are concerned.\nsince in ordered quantity, the timesheet quantity is not invoiced,\nthus there is no meaning of showing invoice with ordered quantity.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_preprocess_get_accounts",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "'%(missing_plan_names)s' analytic plan(s) required on the project '%(project_name)s' linked to the timesheet.",
+        "line": 431
+       }
+      ]
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "'%(missing_plan_names)s' analytic plan(s) required on the analytic distribution of the sale order item '%(so_line_name)s' linked to the timesheet.",
+        "line": 247
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_postprocess",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": "Hook to update record one by one according to the values of a `write` or a `create`. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_postprocess_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": "Get the addionnal values to write on record\n:param dict values: values for the model's fields, as a dictionary::\n    {'field_name': field_value, ...}\n:return: a dictionary mapping each record id to its corresponding\n    dictionary values to write (may be empty).",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Timesheets must be created with at least an active analytic account defined in the plan '%(plan_name)s'.",
+        "line": 464
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The project, the task and the analytic accounts of the timesheet must belong to the same company.",
+        "line": 471
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_is_timesheet_encode_uom_day",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_updatable_timesheet",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_hours_to_days",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "time"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_timesheet_time_day",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_hourly_cost",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_report_base_filename",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_user",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_uom_hours",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_show_portal_timesheets",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Determine if we show timesheet information in the portal. Meant to be overriden in website_timesheet.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Determine if we show timesheet information in the portal.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_timesheet_view_portal",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_unusual_days",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "date_from",
+     "date_to"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_import_templates",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_redirect_action",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_linked_leave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete timesheets that are linked to global time off.",
+        "line": 34
+       },
+       {
+        "kind": "RedirectWarning",
+        "message": "error_message",
+        "line": 40
+       },
+       {
+        "kind": "UserError",
+        "message": "error_message",
+        "line": 38
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_domain_so_line",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_commercial_partner",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "project_id.partner_id.commercial_partner_id",
+         "task_id.partner_id.commercial_partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_timesheet_invoice_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "so_line.product_id",
+         "project_id.billing_type",
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_so_line",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "task_id.sale_line_id",
+         "project_id.sale_line_id",
+         "employee_id",
+         "project_id.allow_billable"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_not_billed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_timesheet_can_be_billed",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_determine_sale_line",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": "Deduce the SO line associated to the timesheet line:\n1/ timesheet on task rate: the so line will be the one from the task\n2/ timesheet on employee rate task: find the SO line in the map of the project (even for subtask), or fallback on the SO line of the task, or fallback\n    on the one on the project",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_get_sale_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "order_lines_ids",
+     "invoice_ids"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_timesheets_to_merge",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_invoiced",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot remove a timesheet that has already been invoiced.",
+        "line": 179
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_employee_mapping_entry",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_sale_order_from_timesheet",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_invoice_from_timesheet",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_convert_sol_uom",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sol",
+     "to_unit"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_general_account_id",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The journal item is not linked to the correct financial account"
+   },
+   {
+    "operation": "_check_can_write",
+    "package": "hr_timesheet",
+    "kind": "AccessError",
+    "message": "You cannot access timesheets that are not yours."
+   },
+   {
+    "operation": "create",
+    "package": "hr_timesheet",
+    "kind": "ValidationError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "create",
+    "package": "hr_timesheet",
+    "kind": "ValidationError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "create",
+    "package": "hr_timesheet",
+    "kind": "ValidationError",
+    "message": "Timesheets cannot be created on a private task."
+   },
+   {
+    "operation": "write",
+    "package": "hr_timesheet",
+    "kind": "ValidationError",
+    "message": "Timesheets cannot be created on a private task."
+   },
+   {
+    "operation": "write",
+    "package": "hr_timesheet",
+    "kind": "UserError",
+    "message": "You cannot set an archived employee on existing timesheets."
+   },
+   {
+    "operation": "_timesheet_preprocess_get_accounts",
+    "package": "hr_timesheet",
+    "kind": "ValidationError",
+    "message": "'%(missing_plan_names)s' analytic plan(s) required on the project '%(project_name)s' linked to the timesheet."
+   },
+   {
+    "operation": "_timesheet_postprocess_values",
+    "package": "hr_timesheet",
+    "kind": "ValidationError",
+    "message": "Timesheets must be created with at least an active analytic account defined in the plan '%(plan_name)s'."
+   },
+   {
+    "operation": "_timesheet_postprocess_values",
+    "package": "hr_timesheet",
+    "kind": "ValidationError",
+    "message": "The project, the task and the analytic accounts of the timesheet must belong to the same company."
+   },
+   {
+    "operation": "_unlink_except_linked_leave",
+    "package": "project_timesheet_holidays",
+    "kind": "UserError",
+    "message": "You cannot delete timesheets that are linked to global time off."
+   },
+   {
+    "operation": "_unlink_except_linked_leave",
+    "package": "project_timesheet_holidays",
+    "kind": "RedirectWarning",
+    "message": "error_message"
+   },
+   {
+    "operation": "_unlink_except_linked_leave",
+    "package": "project_timesheet_holidays",
+    "kind": "UserError",
+    "message": "error_message"
+   },
+   {
+    "operation": "_check_can_write",
+    "package": "project_timesheet_holidays",
+    "kind": "UserError",
+    "message": "Timesheets linked to public holidays cannot be modified."
+   },
+   {
+    "operation": "_check_can_write",
+    "package": "project_timesheet_holidays",
+    "kind": "UserError",
+    "message": "You cannot modify timesheets that are linked to time off requests. Please use the Time Off application to modify your time off requests instead."
+   },
+   {
+    "operation": "_check_can_create",
+    "package": "project_timesheet_holidays",
+    "kind": "UserError",
+    "message": "You cannot create timesheets for a task that is linked to a time off type. Please use the Time Off application to request new time off instead."
+   },
+   {
+    "operation": "_check_can_write",
+    "package": "sale_timesheet",
+    "kind": "UserError",
+    "message": "You cannot modify timesheets that are already invoiced."
+   },
+   {
+    "operation": "_unlink_except_invoiced",
+    "package": "sale_timesheet",
+    "kind": "UserError",
+    "message": "You cannot remove a timesheet that has already been invoiced."
+   },
+   {
+    "operation": "_timesheet_preprocess_get_accounts",
+    "package": "sale_timesheet",
+    "kind": "ValidationError",
+    "message": "'%(missing_plan_names)s' analytic plan(s) required on the analytic distribution of the sale order item '%(so_line_name)s' linked to the timesheet."
+   }
+  ],
+  "state_fields": [
+   "sale_order_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_analytic_line_manager",
+    "package": "account",
+    "name": "account.analytic.line manager",
+    "entity": "account.analytic.line",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_analytic_line_readonly",
+    "package": "account",
+    "name": "account.analytic.line invoice",
+    "entity": "account.analytic.line",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_analytic_line_invoice",
+    "package": "account",
+    "name": "account.analytic.line invoice",
+    "entity": "account.analytic.line",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "analytic.access_account_analytic_line",
+    "package": "analytic",
+    "name": "access_account_analytic_line",
+    "entity": "account.analytic.line",
+    "group": "group_analytic_accounting",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_expense.access_account_analytic_line_user",
+    "package": "hr_expense",
+    "name": "account.analytic.line.user",
+    "entity": "account.analytic.line",
+    "group": "hr_expense.group_hr_expense_team_approver",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_timesheet.access_account_analytic_line_user",
+    "package": "hr_timesheet",
+    "name": "analytic.account.analytic.line.timesheet.user",
+    "entity": "account.analytic.line",
+    "group": "hr_timesheet.group_hr_timesheet_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mrp_subcontracting_account.access_subcontracting_portal_analytic_line",
+    "package": "mrp_subcontracting_account",
+    "name": "subcontracting.portal.analytic_line",
+    "entity": "account.analytic.line",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "project.access_account_analytic_line_project",
+    "package": "project",
+    "name": "account.analytic.line project",
+    "entity": "account.analytic.line",
+    "group": "project.group_project_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "purchase.access_account_analytic_line",
+    "package": "purchase",
+    "name": "account.analytic.line",
+    "entity": "account.analytic.line",
+    "group": "group_purchase_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.account_analytic_line_rule_billing_user",
+    "package": "account",
+    "name": "account.analytic.line.billing.user",
+    "entity": "account.analytic.line",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('account.group_account_invoice'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "account.account_analytic_line_rule_readonly_user",
+    "package": "account",
+    "name": "account.analytic.line.readonly.user",
+    "entity": "account.analytic.line",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('account.group_account_readonly'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "analytic.analytic_line_comp_rule",
+    "package": "analytic",
+    "name": "Analytic line multi company rule",
+    "entity": "account.analytic.line",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_line_rule_portal_user",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.timesheet.portal.user",
+    "entity": "account.analytic.line",
+    "domain": "[\n                ('project_id', '!=', False),\n                ('message_partner_ids', 'child_of', [user.partner_id.commercial_partner_id.id]),\n                ('project_id.privacy_visibility', 'in', ['invited_users', 'portal']),\n                ('project_id.collaborator_ids.partner_id', 'in', [user.partner_id.id]),\n            ]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_line_rule_user",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.timesheet.user",
+    "entity": "account.analytic.line",
+    "domain": "[\n                ('user_id', '=', user.id),\n                ('project_id', '!=', False),\n                '|', '|',\n                    ('project_id.privacy_visibility', 'in', ['employees', 'portal']),\n                    ('partner_id', '=', user.partner_id.id),\n                    ('message_partner_ids', 'in', [user.partner_id.id])\n            ]",
+    "groups": "[(4, ref('group_hr_timesheet_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_line_rule_approver",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.timesheet.approver",
+    "entity": "account.analytic.line",
+    "domain": "[\n                ('project_id', '!=', False),\n                '|', '|',\n                    ('project_id.privacy_visibility', 'in', ['employees', 'portal']),\n                    ('message_partner_ids', 'in', [user.partner_id.id]),\n                    ('partner_id', '=', user.partner_id.id),\n            ]",
+    "groups": "[(4, ref('hr_timesheet.group_hr_timesheet_approver'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_line_rule_manager",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.timesheet.manager",
+    "entity": "account.analytic.line",
+    "domain": "[('project_id', '!=', False)]",
+    "groups": "[(4, ref('group_timesheet_manager')), (4, ref('project.group_project_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "mrp_subcontracting_account.analytic_accout_line_subcontractor_rule",
+    "package": "mrp_subcontracting_account",
+    "name": "Analytic Account Line Subcontractor",
+    "entity": "account.analytic.line",
+    "domain": "[('account_id.bom_ids', 'in', user.partner_id.commercial_partner_id.bom_ids.ids)]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.view_account_analytic_line_form_inherit_account",
+    "package": "account",
+    "name": "account.analytic.line.form.inherit.account",
+    "view_type": "data",
+    "inherits_view": "analytic.view_account_analytic_line_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "ref"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "move_line_id",
+       "widget": "line_open_move_widget",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "general_account_id",
+       "readonly": "move_line_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "line_open_move_widget": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='amount']",
+       "position": "after"
+      },
+      {
+       "expr": "//field[@name='product_uom_id']",
+       "position": "before"
+      },
+      {
+       "element": "group",
+       "attributes": {
+        "name": "amount",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.view_account_analytic_line_tree_inherit_account",
+    "package": "account",
+    "name": "account.analytic.line.list.inherit.account",
+    "view_type": "data",
+    "inherits_view": "analytic.view_account_analytic_line_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "ref",
+       "column_invisible": "context.get('to_invoice', False)",
+       "optional": "hide"
+      },
+      {
+       "name": "general_account_id",
+       "optional": "hide"
+      },
+      {
+       "name": "move_line_id",
+       "widget": "line_open_move_widget",
+       "optional": "hide"
+      },
+      {
+       "name": "product_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "line_open_move_widget": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='account_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.view_account_analytic_line_filter_inherit_account",
+    "package": "account",
+    "name": "account.analytic.line.select.inherit.account",
+    "view_type": "data",
+    "inherits_view": "analytic.view_account_analytic_line_filter",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "auto_account_id"
+      },
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "general_account_id"
+      },
+      {
+       "name": "partner_id",
+       "filter_domain": "[('partner_id','child_of',self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "fiscal_date",
+       "string": "From last fiscal year",
+       "domain": "[('fiscal_year_search', '=', True)]",
+       "invisible": "1"
+      },
+      {
+       "name": "profit_loss_accounts",
+       "string": "P&L Accounts",
+       "domain": "[('general_account_id.internal_group', 'in', ['income', 'expense'])]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "account_id",
+       "context": "{'group_by': 'account_id'}"
+      },
+      {
+       "name": "group_by_financial_account",
+       "string": "Financial Account",
+       "context": "{'group_by':'general_account_id'}"
+      },
+      {
+       "name": "category",
+       "string": "Category",
+       "context": "{'group_by': 'category'}"
+      },
+      {
+       "name": "product",
+       "string": "Product",
+       "context": "{'group_by':'product_id'}"
+      },
+      {
+       "name": "partner",
+       "string": "Partner",
+       "context": "{'group_by':'partner_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='date']",
+       "position": "after"
+      },
+      {
+       "expr": "//filter[@name='month']",
+       "position": "after"
+      },
+      {
+       "expr": "//group[@name='groupby']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.view_account_analytic_line_pivot",
+    "package": "account",
+    "name": "account.analytic.line.pivot",
+    "view_type": "field",
+    "inherits_view": "analytic.view_account_analytic_line_pivot",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "account_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "account_id",
+       "position": "after"
+      },
+      {
+       "name": "partner_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_line_tree",
+    "package": "analytic",
+    "name": "account.analytic.line.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Analytic Items",
+      "multi_edit": "1",
+      "js_class": "analytic_list"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "date",
+       "optional": "show"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "options": "{'multi_edit': true}",
+       "optional": "hide"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "unit_amount",
+       "optional": "hide",
+       "sum": "Quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "optional": "hide"
+      },
+      {
+       "name": "partner_id",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "amount",
+       "optional": "show",
+       "sum": "Total"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "analytic_distribution": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_line_filter",
+    "package": "analytic",
+    "name": "account.analytic.line.select",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Analytic Lines"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "date"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "month",
+       "string": "Date",
+       "date": "date"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_date",
+       "string": "Date",
+       "context": "{'group_by': 'date'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_line_form",
+    "package": "analytic",
+    "name": "account.analytic.line.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Analytic Item"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "amount"
+      },
+      {
+       "name": "unit_amount"
+      },
+      {
+       "name": "product_uom_id"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_line_graph",
+    "package": "analytic",
+    "name": "account.analytic.line.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Analytic Items",
+      "sample": "1",
+      "js_class": "analytic_graph"
+     },
+     "fields": [
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "float_time"
+      },
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "unit_amount",
+       "type": "measure",
+       "widget": "float_time"
+      },
+      {
+       "name": "amount",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_line_pivot",
+    "package": "analytic",
+    "name": "account.analytic.line.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Analytic Items",
+      "sample": "1",
+      "js_class": "analytic_pivot"
+     },
+     "fields": [
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "date",
+       "interval": "month",
+       "type": "col"
+      },
+      {
+       "name": "amount",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_line_kanban",
+    "package": "analytic",
+    "name": "account.analytic.line.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "js_class": "analytic_kanban"
+     },
+     "fields": [
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "amount",
+       "widget": "monetary"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.hr_timesheet_line_tree",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.list.hr_timesheet",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "top",
+      "string": "Timesheet Activities",
+      "sample": "1",
+      "decoration-muted": "readonly_timesheet == True"
+     },
+     "fields": [
+      {
+       "name": "readonly_timesheet",
+       "column_invisible": "True"
+      },
+      {
+       "name": "date",
+       "readonly": "readonly_timesheet"
+      },
+      {
+       "name": "employee_id",
+       "readonly": "readonly_timesheet",
+       "column_invisible": "True"
+      },
+      {
+       "name": "project_id",
+       "readonly": "readonly_timesheet",
+       "required": "1",
+       "context": "{'search_default_my_projects': True}",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "task_id",
+       "widget": "task_with_hours",
+       "readonly": "readonly_timesheet",
+       "context": "{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}",
+       "options": "{'no_create_edit': True, 'no_open': True}",
+       "optional": "show"
+      },
+      {
+       "name": "name",
+       "readonly": "readonly_timesheet",
+       "required": "0",
+       "optional": "show"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "readonly": "readonly_timesheet",
+       "string": "Time Spent",
+       "optional": "show",
+       "sum": "Total",
+       "decoration-danger": "unit_amount > 24 or unit_amount < 0",
+       "decoration-muted": "unit_amount == 0"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "user_id",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "task_with_hours": 1,
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "readonly_timesheet == True"
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.hr_timesheet_line_portal_tree",
+    "package": "hr_timesheet",
+    "name": "portal.hr_timesheet.account.analytic.line.list",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet_line_tree",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_view_tree_user",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.view.list.with.user",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet_line_tree",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='employee_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='employee_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_hr_timesheet_line_pivot",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Timesheets",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "string": "Time Spent"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "employee_id",
+       "type": "row"
+      },
+      {
+       "name": "date",
+       "interval": "month",
+       "type": "col"
+      },
+      {
+       "name": "unit_amount",
+       "string": "Time Spent",
+       "type": "measure",
+       "widget": "timesheet_uom"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_my_timesheet_line_pivot",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Timesheet",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "string": "Time Spent"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date",
+       "interval": "week",
+       "type": "row"
+      },
+      {
+       "name": "unit_amount",
+       "string": "Time Spent",
+       "type": "measure",
+       "widget": "timesheet_uom"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_hr_timesheet_line_graph",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Timesheets",
+      "sample": "1",
+      "js_class": "hr_timesheet_graphview"
+     },
+     "fields": [
+      {
+       "name": "task_id"
+      },
+      {
+       "name": "project_id"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "string": "Time Spent"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "task_id"
+      },
+      {
+       "name": "project_id"
+      },
+      {
+       "name": "unit_amount",
+       "string": "Time Spent",
+       "type": "measure",
+       "widget": "timesheet_uom"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_hr_timesheet_line_graph_my",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Timesheet",
+      "sample": "1",
+      "js_class": "hr_timesheet_graphview"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "project_id"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "string": "Time Spent"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date",
+       "interval": "week"
+      },
+      {
+       "name": "project_id"
+      },
+      {
+       "name": "amount",
+       "type": "measure",
+       "string": "Timesheet Costs"
+      },
+      {
+       "name": "unit_amount",
+       "string": "Time Spent",
+       "type": "measure",
+       "widget": "timesheet_uom"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_hr_timesheet_line_graph_all",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Timesheet",
+      "sample": "1",
+      "js_class": "hr_timesheet_graphview"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "project_id"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "string": "Time Spent"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "project_id"
+      },
+      {
+       "name": "amount",
+       "type": "measure",
+       "string": "Timesheet Costs"
+      },
+      {
+       "name": "unit_amount",
+       "string": "Time Spent",
+       "type": "measure",
+       "widget": "timesheet_uom"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_hr_timesheet_line_by_project",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.graph.by.project",
+    "view_type": "field",
+    "inherits_view": "hr_timesheet.view_hr_timesheet_line_graph_all",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "project_id",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "project_id",
+       "position": "replace"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_hr_timesheet_line_graph_by_employee",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.graph.by.employee",
+    "view_type": "field",
+    "inherits_view": "hr_timesheet.view_hr_timesheet_line_graph_all",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "project_id",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "project_id",
+       "position": "replace"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.hr_timesheet_line_form",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.form",
+    "view_type": "form",
+    "inherits_view": "False",
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Analytic Entry"
+     },
+     "fields": [
+      {
+       "name": "readonly_timesheet",
+       "invisible": "1"
+      },
+      {
+       "name": "project_id",
+       "readonly": "readonly_timesheet",
+       "required": "1",
+       "context": "{'search_default_my_projects': True}",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "task_id",
+       "widget": "task_with_hours",
+       "readonly": "readonly_timesheet",
+       "context": "{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "date",
+       "readonly": "readonly_timesheet"
+      },
+      {
+       "name": "amount",
+       "invisible": "1"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "readonly": "readonly_timesheet",
+       "string": "Time Spent",
+       "decoration-danger": "unit_amount > 24",
+       "decoration-muted": "unit_amount == 0"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "widget": "text",
+       "readonly": "readonly_timesheet",
+       "required": "0",
+       "nolabel": "1",
+       "placeholder": "Describe your activity"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "task_with_hours": 1,
+      "timesheet_uom": 1,
+      "text": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_view_form_user",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.list.with.user",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet.hr_timesheet_line_form",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='date']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "readonly_timesheet",
+       "required": "1",
+       "context": "{'active_test': True}",
+       "groups": "hr_timesheet.group_hr_timesheet_approver"
+      },
+      {
+       "name": "user_id",
+       "invisible": "1",
+       "groups": "hr_timesheet.group_hr_timesheet_approver"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='date']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.hr_timesheet_line_search",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.search",
+    "view_type": "xpath",
+    "inherits_view": "analytic.view_account_analytic_line_filter",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='month']",
+      "position": "before"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "mine",
+       "string": "My Timesheets",
+       "domain": "[('user_id', '=', uid)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='month']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_view_form_portal_user",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.form",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet.timesheet_view_form_user",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='employee_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='employee_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.hr_timesheet_line_my_timesheet_search",
+    "package": "hr_timesheet",
+    "name": "view.search.my.timesheet.menu",
+    "view_type": "field",
+    "inherits_view": "hr_timesheet_line_search",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "employee_id",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "position": "replace"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_kanban_account_analytic_line",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "employee_id",
+       "widget": "image",
+       "invisible": "1",
+       "options": "{'preview_image': 'avatar_128'}"
+      },
+      {
+       "name": "project_id"
+      },
+      {
+       "name": "task_id",
+       "invisible": "context.get('default_project_id')"
+      },
+      {
+       "name": "task_id",
+       "invisible": "not context.get('default_project_id')"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_duration_uom",
+       "decoration-danger": "unit_amount > 24",
+       "decoration-muted": "unit_amount == 0"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "timesheet_duration_uom": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_calendar_account_analytic_line",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "scales": "month",
+      "mode": "month",
+      "date_start": "date",
+      "color": "employee_id",
+      "show_unusual_days": "True",
+      "multi_create_view": "hr_timesheet.view_calendar_account_analytic_line_multi_create",
+      "js_class": "timesheet_calendar",
+      "create_name_field": "calendar_display_name",
+      "form_view_id": "%(hr_timesheet.hr_timesheet_line_form)d"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "project_id"
+      },
+      {
+       "name": "task_id",
+       "invisible": "not task_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "employee_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date",
+      "date_stop": null,
+      "date_delay": null,
+      "color": "employee_id",
+      "mode": "month",
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_calendar_account_analytic_line_multi_create",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.calendar.multi_create",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "project_id",
+       "required": "1",
+       "context": "{'search_default_my_projects': True}",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "task_id",
+       "widget": "task_with_hours",
+       "context": "{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "string": "Time Spent",
+       "decoration-danger": "unit_amount > 24",
+       "decoration-muted": "unit_amount == 0"
+      },
+      {
+       "name": "name",
+       "required": "0",
+       "placeholder": "e.g. Sending E-mails"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "task_with_hours": 1,
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_calendar_account_analytic_line_my_timesheets",
+    "package": "hr_timesheet",
+    "name": "account.analytic.line.calendar",
+    "view_type": "calendar",
+    "inherits_view": "hr_timesheet.view_calendar_account_analytic_line",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "calendar",
+       "attributes": {
+        "position": "attributes"
+       },
+       "position": "attributes"
+      }
+     ],
+     "calendar": {
+      "date_start": null,
+      "date_stop": null,
+      "date_delay": null,
+      "color": null,
+      "mode": null,
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.view_kanban_account_analytic_line_portal_user",
+    "package": "hr_timesheet",
+    "name": "portal.account.analytic.line.kanban",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet.view_kanban_account_analytic_line",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div/span",
+      "position": "replace",
+      "class": "ps-0"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div/span",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "project_account.project_view_account_analytic_line_graph",
+    "package": "project_account",
+    "name": "account.analytic.line.graph",
+    "view_type": "xpath",
+    "inherits_view": "analytic.view_account_analytic_line_graph",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//graph",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//graph",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "project_account.project_view_account_analytic_line_pivot",
+    "package": "project_account",
+    "name": "account.analytic.line.pivot",
+    "view_type": "xpath",
+    "inherits_view": "analytic.view_account_analytic_line_pivot",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//pivot",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//pivot",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.timesheet_view_search",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.search",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet.hr_timesheet_line_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='task_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "order_id",
+       "string": "Sales Order",
+       "filter_domain": "['|', ('so_line', 'ilike', self), ('order_id', 'ilike', self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='task_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.hr_timesheet_line_tree_inherit",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.list.inherit",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet.hr_timesheet_line_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list/field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "commercial_partner_id",
+       "column_invisible": "True",
+       "groups": "sales_team.group_sale_salesman"
+      },
+      {
+       "name": "is_so_line_edited",
+       "column_invisible": "True",
+       "groups": "sales_team.group_sale_salesman"
+      },
+      {
+       "name": "allow_billable",
+       "column_invisible": "True",
+       "groups": "sales_team.group_sale_salesman"
+      },
+      {
+       "name": "so_line",
+       "widget": "so_line_field",
+       "invisible": "not allow_billable",
+       "readonly": "readonly_timesheet",
+       "context": "{'create': False, 'edit': False, 'delete': False}",
+       "options": "{'no_create': True, 'no_open': True}",
+       "column_invisible": "context.get('hide_so_line')",
+       "optional": "show",
+       "groups": "sales_team.group_sale_salesman",
+       "placeholder": "Non-billable"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "so_line_field": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//list/field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.hr_timesheet_line_form_inherit",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet.hr_timesheet_line_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='task_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "commercial_partner_id",
+       "invisible": "1",
+       "groups": "sales_team.group_sale_salesman"
+      },
+      {
+       "name": "is_so_line_edited",
+       "invisible": "1",
+       "groups": "sales_team.group_sale_salesman"
+      },
+      {
+       "name": "allow_billable",
+       "invisible": "1",
+       "groups": "sales_team.group_sale_salesman"
+      },
+      {
+       "name": "sale_order_state",
+       "invisible": "1"
+      },
+      {
+       "name": "so_line",
+       "widget": "so_line_field",
+       "readonly": "readonly_timesheet",
+       "context": "{'create': False, 'edit': False, 'delete': False, 'with_price_unit': True}",
+       "options": "{\"no_create\": True}",
+       "placeholder": "Non-billable"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "so_line_field": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='task_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.view_hr_timesheet_line_pivot_billing_rate",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.pivot.billing.rate",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Timesheets",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "timesheet_invoice_type"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "string": "Time Spent"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date",
+       "interval": "month",
+       "type": "row"
+      },
+      {
+       "name": "timesheet_invoice_type",
+       "type": "col"
+      },
+      {
+       "name": "unit_amount",
+       "string": "Time Spent",
+       "type": "measure",
+       "widget": "timesheet_uom"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.view_hr_timesheet_line_graph_employee_per_date",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.graph.employee.per.date",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Timesheet",
+      "sample": "1",
+      "js_class": "hr_timesheet_graphview"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "amount",
+       "string": "Timesheet Costs"
+      },
+      {
+       "name": "unit_amount",
+       "widget": "timesheet_uom",
+       "string": "Time Spent"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "timesheet_uom": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date",
+       "interval": "month"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "amount",
+       "type": "measure",
+       "string": "Timesheet Costs"
+      },
+      {
+       "name": "unit_amount",
+       "string": "Time Spent",
+       "type": "measure",
+       "widget": "timesheet_uom"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.view_hr_timesheet_line_graph_invoice_employee",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.graph.invoice.employee",
+    "view_type": "xpath",
+    "inherits_view": "view_hr_timesheet_line_graph_employee_per_date",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='date']",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "timesheet_invoice_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='date']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.view_hr_timesheet_line_pivot_inherited",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.pivot",
+    "view_type": "xpath",
+    "inherits_view": "hr_timesheet.view_hr_timesheet_line_pivot",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='amount']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='amount']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.view_calendar_account_analytic_line",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.calendar",
+    "view_type": "field",
+    "inherits_view": "hr_timesheet.view_calendar_account_analytic_line",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "before"
+      },
+      {
+       "name": "so_line",
+       "invisible": "not so_line"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.view_calendar_account_analytic_line_multi_create",
+    "package": "sale_timesheet",
+    "name": "account.analytic.line.calendar.multi_create",
+    "view_type": "field",
+    "inherits_view": "hr_timesheet.view_calendar_account_analytic_line_multi_create",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "unit_amount",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "unit_amount",
+       "position": "before"
+      },
+      {
+       "name": "allow_billable",
+       "invisible": "1",
+       "groups": "sales_team.group_sale_salesman"
+      },
+      {
+       "name": "so_line",
+       "invisible": "not allow_billable",
+       "context": "{'create': False, 'edit': False, 'delete': False, 'with_price_unit': True}",
+       "options": "{\"no_create\": True}",
+       "groups": "sales_team.group_sale_salesman",
+       "placeholder": "Non-billable"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_analytic_reporting",
+    "package": "account",
+    "name": "Analytic Reporting",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "view_account_analytic_line_filter_inherit_account",
+    "domain": null,
+    "context": "{\n                'search_default_group_by_analytic_account': 1,\n                'search_default_fiscal_date': 1,\n                'search_default_profit_loss_accounts': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "analytic.account_analytic_line_action",
+    "package": "analytic",
+    "name": "Gross Margin",
+    "view_mode": "list,form,graph,pivot",
+    "view_id": "view_account_analytic_line_tree",
+    "search_view_id": "view_account_analytic_line_filter",
+    "domain": "[('auto_account_id','=', active_id)]",
+    "context": "{'search_default_group_date': 1, 'default_auto_account_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No activity yet on this account\n            </p><p>\n                In the system, sales orders and projects are implemented using\n                analytic accounts. You can track costs and revenues to analyse\n                your margins easily.\n            </p><p>\n                Costs will be created automatically when you register supplier\n                invoices, expenses or timesheets.\n            </p><p>\n                Revenues will be created automatically when you create customer\n                invoices. Customer invoices can be created based on sales orders\n                (fixed price invoices), on timesheets (based on the work done) or\n                on expenses (e.g. reinvoicing of travel costs).\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "analytic.account_analytic_line_action_entries",
+    "package": "analytic",
+    "name": "Analytic Items",
+    "view_mode": "list,kanban,form,graph,pivot",
+    "view_id": "view_account_analytic_line_tree",
+    "search_view_id": "analytic.view_account_analytic_line_filter",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n               No activity yet\n            </p><p>\n                In the system, sales orders and projects are implemented using\n                analytic accounts. You can track costs and revenues to analyse\n                your margins easily.\n            </p><p>\n                Costs will be created automatically when you register supplier\n                invoices, expenses or timesheets.\n            </p><p>\n                Revenues will be created automatically when you create customer\n                invoices. Customer invoices can be created based on sales orders\n                (fixed price invoices), on timesheets (based on the work done) or\n                on expenses (e.g. reinvoicing of travel costs).\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "hr_timesheet.act_hr_timesheet_line",
+    "package": "hr_timesheet",
+    "name": "My Timesheets",
+    "view_mode": "list,form,kanban,pivot,graph",
+    "view_id": null,
+    "search_view_id": "hr_timesheet_line_my_timesheet_search",
+    "domain": "[('project_id', '!=', False), ('user_id', '=', uid)]",
+    "context": "{\n                \"search_default_week\":1,\n                \"is_timesheet\": 1,\n                \"is_my_timesheets\": 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                No activities found. Let's start a new one!\n              </p>\n              <p>\n                Track your working hours by projects every day and invoice this time to your customers.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_action_task",
+    "package": "hr_timesheet",
+    "name": "Task's Timesheets",
+    "view_mode": "list",
+    "view_id": "timesheet_view_tree_user",
+    "search_view_id": null,
+    "domain": "[('task_id', 'in', active_ids)]",
+    "context": "{\n                'is_timesheet': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_action_project",
+    "package": "hr_timesheet",
+    "name": "Project's Timesheets",
+    "view_mode": "list",
+    "view_id": "timesheet_view_tree_user",
+    "search_view_id": null,
+    "domain": "[('project_id', 'in', active_ids)]",
+    "context": "{\n                'is_timesheet': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_action_all",
+    "package": "hr_timesheet",
+    "name": "All Timesheets",
+    "view_mode": "list,form,kanban,pivot,graph",
+    "view_id": null,
+    "search_view_id": "hr_timesheet_line_search",
+    "domain": "[('project_id', '!=', False)]",
+    "context": "{\n                'search_default_week':1,\n                'is_timesheet': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    No activities found. Let's start a new one!\n              </p>\n              <p>\n                Track your working hours by projects every day and invoice this time to your customers.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_action_from_employee",
+    "package": "hr_timesheet",
+    "name": "Timesheets",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "hr_timesheet_line_search",
+    "domain": "[('project_id', '!=', False), ('employee_id', '=', active_id)]",
+    "context": "{\n                'default_employee_id': active_id,\n                \"is_timesheet\": 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Record a new activity\n                </p><p>\n                    You can register and track your workings hours by project every\n                    day. Every time spent on a project will become a cost and can be re-invoiced to\n                    customers if required.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "hr_timesheet.act_hr_timesheet_line_by_project",
+    "package": "hr_timesheet",
+    "name": "Timesheets",
+    "view_mode": "list,kanban,pivot,graph,form",
+    "view_id": "timesheet_view_tree_user",
+    "search_view_id": "hr_timesheet_line_search",
+    "domain": "[('project_id', '=', active_id)]",
+    "context": "{\n                \"default_project_id\": active_id,\n                \"is_timesheet\": 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Record a new activity\n              </p><p>\n                Track your working hours by projects every day and invoice this time to your customers.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "sale_timesheet.action_timesheet_from_invoice",
+    "package": "sale_timesheet",
+    "name": "Timesheets",
+    "view_mode": "list,form,graph,pivot,kanban",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('timesheet_invoice_id', '=', active_id)]",
+    "context": "{\n            'create': False,\n            'edit': False,\n            'delete': False,\n            \"is_timesheet\": 1,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No activities found\n            </p>\n            <p>\n                Track your working hours by projects every day and invoice this time to your customers.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "sale_timesheet.timesheet_action_from_sales_order",
+    "package": "sale_timesheet",
+    "name": "Timesheets",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "hr_timesheet.hr_timesheet_line_search",
+    "domain": "[('project_id', '!=', False)]",
+    "context": "{\n            \"is_timesheet\": 1,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "sale_timesheet.timesheet_action_from_sales_order_item",
+    "package": "sale_timesheet",
+    "name": "Timesheets",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "hr_timesheet.hr_timesheet_line_search",
+    "domain": "[('project_id', '!=', False), ('so_line', '=', active_id)]",
+    "context": "{\n            'search_default_billable_timesheet': True,\n            'search_default_week': 1,\n            'default_so_line': active_id,\n            'default_is_so_line_edited': True,\n            \"is_timesheet\": 1,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No activities found. Let's start a new one!\n            </p>\n            <p>\n                Track your working hours by projects every day and invoice this time to your customers.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "sale_timesheet.timesheet_action_plan_pivot",
+    "package": "sale_timesheet",
+    "name": "Timesheet",
+    "view_mode": "pivot,list,form",
+    "view_id": null,
+    "search_view_id": "hr_timesheet.hr_timesheet_line_search",
+    "domain": "[('project_id', '!=', False)]",
+    "context": "{\n            \"is_timesheet\": 1,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "sale_timesheet.timesheet_action_from_plan",
+    "package": "sale_timesheet",
+    "name": "Timesheet",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "hr_timesheet.hr_timesheet_line_search",
+    "domain": "[('project_id', '!=', False)]",
+    "context": "{\n            \"is_timesheet\": 1,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.analytic.line"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "hr_timesheet.timesheet_report",
+    "package": "hr_timesheet",
+    "name": "Timesheets",
+    "report_type": "qweb-pdf",
+    "report_name": "hr_timesheet.report_timesheet",
+    "report_file": "report_timesheet",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_account_analytic_line",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "hr_timesheet.timesheet_report_task_timesheets",
+    "package": "hr_timesheet",
+    "name": "Timesheets",
+    "report_type": "qweb-pdf",
+    "report_name": "hr_timesheet.report_timesheet_task",
+    "report_file": "report_timesheet",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": null,
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "account.analytic.line"
+   },
+   {
+    "external_identifier": "mrp_account.wip_report",
+    "package": "mrp_account",
+    "name": "WIP report",
+    "report_type": "qweb-pdf",
+    "report_name": "mrp_account.report_wip",
+    "report_file": "report_wip",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_account_analytic_line",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "account.analytic.line"
+   }
+  ],
+  "menus": [
+   {
+    "external_identifier": "account.menu_action_analytic_lines_tree",
+    "package": "account",
+    "name": "Analytic Items",
+    "parent_id": null,
+    "action": "analytic.account_analytic_line_action_entries",
+    "sequence": "31",
+    "groups_id": "analytic.group_analytic_accounting",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

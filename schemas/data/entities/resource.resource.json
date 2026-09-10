@@ -1,0 +1,1233 @@
+{
+ "catalog": {
+  "name": "entity:resource.resource",
+  "description": "Complete definition of entity Resources (resource.resource).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "resource.resource",
+  "storage_name": "resource_resource",
+  "full_name": "Resources",
+  "kind": "persistent",
+  "description": "Resources",
+  "defined_by_package": "resource",
+  "extended_by_packages": [
+   "resource_mail",
+   "hr",
+   "hr_holidays",
+   "hr_skills"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "name",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "defined_in_package": "resource",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "help": "If the active field is set to False, it will allow you to hide the resource record without removing it.",
+    "defined_in_package": "resource",
+    "full_name": "Active"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "resource",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "resource_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "user",
+      "Human"
+     ],
+     [
+      "material",
+      "Material"
+     ]
+    ],
+    "string": "Type",
+    "default": "user",
+    "required": true,
+    "defined_in_package": "resource",
+    "full_name": "Type"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "index": "btree_not_null",
+    "help": "Related user name for the resource to manage its access.",
+    "defined_in_package": "resource",
+    "copy": false,
+    "extended_in_packages": [
+     "hr"
+    ],
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "avatar_128",
+    "type": "Image",
+    "compute": "_compute_avatar_128",
+    "defined_in_package": "resource",
+    "string": "Avatar 128",
+    "full_name": "Avatar 128"
+   },
+   {
+    "name": "share",
+    "type": "Boolean",
+    "related": "user_id.share",
+    "defined_in_package": "resource",
+    "string": "Share",
+    "full_name": "Share"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "related": "user_id.email",
+    "defined_in_package": "resource",
+    "string": "Email",
+    "full_name": "Email"
+   },
+   {
+    "name": "phone",
+    "type": "Char",
+    "related": "user_id.phone",
+    "defined_in_package": "resource",
+    "string": "Phone",
+    "full_name": "Phone"
+   },
+   {
+    "name": "time_efficiency",
+    "type": "Float",
+    "string": "Efficiency Factor",
+    "default": 100,
+    "required": true,
+    "help": "This field is used to calculate the expected duration of a work order at this work center. For example, if a work order takes one hour and the efficiency factor is 100%, then the expected duration will be one hour. If the efficiency factor is 200%, however the expected duration will be 30 minutes.",
+    "defined_in_package": "resource",
+    "full_name": "Efficiency Factor"
+   },
+   {
+    "name": "calendar_id",
+    "type": "Many2one",
+    "comodel": "resource.calendar",
+    "string": "Working Time",
+    "default": {
+     "dynamic": "lambda self: self.env.company.resource_calendar_id"
+    },
+    "domain": "[('company_id', '=', company_id)]",
+    "help": "Define the working schedule of the resource. If not set, the resource will have fully flexible working hours.",
+    "defined_in_package": "resource",
+    "inverse": "_inverse_calendar_id",
+    "extended_in_packages": [
+     "hr"
+    ],
+    "full_name": "Working Time",
+    "target_entity": "resource.calendar"
+   },
+   {
+    "name": "tz",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "string": "Timezone",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('tz') or self.env.user.tz or 'UTC'"
+    },
+    "defined_in_package": "resource",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "default": {
+     "dynamic": "_default_color"
+    },
+    "defined_in_package": "resource_mail",
+    "string": "Color",
+    "full_name": "Color"
+   },
+   {
+    "name": "im_status",
+    "type": "Char",
+    "related": "user_id.im_status",
+    "defined_in_package": "resource_mail",
+    "string": "Im Status",
+    "full_name": "Im Status"
+   },
+   {
+    "name": "employee_id",
+    "type": "One2many",
+    "comodel": "hr.employee",
+    "inverse_name": "resource_id",
+    "check_company": true,
+    "context": {
+     "active_test": false
+    },
+    "defined_in_package": "hr",
+    "string": "Employee",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "job_title",
+    "type": "Char",
+    "compute": "_compute_job_title",
+    "compute_sudo": true,
+    "defined_in_package": "hr",
+    "string": "Job Title",
+    "full_name": "Job Title"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "compute": "_compute_department_id",
+    "compute_sudo": true,
+    "defined_in_package": "hr",
+    "string": "Department",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "work_location_id",
+    "type": "Many2one",
+    "related": "employee_id.work_location_id",
+    "defined_in_package": "hr",
+    "string": "Work Location",
+    "full_name": "Work Location"
+   },
+   {
+    "name": "work_email",
+    "type": "Char",
+    "related": "employee_id.work_email",
+    "defined_in_package": "hr",
+    "string": "Work Email",
+    "full_name": "Work Email"
+   },
+   {
+    "name": "work_phone",
+    "type": "Char",
+    "related": "employee_id.work_phone",
+    "defined_in_package": "hr",
+    "string": "Work Phone",
+    "full_name": "Work Phone"
+   },
+   {
+    "name": "show_hr_icon_display",
+    "type": "Boolean",
+    "related": "employee_id.show_hr_icon_display",
+    "defined_in_package": "hr",
+    "string": "Show Human resources Icon Display",
+    "full_name": "Show Human resources Icon Display"
+   },
+   {
+    "name": "hr_icon_display",
+    "type": "Selection",
+    "related": "employee_id.hr_icon_display",
+    "defined_in_package": "hr",
+    "string": "Human resources Icon Display",
+    "full_name": "Human resources Icon Display"
+   },
+   {
+    "name": "leave_date_to",
+    "type": "Date",
+    "related": "user_id.leave_date_to",
+    "defined_in_package": "hr_holidays",
+    "string": "Leave Date To",
+    "full_name": "Leave Date To"
+   },
+   {
+    "name": "employee_skill_ids",
+    "type": "One2many",
+    "related": "employee_id.employee_skill_ids",
+    "defined_in_package": "hr_skills",
+    "string": "Employee Skill",
+    "full_name": "Employee Skill"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_time_efficiency",
+    "kind": "Constraint",
+    "definition": "CHECK(time_efficiency>0)",
+    "message": "Time efficiency must be strictly positive",
+    "defined_in_package": "resource"
+   }
+  ],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_avatar_128",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_company_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_user_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_work_interval",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_adjust_to_calendar",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end",
+     "compute_leaves"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Adjust the given start and end datetimes to the closest effective hours encoded\nin the resource calendar. Only attendances in the same day as `start` and `end` are\nconsidered (respectively). If no attendance is found during that day, the closest hour\nis None.\ne.g. simplified example:\n     given two attendances: 8am-1pm and 2pm-5pm, given start=9am and end=6pm\n     resource._adjust_to_calendar(start, end)\n     >>> {resource: (8am, 5pm)}\n:return: Closest matching start and end of working periods for each resource\n:rtype: dict(resource, tuple(datetime | None, datetime | None))",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_unavailable_intervals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Compute the intervals during which employee is unavailable with hour granularity between start and end\nNote: this method is used in enterprise (forecast and planning)",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_calendars_validity_within_period",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end",
+     "default_company"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Gets a dict of dict with resource's id as first key and resource's calendar as secondary key\nThe value is the validity interval of the calendar for the given resource.\n\nHere the validity interval for each calendar is the whole interval but it's meant to be overriden in further modules\nhandling resource's employee contracts.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_valid_work_intervals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end",
+     "calendars",
+     "compute_leaves"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Gets the valid work intervals of the resource following their calendars between ``start`` and ``end``\n\nThis methods handle the eventuality of a resource having multiple resource calendars, see _get_calendars_validity_within_period method\nfor further explanation.\n\nFor flexible calendars and fully flexible resources: -> return the whole interval",
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_fully_flexible",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "employee has a fully flexible schedule has no working calendar set ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_calendar_at",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_target",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_flexible",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "An employee is considered flexible if the field flexible_hours is True on the calendar\nor the employee is not assigned any calendar, in which case is considered as Fully flexible.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_flexible_resources_default_work_intervals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_flexible_resources_calendars_validity_within_period",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_leave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "leave",
+     "resource_hours_per_day",
+     "resource_hours_per_week",
+     "ranges_to_remove",
+     "start_day",
+     "end_day",
+     "locale"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_flexible_resource_valid_work_intervals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 80,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_flexible_resource_work_hours",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "intervals",
+     "flexible_resources_hours_per_day",
+     "flexible_resources_hours_per_week",
+     "work_hours_per_day"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_color",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource_mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_avatar_card_data",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "resource_mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_job_title",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_department_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_calendar_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_resource_without_contract",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_contracts_valid_periods",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr.access_hr_employee_resource_user",
+    "package": "hr",
+    "name": "resource.resource.user",
+    "entity": "resource.resource",
+    "group": "group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr.access_hr_resource_manager",
+    "package": "hr",
+    "name": "hr.employee.resource.manager",
+    "entity": "resource.resource",
+    "group": "hr.group_hr_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mrp.access_resource_resource",
+    "package": "mrp",
+    "name": "resource.resource",
+    "entity": "resource.resource",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mrp.access_resource_resource_manager",
+    "package": "mrp",
+    "name": "resource.resource.manager",
+    "entity": "resource.resource",
+    "group": "mrp.group_mrp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "resource.access_resource_resource",
+    "package": "resource",
+    "name": "resource.resource",
+    "entity": "resource.resource",
+    "group": "base.group_system",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "resource.access_resource_resource_all",
+    "package": "resource",
+    "name": "resource.resource all",
+    "entity": "resource.resource",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "resource.resource_resource_multi_company",
+    "package": "resource",
+    "name": "resource.resource multi-company",
+    "entity": "resource.resource",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "resource.view_resource_resource_search",
+    "package": "resource",
+    "name": "resource.resource.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Resource"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "resource_type"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "calendar_id"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "human",
+       "string": "Human",
+       "domain": "[('resource_type','=', 'user')]"
+      },
+      {
+       "name": "material",
+       "string": "Material",
+       "domain": "[('resource_type','=', 'material')]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "user",
+       "string": "User",
+       "domain": "[]",
+       "context": "{'group_by':'user_id'}"
+      },
+      {
+       "name": "type",
+       "string": "Type",
+       "domain": "[]",
+       "context": "{'group_by':'resource_type'}"
+      },
+      {
+       "name": "company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by':'company_id'}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "working_period",
+       "string": "Working Time",
+       "domain": "[]",
+       "context": "{'group_by':'calendar_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "resource.resource_resource_form",
+    "package": "resource",
+    "name": "resource.resource.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Resource"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "user_id",
+       "invisible": "resource_type == 'material'",
+       "required": "resource_type == 'user'"
+      },
+      {
+       "name": "resource_type"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "calendar_id",
+       "placeholder": "Fully Flexible"
+      },
+      {
+       "name": "tz"
+      },
+      {
+       "name": "time_efficiency"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "resource.resource_resource_tree",
+    "package": "resource",
+    "name": "resource.resource.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Resources",
+      "multi_edit": "1",
+      "default_order": "name"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "calendar_id",
+       "optional": "show"
+      },
+      {
+       "name": "tz",
+       "optional": "hide"
+      },
+      {
+       "name": "resource_type",
+       "optional": "show"
+      },
+      {
+       "name": "time_efficiency"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "resource.action_resource_resource_tree",
+    "package": "resource",
+    "name": "Resources",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_resource_resource_search",
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "Resources allow you to create and manage resources that should be involved in a specific project phase. You can also set their efficiency level and workload based on their weekly working hours.",
+    "usage": null,
+    "entity": "resource.resource"
+   },
+   {
+    "external_identifier": "resource.resource_resource_action_from_calendar",
+    "package": "resource",
+    "name": "Resources",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_resource_resource_search",
+    "domain": null,
+    "context": "{\n            'default_calendar_id': active_id,\n            'search_default_calendar_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "Resources allow you to create and manage resources that should be involved in a specific project phase. You can also set their efficiency level and workload based on their weekly working hours.",
+    "usage": null,
+    "entity": "resource.resource"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

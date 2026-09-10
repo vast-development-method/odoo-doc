@@ -1,0 +1,710 @@
+{
+ "catalog": {
+  "name": "entity:ir.sequence",
+  "description": "Complete definition of entity Sequence (ir.sequence).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.sequence",
+  "storage_name": "ir_sequence",
+  "full_name": "Sequence",
+  "kind": "persistent",
+  "description": "Sequence",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "point_of_sale"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_allow_sudo_commands": false
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "defined_in_package": "base",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "string": "Sequence Code",
+    "defined_in_package": "base",
+    "full_name": "Sequence Code"
+   },
+   {
+    "name": "implementation",
+    "type": "Selection",
+    "selection": [
+     [
+      "standard",
+      "Standard"
+     ],
+     [
+      "no_gap",
+      "No gap"
+     ]
+    ],
+    "string": "Implementation",
+    "required": true,
+    "default": "standard",
+    "help": "While assigning a sequence number to a record, the 'no gap' sequence implementation ensures that each previous sequence number has been assigned already. While this sequence implementation will not skip any sequence number upon assignment, there can still be gaps in the sequence if records are deleted. The 'no gap' implementation is slower than the standard one.",
+    "defined_in_package": "base",
+    "full_name": "Implementation"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "base",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "prefix",
+    "type": "Char",
+    "help": "Prefix value of the record for the sequence",
+    "trim": false,
+    "defined_in_package": "base",
+    "string": "Prefix",
+    "full_name": "Prefix"
+   },
+   {
+    "name": "suffix",
+    "type": "Char",
+    "help": "Suffix value of the record for the sequence",
+    "trim": false,
+    "defined_in_package": "base",
+    "string": "Suffix",
+    "full_name": "Suffix"
+   },
+   {
+    "name": "number_next",
+    "type": "Integer",
+    "string": "Next Number",
+    "required": true,
+    "default": 1,
+    "help": "Next number of this sequence",
+    "defined_in_package": "base",
+    "full_name": "Next Number"
+   },
+   {
+    "name": "number_next_actual",
+    "type": "Integer",
+    "compute": "_get_number_next_actual",
+    "inverse": "_set_number_next_actual",
+    "string": "Actual Next Number",
+    "help": "Next number that will be used. This number can be incremented frequently so the displayed value might already be obsolete",
+    "defined_in_package": "base",
+    "full_name": "Actual Next Number"
+   },
+   {
+    "name": "number_increment",
+    "type": "Integer",
+    "string": "Step",
+    "required": true,
+    "default": 1,
+    "help": "The next number of the sequence will be incremented by this number",
+    "defined_in_package": "base",
+    "full_name": "Step"
+   },
+   {
+    "name": "padding",
+    "type": "Integer",
+    "string": "Sequence Size",
+    "required": true,
+    "default": 0,
+    "help": "the system will automatically adds some '0' on the left of the 'Next Number' to get the required padding size.",
+    "defined_in_package": "base",
+    "full_name": "Sequence Size"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda s: s.env.company"
+    },
+    "defined_in_package": "base",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "use_date_range",
+    "type": "Boolean",
+    "string": "Use subsequences per date_range",
+    "defined_in_package": "base",
+    "full_name": "Use subsequences per date_range"
+   },
+   {
+    "name": "date_range_ids",
+    "type": "One2many",
+    "comodel": "ir.sequence.date_range",
+    "inverse_name": "sequence_id",
+    "string": "Subsequences",
+    "defined_in_package": "base",
+    "full_name": "Subsequences",
+    "target_entity": "ir.sequence.date_range"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_number_next_actual",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return number from ir_sequence row when no_gap implementation,\nand number from postgres sequence when standard implementation.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_number_next_actual",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_current_sequence",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "sequence_date"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns the object on which we can find the number_next to consider for the sequence.\nIt could be an ir.sequence or an ir.sequence.date_range depending if use_date_range is checked\nor not. This function will also create the ir.sequence.date_range if none exists yet for today",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create a sequence, in implementation == standard a fast gaps-allowed PostgreSQL sequence is used.\n        ",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_next_do",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_prefix_suffix",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date",
+     "date_range"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Invalid prefix or suffix for sequence “%s”",
+        "line": 237
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "get_next_char",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "number_next"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_date_range_seq",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_next",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sequence_date"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Returns the next number in the preferred sequence in all the ones given in self.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "next_by_id",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "sequence_date"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Draw an interpolated string using the specified sequence.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "next_by_code",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "sequence_code",
+     "sequence_date"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Draw an interpolated string using a sequence with the requested code.\nIf several sequences with the correct code are available to the user\n(multi-company cases), the one from the user's current company will\nbe used.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_sequence",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a sequence used in an active POS config: %s",
+        "line": 18
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_get_prefix_suffix",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Invalid prefix or suffix for sequence “%s”"
+   },
+   {
+    "operation": "_unlink_sequence",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You cannot delete a sequence used in an active POS config: %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_sequence_group_user",
+    "package": "base",
+    "name": "ir_sequence group_user",
+    "entity": "ir.sequence",
+    "group": "group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "base.access_ir_sequence_group_system",
+    "package": "base",
+    "name": "ir_sequence group_system",
+    "entity": "ir.sequence",
+    "group": "group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.sequence_view",
+    "package": "base",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Sequences"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "implementation"
+      },
+      {
+       "name": "code"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "prefix"
+      },
+      {
+       "name": "suffix"
+      },
+      {
+       "name": "use_date_range"
+      },
+      {
+       "name": "padding"
+      },
+      {
+       "name": "number_increment"
+      },
+      {
+       "name": "number_next_actual",
+       "invisible": "use_date_range",
+       "string": "Next Number"
+      },
+      {
+       "name": "date_range_ids",
+       "invisible": "not use_date_range"
+      },
+      {
+       "name": "date_from"
+      },
+      {
+       "name": "date_to"
+      },
+      {
+       "name": "number_next_actual",
+       "string": "Next Number"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "sequence",
+       "string": "Sequence",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.sequence_view_tree",
+    "package": "base",
+    "name": null,
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Sequences"
+     },
+     "fields": [
+      {
+       "name": "code"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "prefix"
+      },
+      {
+       "name": "padding"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "number_next_actual",
+       "string": "Next Number"
+      },
+      {
+       "name": "number_increment"
+      },
+      {
+       "name": "implementation"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.view_sequence_search",
+    "package": "base",
+    "name": null,
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Sequences"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Sequence"
+      },
+      {
+       "name": "code"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.ir_sequence_form",
+    "package": "base",
+    "name": "Sequences",
+    "view_mode": null,
+    "view_id": "sequence_view_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'active_test': False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.sequence"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

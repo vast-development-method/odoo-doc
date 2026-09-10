@@ -1,0 +1,872 @@
+{
+ "catalog": {
+  "name": "entity:event.mail",
+  "description": "Complete definition of entity Event Automated Mailing (event.mail).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.mail",
+  "storage_name": "event_mail",
+  "full_name": "Event Automated Mailing",
+  "kind": "persistent",
+  "description": "Event Automated Mailing",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "event_sms"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "event_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "event",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Display order",
+    "defined_in_package": "event",
+    "full_name": "Display order"
+   },
+   {
+    "name": "interval_nbr",
+    "type": "Integer",
+    "string": "Interval",
+    "default": 1,
+    "defined_in_package": "event",
+    "full_name": "Interval"
+   },
+   {
+    "name": "interval_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "now",
+      "Immediately"
+     ],
+     [
+      "hours",
+      "Hours"
+     ],
+     [
+      "days",
+      "Days"
+     ],
+     [
+      "weeks",
+      "Weeks"
+     ],
+     [
+      "months",
+      "Months"
+     ]
+    ],
+    "string": "Unit",
+    "default": "hours",
+    "required": true,
+    "defined_in_package": "event",
+    "full_name": "Unit"
+   },
+   {
+    "name": "interval_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "after_sub",
+      "After each registration"
+     ],
+     [
+      "before_event",
+      "Before the event starts"
+     ],
+     [
+      "after_event_start",
+      "After the event started"
+     ],
+     [
+      "after_event",
+      "After the event ended"
+     ],
+     [
+      "before_event_end",
+      "Before the event ends"
+     ]
+    ],
+    "string": "Trigger ",
+    "default": "before_event",
+    "required": true,
+    "help": "Indicates when the communication is sent. If the event has multiple slots, the interval is related to each time slot instead of the whole event.",
+    "defined_in_package": "event",
+    "full_name": "Trigger "
+   },
+   {
+    "name": "scheduled_date",
+    "type": "Datetime",
+    "string": "Schedule Date",
+    "compute": "_compute_scheduled_date",
+    "store": true,
+    "defined_in_package": "event",
+    "full_name": "Schedule Date"
+   },
+   {
+    "name": "error_datetime",
+    "type": "Datetime",
+    "string": "Last Error",
+    "defined_in_package": "event",
+    "full_name": "Last Error"
+   },
+   {
+    "name": "last_registration_id",
+    "type": "Many2one",
+    "comodel": "event.registration",
+    "string": "Last Attendee",
+    "defined_in_package": "event",
+    "full_name": "Last Attendee",
+    "target_entity": "event.registration"
+   },
+   {
+    "name": "mail_registration_ids",
+    "type": "One2many",
+    "comodel": "event.mail.registration",
+    "inverse_name": "scheduler_id",
+    "help": "Communication related to event registrations",
+    "defined_in_package": "event",
+    "string": "Mail Registration",
+    "full_name": "Mail Registration",
+    "target_entity": "event.mail.registration"
+   },
+   {
+    "name": "mail_slot_ids",
+    "type": "One2many",
+    "comodel": "event.mail.slot",
+    "inverse_name": "scheduler_id",
+    "help": "Slot-based communication",
+    "defined_in_package": "event",
+    "string": "Mail Slot",
+    "full_name": "Mail Slot",
+    "target_entity": "event.mail.slot"
+   },
+   {
+    "name": "mail_done",
+    "type": "Boolean",
+    "string": "Sent",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "event",
+    "full_name": "Sent"
+   },
+   {
+    "name": "mail_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "running",
+      "Running"
+     ],
+     [
+      "scheduled",
+      "Scheduled"
+     ],
+     [
+      "sent",
+      "Sent"
+     ],
+     [
+      "error",
+      "Error"
+     ],
+     [
+      "cancelled",
+      "Cancelled"
+     ]
+    ],
+    "string": "Global communication Status",
+    "compute": "_compute_mail_state",
+    "defined_in_package": "event",
+    "full_name": "Global communication Status"
+   },
+   {
+    "name": "mail_count_done",
+    "type": "Integer",
+    "string": "# Sent",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "event",
+    "full_name": "# Sent"
+   },
+   {
+    "name": "notification_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "mail",
+      "Mail"
+     ],
+     [
+      "sms",
+      "SMS"
+     ]
+    ],
+    "string": "Send",
+    "compute": "_compute_notification_type",
+    "defined_in_package": "event",
+    "selection_added_by": [
+     "event_sms"
+    ],
+    "extended_in_packages": [
+     "event_sms"
+    ],
+    "full_name": "Send"
+   },
+   {
+    "name": "template_ref",
+    "type": "Reference",
+    "string": "Template",
+    "ondelete": {
+     "sms.template": "cascade"
+    },
+    "required": true,
+    "selection": [
+     [
+      "mail.template",
+      "Mail"
+     ],
+     [
+      "sms.template",
+      "SMS"
+     ]
+    ],
+    "defined_in_package": "event",
+    "selection_added_by": [
+     "event_sms"
+    ],
+    "extended_in_packages": [
+     "event_sms"
+    ],
+    "full_name": "Template"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_scheduled_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_id.date_begin",
+         "event_id.date_end",
+         "interval_type",
+         "interval_unit",
+         "interval_nbr"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mail_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "error_datetime",
+         "interval_type",
+         "mail_done",
+         "event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_notification_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_ref"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Assigns the type of template in use, if any is set.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "execute",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_execute_event_based",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "mail_slot"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Main scheduler method when running in event-based mode aka\n'after_event' or 'before_event' (and their negative counterparts).\nThis is a global communication done once i.e. we do not track each\nregistration individually.\n\n:param mail_slot: optional <event.mail.slot> slot-specific event communication,\n  when event uses slots. In that case, it works like the classic event\n  communication (iterative, ...) but information is specific to each\n  slot (last registration, scheduled datetime, ...)",
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_execute_event_based_for_registrations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "registrations"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Method doing notification and recipients specific implementation\nof contacting attendees globally.\n\n:param registrations: a recordset of registrations to contact",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_execute_slot_based",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Main scheduler method when running in slot-based mode aka\n'after_event' or 'before_event' (and their negative counterparts) on\nevents with slots. This is a global communication done once i.e. we do\nnot track each registration individually. ",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_execute_attendee_based",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Main scheduler method when running in attendee-based mode aka\n'after_sub'. This relies on a sub model allowing to know which\nregistrations have been contacted.\n\nIt currently does two main things\n  * generate missing 'event.mail.registrations' which are scheduled\n    communication linked to registrations;\n  * launch registration-based communication, splitting in batches as\n    it may imply a lot of computation. When having more than given\n    limit to handle, schedule another call of cron to avoid having to\n    wait another cron interval check;",
+      "size_in_lines": 76,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_missing_mail_registrations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "registrations"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_refresh_mail_count_done",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "mail_slot"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_template_ref",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Check for valid template reference: existing, working template ",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "registrations"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Mail action: send mail to attendees ",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_template_model_by_notification_type",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_event_mail_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_warn_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "exception"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "run",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "autocommit"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Backward compatible method, notably if crons are not updated when\nmigrating for some reason. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "schedule_communications",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "autocommit"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_sms",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "registrations"
+    ],
+    "definitions": [
+     {
+      "package": "event_sms",
+      "decorators": [],
+      "documentation": "SMS action: send SMS to attendees ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "mail_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_mail_registration",
+    "package": "event",
+    "name": "event.mail.registration",
+    "entity": "event.mail",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_mail_user",
+    "package": "event",
+    "name": "event.mail.user",
+    "entity": "event.mail",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "event.view_event_mail_form",
+    "package": "event",
+    "name": "event.mail.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Event Mail Scheduler"
+     },
+     "fields": [
+      {
+       "name": "event_id"
+      },
+      {
+       "name": "template_ref",
+       "widget": "EventMailTemplateReferenceField",
+       "context": "{'filter_template_on_event': True, 'default_model': 'event.registration'}",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "mail_state"
+      },
+      {
+       "name": "interval_nbr",
+       "invisible": "interval_unit == 'now'",
+       "readonly": "interval_unit == 'now'"
+      },
+      {
+       "name": "interval_unit"
+      },
+      {
+       "name": "interval_type"
+      },
+      {
+       "name": "scheduled_date"
+      },
+      {
+       "name": "mail_registration_ids"
+      },
+      {
+       "name": "registration_id"
+      },
+      {
+       "name": "scheduled_date"
+      },
+      {
+       "name": "mail_sent",
+       "string": "Sent"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "registration_mails",
+       "string": "Registration Mails",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "EventMailTemplateReferenceField": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event.view_event_mail_tree",
+    "package": "event",
+    "name": "event.mail.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Event Mail Schedulers"
+     },
+     "fields": [
+      {
+       "name": "event_id"
+      },
+      {
+       "name": "template_ref",
+       "widget": "EventMailTemplateReferenceField",
+       "context": "{'filter_template_on_event': True, 'default_model': 'event.registration'}",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "scheduled_date"
+      },
+      {
+       "name": "mail_count_done"
+      },
+      {
+       "name": "mail_state",
+       "widget": "event_icon_selection",
+       "string": " ",
+       "options": "{'sent': 'fa fa-check', 'scheduled': 'fa fa-hourglass-half', 'running': 'fa fa-cogs', 'cancelled': 'fa fa-times-circle'}",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "EventMailTemplateReferenceField": 1,
+      "event_icon_selection": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event.action_event_mail",
+    "package": "event",
+    "name": "Events Mail Schedulers",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'create': False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Nothing Scheduled yet!\n            </p><p>\n                Under this technical menu you will find all scheduled communication related to your events.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.mail"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "event.menu_event_mail_schedulers",
+    "package": "event",
+    "name": null,
+    "parent_id": null,
+    "action": "event.action_event_mail",
+    "sequence": null,
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "event.event_mail_scheduler",
+    "package": "event",
+    "name": "Event: Mail Scheduler",
+    "interval_number": "24",
+    "interval_type": "hours",
+    "priority": null,
+    "active": null,
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "event.mail",
+    "operation": "schedule_communications",
+    "operation_call": "model.schedule_communications(autocommit=True)"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

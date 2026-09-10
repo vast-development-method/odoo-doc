@@ -1,0 +1,3142 @@
+{
+ "catalog": {
+  "name": "constraints",
+  "description": "Every database-level constraint and index.",
+  "record_count": 390,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name, applicability, country_id)",
+   "message": "A tag with the same name and applicability already exists in this country.",
+   "defined_in_package": "account",
+   "entity": "account.account.tag"
+  },
+  {
+   "name": "_timeoff_timesheet_idx",
+   "kind": "Index",
+   "definition": "(task_id) WHERE (global_leave_id IS NOT NULL OR holiday_id IS NOT NULL) AND project_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "project_timesheet_holidays",
+   "entity": "account.analytic.line"
+  },
+  {
+   "name": "_journal_id_date_desc_id_desc_idx",
+   "kind": "Index",
+   "definition": "(journal_id, date DESC, id DESC)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.bank.statement"
+  },
+  {
+   "name": "_first_line_index_idx",
+   "kind": "Index",
+   "definition": "(journal_id, first_line_index)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.bank.statement"
+  },
+  {
+   "name": "_unreconciled_idx",
+   "kind": "Index",
+   "definition": "(journal_id, company_id, internal_index) WHERE is_reconciled IS NOT TRUE",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.bank.statement.line"
+  },
+  {
+   "name": "_orphan_idx",
+   "kind": "Index",
+   "definition": "(journal_id, company_id, internal_index) WHERE statement_id IS NULL",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.bank.statement.line"
+  },
+  {
+   "name": "_main_idx",
+   "kind": "Index",
+   "definition": "(journal_id, company_id, internal_index)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.bank.statement.line"
+  },
+  {
+   "name": "_unique_edi_document_by_move_by_format",
+   "kind": "Constraint",
+   "definition": "UNIQUE(edi_format_id, move_id)",
+   "message": "Only one edi document by move by format",
+   "defined_in_package": "account_edi",
+   "entity": "account.edi.document"
+  },
+  {
+   "name": "_unique_code",
+   "kind": "Constraint",
+   "definition": "unique (code)",
+   "message": "This code already exists",
+   "defined_in_package": "account_edi",
+   "entity": "account.edi.format"
+  },
+  {
+   "name": "_account_src_dest_uniq",
+   "kind": "Constraint",
+   "definition": "unique (position_id,account_src_id,account_dest_id)",
+   "message": "An account fiscal position could be defined only one time on same accounts.",
+   "defined_in_package": "account",
+   "entity": "account.fiscal.position.account"
+  },
+  {
+   "name": "_check_length_prefix",
+   "kind": "Constraint",
+   "definition": "CHECK(char_length(COALESCE(code_prefix_start, '')) = char_length(COALESCE(code_prefix_end, '')))",
+   "message": "The length of the starting and the ending code prefix must be the same",
+   "defined_in_package": "account",
+   "entity": "account.group"
+  },
+  {
+   "name": "_code_company_uniq",
+   "kind": "Constraint",
+   "definition": "unique (company_id, code)",
+   "message": "Journal codes must be unique per company.",
+   "defined_in_package": "account",
+   "entity": "account.journal"
+  },
+  {
+   "name": "_uniq_name",
+   "kind": "Constraint",
+   "definition": "unique(company_id, name)",
+   "message": "A Ledger group name must be unique per company.",
+   "defined_in_package": "account",
+   "entity": "account.journal.group"
+  },
+  {
+   "name": "_company_id_end_datetime_idx",
+   "kind": "Index",
+   "definition": "(company_id, user_id, end_datetime) WHERE active IS TRUE",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.lock_exception"
+  },
+  {
+   "name": "_checked_idx",
+   "kind": "Index",
+   "definition": "(journal_id) WHERE (checked IS NOT TRUE)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move"
+  },
+  {
+   "name": "_payment_idx",
+   "kind": "Index",
+   "definition": "(journal_id, state, payment_state, move_type, date)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move"
+  },
+  {
+   "name": "_unique_name",
+   "kind": "UniqueIndex",
+   "definition": "(name, journal_id) WHERE (state = 'posted'AND name != '/')",
+   "message": "Another entry with the same name already exists.",
+   "defined_in_package": "account",
+   "entity": "account.move"
+  },
+  {
+   "name": "_journal_id_date_idx",
+   "kind": "Index",
+   "definition": "(journal_id, date)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move"
+  },
+  {
+   "name": "_journal_id_company_id_idx",
+   "kind": "Index",
+   "definition": "(journal_id, company_id, date)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move"
+  },
+  {
+   "name": "_made_gaps",
+   "kind": "Index",
+   "definition": "(journal_id, state, payment_state, move_type, date) WHERE (made_sequence_gap IS TRUE)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move"
+  },
+  {
+   "name": "_duplicate_bills_idx",
+   "kind": "Index",
+   "definition": "(ref) WHERE (move_type IN ('in_invoice', 'in_refund'))",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move"
+  },
+  {
+   "name": "_account_move_sanitize_payment_ref_idx",
+   "kind": "Index",
+   "definition": "(regexp_replace(COALESCE(payment_reference, ''), '[^a-zA-Z0-9]', '', 'g'))",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move"
+  },
+  {
+   "name": "_unique_name",
+   "kind": "UniqueIndex",
+   "definition": "(name, journal_id) WHERE (state = 'posted' AND name != '/' AND (l10n_latam_document_type_id IS NULL OR move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt')))",
+   "message": "Another entry with the same name already exists.",
+   "defined_in_package": "l10n_latam_invoice_document",
+   "entity": "account.move"
+  },
+  {
+   "name": "_unique_name_latam",
+   "kind": "UniqueIndex",
+   "definition": "(name, commercial_partner_id, l10n_latam_document_type_id, company_id) WHERE (state = 'posted' AND name != '/' AND (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')))",
+   "message": "Another entry with the same name already exists.",
+   "defined_in_package": "l10n_latam_invoice_document",
+   "entity": "account.move"
+  },
+  {
+   "name": "_l10n_pl_edi_number_company_id_move_type_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE(l10n_pl_edi_number, company_id, move_type)",
+   "message": "The KSeF number must be unique per company per move_type",
+   "defined_in_package": "l10n_pl_edi",
+   "entity": "account.move"
+  },
+  {
+   "name": "_check_credit_debit",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type IN ('line_section', 'line_subsection', 'line_note') OR credit * debit=0)",
+   "message": "Wrong credit or debit value in accounting entry!",
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_check_amount_currency_balance_sign",
+   "kind": "Constraint",
+   "definition": "CHECK(\n                display_type IN ('line_section', 'line_subsection', 'line_note')\n                OR (\n                    (balance <= 0 AND amount_currency <= 0)\n                    OR\n                    (balance >= 0 AND amount_currency >= 0)\n                )\n            )",
+   "message": "The amount expressed in the secondary currency must be positive when account is debited and negative when account is credited. If the currency is the same as the one from the company, this amount must strictly be equal to the balance.",
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_check_accountable_required_fields",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type IN ('line_section', 'line_subsection', 'line_note') OR account_id IS NOT NULL)",
+   "message": "Missing required account on accountable line.",
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_check_non_accountable_fields_null",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type NOT IN ('line_section', 'line_subsection', 'line_note') OR (amount_currency = 0 AND debit = 0 AND credit = 0 AND account_id IS NULL))",
+   "message": "Forbidden balance or account on non-accountable line",
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_partner_id_ref_idx",
+   "kind": "Index",
+   "definition": "(partner_id, ref)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_date_name_id_idx",
+   "kind": "Index",
+   "definition": "(date desc, move_name desc, id)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_unreconciled_index",
+   "kind": "Index",
+   "definition": "(account_id, partner_id) WHERE reconciled IS NOT TRUE",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_journal_id_neg_amnt_residual_idx",
+   "kind": "Index",
+   "definition": "(journal_id) WHERE amount_residual < 0",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_account_id_date_idx",
+   "kind": "Index",
+   "definition": "(account_id, date)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.move.line"
+  },
+  {
+   "name": "_check_amount_not_negative",
+   "kind": "Constraint",
+   "definition": "CHECK(amount >= 0.0)",
+   "message": "The payment amount cannot be negative.",
+   "defined_in_package": "account",
+   "entity": "account.payment"
+  },
+  {
+   "name": "_journal_id_company_id_idx",
+   "kind": "Index",
+   "definition": "(journal_id, company_id)",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.payment"
+  },
+  {
+   "name": "_unmatched_idx",
+   "kind": "Index",
+   "definition": "(journal_id, company_id) WHERE is_matched IS NOT TRUE",
+   "message": null,
+   "defined_in_package": "account",
+   "entity": "account.payment"
+  },
+  {
+   "name": "_name_code_unique",
+   "kind": "Constraint",
+   "definition": "unique (code, payment_type)",
+   "message": "The combination code/payment type already exists!",
+   "defined_in_package": "account",
+   "entity": "account.payment.method"
+  },
+  {
+   "name": "_domain_engine_subformula_required",
+   "kind": "Constraint",
+   "definition": "CHECK(engine != 'domain' OR subformula IS NOT NULL)",
+   "message": "Expressions using 'domain' engine should all have a subformula.",
+   "defined_in_package": "account",
+   "entity": "account.report.expression"
+  },
+  {
+   "name": "_line_label_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE(report_line_id,label)",
+   "message": "The expression label must be unique per report line.",
+   "defined_in_package": "account",
+   "entity": "account.report.expression"
+  },
+  {
+   "name": "_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique (report_id, code)",
+   "message": "A report line with the same code already exists.",
+   "defined_in_package": "account",
+   "entity": "account.report.line"
+  },
+  {
+   "name": "_unique_id_client",
+   "kind": "Constraint",
+   "definition": "unique(id_client)",
+   "message": "This id_client is already used on another user.",
+   "defined_in_package": "account_edi_proxy_client",
+   "entity": "account_edi_proxy_client.user"
+  },
+  {
+   "name": "_unique_active_company_proxy",
+   "kind": "UniqueIndex",
+   "definition": "(company_id, proxy_type, edi_mode) WHERE (active IS TRUE)",
+   "message": "This company has an active user already created for this EDI type",
+   "defined_in_package": "account_edi_proxy_client",
+   "entity": "account_edi_proxy_client.user"
+  },
+  {
+   "name": "_peppol_proxy_types_conflict",
+   "kind": "Constraint",
+   "definition": "\n            EXCLUDE (\n                company_id WITH =,\n                edi_mode WITH =\n            )\n            WHERE (active IS TRUE AND proxy_type IN ('peppol', 'pdp'))\n        ",
+   "message": "You can not have both a Peppol and a PDP proxy user",
+   "defined_in_package": "l10n_fr_pdp",
+   "entity": "account_edi_proxy_client.user"
+  },
+  {
+   "name": "_unique_identification_l10n_gr_edi",
+   "kind": "UniqueIndex",
+   "definition": "(edi_identification, edi_mode) WHERE (active IS TRUE AND proxy_type = 'l10n_gr_edi')",
+   "message": "This EDI identification is already assigned to an active user.",
+   "defined_in_package": "l10n_gr_edi_e_invoo",
+   "entity": "account_edi_proxy_client.user"
+  },
+  {
+   "name": "_unique_identification_l10n_it_edi",
+   "kind": "UniqueIndex",
+   "definition": "(edi_identification, proxy_type, edi_mode) WHERE (active AND proxy_type = 'l10n_it_edi')",
+   "message": "This edi identification is already assigned to an active user",
+   "defined_in_package": "l10n_it_edi",
+   "entity": "account_edi_proxy_client.user"
+  },
+  {
+   "name": "_unique_identification_l10n_my_edi",
+   "kind": "UniqueIndex",
+   "definition": "(edi_identification, proxy_type, edi_mode) WHERE (active AND proxy_type = 'l10n_my_edi')",
+   "message": "This edi identification is already assigned to an active user",
+   "defined_in_package": "l10n_my_edi",
+   "entity": "account_edi_proxy_client.user"
+  },
+  {
+   "name": "_unique_identifier",
+   "kind": "Constraint",
+   "definition": "UNIQUE(credential_identifier)",
+   "message": "The credential identifier should be unique.",
+   "defined_in_package": "auth_passkey",
+   "entity": "auth.passkey.key"
+  },
+  {
+   "name": "_user_id_limit_type_create_date_idx",
+   "kind": "Index",
+   "definition": "(user_id, limit_type, create_date)",
+   "message": null,
+   "defined_in_package": "auth_totp",
+   "entity": "auth.totp.rate.limit.log"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "website_blog",
+   "entity": "blog.tag"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag category already exists!",
+   "defined_in_package": "website_blog",
+   "entity": "blog.tag.category"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "calendar",
+   "entity": "calendar.event.type"
+  },
+  {
+   "name": "_user_id_partner_id_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(user_id, partner_id)",
+   "message": "A user cannot have the same contact twice.",
+   "defined_in_package": "calendar",
+   "entity": "calendar.filters"
+  },
+  {
+   "name": "_month_day",
+   "kind": "Constraint",
+   "definition": {
+    "expression": "\"CHECK (\\n        rrule_type != 'monthly'\\n        OR month_by != 'day'\\n        OR day >= 1 AND day <= 31\\n        OR weekday IN %s AND byday IN %s)\" % (tuple((wd[0] for wd in WEEKDAY_SELECTION)), tuple((bd[0] for bd in BYDAY_SELECTION)))"
+   },
+   "message": "The day must be between 1 and 31",
+   "defined_in_package": "calendar",
+   "entity": "calendar.recurrence"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name)",
+   "message": "Tags may not reuse existing names.",
+   "defined_in_package": "marketing_card",
+   "entity": "card.campaign.tag"
+  },
+  {
+   "name": "_campaign_record_unique",
+   "kind": "Constraint",
+   "definition": "unique(campaign_id, res_id)",
+   "message": "Each record should be unique for a campaign",
+   "defined_in_package": "marketing_card",
+   "entity": "card.card"
+  },
+  {
+   "name": "_unique_mail_message_id",
+   "kind": "Constraint",
+   "definition": "unique (mail_message_id)",
+   "message": "A mail.message can only be linked to a single chatbot message",
+   "defined_in_package": "im_livechat",
+   "entity": "chatbot.message"
+  },
+  {
+   "name": "_channel_id_user_raw_script_answer_id_idx",
+   "kind": "Index",
+   "definition": "(discuss_channel_id, user_raw_script_answer_id) WHERE user_raw_script_answer_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "im_livechat",
+   "entity": "chatbot.message"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Industry name already exists!",
+   "defined_in_package": "crm_iap_mine",
+   "entity": "crm.iap.lead.industry"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Role name already exists!",
+   "defined_in_package": "crm_iap_mine",
+   "entity": "crm.iap.lead.role"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Name already exists!",
+   "defined_in_package": "crm_iap_mine",
+   "entity": "crm.iap.lead.seniority"
+  },
+  {
+   "name": "_check_probability",
+   "kind": "Constraint",
+   "definition": "check(probability >= 0 and probability <= 100)",
+   "message": "The probability of closing the deal should be between 0% and 100%!",
+   "defined_in_package": "crm",
+   "entity": "crm.lead"
+  },
+  {
+   "name": "_user_id_team_id_type_index",
+   "kind": "Index",
+   "definition": "(user_id, team_id, type)",
+   "message": null,
+   "defined_in_package": "crm",
+   "entity": "crm.lead"
+  },
+  {
+   "name": "_create_date_team_id_idx",
+   "kind": "Index",
+   "definition": "(create_date, team_id)",
+   "message": null,
+   "defined_in_package": "crm",
+   "entity": "crm.lead"
+  },
+  {
+   "name": "_default_order_idx",
+   "kind": "Index",
+   "definition": "(priority DESC, id DESC) WHERE active IS TRUE",
+   "message": null,
+   "defined_in_package": "crm",
+   "entity": "crm.lead"
+  },
+  {
+   "name": "_check_number_of_months",
+   "kind": "Constraint",
+   "definition": "CHECK(number_of_months >= 0)",
+   "message": "The number of month can't be negative.",
+   "defined_in_package": "crm",
+   "entity": "crm.recurring.plan"
+  },
+  {
+   "name": "_limit_extra_contacts",
+   "kind": "Constraint",
+   "definition": "check(extra_contacts >= 1 and extra_contacts <= 5)",
+   "message": "Maximum 5 contacts are allowed!",
+   "defined_in_package": "website_crm_iap_reveal",
+   "entity": "crm.reveal.rule"
+  },
+  {
+   "name": "_ip_rule_id",
+   "kind": "UniqueIndex",
+   "definition": "(reveal_rule_id,reveal_ip)",
+   "message": null,
+   "defined_in_package": "website_crm_iap_reveal",
+   "entity": "crm.reveal.view"
+  },
+  {
+   "name": "_state_create_date",
+   "kind": "Index",
+   "definition": "(reveal_state,create_date)",
+   "message": null,
+   "defined_in_package": "website_crm_iap_reveal",
+   "entity": "crm.reveal.view"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "sales_team",
+   "entity": "crm.tag"
+  },
+  {
+   "name": "_check_notif_freq",
+   "kind": "Constraint",
+   "definition": "CHECK(notify_frequency > 0)",
+   "message": "The notification frequency should be greater than 0",
+   "defined_in_package": "data_recycle",
+   "entity": "data_recycle.model"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Only one value can be defined for each given usage!",
+   "defined_in_package": "base",
+   "entity": "decimal.precision"
+  },
+  {
+   "name": "_margin_not_under_100_percent",
+   "kind": "Constraint",
+   "definition": "CHECK (margin >= -1)",
+   "message": "Margin cannot be lower than -100%",
+   "defined_in_package": "delivery",
+   "entity": "delivery.carrier"
+  },
+  {
+   "name": "_shipping_insurance_is_percentage",
+   "kind": "Constraint",
+   "definition": "CHECK(shipping_insurance >= 0 AND shipping_insurance <= 100)",
+   "message": "The shipping insurance must be a percentage between 0 and 100.",
+   "defined_in_package": "delivery",
+   "entity": "delivery.carrier"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Prefix already exists!",
+   "defined_in_package": "delivery",
+   "entity": "delivery.zip.prefix"
+  },
+  {
+   "name": "_channel_id_not_null_constraint",
+   "kind": "Constraint",
+   "definition": "CHECK (channel_id IS NOT NULL)",
+   "message": "Call history must have a channel",
+   "defined_in_package": "mail",
+   "entity": "discuss.call.history"
+  },
+  {
+   "name": "_start_dt_is_not_null_constraint",
+   "kind": "Constraint",
+   "definition": "CHECK (start_dt IS NOT NULL)",
+   "message": "Call history must have a start date",
+   "defined_in_package": "mail",
+   "entity": "discuss.call.history"
+  },
+  {
+   "name": "_message_id_unique_constraint",
+   "kind": "Constraint",
+   "definition": "UNIQUE (start_call_message_id)",
+   "message": "Messages can only be linked to one call history",
+   "defined_in_package": "mail",
+   "entity": "discuss.call.history"
+  },
+  {
+   "name": "_channel_id_end_dt_idx",
+   "kind": "Index",
+   "definition": "(channel_id, end_dt) WHERE end_dt IS NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "discuss.call.history"
+  },
+  {
+   "name": "_from_message_id_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(from_message_id)",
+   "message": "Messages can only be linked to one sub-channel",
+   "defined_in_package": "mail",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_uuid_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(uuid)",
+   "message": "The channel UUID must be unique",
+   "defined_in_package": "mail",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_group_public_id_check",
+   "kind": "Constraint",
+   "definition": "CHECK (channel_type = 'channel' OR group_public_id IS NULL)",
+   "message": "Group authorization and group auto-subscription are only supported on channels.",
+   "defined_in_package": "mail",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_livechat_operator_id",
+   "kind": "Constraint",
+   "definition": "CHECK((channel_type = 'livechat' and livechat_operator_id is not null) or (channel_type != 'livechat'))",
+   "message": "Livechat Operator ID is required for a channel of type livechat.",
+   "defined_in_package": "im_livechat",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_livechat_end_dt_status_constraint",
+   "kind": "Constraint",
+   "definition": "CHECK(livechat_end_dt IS NULL or livechat_status IS NULL)",
+   "message": "Closed Live Chat session should not have a status.",
+   "defined_in_package": "im_livechat",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_livechat_end_dt_idx",
+   "kind": "Index",
+   "definition": "(livechat_end_dt) WHERE livechat_end_dt IS NULL",
+   "message": null,
+   "defined_in_package": "im_livechat",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_livechat_failure_idx",
+   "kind": "Index",
+   "definition": "(livechat_failure) WHERE livechat_failure IN ('no_answer', 'no_agent')",
+   "message": null,
+   "defined_in_package": "im_livechat",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_livechat_is_escalated_idx",
+   "kind": "Index",
+   "definition": "(livechat_is_escalated) WHERE livechat_is_escalated IS TRUE",
+   "message": null,
+   "defined_in_package": "im_livechat",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_livechat_channel_type_create_date_idx",
+   "kind": "Index",
+   "definition": "(channel_type, create_date) WHERE channel_type = 'livechat'",
+   "message": null,
+   "defined_in_package": "im_livechat",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_has_crm_lead_index",
+   "kind": "Index",
+   "definition": "(has_crm_lead) WHERE has_crm_lead IS TRUE",
+   "message": null,
+   "defined_in_package": "crm_livechat",
+   "entity": "discuss.channel"
+  },
+  {
+   "name": "_seen_message_id_idx",
+   "kind": "Index",
+   "definition": "(channel_id, partner_id, seen_message_id)",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "discuss.channel.member"
+  },
+  {
+   "name": "_partner_unique",
+   "kind": "UniqueIndex",
+   "definition": "(channel_id, partner_id) WHERE partner_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "discuss.channel.member"
+  },
+  {
+   "name": "_guest_unique",
+   "kind": "UniqueIndex",
+   "definition": "(channel_id, guest_id) WHERE guest_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "discuss.channel.member"
+  },
+  {
+   "name": "_partner_or_guest_exists",
+   "kind": "Constraint",
+   "definition": "CHECK((partner_id IS NOT NULL AND guest_id IS NULL) OR (partner_id IS NULL AND guest_id IS NOT NULL))",
+   "message": "A channel member must be a partner or a guest.",
+   "defined_in_package": "mail",
+   "entity": "discuss.channel.member"
+  },
+  {
+   "name": "_channel_member_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(channel_member_id)",
+   "message": "There can only be one rtc session per channel member",
+   "defined_in_package": "mail",
+   "entity": "discuss.channel.rtc.session"
+  },
+  {
+   "name": "_user_gif_favorite",
+   "kind": "Constraint",
+   "definition": "unique(create_uid,tenor_gif_id)",
+   "message": "User should not have duplicated favorite GIF",
+   "defined_in_package": "mail",
+   "entity": "discuss.gif.favorite"
+  },
+  {
+   "name": "_unique_registration",
+   "kind": "Constraint",
+   "definition": "unique(sale_order_line_id, event_booth_id)",
+   "message": "There can be only one registration for a booth by sale order line",
+   "defined_in_package": "event_booth_sale",
+   "entity": "event.booth.registration"
+  },
+  {
+   "name": "_uniq_event",
+   "kind": "Constraint",
+   "definition": "unique(event_id)",
+   "message": "You can only have one generation request per event at a time.",
+   "defined_in_package": "event_crm",
+   "entity": "event.lead.request"
+  },
+  {
+   "name": "_check_default_question_is_reusable",
+   "kind": "Constraint",
+   "definition": "CHECK(is_default IS DISTINCT FROM TRUE OR is_reusable IS TRUE)",
+   "message": "A default question must be reusable.",
+   "defined_in_package": "event",
+   "entity": "event.question"
+  },
+  {
+   "name": "_barcode_event_uniq",
+   "kind": "Constraint",
+   "definition": "unique(barcode)",
+   "message": "Barcode should be unique",
+   "defined_in_package": "event",
+   "entity": "event.registration"
+  },
+  {
+   "name": "_value_check",
+   "kind": "Constraint",
+   "definition": "CHECK(value_answer_id IS NOT NULL OR COALESCE(value_text_box, '') <> '')",
+   "message": "There must be a suggested value or a text value.",
+   "defined_in_package": "event",
+   "entity": "event.registration.answer"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "website_event_track",
+   "entity": "event.track.tag"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE (name)",
+   "message": "Category name must be unique",
+   "defined_in_package": "fleet",
+   "entity": "fleet.vehicle.model.category"
+  },
+  {
+   "name": "_fleet_state_name_unique",
+   "kind": "Constraint",
+   "definition": "unique(name)",
+   "message": "State name already exists",
+   "defined_in_package": "fleet",
+   "entity": "fleet.vehicle.state"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "fleet",
+   "entity": "fleet.vehicle.tag"
+  },
+  {
+   "name": "_vote_uniq",
+   "kind": "Constraint",
+   "definition": "unique (post_id, user_id)",
+   "message": "Vote already exists!",
+   "defined_in_package": "website_forum",
+   "entity": "forum.post.vote"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name, forum_id)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "website_forum",
+   "entity": "forum.tag"
+  },
+  {
+   "name": "_karma_min_check",
+   "kind": "Constraint",
+   "definition": "CHECK( karma_min > 0 )",
+   "message": "The required karma has to be above 0.",
+   "defined_in_package": "gamification",
+   "entity": "gamification.karma.rank"
+  },
+  {
+   "name": "_job_id_stage_id_idx",
+   "kind": "Index",
+   "definition": "(job_id, stage_id) WHERE active IS TRUE",
+   "message": null,
+   "defined_in_package": "hr_recruitment",
+   "entity": "hr.applicant"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "hr_recruitment",
+   "entity": "hr.applicant.category"
+  },
+  {
+   "name": "_overtime_start_before_end",
+   "kind": "Constraint",
+   "definition": "CHECK (time_stop > time_start)",
+   "message": "Starting time should be before end time.",
+   "defined_in_package": "hr_attendance",
+   "entity": "hr.attendance.overtime.line"
+  },
+  {
+   "name": "_timing_start_is_hour",
+   "kind": "Constraint",
+   "definition": "CHECK(0 <= timing_start AND timing_start < 24)",
+   "message": "Timing Start is an hour of the day",
+   "defined_in_package": "hr_attendance",
+   "entity": "hr.attendance.overtime.rule"
+  },
+  {
+   "name": "_timing_stop_is_hour",
+   "kind": "Constraint",
+   "definition": "CHECK(0 <= timing_stop AND timing_stop <= 24)",
+   "message": "Timing Stop is an hour of the day",
+   "defined_in_package": "hr_attendance",
+   "entity": "hr.attendance.overtime.rule"
+  },
+  {
+   "name": "_barcode_uniq",
+   "kind": "Constraint",
+   "definition": "unique (barcode)",
+   "message": "The Badge ID must be unique, this one is already assigned to another employee.",
+   "defined_in_package": "hr",
+   "entity": "hr.employee"
+  },
+  {
+   "name": "_user_uniq",
+   "kind": "Constraint",
+   "definition": "unique (user_id, company_id)",
+   "message": "A user cannot be linked to multiple employees in the same company.",
+   "defined_in_package": "hr",
+   "entity": "hr.employee"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "hr",
+   "entity": "hr.employee.category"
+  },
+  {
+   "name": "_uniq_exceptional_per_day",
+   "kind": "Constraint",
+   "definition": "unique(employee_id, date)",
+   "message": "Only one default work location and one exceptional work location per day per employee.",
+   "defined_in_package": "hr_homeworking",
+   "entity": "hr.employee.location"
+  },
+  {
+   "name": "_name_company_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name, company_id, department_id)",
+   "message": "The name of the job position must be unique per department in company!",
+   "defined_in_package": "hr",
+   "entity": "hr.job"
+  },
+  {
+   "name": "_no_of_recruitment_positive",
+   "kind": "Constraint",
+   "definition": "CHECK(no_of_recruitment >= 0)",
+   "message": "The expected number of new employees must be positive.",
+   "defined_in_package": "hr",
+   "entity": "hr.job"
+  },
+  {
+   "name": "_email_uniq",
+   "kind": "Constraint",
+   "definition": "unique (email)",
+   "message": "The Email must be unique, this one already corresponds to another Job Platform.",
+   "defined_in_package": "hr_recruitment",
+   "entity": "hr.job.platform"
+  },
+  {
+   "name": "_date_check2",
+   "kind": "Constraint",
+   "definition": "CHECK ((date_from <= date_to))",
+   "message": "The start date must be before or equal to the end date.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave"
+  },
+  {
+   "name": "_date_check3",
+   "kind": "Constraint",
+   "definition": "CHECK ((request_date_from <= request_date_to))",
+   "message": "The request start date must be before or equal to the request end date.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave"
+  },
+  {
+   "name": "_duration_check",
+   "kind": "Constraint",
+   "definition": "CHECK ( number_of_days >= 0 )",
+   "message": "If you want to change the number of days you should use the 'period' mode",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave"
+  },
+  {
+   "name": "_date_to_date_from_index",
+   "kind": "Index",
+   "definition": "(date_to, date_from)",
+   "message": null,
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave"
+  },
+  {
+   "name": "_start_count_check",
+   "kind": "Constraint",
+   "definition": "CHECK((start_count > 0 AND milestone_date = 'after') OR (start_count = 0 AND milestone_date = 'creation'))",
+   "message": "You can not start an accrual in the past.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave.accrual.level"
+  },
+  {
+   "name": "_added_value_greater_than_zero",
+   "kind": "Constraint",
+   "definition": "CHECK(added_value > 0)",
+   "message": "You must give a rate greater than 0 in accrual plan levels.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave.accrual.level"
+  },
+  {
+   "name": "_valid_postpone_max_days_value",
+   "kind": "Constraint",
+   "definition": "CHECK(action_with_unused_accruals <> 'all' OR carryover_options <> 'limited' OR COALESCE(postpone_max_days, 0) > 0)",
+   "message": "You cannot have a maximum quantity to carryover set to 0.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave.accrual.level"
+  },
+  {
+   "name": "_valid_accrual_validity_value",
+   "kind": "Constraint",
+   "definition": "CHECK(accrual_validity IS NOT TRUE OR COALESCE(accrual_validity_count, 0) > 0)",
+   "message": "You cannot have an accrual validity time set to 0.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave.accrual.level"
+  },
+  {
+   "name": "_valid_yearly_cap_value",
+   "kind": "Constraint",
+   "definition": "CHECK(cap_accrued_time_yearly IS NOT TRUE OR COALESCE(maximum_leave_yearly, 0) > 0)",
+   "message": "You cannot have a cap on yearly accrued time without setting a maximum amount.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave.accrual.level"
+  },
+  {
+   "name": "_duration_check",
+   "kind": "Constraint",
+   "definition": "CHECK( ( number_of_days > 0 AND allocation_type='regular') or (allocation_type != 'regular'))",
+   "message": "The duration must be greater than 0.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave.allocation"
+  },
+  {
+   "name": "_date_from_after_day_to",
+   "kind": "Constraint",
+   "definition": "CHECK(start_date <= end_date)",
+   "message": "The start date must be anterior than the end date.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave.mandatory.day"
+  },
+  {
+   "name": "_check_negative",
+   "kind": "Constraint",
+   "definition": "CHECK(NOT allows_negative OR max_allowed_negative > 0)",
+   "message": "The maximum excess amount should be greater than 0. If you want to set 0, disable the negative cap instead.",
+   "defined_in_package": "hr_holidays",
+   "entity": "hr.leave.type"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "The name of the Degree of Recruitment must be unique!",
+   "defined_in_package": "hr_recruitment",
+   "entity": "hr.recruitment.degree"
+  },
+  {
+   "name": "_score_range",
+   "kind": "Constraint",
+   "definition": "check(score >= 0 and score <= 1)",
+   "message": "Score should be between 0 and 100%",
+   "defined_in_package": "hr_recruitment",
+   "entity": "hr.recruitment.degree"
+  },
+  {
+   "name": "_date_check",
+   "kind": "Constraint",
+   "definition": "CHECK ((date_start <= date_end OR date_end IS NULL))",
+   "message": "The start date must be anterior to the end date.",
+   "defined_in_package": "hr_skills",
+   "entity": "hr.resume.line"
+  },
+  {
+   "name": "_check_level_progress",
+   "kind": "Constraint",
+   "definition": "CHECK(level_progress BETWEEN 0 AND 100)",
+   "message": "Progress should be a number between 0 and 100.",
+   "defined_in_package": "hr_skills",
+   "entity": "hr.skill.level"
+  },
+  {
+   "name": "_user_id_employee_id_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(user_id,employee_id)",
+   "message": "You cannot have the same employee twice.",
+   "defined_in_package": "hr_work_entry",
+   "entity": "hr.user.work.entry.employee"
+  },
+  {
+   "name": "_check_contract_start_date_defined",
+   "kind": "Constraint",
+   "definition": "CHECK(contract_date_end IS NULL OR contract_date_start IS NOT NULL)",
+   "message": "The contract must have a start date.",
+   "defined_in_package": "hr",
+   "entity": "hr.version"
+  },
+  {
+   "name": "_check_unique_date_version",
+   "kind": "UniqueIndex",
+   "definition": "(employee_id, date_version) WHERE active = TRUE AND employee_id IS NOT NULL",
+   "message": "An employee cannot have multiple active versions sharing the same effective date.",
+   "defined_in_package": "hr",
+   "entity": "hr.version"
+  },
+  {
+   "name": "_contract_date_start_stop_idx",
+   "kind": "Index",
+   "definition": "(version_id, date) WHERE state IN ('draft', 'validated')",
+   "message": null,
+   "defined_in_package": "hr_work_entry",
+   "entity": "hr.work.entry"
+  },
+  {
+   "name": "_unique_technical_name",
+   "kind": "Constraint",
+   "definition": "UNIQUE(technical_name)",
+   "message": "Only one service can exist with a specific technical_name",
+   "defined_in_package": "iap",
+   "entity": "iap.service"
+  },
+  {
+   "name": "_max_sessions_mode_greater_than_zero",
+   "kind": "Constraint",
+   "definition": "CHECK(max_sessions > 0)",
+   "message": "Concurrent session number should be greater than zero.",
+   "defined_in_package": "im_livechat",
+   "entity": "im_livechat.channel"
+  },
+  {
+   "name": "_member_id_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(member_id)",
+   "message": "Members can only be linked to one history",
+   "defined_in_package": "im_livechat",
+   "entity": "im_livechat.channel.member.history"
+  },
+  {
+   "name": "_channel_id_partner_id_unique",
+   "kind": "UniqueIndex",
+   "definition": "(channel_id, partner_id) WHERE partner_id IS NOT NULL",
+   "message": "One partner can only be linked to one history on a channel",
+   "defined_in_package": "im_livechat",
+   "entity": "im_livechat.channel.member.history"
+  },
+  {
+   "name": "_channel_id_guest_id_unique",
+   "kind": "UniqueIndex",
+   "definition": "(channel_id, guest_id) WHERE guest_id IS NOT NULL",
+   "message": "One guest can only be linked to one history on a channel",
+   "defined_in_package": "im_livechat",
+   "entity": "im_livechat.channel.member.history"
+  },
+  {
+   "name": "_partner_id_or_guest_id_constraint",
+   "kind": "Constraint",
+   "definition": "CHECK(partner_id IS NULL OR guest_id IS NULL)",
+   "message": "History should either be linked to a partner or a guest but not both",
+   "defined_in_package": "im_livechat",
+   "entity": "im_livechat.channel.member.history"
+  },
+  {
+   "name": "_name_unique",
+   "kind": "UniqueIndex",
+   "definition": "(name)",
+   "message": null,
+   "defined_in_package": "im_livechat",
+   "entity": "im_livechat.conversation.tag"
+  },
+  {
+   "name": "_name_unique",
+   "kind": "UniqueIndex",
+   "definition": "(name)",
+   "message": null,
+   "defined_in_package": "im_livechat",
+   "entity": "im_livechat.expertise"
+  },
+  {
+   "name": "_unique_mode_per_action",
+   "kind": "UniqueIndex",
+   "definition": "(act_window_id, view_mode)",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "ir.actions.act_window.view"
+  },
+  {
+   "name": "_path_unique",
+   "kind": "Constraint",
+   "definition": "unique(path)",
+   "message": "Path to show in the URL must be unique! Please choose another one.",
+   "defined_in_package": "base",
+   "entity": "ir.actions.actions"
+  },
+  {
+   "name": "_res_idx",
+   "kind": "Index",
+   "definition": "(res_model, res_id)",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "ir.attachment"
+  },
+  {
+   "name": "_key_uniq",
+   "kind": "Constraint",
+   "definition": "unique (key)",
+   "message": "Key must be unique.",
+   "defined_in_package": "base",
+   "entity": "ir.config_parameter"
+  },
+  {
+   "name": "_check_strictly_positive_interval",
+   "kind": "Constraint",
+   "definition": "CHECK(interval_number > 0)",
+   "message": "The interval number must be a strictly positive number.",
+   "defined_in_package": "base",
+   "entity": "ir.cron"
+  },
+  {
+   "name": "_check_only_one_action_defined",
+   "kind": "Constraint",
+   "definition": "CHECK(\n            (action_id IS NOT NULL AND python_method IS NULL)\n            OR (action_id IS NULL AND python_method IS NOT NULL)\n        )",
+   "message": "Constraint to ensure that either an XML action or a python_method is defined, but not both.",
+   "defined_in_package": "base",
+   "entity": "ir.embedded.actions"
+  },
+  {
+   "name": "_check_python_method_requires_name",
+   "kind": "Constraint",
+   "definition": "CHECK(NOT (python_method IS NOT NULL AND name IS NULL))",
+   "message": "Constraint to ensure that if a python_method is defined, then the name must also be defined.",
+   "defined_in_package": "base",
+   "entity": "ir.embedded.actions"
+  },
+  {
+   "name": "_get_filters_index",
+   "kind": "Index",
+   "definition": "(model_id, action_id, embedded_action_id, embedded_parent_res_id)",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "ir.filters"
+  },
+  {
+   "name": "_check_res_id_only_when_embedded_action",
+   "kind": "Constraint",
+   "definition": "CHECK(NOT (embedded_parent_res_id IS NOT NULL AND embedded_action_id IS NULL))",
+   "message": "Constraint to ensure that the embedded_parent_res_id is only defined when a top_action_id is defined.",
+   "defined_in_package": "base",
+   "entity": "ir.filters"
+  },
+  {
+   "name": "_check_sort_json",
+   "kind": "Constraint",
+   "definition": "CHECK(sort IS NULL OR jsonb_typeof(sort::jsonb) = 'array')",
+   "message": "Invalid sort definition",
+   "defined_in_package": "base",
+   "entity": "ir.filters"
+  },
+  {
+   "name": "_certificate_requires_tls",
+   "kind": "Constraint",
+   "definition": "CHECK(smtp_encryption != 'none' OR smtp_authentication != 'certificate')",
+   "message": "Certificate-based authentication requires a TLS transport",
+   "defined_in_package": "base",
+   "entity": "ir.mail_server"
+  },
+  {
+   "name": "_unique_owner_user_id",
+   "kind": "Constraint",
+   "definition": "UNIQUE(owner_user_id)",
+   "message": "owner_user_id must be unique",
+   "defined_in_package": "mail",
+   "entity": "ir.mail_server"
+  },
+  {
+   "name": "_obj_name_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE (model)",
+   "message": "Each model must have a unique name.",
+   "defined_in_package": "base",
+   "entity": "ir.model"
+  },
+  {
+   "name": "_module_name_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE (name, module)",
+   "message": "Constraints with the same name are unique per module.",
+   "defined_in_package": "base",
+   "entity": "ir.model.constraint"
+  },
+  {
+   "name": "_name_nospaces",
+   "kind": "Constraint",
+   "definition": "CHECK(name NOT LIKE '% %')",
+   "message": "External IDs cannot contain spaces",
+   "defined_in_package": "base",
+   "entity": "ir.model.data"
+  },
+  {
+   "name": "_module_name_uniq_index",
+   "kind": "UniqueIndex",
+   "definition": "(module, name)",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "ir.model.data"
+  },
+  {
+   "name": "_model_res_id_index",
+   "kind": "Index",
+   "definition": "(model, res_id)",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "ir.model.data"
+  },
+  {
+   "name": "_name_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(model, name)",
+   "message": "Field names must be unique per model.",
+   "defined_in_package": "base",
+   "entity": "ir.model.fields"
+  },
+  {
+   "name": "_size_gt_zero",
+   "kind": "Constraint",
+   "definition": "CHECK (size>=0)",
+   "message": "Size of the field cannot be negative.",
+   "defined_in_package": "base",
+   "entity": "ir.model.fields"
+  },
+  {
+   "name": "_name_manual_field",
+   "kind": "Constraint",
+   "definition": "CHECK (state != 'manual' OR name LIKE 'x\\_%')",
+   "message": "Custom fields must have a name that starts with 'x_'!",
+   "defined_in_package": "base",
+   "entity": "ir.model.fields"
+  },
+  {
+   "name": "_selection_field_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE (field_id, value)",
+   "message": "Selections values must be unique per field",
+   "defined_in_package": "base",
+   "entity": "ir.model.fields.selection"
+  },
+  {
+   "name": "_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE(model_id, parent_id)",
+   "message": "Models inherits from another only once",
+   "defined_in_package": "base",
+   "entity": "ir.model.inherit"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE (name)",
+   "message": "The name of the module must be unique!",
+   "defined_in_package": "base",
+   "entity": "ir.module.module"
+  },
+  {
+   "name": "_no_access_rights",
+   "kind": "Constraint",
+   "definition": "CHECK (perm_read!=False or perm_write!=False or perm_create!=False or perm_unlink!=False)",
+   "message": "Rule must have at least one checked access right!",
+   "defined_in_package": "base",
+   "entity": "ir.rule"
+  },
+  {
+   "name": "_unique_range_per_sequence",
+   "kind": "Constraint",
+   "definition": "UNIQUE(sequence_id, date_from, date_to)",
+   "message": "You cannot create two date ranges for the same sequence with the same date range.",
+   "defined_in_package": "base",
+   "entity": "ir.sequence.date_range"
+  },
+  {
+   "name": "_inheritance_mode",
+   "kind": "Constraint",
+   "definition": "CHECK (mode != 'extension' OR inherit_id IS NOT NULL)",
+   "message": "Invalid inheritance mode: if the mode is 'extension', the view must extend an other view",
+   "defined_in_package": "base",
+   "entity": "ir.ui.view"
+  },
+  {
+   "name": "_qweb_required_key",
+   "kind": "Constraint",
+   "definition": "CHECK (type != 'qweb' OR key IS NOT NULL)",
+   "message": "Invalid key: QWeb view should have a key",
+   "defined_in_package": "base",
+   "entity": "ir.ui.view"
+  },
+  {
+   "name": "_model_type_inherit_id",
+   "kind": "Index",
+   "definition": "(model, inherit_id)",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "ir.ui.view"
+  },
+  {
+   "name": "_user_id_ref_id",
+   "kind": "Index",
+   "definition": "(user_id, ref_id)",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "ir.ui.view.custom"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name)",
+   "message": "Name must be unique!",
+   "defined_in_package": "l10n_ar",
+   "entity": "l10n_ar.afip.responsibility.type"
+  },
+  {
+   "name": "_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique(code)",
+   "message": "Code must be unique!",
+   "defined_in_package": "l10n_ar",
+   "entity": "l10n_ar.afip.responsibility.type"
+  },
+  {
+   "name": "_uniq_start",
+   "kind": "Constraint",
+   "definition": "unique(start)",
+   "message": "The \"from\" zip must be unique",
+   "defined_in_package": "l10n_br",
+   "entity": "l10n_br.zip.range"
+  },
+  {
+   "name": "_uniq_end",
+   "kind": "Constraint",
+   "definition": "unique(\"end\")",
+   "message": "The \"to\" zip must be unique.",
+   "defined_in_package": "l10n_br",
+   "entity": "l10n_br.zip.range"
+  },
+  {
+   "name": "_workplace_code_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE (workplace_code)",
+   "message": "The territorial workplace code must be unique",
+   "defined_in_package": "l10n_cz",
+   "entity": "l10n_cz.tax_office"
+  },
+  {
+   "name": "_user_drive_uniq",
+   "kind": "Constraint",
+   "definition": "unique (user_id, company_id)",
+   "message": "You can only have one thumb drive per user per company!",
+   "defined_in_package": "l10n_eg_edi_eta",
+   "entity": "l10n_eg_edi.thumb.drive"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "A PAN Entity with same PAN Number already exists.",
+   "defined_in_package": "l10n_in",
+   "entity": "l10n_in.pan.entity"
+  },
+  {
+   "name": "_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique (code)",
+   "message": "The Port Code must be unique!",
+   "defined_in_package": "l10n_in",
+   "entity": "l10n_in.port.code"
+  },
+  {
+   "name": "_per_transaction_limit",
+   "kind": "Constraint",
+   "definition": "CHECK(per_transaction_limit >= 0)",
+   "message": "Per transaction limit must be positive",
+   "defined_in_package": "l10n_in",
+   "entity": "l10n_in.section.alert"
+  },
+  {
+   "name": "_aggregate_limit",
+   "kind": "Constraint",
+   "definition": "CHECK(aggregate_limit >= 0)",
+   "message": "Aggregate limit must be positive",
+   "defined_in_package": "l10n_in",
+   "entity": "l10n_in.section.alert"
+  },
+  {
+   "name": "_protocol_number_unique",
+   "kind": "Constraint",
+   "definition": "unique(protocol_number_part1, protocol_number_part2)",
+   "message": "The Protocol Number of a Declaration of Intent must be unique! Please choose another one.",
+   "defined_in_package": "l10n_it_edi_doi",
+   "entity": "l10n_it_edi_doi.declaration_of_intent"
+  },
+  {
+   "name": "_threshold_positive",
+   "kind": "Constraint",
+   "definition": "CHECK(threshold > 0)",
+   "message": "The Threshold of a Declaration of Intent must be positive.",
+   "defined_in_package": "l10n_it_edi_doi",
+   "entity": "l10n_it_edi_doi.declaration_of_intent"
+  },
+  {
+   "name": "_unique",
+   "kind": "UniqueIndex",
+   "definition": "(name, payment_method_line_id) WHERE outstanding_line_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "l10n_latam_check",
+   "entity": "l10n_latam.check"
+  },
+  {
+   "name": "_code_company_uniq",
+   "kind": "Constraint",
+   "definition": "unique (code)",
+   "message": "The code of the tax office must be unique !",
+   "defined_in_package": "l10n_pl",
+   "entity": "l10n_pl.l10n_pl_tax_office"
+  },
+  {
+   "name": "_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique (code)",
+   "message": "Code must be unique!",
+   "defined_in_package": "l10n_ro_cpv_code",
+   "entity": "l10n_ro.cpv.code"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name,plate_number_type)",
+   "message": "A Plate Number with that type already exists.",
+   "defined_in_package": "l10n_tr_nilvera_edispatch",
+   "entity": "l10n_tr.nilvera.trailer.plate"
+  },
+  {
+   "name": "_name_template_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name, invoice_template_id)",
+   "message": "The combination symbol/template must be unique!",
+   "defined_in_package": "l10n_vn_edi_viettel",
+   "entity": "l10n_vn_edi_viettel.sinvoice.symbol"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "The template code must be unique!",
+   "defined_in_package": "l10n_vn_edi_viettel",
+   "entity": "l10n_vn_edi_viettel.sinvoice.template"
+  },
+  {
+   "name": "_code",
+   "kind": "Constraint",
+   "definition": "unique( code )",
+   "message": "Code must be unique.",
+   "defined_in_package": "link_tracker",
+   "entity": "link.tracker.code"
+  },
+  {
+   "name": "_card_code_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(code)",
+   "message": "A coupon/loyalty card must have a unique code.",
+   "defined_in_package": "loyalty",
+   "entity": "loyalty.card"
+  },
+  {
+   "name": "_check_max_usage",
+   "kind": "Constraint",
+   "definition": "CHECK (limit_usage = False OR max_usage > 0)",
+   "message": "Max usage must be strictly positive if a limit is used.",
+   "defined_in_package": "loyalty",
+   "entity": "loyalty.program"
+  },
+  {
+   "name": "_required_points_positive",
+   "kind": "Constraint",
+   "definition": "CHECK (required_points > 0)",
+   "message": "The required points for a reward must be strictly positive.",
+   "defined_in_package": "loyalty",
+   "entity": "loyalty.reward"
+  },
+  {
+   "name": "_product_qty_positive",
+   "kind": "Constraint",
+   "definition": "CHECK (reward_type != 'product' OR reward_product_qty > 0)",
+   "message": "The reward product quantity must be strictly positive.",
+   "defined_in_package": "loyalty",
+   "entity": "loyalty.reward"
+  },
+  {
+   "name": "_discount_positive",
+   "kind": "Constraint",
+   "definition": "CHECK (reward_type != 'discount' OR discount > 0)",
+   "message": "The discount must be strictly positive.",
+   "defined_in_package": "loyalty",
+   "entity": "loyalty.reward"
+  },
+  {
+   "name": "_reward_point_amount_positive",
+   "kind": "Constraint",
+   "definition": "CHECK (reward_point_amount > 0)",
+   "message": "Rule points reward must be strictly positive.",
+   "defined_in_package": "loyalty",
+   "entity": "loyalty.rule"
+  },
+  {
+   "name": "_notification_time_range",
+   "kind": "Constraint",
+   "definition": "CHECK(notification_time >= 0 and notification_time <= 12)",
+   "message": "Notification time must be between 0 and 12",
+   "defined_in_package": "lunch",
+   "entity": "lunch.alert"
+  },
+  {
+   "name": "_user_product_date",
+   "kind": "Index",
+   "definition": "(user_id, product_id, date)",
+   "message": null,
+   "defined_in_package": "lunch",
+   "entity": "lunch.order"
+  },
+  {
+   "name": "_automatic_email_time_range",
+   "kind": "Constraint",
+   "definition": "CHECK(automatic_email_time >= 0 AND automatic_email_time <= 12)",
+   "message": "Automatic Email Sending Time should be between 0 and 12",
+   "defined_in_package": "lunch",
+   "entity": "lunch.supplier"
+  },
+  {
+   "name": "_check_res_id_is_set_if_model",
+   "kind": "Constraint",
+   "definition": "CHECK(\n            (COALESCE(res_model, '') <> '' AND (res_id IS NOT NULL AND res_id != 0)) OR\n            (COALESCE(res_model, '') = '' AND (res_id IS NULL OR res_id = 0))\n        )",
+   "message": "Activities have to be linked to records with a not null res_id.",
+   "defined_in_package": "mail",
+   "entity": "mail.activity"
+  },
+  {
+   "name": "_check_user_id_is_set_if_model",
+   "kind": "Constraint",
+   "definition": "CHECK(\n            (COALESCE(res_model, '') <> '' OR user_id IS NOT NULL)\n        )",
+   "message": "Activities must be assigned if not attached to a document.",
+   "defined_in_package": "mail",
+   "entity": "mail.activity"
+  },
+  {
+   "name": "_name_domain_unique",
+   "kind": "UniqueIndex",
+   "definition": "(alias_name, COALESCE(alias_domain_id, 0))",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.alias"
+  },
+  {
+   "name": "_bounce_email_uniques",
+   "kind": "Constraint",
+   "definition": "UNIQUE(bounce_alias, name)",
+   "message": "Bounce emails should be unique",
+   "defined_in_package": "mail",
+   "entity": "mail.alias.domain"
+  },
+  {
+   "name": "_catchall_email_uniques",
+   "kind": "Constraint",
+   "definition": "UNIQUE(catchall_alias, name)",
+   "message": "Catchall emails should be unique",
+   "defined_in_package": "mail",
+   "entity": "mail.alias.domain"
+  },
+  {
+   "name": "_unique_email",
+   "kind": "Constraint",
+   "definition": "unique (email)",
+   "message": "Email address already exists!",
+   "defined_in_package": "mail",
+   "entity": "mail.blacklist"
+  },
+  {
+   "name": "_mail_followers_res_partner_res_model_id_uniq",
+   "kind": "Constraint",
+   "definition": "unique(res_model,res_id,partner_id)",
+   "message": "Error, a partner cannot follow twice the same object.",
+   "defined_in_package": "mail",
+   "entity": "mail.followers"
+  },
+  {
+   "name": "_unique_partner",
+   "kind": "Constraint",
+   "definition": "UNIQUE(partner_id, mail_group_id)",
+   "message": "This partner is already subscribed to the group",
+   "defined_in_package": "mail_group",
+   "entity": "mail.group.member"
+  },
+  {
+   "name": "_mail_group_email_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE(mail_group_id, email)",
+   "message": "You can create only one rule for a given email address in a group.",
+   "defined_in_package": "mail_group",
+   "entity": "mail.group.moderation"
+  },
+  {
+   "name": "_unique_source_url",
+   "kind": "UniqueIndex",
+   "definition": "(source_url)",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.link.preview"
+  },
+  {
+   "name": "_model_res_id_idx",
+   "kind": "Index",
+   "definition": "(model, res_id)",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.message"
+  },
+  {
+   "name": "_model_res_id_id_idx",
+   "kind": "Index",
+   "definition": "(model, res_id, id)",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.message"
+  },
+  {
+   "name": "_date_res_id_id_for_burndown_chart",
+   "kind": "Index",
+   "definition": "(date, res_id, id) WHERE model = 'project.task' AND message_type = 'notification'",
+   "message": null,
+   "defined_in_package": "project",
+   "entity": "mail.message"
+  },
+  {
+   "name": "_unique_message_link_preview",
+   "kind": "UniqueIndex",
+   "definition": "(message_id, link_preview_id)",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.message.link.preview"
+  },
+  {
+   "name": "_partner_unique",
+   "kind": "UniqueIndex",
+   "definition": "(message_id, content, partner_id) WHERE partner_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.message.reaction"
+  },
+  {
+   "name": "_guest_unique",
+   "kind": "UniqueIndex",
+   "definition": "(message_id, content, guest_id) WHERE guest_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.message.reaction"
+  },
+  {
+   "name": "_partner_or_guest_exists",
+   "kind": "Constraint",
+   "definition": "CHECK((partner_id IS NOT NULL AND guest_id IS NULL) OR (partner_id IS NULL AND guest_id IS NOT NULL))",
+   "message": "A message reaction must be from a partner or from a guest.",
+   "defined_in_package": "mail",
+   "entity": "mail.message.reaction"
+  },
+  {
+   "name": "_unique",
+   "kind": "UniqueIndex",
+   "definition": "(message_id, target_lang)",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.message.translation"
+  },
+  {
+   "name": "_notification_partner_required",
+   "kind": "Constraint",
+   "definition": "CHECK(notification_type != 'inbox' OR res_partner_id IS NOT NULL)",
+   "message": "Customer is required for inbox notification",
+   "defined_in_package": "mail",
+   "entity": "mail.notification"
+  },
+  {
+   "name": "_notification_partner_or_email_required",
+   "kind": "Constraint",
+   "definition": "CHECK(notification_type != 'email' OR failure_type IS NOT NULL OR res_partner_id IS NOT NULL OR COALESCE(mail_email_address, '') != '')",
+   "message": "Customer or email is required for inbox / email notification",
+   "defined_in_package": "mail",
+   "entity": "mail.notification"
+  },
+  {
+   "name": "_res_partner_id_is_read_notification_status_mail_message_id",
+   "kind": "Index",
+   "definition": "(res_partner_id, is_read, notification_status, mail_message_id)",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.notification"
+  },
+  {
+   "name": "_author_id_notification_status_failure",
+   "kind": "Index",
+   "definition": "(author_id, notification_status) WHERE notification_status IN ('bounce', 'exception')",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.notification"
+  },
+  {
+   "name": "_unique_mail_message_id_res_partner_id_",
+   "kind": "UniqueIndex",
+   "definition": "(mail_message_id, res_partner_id) WHERE res_partner_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.notification"
+  },
+  {
+   "name": "_guest_unique",
+   "kind": "UniqueIndex",
+   "definition": "(guest_id) WHERE guest_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.presence"
+  },
+  {
+   "name": "_user_unique",
+   "kind": "UniqueIndex",
+   "definition": "(user_id) WHERE user_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "mail.presence"
+  },
+  {
+   "name": "_partner_or_guest_exists",
+   "kind": "Constraint",
+   "definition": "CHECK((user_id IS NOT NULL AND guest_id IS NULL) OR (user_id IS NULL AND guest_id IS NOT NULL))",
+   "message": "A mail presence must have a user or a guest.",
+   "defined_in_package": "mail",
+   "entity": "mail.presence"
+  },
+  {
+   "name": "_endpoint_unique",
+   "kind": "Constraint",
+   "definition": "unique(endpoint)",
+   "message": "The endpoint must be unique !",
+   "defined_in_package": "mail",
+   "entity": "mail.push.device"
+  },
+  {
+   "name": "_percentage_valid",
+   "kind": "Constraint",
+   "definition": "CHECK(ab_testing_pc >= 0 AND ab_testing_pc <= 100)",
+   "message": "The A/B Testing Percentage needs to be between 0 and 100%",
+   "defined_in_package": "mass_mailing",
+   "entity": "mailing.mailing"
+  },
+  {
+   "name": "_email_from",
+   "kind": "Constraint",
+   "definition": "CHECK(email_from IS NOT NULL OR mailing_type != 'mail')",
+   "message": "email from is required for mailing",
+   "defined_in_package": "mass_mailing",
+   "entity": "mailing.mailing"
+  },
+  {
+   "name": "_unique_contact_list",
+   "kind": "Constraint",
+   "definition": "unique (contact_id, list_id)",
+   "message": "A mailing contact cannot subscribe to the same mailing list multiple times.",
+   "defined_in_package": "mass_mailing",
+   "entity": "mailing.subscription"
+  },
+  {
+   "name": "_check_res_id_is_set",
+   "kind": "Constraint",
+   "definition": "CHECK(res_id IS NOT NULL AND res_id !=0 )",
+   "message": "Traces have to be linked to records with a not null res_id.",
+   "defined_in_package": "mass_mailing",
+   "entity": "mailing.trace"
+  },
+  {
+   "name": "_serial_no",
+   "kind": "Constraint",
+   "definition": "unique(serial_no)",
+   "message": "Another asset already exists with this serial number!",
+   "defined_in_package": "maintenance",
+   "entity": "maintenance.equipment"
+  },
+  {
+   "name": "_check_debit_credit",
+   "kind": "Constraint",
+   "definition": "CHECK ( debit = 0 OR credit = 0 )",
+   "message": "A single line cannot be both credit and debit.",
+   "defined_in_package": "mrp_account",
+   "entity": "mrp.account.wip.accounting.line"
+  },
+  {
+   "name": "_qty_positive",
+   "kind": "Constraint",
+   "definition": "check (product_qty > 0)",
+   "message": "The quantity to produce must be positive!",
+   "defined_in_package": "mrp",
+   "entity": "mrp.bom"
+  },
+  {
+   "name": "_bom_qty_zero",
+   "kind": "Constraint",
+   "definition": "CHECK (product_qty>=0)",
+   "message": "All product quantities must be greater or equal to 0.\nLines with 0 quantities can be used as optional lines. \nYou should install the mrp_byproduct module if you want to manage extra products on BoMs!",
+   "defined_in_package": "mrp",
+   "entity": "mrp.bom.line"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name, company_id)",
+   "message": "Reference must be unique per Company!",
+   "defined_in_package": "mrp",
+   "entity": "mrp.production"
+  },
+  {
+   "name": "_qty_positive",
+   "kind": "Constraint",
+   "definition": "check (product_qty > 0)",
+   "message": "The quantity to produce must be positive!",
+   "defined_in_package": "mrp",
+   "entity": "mrp.production"
+  },
+  {
+   "name": "_qty_positive",
+   "kind": "Constraint",
+   "definition": "check (product_qty > 0)",
+   "message": "The quantity to unbuild must be positive!",
+   "defined_in_package": "mrp",
+   "entity": "mrp.unbuild"
+  },
+  {
+   "name": "_positive_capacity",
+   "kind": "Constraint",
+   "definition": "CHECK(capacity >= 0)",
+   "message": "Capacity should be a non-negative number.",
+   "defined_in_package": "mrp",
+   "entity": "mrp.workcenter.capacity"
+  },
+  {
+   "name": "_workcenter_product_product_uom_unique",
+   "kind": "UniqueIndex",
+   "definition": "(workcenter_id, COALESCE(product_id, 0), product_uom_id)",
+   "message": "Product/Unit capacity should be unique for each workcenter.",
+   "defined_in_package": "mrp",
+   "entity": "mrp.workcenter.capacity"
+  },
+  {
+   "name": "_tag_name_unique",
+   "kind": "Constraint",
+   "definition": "unique(name)",
+   "message": "The tag name must be unique.",
+   "defined_in_package": "mrp",
+   "entity": "mrp.workcenter.tag"
+  },
+  {
+   "name": "_route_name_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE (route_name)",
+   "message": "Onboarding alias must be unique.",
+   "defined_in_package": "onboarding",
+   "entity": "onboarding.onboarding"
+  },
+  {
+   "name": "_onboarding_company_uniq",
+   "kind": "UniqueIndex",
+   "definition": "(onboarding_id, COALESCE(company_id, 0))",
+   "message": null,
+   "defined_in_package": "onboarding",
+   "entity": "onboarding.progress"
+  },
+  {
+   "name": "_company_uniq",
+   "kind": "UniqueIndex",
+   "definition": "(step_id, COALESCE(company_id, 0))",
+   "message": null,
+   "defined_in_package": "onboarding",
+   "entity": "onboarding.progress.step"
+  },
+  {
+   "name": "_custom_providers_setup",
+   "kind": "Constraint",
+   "definition": "CHECK(custom_mode IS NULL OR (code = 'custom' AND custom_mode IS NOT NULL))",
+   "message": "Only custom providers should have a custom mode.",
+   "defined_in_package": "payment_custom",
+   "entity": "payment.provider"
+  },
+  {
+   "name": "_reference_uniq",
+   "kind": "Constraint",
+   "definition": "unique(reference)",
+   "message": "Reference must be unique!",
+   "defined_in_package": "payment",
+   "entity": "payment.transaction"
+  },
+  {
+   "name": "_unique_number",
+   "kind": "Constraint",
+   "definition": "unique (number)",
+   "message": "Number already exists",
+   "defined_in_package": "phone_validation",
+   "entity": "phone.blacklist"
+  },
+  {
+   "name": "_name_unique",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "A note with this name already exists",
+   "defined_in_package": "point_of_sale",
+   "entity": "pos.note"
+  },
+  {
+   "name": "_unique_uuid",
+   "kind": "Constraint",
+   "definition": "unique (uuid)",
+   "message": "An order with this uuid already exists",
+   "defined_in_package": "point_of_sale",
+   "entity": "pos.order"
+  },
+  {
+   "name": "_unique_uuid",
+   "kind": "Constraint",
+   "definition": "unique (uuid)",
+   "message": "An order line with this uuid already exists",
+   "defined_in_package": "point_of_sale",
+   "entity": "pos.order.line"
+  },
+  {
+   "name": "_unique_uuid",
+   "kind": "Constraint",
+   "definition": "unique (uuid)",
+   "message": "A payment with this uuid already exists",
+   "defined_in_package": "point_of_sale",
+   "entity": "pos.payment"
+  },
+  {
+   "name": "_check_multi_checkbox_no_variant",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type != 'multi' OR create_variant = 'no_variant')",
+   "message": "Multi-checkbox display type is not compatible with the creation of variants",
+   "defined_in_package": "product",
+   "entity": "product.attribute"
+  },
+  {
+   "name": "_sol_custom_value_unique",
+   "kind": "Constraint",
+   "definition": "unique(custom_product_template_attribute_value_id, sale_order_line_id)",
+   "message": "Only one Custom Value is allowed per Attribute Value per Sales Order Line.",
+   "defined_in_package": "sale",
+   "entity": "product.attribute.custom.value"
+  },
+  {
+   "name": "_combination_unique",
+   "kind": "UniqueIndex",
+   "definition": "(product_tmpl_id, combination_indices) WHERE active IS TRUE",
+   "message": null,
+   "defined_in_package": "product",
+   "entity": "product.product"
+  },
+  {
+   "name": "_is_favorite_index",
+   "kind": "Index",
+   "definition": "(is_favorite) WHERE is_favorite IS TRUE",
+   "message": null,
+   "defined_in_package": "product",
+   "entity": "product.product"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "product",
+   "entity": "product.tag"
+  },
+  {
+   "name": "_is_favorite_index",
+   "kind": "Index",
+   "definition": "(is_favorite) WHERE is_favorite IS TRUE",
+   "message": null,
+   "defined_in_package": "product",
+   "entity": "product.template"
+  },
+  {
+   "name": "_name_gist_idx",
+   "kind": "Index",
+   "definition": {
+    "expression": "lambda registry: get_translated_field_gist_index(registry, 'name')"
+   },
+   "message": null,
+   "defined_in_package": "website_sale",
+   "entity": "product.template"
+  },
+  {
+   "name": "_description_gist_idx",
+   "kind": "Index",
+   "definition": {
+    "expression": "lambda registry: get_translated_field_gist_index(registry, 'description')"
+   },
+   "message": null,
+   "defined_in_package": "website_sale",
+   "entity": "product.template"
+  },
+  {
+   "name": "_description_sale_gist_idx",
+   "kind": "Index",
+   "definition": {
+    "expression": "lambda registry: get_translated_field_gist_index(registry, 'description_sale')"
+   },
+   "message": null,
+   "defined_in_package": "website_sale",
+   "entity": "product.template"
+  },
+  {
+   "name": "_description_ecommerce_gist_idx",
+   "kind": "Index",
+   "definition": {
+    "expression": "lambda registry: get_translated_field_gist_index(registry, 'description_ecommerce')"
+   },
+   "message": null,
+   "defined_in_package": "website_sale",
+   "entity": "product.template"
+  },
+  {
+   "name": "_default_code_gist_idx",
+   "kind": "Index",
+   "definition": {
+    "expression": "lambda registry: 'USING GIST(unaccent(default_code) gist_trgm_ops)' if registry.has_trigram and registry.has_unaccent == FunctionStatus.INDEXABLE else 'USING GIST(default_code gist_trgm_ops)' if registry.has_trigram else ''"
+   },
+   "message": null,
+   "defined_in_package": "website_sale",
+   "entity": "product.template"
+  },
+  {
+   "name": "_attribute_value_unique",
+   "kind": "Constraint",
+   "definition": "unique(attribute_line_id, product_attribute_value_id)",
+   "message": "Each value should be defined only once per attribute per product.",
+   "defined_in_package": "product",
+   "entity": "product.template.attribute.value"
+  },
+  {
+   "name": "_barcode_uniq",
+   "kind": "Constraint",
+   "definition": "unique(barcode)",
+   "message": "A barcode can only be assigned to one packaging.",
+   "defined_in_package": "product",
+   "entity": "product.uom"
+  },
+  {
+   "name": "_product_unique_partner_id",
+   "kind": "Constraint",
+   "definition": "UNIQUE(product_id, partner_id)",
+   "message": "Duplicated wishlisted product for this partner.",
+   "defined_in_package": "website_sale_wishlist",
+   "entity": "product.wishlist"
+  },
+  {
+   "name": "_unique_collaborator",
+   "kind": "Constraint",
+   "definition": "UNIQUE(project_id, partner_id)",
+   "message": "A collaborator cannot be selected more than once in the project sharing access. Please remove duplicate(s) and try again.",
+   "defined_in_package": "project",
+   "entity": "project.collaborator"
+  },
+  {
+   "name": "_project_date_greater",
+   "kind": "Constraint",
+   "definition": "check(date >= date_start)",
+   "message": "The project's start date must be before its end date.",
+   "defined_in_package": "project",
+   "entity": "project.project"
+  },
+  {
+   "name": "_uniqueness_employee",
+   "kind": "Constraint",
+   "definition": "UNIQUE(project_id,employee_id)",
+   "message": "An employee cannot be selected more than once in the mapping. Please remove duplicate(s) and try again.",
+   "defined_in_package": "sale_timesheet",
+   "entity": "project.sale.line.employee.map"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "A tag with the same name already exists.",
+   "defined_in_package": "project",
+   "entity": "project.tags"
+  },
+  {
+   "name": "_recurring_task_has_no_parent",
+   "kind": "Constraint",
+   "definition": "CHECK (NOT (recurring_task IS TRUE AND parent_id IS NOT NULL))",
+   "message": "You cannot convert this task into a sub-task because it is recurrent.",
+   "defined_in_package": "project",
+   "entity": "project.task"
+  },
+  {
+   "name": "_private_task_has_no_parent",
+   "kind": "Constraint",
+   "definition": "CHECK (NOT (project_id IS NULL AND parent_id IS NOT NULL))",
+   "message": "A private task cannot have a parent.",
+   "defined_in_package": "project",
+   "entity": "project.task"
+  },
+  {
+   "name": "_is_template_idx",
+   "kind": "Index",
+   "definition": "(is_template) WHERE is_template IS TRUE",
+   "message": null,
+   "defined_in_package": "project",
+   "entity": "project.task"
+  },
+  {
+   "name": "_project_personal_stage_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE (task_id, user_id)",
+   "message": "A task can only have a single personal stage per user.",
+   "defined_in_package": "project",
+   "entity": "project.task.stage.personal"
+  },
+  {
+   "name": "_unique_properties_field_id",
+   "kind": "Constraint",
+   "definition": "UNIQUE(properties_field_id)",
+   "message": "Only one definition per properties field",
+   "defined_in_package": "base",
+   "entity": "properties.base.definition"
+  },
+  {
+   "name": "_accountable_required_fields",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type IS NOT NULL OR is_downpayment OR (product_id IS NOT NULL AND product_uom_id IS NOT NULL AND date_planned IS NOT NULL))",
+   "message": "Missing required fields on accountable purchase order line.",
+   "defined_in_package": "purchase",
+   "entity": "purchase.order.line"
+  },
+  {
+   "name": "_non_accountable_null_fields",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type IS NULL OR (product_id IS NULL AND price_unit = 0 AND product_uom_qty = 0 AND product_uom_id IS NULL AND date_planned is NULL))",
+   "message": "Forbidden values on non-accountable purchase order line",
+   "defined_in_package": "purchase",
+   "entity": "purchase.order.line"
+  },
+  {
+   "name": "_rating_range",
+   "kind": "Constraint",
+   "definition": "check(rating >= 0 and rating <= 5)",
+   "message": "Rating should be between 0 and 5",
+   "defined_in_package": "rating",
+   "entity": "rating.rating"
+  },
+  {
+   "name": "_consumed_idx",
+   "kind": "Index",
+   "definition": "(res_model, res_id, write_date) WHERE consumed IS TRUE",
+   "message": null,
+   "defined_in_package": "rating",
+   "entity": "rating.rating"
+  },
+  {
+   "name": "_parent_consumed_idx",
+   "kind": "Index",
+   "definition": "(parent_res_model, parent_res_id, write_date) WHERE consumed IS TRUE",
+   "message": null,
+   "defined_in_package": "rating",
+   "entity": "rating.rating"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "repair",
+   "entity": "repair.tags"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "The company name must be unique!",
+   "defined_in_package": "base",
+   "entity": "res.company"
+  },
+  {
+   "name": "_check_quotation_validity_days",
+   "kind": "Constraint",
+   "definition": "CHECK(quotation_validity_days >= 0)",
+   "message": "You cannot set a negative number for the default quotation validity. Leave empty (or 0) to disable the automatic expiration of quotations.",
+   "defined_in_package": "sale",
+   "entity": "res.company"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "The name of the country must be unique!",
+   "defined_in_package": "base",
+   "entity": "res.country"
+  },
+  {
+   "name": "_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique (code)",
+   "message": "The code of the country must be unique!",
+   "defined_in_package": "base",
+   "entity": "res.country"
+  },
+  {
+   "name": "_check_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique(code)",
+   "message": "The country group code must be unique!",
+   "defined_in_package": "base",
+   "entity": "res.country.group"
+  },
+  {
+   "name": "_name_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique(country_id, code)",
+   "message": "The code of the state must be unique by country!",
+   "defined_in_package": "base",
+   "entity": "res.country.state"
+  },
+  {
+   "name": "_unique_name",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "The currency code must be unique!",
+   "defined_in_package": "base",
+   "entity": "res.currency"
+  },
+  {
+   "name": "_rounding_gt_zero",
+   "kind": "Constraint",
+   "definition": "CHECK (rounding>0)",
+   "message": "The rounding factor must be greater than 0!",
+   "defined_in_package": "base",
+   "entity": "res.currency"
+  },
+  {
+   "name": "_unique_name_per_day",
+   "kind": "Constraint",
+   "definition": "unique (name,currency_id,company_id)",
+   "message": "Only one currency rate per day allowed!",
+   "defined_in_package": "base",
+   "entity": "res.currency.rate"
+  },
+  {
+   "name": "_currency_rate_check",
+   "kind": "Constraint",
+   "definition": "CHECK (rate>0)",
+   "message": "The currency rate must be strictly positive.",
+   "defined_in_package": "base",
+   "entity": "res.currency.rate"
+  },
+  {
+   "name": "_composite_idx",
+   "kind": "Index",
+   "definition": "(user_id, session_identifier, platform, browser, last_activity, id) WHERE revoked IS NOT TRUE",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "res.device.log"
+  },
+  {
+   "name": "_revoked_idx",
+   "kind": "Index",
+   "definition": "(revoked) WHERE revoked IS NOT TRUE",
+   "message": null,
+   "defined_in_package": "base",
+   "entity": "res.device.log"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "UNIQUE (privilege_id, name)",
+   "message": "The name of the group must be unique within a group privilege!",
+   "defined_in_package": "base",
+   "entity": "res.groups"
+  },
+  {
+   "name": "_check_api_key_duration",
+   "kind": "Constraint",
+   "definition": "CHECK(api_key_duration >= 0)",
+   "message": "The api key duration cannot be a negative value.",
+   "defined_in_package": "base",
+   "entity": "res.groups"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name)",
+   "message": "The name of the language must be unique!",
+   "defined_in_package": "base",
+   "entity": "res.lang"
+  },
+  {
+   "name": "_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique(code)",
+   "message": "The code of the language must be unique!",
+   "defined_in_package": "base",
+   "entity": "res.lang"
+  },
+  {
+   "name": "_url_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique(url_code)",
+   "message": "The URL code of the language must be unique!",
+   "defined_in_package": "base",
+   "entity": "res.lang"
+  },
+  {
+   "name": "_check_name",
+   "kind": "Constraint",
+   "definition": "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )",
+   "message": "Contacts require a name",
+   "defined_in_package": "base",
+   "entity": "res.partner"
+  },
+  {
+   "name": "_l10n_it_codice_fiscale",
+   "kind": "Constraint",
+   "definition": "CHECK(l10n_it_codice_fiscale IS NULL OR l10n_it_codice_fiscale = '' OR LENGTH(l10n_it_codice_fiscale) >= 11)",
+   "message": "Codice fiscale must have between 11 and 16 characters.",
+   "defined_in_package": "l10n_it_edi",
+   "entity": "res.partner"
+  },
+  {
+   "name": "_l10n_it_pa_index",
+   "kind": "Constraint",
+   "definition": "CHECK(l10n_it_pa_index IS NULL OR l10n_it_pa_index = '' OR LENGTH(l10n_it_pa_index) >= 6)",
+   "message": "Destination Code (SDI) must have between 6 and 7 characters.",
+   "defined_in_package": "l10n_it_edi",
+   "entity": "res.partner"
+  },
+  {
+   "name": "_unique_number",
+   "kind": "Constraint",
+   "definition": "unique(sanitized_acc_number, partner_id)",
+   "message": "The combination Account Number/Partner must be unique.",
+   "defined_in_package": "base",
+   "entity": "res.partner.bank"
+  },
+  {
+   "name": "_unique_partner_id",
+   "kind": "Constraint",
+   "definition": "UNIQUE(partner_id)",
+   "message": "Only one partner IAP is allowed for one partner",
+   "defined_in_package": "mail_plugin",
+   "entity": "res.partner.iap"
+  },
+  {
+   "name": "_unique_name",
+   "kind": "UniqueIndex",
+   "definition": "(name)",
+   "message": "A role with the same name already exists.",
+   "defined_in_package": "mail",
+   "entity": "res.role"
+  },
+  {
+   "name": "_login_key",
+   "kind": "Constraint",
+   "definition": "UNIQUE (login)",
+   "message": "You can not have two users with the same login!",
+   "defined_in_package": "base",
+   "entity": "res.users"
+  },
+  {
+   "name": "_notification_type",
+   "kind": "Constraint",
+   "definition": "CHECK (notification_type = 'email' OR NOT share)",
+   "message": "Only internal user can receive notifications in Odoo",
+   "defined_in_package": "mail",
+   "entity": "res.users"
+  },
+  {
+   "name": "_uniq_users_oauth_provider_oauth_uid",
+   "kind": "Constraint",
+   "definition": "unique(oauth_provider_id, oauth_uid)",
+   "message": "OAuth UID must be unique per provider",
+   "defined_in_package": "auth_oauth",
+   "entity": "res.users"
+  },
+  {
+   "name": "_login_key",
+   "kind": "Constraint",
+   "definition": "unique (login, website_id)",
+   "message": "You can not have two users with the same login!",
+   "defined_in_package": "website",
+   "entity": "res.users"
+  },
+  {
+   "name": "_unique_user_id",
+   "kind": "Constraint",
+   "definition": "UNIQUE(user_id)",
+   "message": "One user should only have one user settings.",
+   "defined_in_package": "base",
+   "entity": "res.users.settings"
+  },
+  {
+   "name": "_res_user_settings_embedded_action_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE (user_setting_id, action_id, res_id)",
+   "message": "The user should have one unique embedded action setting per user setting, action and record id.",
+   "defined_in_package": "web",
+   "entity": "res.users.settings.embedded.action"
+  },
+  {
+   "name": "_partner_unique",
+   "kind": "UniqueIndex",
+   "definition": "(user_setting_id, partner_id) WHERE partner_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "res.users.settings.volumes"
+  },
+  {
+   "name": "_guest_unique",
+   "kind": "UniqueIndex",
+   "definition": "(user_setting_id, guest_id) WHERE guest_id IS NOT NULL",
+   "message": null,
+   "defined_in_package": "mail",
+   "entity": "res.users.settings.volumes"
+  },
+  {
+   "name": "_partner_or_guest_exists",
+   "kind": "Constraint",
+   "definition": "CHECK((partner_id IS NOT NULL AND guest_id IS NULL) OR (partner_id IS NULL AND guest_id IS NOT NULL))",
+   "message": "A volume setting must have a partner or a guest.",
+   "defined_in_package": "mail",
+   "entity": "res.users.settings.volumes"
+  },
+  {
+   "name": "_check_time_efficiency",
+   "kind": "Constraint",
+   "definition": "CHECK(time_efficiency>0)",
+   "message": "Time efficiency must be strictly positive",
+   "defined_in_package": "resource",
+   "entity": "resource.resource"
+  },
+  {
+   "name": "_date_order_conditional_required",
+   "kind": "Constraint",
+   "definition": "CHECK((state = 'sale' AND date_order IS NOT NULL) OR state != 'sale')",
+   "message": "A confirmed sales order requires a confirmation date.",
+   "defined_in_package": "sale",
+   "entity": "sale.order"
+  },
+  {
+   "name": "_date_order_id_idx",
+   "kind": "Index",
+   "definition": "(date_order desc, id desc)",
+   "message": null,
+   "defined_in_package": "sale",
+   "entity": "sale.order"
+  },
+  {
+   "name": "_order_coupon_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE (order_id, coupon_id)",
+   "message": "The coupon points entry already exists.",
+   "defined_in_package": "sale_loyalty",
+   "entity": "sale.order.coupon.points"
+  },
+  {
+   "name": "_accountable_required_fields",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type IS NOT NULL OR is_downpayment OR (product_id IS NOT NULL AND product_uom_id IS NOT NULL))",
+   "message": "Missing required fields on accountable sale order line.",
+   "defined_in_package": "sale",
+   "entity": "sale.order.line"
+  },
+  {
+   "name": "_non_accountable_null_fields",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type IS NULL OR (product_id IS NULL AND price_unit = 0 AND product_uom_qty = 0 AND product_uom_id IS NULL AND customer_lead = 0))",
+   "message": "Forbidden values on non-accountable sale order line",
+   "defined_in_package": "sale",
+   "entity": "sale.order.line"
+  },
+  {
+   "name": "_name_search_services_index",
+   "kind": "Index",
+   "definition": "(order_id DESC, sequence, id) WHERE is_service IS TRUE",
+   "message": null,
+   "defined_in_package": "sale_service",
+   "entity": "sale.order.line"
+  },
+  {
+   "name": "_accountable_product_id_required",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type IS NOT NULL OR (product_id IS NOT NULL AND product_uom_id IS NOT NULL))",
+   "message": "Missing required product and UoM on accountable sale quote line.",
+   "defined_in_package": "sale_management",
+   "entity": "sale.order.template.line"
+  },
+  {
+   "name": "_non_accountable_fields_null",
+   "kind": "Constraint",
+   "definition": "CHECK(display_type IS NULL OR (product_id IS NULL AND product_uom_qty = 0 AND product_uom_id IS NULL))",
+   "message": "Forbidden product, quantity and UoM on non-accountable sale quote line",
+   "defined_in_package": "sale_management",
+   "entity": "sale.order.template.line"
+  },
+  {
+   "name": "_unique_name_per_doc_type",
+   "kind": "Constraint",
+   "definition": "UNIQUE(name, document_type)",
+   "message": "Form field name must be unique for a given document type.",
+   "defined_in_package": "sale_pdf_quote_builder",
+   "entity": "sale.pdf.form.field"
+  },
+  {
+   "name": "_check_enroll",
+   "kind": "Constraint",
+   "definition": "CHECK(visibility != 'members' OR enroll = 'invite')",
+   "message": "The Enroll Policy should be set to 'On Invitation' when visibility is set to 'Course Attendees'",
+   "defined_in_package": "website_slides",
+   "entity": "slide.channel"
+  },
+  {
+   "name": "_product_id_check",
+   "kind": "Constraint",
+   "definition": "CHECK( enroll!='payment' OR product_id IS NOT NULL )",
+   "message": "Product is required for on payment channels.",
+   "defined_in_package": "website_sale_slides",
+   "entity": "slide.channel"
+  },
+  {
+   "name": "_forum_uniq",
+   "kind": "Constraint",
+   "definition": "unique (forum_id)",
+   "message": "Only one course per forum!",
+   "defined_in_package": "website_slides_forum",
+   "entity": "slide.channel"
+  },
+  {
+   "name": "_channel_partner_uniq",
+   "kind": "Constraint",
+   "definition": "unique(channel_id, partner_id)",
+   "message": "A partner membership to a channel must be unique!",
+   "defined_in_package": "website_slides",
+   "entity": "slide.channel.partner"
+  },
+  {
+   "name": "_check_completion",
+   "kind": "Constraint",
+   "definition": "check(completion >= 0 and completion <= 100)",
+   "message": "The completion of a channel is a percentage and should be between 0% and 100.",
+   "defined_in_package": "website_slides",
+   "entity": "slide.channel.partner"
+  },
+  {
+   "name": "_exclusion_html_content_and_url",
+   "kind": "Constraint",
+   "definition": "CHECK(html_content IS NULL OR url IS NULL)",
+   "message": "A slide is either filled with a url or HTML content. Not both.",
+   "defined_in_package": "website_slides",
+   "entity": "slide.slide"
+  },
+  {
+   "name": "_check_survey_id",
+   "kind": "Constraint",
+   "definition": "CHECK(slide_category != 'certification' OR survey_id IS NOT NULL)",
+   "message": "A slide of type 'certification' requires a certification.",
+   "defined_in_package": "website_slides_survey",
+   "entity": "slide.slide"
+  },
+  {
+   "name": "_check_certification_preview",
+   "kind": "Constraint",
+   "definition": "CHECK(slide_category != 'certification' OR is_preview = False)",
+   "message": "A slide of type certification cannot be previewed.",
+   "defined_in_package": "website_slides_survey",
+   "entity": "slide.slide"
+  },
+  {
+   "name": "_slide_partner_uniq",
+   "kind": "Constraint",
+   "definition": "unique(slide_id, partner_id)",
+   "message": "A partner membership to a slide must be unique!",
+   "defined_in_package": "website_slides",
+   "entity": "slide.slide.partner"
+  },
+  {
+   "name": "_check_vote",
+   "kind": "Constraint",
+   "definition": "CHECK(vote IN (-1, 0, 1))",
+   "message": "The vote must be 1, 0 or -1.",
+   "defined_in_package": "website_slides",
+   "entity": "slide.slide.partner"
+  },
+  {
+   "name": "_check_url",
+   "kind": "Constraint",
+   "definition": "CHECK (resource_type != 'url' OR link IS NOT NULL)",
+   "message": "A resource of type url must contain a link.",
+   "defined_in_package": "website_slides",
+   "entity": "slide.slide.resource"
+  },
+  {
+   "name": "_check_file_type",
+   "kind": "Constraint",
+   "definition": "CHECK (resource_type != 'file' OR link IS NULL)",
+   "message": "A resource of type file cannot contain a link.",
+   "defined_in_package": "website_slides",
+   "entity": "slide.slide.resource"
+  },
+  {
+   "name": "_slide_tag_unique",
+   "kind": "Constraint",
+   "definition": "UNIQUE(name)",
+   "message": "A tag must be unique!",
+   "defined_in_package": "website_slides",
+   "entity": "slide.tag"
+  },
+  {
+   "name": "_uuid_unique",
+   "kind": "Constraint",
+   "definition": "unique(uuid)",
+   "message": "UUID must be unique",
+   "defined_in_package": "sms",
+   "entity": "sms.sms"
+  },
+  {
+   "name": "_sms_uuid_unique",
+   "kind": "Constraint",
+   "definition": "unique(sms_uuid)",
+   "message": "A record for this UUID already exists",
+   "defined_in_package": "sms",
+   "entity": "sms.tracker"
+  },
+  {
+   "name": "_barcode_company_uniq",
+   "kind": "Constraint",
+   "definition": "unique (barcode,company_id)",
+   "message": "The barcode for a location must be unique per company!",
+   "defined_in_package": "stock",
+   "entity": "stock.location"
+  },
+  {
+   "name": "_inventory_freq_nonneg",
+   "kind": "Constraint",
+   "definition": "check(cyclic_inventory_frequency >= 0)",
+   "message": "The inventory frequency (days) for a location must be non-negative",
+   "defined_in_package": "stock",
+   "entity": "stock.location"
+  },
+  {
+   "name": "_parent_path_id_idx",
+   "kind": "Index",
+   "definition": "(parent_path, id)",
+   "message": null,
+   "defined_in_package": "stock",
+   "entity": "stock.location"
+  },
+  {
+   "name": "_product_location_index",
+   "kind": "Index",
+   "definition": "(product_id, location_id, location_dest_id, company_id, state)",
+   "message": null,
+   "defined_in_package": "stock",
+   "entity": "stock.move"
+  },
+  {
+   "name": "_free_reservation_index",
+   "kind": "Index",
+   "definition": "(id, company_id, product_id, lot_id, location_id, owner_id, package_id)\n        WHERE (state IS NULL OR state NOT IN ('cancel', 'done')) AND quantity_product_uom > 0 AND picked IS NOT TRUE",
+   "message": null,
+   "defined_in_package": "stock",
+   "entity": "stock.move.line"
+  },
+  {
+   "name": "_barcode_uniq",
+   "kind": "Constraint",
+   "definition": "unique(barcode)",
+   "message": "A barcode can only be assigned to one package type!",
+   "defined_in_package": "stock",
+   "entity": "stock.package.type"
+  },
+  {
+   "name": "_positive_height",
+   "kind": "Constraint",
+   "definition": "CHECK(height>=0.0)",
+   "message": "Height must be positive",
+   "defined_in_package": "stock",
+   "entity": "stock.package.type"
+  },
+  {
+   "name": "_positive_width",
+   "kind": "Constraint",
+   "definition": "CHECK(width>=0.0)",
+   "message": "Width must be positive",
+   "defined_in_package": "stock",
+   "entity": "stock.package.type"
+  },
+  {
+   "name": "_positive_length",
+   "kind": "Constraint",
+   "definition": "CHECK(packaging_length>=0.0)",
+   "message": "Length must be positive",
+   "defined_in_package": "stock",
+   "entity": "stock.package.type"
+  },
+  {
+   "name": "_positive_max_weight",
+   "kind": "Constraint",
+   "definition": "CHECK(max_weight>=0.0)",
+   "message": "Max Weight must be positive",
+   "defined_in_package": "stock",
+   "entity": "stock.package.type"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name, company_id)",
+   "message": "Reference must be unique per company!",
+   "defined_in_package": "stock",
+   "entity": "stock.picking"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "stock",
+   "entity": "stock.scrap.reason.tag"
+  },
+  {
+   "name": "_positive_max_weight",
+   "kind": "Constraint",
+   "definition": "CHECK(max_weight >= 0)",
+   "message": "Max weight should be a positive number.",
+   "defined_in_package": "stock",
+   "entity": "stock.storage.category"
+  },
+  {
+   "name": "_positive_quantity",
+   "kind": "Constraint",
+   "definition": "CHECK(quantity > 0)",
+   "message": "Quantity should be a positive number.",
+   "defined_in_package": "stock",
+   "entity": "stock.storage.category.capacity"
+  },
+  {
+   "name": "_unique_product",
+   "kind": "Constraint",
+   "definition": "UNIQUE(product_id, storage_category_id)",
+   "message": "Multiple capacity rules for one product.",
+   "defined_in_package": "stock",
+   "entity": "stock.storage.category.capacity"
+  },
+  {
+   "name": "_unique_package_type",
+   "kind": "Constraint",
+   "definition": "UNIQUE(package_type_id, storage_category_id)",
+   "message": "Multiple capacity rules for one package type.",
+   "defined_in_package": "stock",
+   "entity": "stock.storage.category.capacity"
+  },
+  {
+   "name": "_warehouse_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique(name, company_id)",
+   "message": "The name of the warehouse must be unique per company!",
+   "defined_in_package": "stock",
+   "entity": "stock.warehouse"
+  },
+  {
+   "name": "_warehouse_code_uniq",
+   "kind": "Constraint",
+   "definition": "unique(code, company_id)",
+   "message": "The short name of the warehouse must be unique per company!",
+   "defined_in_package": "stock",
+   "entity": "stock.warehouse"
+  },
+  {
+   "name": "_product_location_check",
+   "kind": "Constraint",
+   "definition": "unique (product_id, location_id, company_id)",
+   "message": "A replenishment rule already exists for this product on this location.",
+   "defined_in_package": "stock",
+   "entity": "stock.warehouse.orderpoint"
+  },
+  {
+   "name": "_positive_len_min",
+   "kind": "Constraint",
+   "definition": "CHECK (validation_length_min >= 0)",
+   "message": "A length must be positive!",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_positive_len_max",
+   "kind": "Constraint",
+   "definition": "CHECK (validation_length_max >= 0)",
+   "message": "A length must be positive!",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_validation_length",
+   "kind": "Constraint",
+   "definition": "CHECK (validation_length_min <= validation_length_max)",
+   "message": "Max length cannot be smaller than min length!",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_validation_float",
+   "kind": "Constraint",
+   "definition": "CHECK (validation_min_float_value <= validation_max_float_value)",
+   "message": "Max value cannot be smaller than min value!",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_validation_date",
+   "kind": "Constraint",
+   "definition": "CHECK (validation_min_date <= validation_max_date)",
+   "message": "Max date cannot be smaller than min date!",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_validation_datetime",
+   "kind": "Constraint",
+   "definition": "CHECK (validation_min_datetime <= validation_max_datetime)",
+   "message": "Max datetime cannot be smaller than min datetime!",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_positive_answer_score",
+   "kind": "Constraint",
+   "definition": "CHECK (answer_score >= 0)",
+   "message": "An answer score for a non-multiple choice question cannot be negative!",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_scored_datetime_have_answers",
+   "kind": "Constraint",
+   "definition": "CHECK (is_scored_question != True OR question_type != 'datetime' OR answer_datetime is not null)",
+   "message": "All \"Is a scored question = True\" and \"Question Type: Datetime\" questions need an answer",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_scored_date_have_answers",
+   "kind": "Constraint",
+   "definition": "CHECK (is_scored_question != True OR question_type != 'date' OR answer_date is not null)",
+   "message": "All \"Is a scored question = True\" and \"Question Type: Date\" questions need an answer",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_scale",
+   "kind": "Constraint",
+   "definition": "CHECK (question_type != 'scale' OR (scale_min >= 0 AND scale_max <= 10 AND scale_min < scale_max))",
+   "message": "The scale must be a growing non-empty range between 0 and 10 (inclusive)",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_is_time_limited_have_time_limit",
+   "kind": "Constraint",
+   "definition": "CHECK (is_time_limited != TRUE OR time_limit IS NOT NULL AND time_limit > 0)",
+   "message": "All time-limited questions need a positive time limit",
+   "defined_in_package": "survey",
+   "entity": "survey.question"
+  },
+  {
+   "name": "_value_not_empty",
+   "kind": "Constraint",
+   "definition": "CHECK (value IS NOT NULL OR value_image_filename IS NOT NULL)",
+   "message": "Suggested answer value must not be empty (a text and/or an image must be provided).",
+   "defined_in_package": "survey",
+   "entity": "survey.question.answer"
+  },
+  {
+   "name": "_access_token_unique",
+   "kind": "Constraint",
+   "definition": "unique(access_token)",
+   "message": "Access token should be unique",
+   "defined_in_package": "survey",
+   "entity": "survey.survey"
+  },
+  {
+   "name": "_session_code_unique",
+   "kind": "Constraint",
+   "definition": "unique(session_code)",
+   "message": "Session code should be unique",
+   "defined_in_package": "survey",
+   "entity": "survey.survey"
+  },
+  {
+   "name": "_certification_check",
+   "kind": "Constraint",
+   "definition": "CHECK( scoring_type!='no_scoring' OR certification=False )",
+   "message": "You can only create certifications for surveys that have a scoring mechanism.",
+   "defined_in_package": "survey",
+   "entity": "survey.survey"
+  },
+  {
+   "name": "_scoring_success_min_check",
+   "kind": "Constraint",
+   "definition": "CHECK( scoring_success_min IS NULL OR (scoring_success_min>=0 AND scoring_success_min<=100) )",
+   "message": "The percentage of success has to be defined between 0 and 100.",
+   "defined_in_package": "survey",
+   "entity": "survey.survey"
+  },
+  {
+   "name": "_time_limit_check",
+   "kind": "Constraint",
+   "definition": "CHECK( (is_time_limited=False) OR (time_limit is not null AND time_limit > 0) )",
+   "message": "The time limit needs to be a positive number if the survey is time limited.",
+   "defined_in_package": "survey",
+   "entity": "survey.survey"
+  },
+  {
+   "name": "_attempts_limit_check",
+   "kind": "Constraint",
+   "definition": "CHECK( (is_attempts_limited=False) OR (attempts_limit is not null AND attempts_limit > 0) )",
+   "message": "The attempts limit needs to be a positive number if the survey has a limited number of attempts.",
+   "defined_in_package": "survey",
+   "entity": "survey.survey"
+  },
+  {
+   "name": "_badge_uniq",
+   "kind": "Constraint",
+   "definition": "unique (certification_badge_id)",
+   "message": "The badge for each survey should be unique!",
+   "defined_in_package": "survey",
+   "entity": "survey.survey"
+  },
+  {
+   "name": "_session_speed_rating_has_time_limit",
+   "kind": "Constraint",
+   "definition": "CHECK (session_speed_rating != TRUE OR session_speed_rating_time_limit IS NOT NULL AND session_speed_rating_time_limit > 0)",
+   "message": "A positive default time limit is required when the session rewards quick answers.",
+   "defined_in_package": "survey",
+   "entity": "survey.survey"
+  },
+  {
+   "name": "_unique_token",
+   "kind": "Constraint",
+   "definition": "UNIQUE (access_token)",
+   "message": "An access token must be unique!",
+   "defined_in_package": "survey",
+   "entity": "survey.user_input"
+  },
+  {
+   "name": "_factor_gt_zero",
+   "kind": "Constraint",
+   "definition": "CHECK (relative_factor!=0)",
+   "message": "The conversion ratio for a unit of measure cannot be 0!",
+   "defined_in_package": "uom",
+   "entity": "uom.uom"
+  },
+  {
+   "name": "_unique_name",
+   "kind": "Constraint",
+   "definition": "UNIQUE(name)",
+   "message": "The name must be unique",
+   "defined_in_package": "utm",
+   "entity": "utm.campaign"
+  },
+  {
+   "name": "_unique_name",
+   "kind": "Constraint",
+   "definition": "UNIQUE(name)",
+   "message": "The name must be unique",
+   "defined_in_package": "utm",
+   "entity": "utm.medium"
+  },
+  {
+   "name": "_unique_name",
+   "kind": "Constraint",
+   "definition": "UNIQUE(name)",
+   "message": "The name must be unique",
+   "defined_in_package": "utm",
+   "entity": "utm.source"
+  },
+  {
+   "name": "_name_uniq",
+   "kind": "Constraint",
+   "definition": "unique (name)",
+   "message": "Tag name already exists!",
+   "defined_in_package": "utm",
+   "entity": "utm.tag"
+  },
+  {
+   "name": "_uniq_name",
+   "kind": "Constraint",
+   "definition": "unique(name)",
+   "message": "A tour already exists with this name . Tour's name must be unique!",
+   "defined_in_package": "web_tour",
+   "entity": "web_tour.tour"
+  },
+  {
+   "name": "_domain_unique",
+   "kind": "Constraint",
+   "definition": "unique(domain)",
+   "message": "Website Domain should be unique.",
+   "defined_in_package": "website",
+   "entity": "website"
+  },
+  {
+   "name": "_unique_name_slugified",
+   "kind": "Constraint",
+   "definition": "UNIQUE(name_slugified)",
+   "message": "url should be unique",
+   "defined_in_package": "website",
+   "entity": "website.controller.page"
+  },
+  {
+   "name": "_access_token_unique",
+   "kind": "Constraint",
+   "definition": "unique(access_token)",
+   "message": "Access token should be unique.",
+   "defined_in_package": "website",
+   "entity": "website.visitor"
+  }
+ ]
+}

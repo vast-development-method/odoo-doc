@@ -1,0 +1,5319 @@
+{
+ "catalog": {
+  "name": "entity:hr.leave",
+  "description": "Complete definition of entity Time Off (hr.leave).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.leave",
+  "storage_name": "hr_leave",
+  "full_name": "Time Off",
+  "kind": "persistent",
+  "description": "Time Off",
+  "defined_by_package": "hr_holidays",
+  "extended_by_packages": [
+   "hr_holidays_attendance",
+   "hr_work_entry_holidays",
+   "l10n_fr_hr_holidays",
+   "l10n_in_hr_holidays",
+   "project_timesheet_holidays"
+  ],
+  "mixins": [
+   "mail.thread.main.attachment",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "date_from desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": "read",
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Description",
+    "compute": "_compute_description",
+    "inverse": "_inverse_description",
+    "search": "_search_description",
+    "compute_sudo": false,
+    "copy": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Description"
+   },
+   {
+    "name": "private_name",
+    "type": "Char",
+    "string": "Time Off Description",
+    "groups": "hr_holidays.group_hr_holidays_responsible",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Description"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "confirm",
+      "To Approve"
+     ],
+     [
+      "refuse",
+      "Refused"
+     ],
+     [
+      "validate1",
+      "Second Approval"
+     ],
+     [
+      "validate",
+      "Approved"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "store": true,
+    "tracking": true,
+    "copy": false,
+    "readonly": false,
+    "default": "confirm",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Status"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "related": "employee_id.user_id",
+    "related_sudo": true,
+    "compute_sudo": true,
+    "store": true,
+    "readonly": true,
+    "index": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "holiday_status_id",
+    "type": "Many2one",
+    "comodel": "hr.leave.type",
+    "compute": "_compute_from_employee_id",
+    "store": true,
+    "string": "Time Off Type",
+    "required": true,
+    "readonly": false,
+    "domain": "[\n            '|',\n                ('requires_allocation', '=', False),\n                ('has_valid_allocation', '=', True),\n        ]",
+    "tracking": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Type",
+    "target_entity": "hr.leave.type"
+   },
+   {
+    "name": "holiday_status_requires_allocation",
+    "type": "Boolean",
+    "related": "holiday_status_id.requires_allocation",
+    "defined_in_package": "hr_holidays",
+    "string": "Holiday Status Requires Allocation",
+    "full_name": "Holiday Status Requires Allocation"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "related": "holiday_status_id.color",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Color"
+   },
+   {
+    "name": "validation_type",
+    "type": "Selection",
+    "string": "Validation Type",
+    "related": "holiday_status_id.leave_validation_type",
+    "readonly": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Validation Type"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "index": true,
+    "ondelete": "restrict",
+    "required": true,
+    "tracking": true,
+    "domain": {
+     "dynamic": "lambda self: self._get_employee_domain()"
+    },
+    "default": {
+     "dynamic": "lambda self: self.env.user.employee_id"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "employee_company_id",
+    "type": "Many2one",
+    "related": "employee_id.company_id",
+    "string": "Employee Company",
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Employee Company"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "compute": "_compute_company_id",
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "active_employee",
+    "type": "Boolean",
+    "related": "employee_id.active",
+    "string": "Employee Active",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Employee Active"
+   },
+   {
+    "name": "tz_mismatch",
+    "type": "Boolean",
+    "compute": "_compute_tz_mismatch",
+    "defined_in_package": "hr_holidays",
+    "string": "Tz Mismatch",
+    "full_name": "Tz Mismatch"
+   },
+   {
+    "name": "tz",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "compute": "_compute_tz",
+    "defined_in_package": "hr_holidays",
+    "string": "Tz",
+    "full_name": "Tz"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "compute": "_compute_department_id",
+    "store": true,
+    "string": "Department",
+    "readonly": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "notes",
+    "type": "Text",
+    "string": "Reasons",
+    "readonly": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Reasons"
+   },
+   {
+    "name": "resource_calendar_id",
+    "type": "Many2one",
+    "comodel": "resource.calendar",
+    "compute": "_compute_resource_calendar_id",
+    "store": true,
+    "readonly": false,
+    "copy": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Resource Calendar",
+    "full_name": "Resource Calendar",
+    "target_entity": "resource.calendar"
+   },
+   {
+    "name": "max_leaves",
+    "type": "Float",
+    "compute": "_compute_leaves",
+    "defined_in_package": "hr_holidays",
+    "string": "Max Leaves",
+    "full_name": "Max Leaves"
+   },
+   {
+    "name": "virtual_remaining_leaves",
+    "type": "Float",
+    "compute": "_compute_leaves",
+    "string": "Available Time Off",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Available Time Off"
+   },
+   {
+    "name": "date_from",
+    "type": "Datetime",
+    "string": "Start Date",
+    "compute": "_compute_date_from_to",
+    "store": true,
+    "index": true,
+    "tracking": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_to",
+    "type": "Datetime",
+    "string": "End Date",
+    "compute": "_compute_date_from_to",
+    "store": true,
+    "tracking": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "End Date"
+   },
+   {
+    "name": "number_of_days",
+    "type": "Float",
+    "string": "Duration (Days)",
+    "compute": "_compute_duration",
+    "store": true,
+    "tracking": true,
+    "help": "Number of days of the time off request. Used in the calculation.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Duration (Days)"
+   },
+   {
+    "name": "number_of_hours",
+    "type": "Float",
+    "string": "Duration (Hours)",
+    "compute": "_compute_duration",
+    "store": true,
+    "tracking": true,
+    "help": "Number of hours of the time off request. Used in the calculation.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Duration (Hours)"
+   },
+   {
+    "name": "last_several_days",
+    "type": "Boolean",
+    "string": "All day",
+    "compute": "_compute_last_several_days",
+    "defined_in_package": "hr_holidays",
+    "full_name": "All day"
+   },
+   {
+    "name": "duration_display",
+    "type": "Char",
+    "string": "Requested",
+    "compute": "_compute_duration_display",
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Requested"
+   },
+   {
+    "name": "meeting_id",
+    "type": "Many2one",
+    "comodel": "calendar.event",
+    "string": "Meeting",
+    "copy": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Meeting",
+    "target_entity": "calendar.event"
+   },
+   {
+    "name": "first_approver_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "First Approval",
+    "readonly": true,
+    "copy": false,
+    "help": "This area is automatically filled by the user who validate the time off",
+    "defined_in_package": "hr_holidays",
+    "full_name": "First Approval",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "second_approver_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Second Approval",
+    "readonly": true,
+    "copy": false,
+    "help": "This area is automatically filled by the user who validate the time off with second level (If time off type need second validation)",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Second Approval",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "can_approve",
+    "type": "Boolean",
+    "compute": "_compute_can_approve",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Can Approve",
+    "full_name": "Can Approve"
+   },
+   {
+    "name": "can_validate",
+    "type": "Boolean",
+    "compute": "_compute_can_validate",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Can Validate",
+    "full_name": "Can Validate"
+   },
+   {
+    "name": "can_refuse",
+    "type": "Boolean",
+    "compute": "_compute_can_refuse",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Can Refuse",
+    "full_name": "Can Refuse"
+   },
+   {
+    "name": "can_cancel",
+    "type": "Boolean",
+    "compute": "_compute_can_cancel",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Can Cancel",
+    "full_name": "Can Cancel"
+   },
+   {
+    "name": "can_back_to_approve",
+    "type": "Boolean",
+    "compute": "_compute_can_back_to_approve",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Can Back To Approve",
+    "full_name": "Can Back To Approve"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "One2many",
+    "comodel": "ir.attachment",
+    "inverse_name": "res_id",
+    "string": "Attachments",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "supported_attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "string": "Attach File",
+    "compute": "_compute_supported_attachment_ids",
+    "inverse": "_inverse_supported_attachment_ids",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Attach File",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "supported_attachment_ids_count",
+    "type": "Integer",
+    "compute": "_compute_supported_attachment_ids",
+    "defined_in_package": "hr_holidays",
+    "string": "Supported Attachment Identifiers Count",
+    "full_name": "Supported Attachment Identifiers Count"
+   },
+   {
+    "name": "leave_type_request_unit",
+    "type": "Selection",
+    "related": "holiday_status_id.request_unit",
+    "readonly": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Leave Type Request Unit",
+    "full_name": "Leave Type Request Unit"
+   },
+   {
+    "name": "leave_type_support_document",
+    "type": "Boolean",
+    "related": "holiday_status_id.support_document",
+    "defined_in_package": "hr_holidays",
+    "string": "Leave Type Support Document",
+    "full_name": "Leave Type Support Document"
+   },
+   {
+    "name": "request_date_from",
+    "type": "Date",
+    "string": "Request Start Date",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Request Start Date"
+   },
+   {
+    "name": "request_date_to",
+    "type": "Date",
+    "string": "Request End Date",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Request End Date"
+   },
+   {
+    "name": "request_hour_from",
+    "type": "Float",
+    "string": "Hour from",
+    "compute": "_compute_request_hour_from_to",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Hour from"
+   },
+   {
+    "name": "request_hour_to",
+    "type": "Float",
+    "string": "Hour to",
+    "compute": "_compute_request_hour_from_to",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Hour to"
+   },
+   {
+    "name": "request_date_from_period",
+    "type": "Selection",
+    "selection": [
+     [
+      "am",
+      "Morning"
+     ],
+     [
+      "pm",
+      "Afternoon"
+     ]
+    ],
+    "string": "Date Period Start",
+    "default": "am",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Date Period Start"
+   },
+   {
+    "name": "request_date_to_period",
+    "type": "Selection",
+    "selection": [
+     [
+      "am",
+      "Morning"
+     ],
+     [
+      "pm",
+      "Afternoon"
+     ]
+    ],
+    "string": "Date Period End",
+    "default": "pm",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Date Period End"
+   },
+   {
+    "name": "request_unit_half",
+    "type": "Boolean",
+    "string": "Half-Day",
+    "compute": "_compute_request_unit_half",
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Half-Day"
+   },
+   {
+    "name": "request_unit_hours",
+    "type": "Boolean",
+    "string": "Specific Time",
+    "compute": "_compute_request_unit_hours",
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Specific Time"
+   },
+   {
+    "name": "is_hatched",
+    "type": "Boolean",
+    "string": "Hatched",
+    "compute": "_compute_is_hatched",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Hatched"
+   },
+   {
+    "name": "is_striked",
+    "type": "Boolean",
+    "string": "Striked",
+    "compute": "_compute_is_hatched",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Striked"
+   },
+   {
+    "name": "has_mandatory_day",
+    "type": "Boolean",
+    "compute": "_compute_has_mandatory_day",
+    "defined_in_package": "hr_holidays",
+    "string": "Has Mandatory Day",
+    "full_name": "Has Mandatory Day"
+   },
+   {
+    "name": "leave_type_increases_duration",
+    "type": "Char",
+    "compute": "_compute_leave_type_increases_duration",
+    "defined_in_package": "hr_holidays",
+    "string": "Leave Type Increases Duration",
+    "full_name": "Leave Type Increases Duration"
+   },
+   {
+    "name": "dashboard_warning_message",
+    "type": "Char",
+    "compute": "_compute_dashboard_warning_message",
+    "defined_in_package": "hr_holidays",
+    "string": "Dashboard Warning Message",
+    "full_name": "Dashboard Warning Message"
+   },
+   {
+    "name": "employee_overtime",
+    "type": "Float",
+    "compute": "_compute_employee_overtime",
+    "groups": "base.group_user",
+    "defined_in_package": "hr_holidays_attendance",
+    "string": "Employee Overtime",
+    "full_name": "Employee Overtime"
+   },
+   {
+    "name": "overtime_deductible",
+    "type": "Boolean",
+    "compute": "_compute_overtime_deductible",
+    "defined_in_package": "hr_holidays_attendance",
+    "string": "Overtime Deductible",
+    "full_name": "Overtime Deductible"
+   },
+   {
+    "name": "l10n_fr_date_to_changed",
+    "type": "Boolean",
+    "export_string_translation": false,
+    "defined_in_package": "l10n_fr_hr_holidays",
+    "string": "Localization Fr Date To Changed",
+    "full_name": "Localization Fr Date To Changed"
+   },
+   {
+    "name": "l10n_in_contains_sandwich_leaves",
+    "type": "Boolean",
+    "defined_in_package": "l10n_in_hr_holidays",
+    "string": "Localization In Contains Sandwich Leaves",
+    "full_name": "Localization In Contains Sandwich Leaves"
+   },
+   {
+    "name": "timesheet_ids",
+    "type": "One2many",
+    "comodel": "account.analytic.line",
+    "inverse_name": "holiday_id",
+    "string": "Analytic Lines",
+    "defined_in_package": "project_timesheet_holidays",
+    "full_name": "Analytic Lines",
+    "target_entity": "account.analytic.line"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_date_check2",
+    "kind": "Constraint",
+    "definition": "CHECK ((date_from <= date_to))",
+    "message": "The start date must be before or equal to the end date.",
+    "defined_in_package": "hr_holidays"
+   },
+   {
+    "name": "_date_check3",
+    "kind": "Constraint",
+    "definition": "CHECK ((request_date_from <= request_date_to))",
+    "message": "The request start date must be before or equal to the request end date.",
+    "defined_in_package": "hr_holidays"
+   },
+   {
+    "name": "_duration_check",
+    "kind": "Constraint",
+    "definition": "CHECK ( number_of_days >= 0 )",
+    "message": "If you want to change the number of days you should use the 'period' mode",
+    "defined_in_package": "hr_holidays"
+   },
+   {
+    "name": "_date_to_date_from_index",
+    "kind": "Index",
+    "definition": "(date_to, date_from)",
+    "message": null,
+    "defined_in_package": "hr_holidays"
+   }
+  ],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_get_request_dates",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_hours",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "request_hour_from",
+         "request_hour_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_request_hour_from_to",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "request_date_from",
+         "request_date_to",
+         "request_unit_hours"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_request_dates",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "request_date_from",
+         "request_date_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dashboard_warning_message",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "leave_type_request_unit",
+         "request_date_from",
+         "request_date_to",
+         "request_hour_from",
+         "request_hour_to",
+         "request_date_from_period",
+         "request_date_to_period",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_description",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_description",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_resource_calendar_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "request_date_from",
+         "request_date_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_overlapping_contracts",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_contracts",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date_from",
+         "date_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "A leave cannot be set across multiple contracts.\nNote: a leave can be across multiple contracts despite this constraint.\nIt happens if a leave is correctly created (not across multiple contracts) but\ncontracts are later modifed/created in the middle of the leave.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A leave cannot be set across multiple versions with different working schedules.\n\nPlease create one time off for each version period.\n\nTime off:\n%(time_off)s\n\nVersions:\n%(versions)s",
+        "line": 444
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_from_to",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "request_date_from_period",
+         "request_date_to_period",
+         "request_hour_from",
+         "request_hour_to",
+         "request_date_from",
+         "request_date_to",
+         "request_unit_half",
+         "request_unit_hours",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "request_date_from_period",
+         "request_date_to_period",
+         "request_hour_from",
+         "request_hour_to",
+         "request_date_from",
+         "request_date_to",
+         "request_unit_half",
+         "request_unit_hours",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_request_unit_half",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "leave_type_request_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_request_unit_hours",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "leave_type_request_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_employee_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_from_employee_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_department_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_mandatory_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_from",
+         "date_to",
+         "holiday_status_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_leave_type_increases_duration",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "leave_type_request_unit",
+         "number_of_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_durations",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "check_leave_type",
+     "resource_calendar"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "This method is factored out into a separate method from\n_compute_duration so it can be hooked and called without necessarily\nmodifying the fields and triggering more computes of fields that\ndepend on number_of_hours or number_of_days.",
+      "size_in_lines": 99,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_hr_holidays",
+      "decorators": [],
+      "documentation": "In french time off laws, if an employee has a part time contract, when taking time off\nbefore one of his off day (compared to the company's calendar) it should also count the time\nbetween the time off and the next calendar work day/company off day (weekends).\n\nFor example take an employee working mon-wed in a company where the regular calendar is mon-fri.\nIf the employee were to take a time off ending on wednesday, the legal duration would count until friday.",
+      "size_in_lines": 75,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_from",
+         "date_to",
+         "resource_calendar_id",
+         "holiday_status_id.request_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_last_several_days",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "number_of_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tz_mismatch",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "tz"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tz",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "resource_calendar_id.tz"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration_display",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "number_of_hours",
+         "number_of_days",
+         "leave_type_request_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_approve",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "employee_id",
+         "department_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_back_to_approve",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "employee_id",
+         "department_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_validate",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "employee_id",
+         "department_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_refuse",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "employee_id",
+         "department_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_cancel",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_hatched",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_supported_attachment_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "leave_type_support_document",
+         "attachment_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_leaves",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "holiday_status_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_supported_attachment_ids",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_date",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date_from",
+         "date_to",
+         "employee_id",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "holiday.dashboard_warning_message",
+        "line": 796
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_date_state",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date_from",
+         "date_to",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "This modification is not allowed in the current state.",
+        "line": 804
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_validity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You are not allowed to request time off on a Mandatory Day",
+        "line": 847
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You do not have any allocation for this time off type.\nPlease request an allocation before submitting your time off request.",
+        "line": 837
+       },
+       {
+        "kind": "ValidationError",
+        "message": "%(name)s does not have a valid allocation for the leave type %(leave_type)s to cover that request.",
+        "line": 842
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You do not have any allocation for this time off type.\nPlease request an allocation before submitting your time off request.",
+        "line": 822
+       },
+       {
+        "kind": "ValidationError",
+        "message": "%(name)s does not have a valid allocation for the leave type %(leave_type)s to cover that request.",
+        "line": 825
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "tz",
+         "date_from",
+         "date_to",
+         "employee_id",
+         "holiday_status_id",
+         "number_of_hours",
+         "leave_type_request_unit",
+         "number_of_days",
+         "department_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "short_name",
+         "hide_employee_name",
+         "groupby"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "onchange",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "values",
+     "field_names",
+     "fields_spec"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "add_follower",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "employee_id"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_double_validation_rules",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "employees",
+     "state"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You cannot first approve a time off for %s, because you are not his time off manager",
+        "line": 917
+       },
+       {
+        "kind": "AccessError",
+        "message": "You don't have the rights to apply second approval on a time off request",
+        "line": 920
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There is no employee set on the time off. Please make sure you're logged in the correct company.",
+        "line": 938
+       }
+      ]
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You must have manager rights to modify/validate a time off that already begun",
+        "line": 971
+       },
+       {
+        "kind": "UserError",
+        "message": "Only a manager can modify a canceled leave.",
+        "line": 973
+       }
+      ]
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_correct_states",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "error_message % {'state': state_description_values.get(self[:1].state)}",
+        "line": 1023
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't delete a time off request that is in the past.",
+        "line": 1025
+       },
+       {
+        "kind": "UserError",
+        "message": "error_message % {'state': state_description_values.get(holiday.state)}",
+        "line": 1029
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "A time off cannot be duplicated.",
+        "line": 1042
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_redirect_suggested_company",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_resource_leave_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Hook method for others to inject data\n        ",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_resource_leave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "This method will create entry in resource calendar time off object at the time of holidays validated\n:returns: created `resource.calendar.leaves`",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_remove_resource_leave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "This method will create entry in resource calendar time off object at the time of holidays cancel/removed ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_amend_resource_leave_dates",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "This method updates the dates of an existing resource calendar leave object for already validated leaves.\nFor cases where overrides change the leave dates but not the validated state.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_leave_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Validate time off requests\nby creating a calendar event and a resource time off. ",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_holidays_meeting_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_approve",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "check_state"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot approve this leave.",
+        "line": 1198
+       }
+      ]
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_back_to_approval",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_move_validate_leave_to_confirm",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leaves_on_public_holiday",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_leaves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "split_date_from",
+     "split_date_to"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "This method splits an original leave in two leaves and returns the new one for each leave in self.\nE.g. (start, stop) -> (start, split_date_from - 1day), (split_date_to, stop)\n:param split_date_from: The starting date of the splicing interval (includes)\n:param split_date_to: The ending date of the splicing interval. (not includes)\n:param changes_message: The message will be translated and posted in the first leave's chatter\n\nIf split_date_to is not set; the splicing interval will be equals to [split_date_form, split_date_from -1]\nto avoid one day leave.",
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_validate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "check_state"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't validate this leave.",
+        "line": 1280
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The following employees are not supposed to work during that period:\n %s",
+        "line": 1282
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_refuse",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Time off request must be confirmed or validated in order to refuse it.",
+        "line": 1306
+       }
+      ]
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": "Override to archive linked work entries and recreate attendance work entries\nwhere the refused leave was.",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": "Remove the timesheets linked to the refused holidays ",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_manager",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_user_cancel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reason"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "This time off cannot be cancelled.",
+        "line": 1345
+       }
+      ]
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_force_cancel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reason",
+     "msg_subtype",
+     "notify_responsibles"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_leave_cancel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_documents",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_states_by_state",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_approval_update",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "state",
+     "raise_if_not_possible"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Check if target state is achievable. ",
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "error_message",
+        "line": 1511
+       },
+       {
+        "kind": "UserError",
+        "message": "e",
+        "line": 1505
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "open_pending_requests",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_responsible_for_approval",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_to_clean_activities",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_update",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 55,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_change",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "subtype_xmlid"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_subtype",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "init_values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "message_subscribe",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "partner_ids",
+     "subtype_ids"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_unusual_days",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "date_from",
+     "date_to"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_utc",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date",
+     "hour",
+     "resource"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_hour_from_to",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "request_date_from",
+     "request_date_to",
+     "day_period"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Return the hour_from and hour_to for the given request dates, based on\nthe resource calendar.\n\nIf there are no attendances on the exact days of the request, return\nthe earliest hour_from and latest hour_to that exist in the schedule.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cancel_invalid_leaves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_overtime_deductible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "holiday_status_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_deductible_employee_overtime",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "employees"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_employee_overtime",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "number_of_hours",
+         "employee_id",
+         "holiday_status_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_overtime_deductible",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "leaves"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The employee does not have enough extra hours to request this leave.",
+        "line": 54
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You do not have enough extra hours to request this leave",
+        "line": 53
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_reset_confirm",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_leaves_overtime",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cancel_work_entry_conflict",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": "Creates a leave work entry for each hr.leave in self.\nCheck overlapping work entries with self.\nWork entries completely included in a leave are archived.\ne.g.:\n    |----- work entry ----|---- work entry ----|\n        |------------------- hr.leave ---------------|\n                            ||\n                            vv\n    |----* work entry ****|\n        |************ work entry leave --------------|",
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_regen_work_entries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": "Called when the leave is refused or cancelled to regenerate the work entries properly for that period.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_fr_leave_applies",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fr_date_from_to",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_from",
+     "date_to"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 69,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "An employee can't take paid time off in a period without any work hours.",
+        "line": 35
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_get_default_leave_hours",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_is_full_day_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "hours",
+     "default_hours"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_check_optional_holiday_request_dates",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "holiday_status_id",
+         "request_date_from",
+         "request_date_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The following leaves are not on Optional Holidays:\n - %s",
+        "line": 77
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_is_working",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "on_date",
+     "public_holiday_dates",
+     "resource_calendar"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_count_adjacent_non_working",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_date",
+     "public_holiday_dates",
+     "resource_calendar",
+     "reverse",
+     "include_start"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_find_linked_leave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_date",
+     "public_holiday_dates",
+     "resource_calendar",
+     "leaves_by_date",
+     "reverse"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_get_linked_leaves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "leaves_dates_by_employee",
+     "public_holidays_date_by_company"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_prepare_sandwich_context",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": "Build and return a tuple:\n    (indian_leaves, leaves_by_employee, public_holidays_by_company_id)\n- Filters Indian, full-day, sandwich-enabled leaves.\n- Prepares dicts for sibling employee leaves and company public holidays.",
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_apply_sandwich_rule",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "public_holidays_date_by_company",
+     "leaves_dates_by_employee"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_get_public_holiday_dates",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "public_holidays_date_by_company"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_in_update_neighbors_duration_after_change",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 49,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ondelete_refresh_neighbors",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_hr_holidays",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Pre-delete hook: update neighbors as if these records were already deleted",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_timesheets",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "ignored_resource_calendar_leaves"
+    ],
+    "definitions": [
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": "Timesheet will be generated on leave validation\ninternal_project_id and leave_timesheet_task_id are used.\nThe generated timesheet will be attached to this project/task.",
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_prepare_line_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "index",
+     "work_hours_data",
+     "day_date",
+     "work_hours_count",
+     "project",
+     "task"
+    ],
+    "definitions": [
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_missing_global_leave_timesheets",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_timesheets",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project_timesheet_holidays",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Remove timesheets when the timeoff is deleted. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_contracts",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "A leave cannot be set across multiple versions with different working schedules.\n\nPlease create one time off for each version period.\n\nTime off:\n%(time_off)s\n\nVersions:\n%(versions)s"
+   },
+   {
+    "operation": "_check_date",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "holiday.dashboard_warning_message"
+   },
+   {
+    "operation": "_check_date_state",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "This modification is not allowed in the current state."
+   },
+   {
+    "operation": "_check_validity",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "You are not allowed to request time off on a Mandatory Day"
+   },
+   {
+    "operation": "_check_validity",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "You do not have any allocation for this time off type.\nPlease request an allocation before submitting your time off request."
+   },
+   {
+    "operation": "_check_validity",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "%(name)s does not have a valid allocation for the leave type %(leave_type)s to cover that request."
+   },
+   {
+    "operation": "_check_validity",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "You do not have any allocation for this time off type.\nPlease request an allocation before submitting your time off request."
+   },
+   {
+    "operation": "_check_validity",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "%(name)s does not have a valid allocation for the leave type %(leave_type)s to cover that request."
+   },
+   {
+    "operation": "_check_double_validation_rules",
+    "package": "hr_holidays",
+    "kind": "AccessError",
+    "message": "You cannot first approve a time off for %s, because you are not his time off manager"
+   },
+   {
+    "operation": "_check_double_validation_rules",
+    "package": "hr_holidays",
+    "kind": "AccessError",
+    "message": "You don't have the rights to apply second approval on a time off request"
+   },
+   {
+    "operation": "create",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "There is no employee set on the time off. Please make sure you're logged in the correct company."
+   },
+   {
+    "operation": "write",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "You must have manager rights to modify/validate a time off that already begun"
+   },
+   {
+    "operation": "write",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "Only a manager can modify a canceled leave."
+   },
+   {
+    "operation": "_unlink_if_correct_states",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "error_message % {'state': state_description_values.get(self[:1].state)}"
+   },
+   {
+    "operation": "_unlink_if_correct_states",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "You can't delete a time off request that is in the past."
+   },
+   {
+    "operation": "_unlink_if_correct_states",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "error_message % {'state': state_description_values.get(holiday.state)}"
+   },
+   {
+    "operation": "copy_data",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "A time off cannot be duplicated."
+   },
+   {
+    "operation": "action_approve",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "You cannot approve this leave."
+   },
+   {
+    "operation": "_action_validate",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "You can't validate this leave."
+   },
+   {
+    "operation": "_action_validate",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "The following employees are not supposed to work during that period:\n %s"
+   },
+   {
+    "operation": "action_refuse",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "Time off request must be confirmed or validated in order to refuse it."
+   },
+   {
+    "operation": "_action_user_cancel",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "This time off cannot be cancelled."
+   },
+   {
+    "operation": "_check_approval_update",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "error_message"
+   },
+   {
+    "operation": "_check_approval_update",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "e"
+   },
+   {
+    "operation": "_check_overtime_deductible",
+    "package": "hr_holidays_attendance",
+    "kind": "ValidationError",
+    "message": "The employee does not have enough extra hours to request this leave."
+   },
+   {
+    "operation": "_check_overtime_deductible",
+    "package": "hr_holidays_attendance",
+    "kind": "ValidationError",
+    "message": "You do not have enough extra hours to request this leave"
+   },
+   {
+    "operation": "_get_fr_date_from_to",
+    "package": "l10n_fr_hr_holidays",
+    "kind": "UserError",
+    "message": "An employee can't take paid time off in a period without any work hours."
+   },
+   {
+    "operation": "_l10n_in_check_optional_holiday_request_dates",
+    "package": "l10n_in_hr_holidays",
+    "kind": "ValidationError",
+    "message": "The following leaves are not on Optional Holidays:\n - %s"
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_manager_request",
+    "package": "hr_holidays",
+    "name": "hr.holidays.manager.request",
+    "entity": "hr.leave",
+    "group": "hr_holidays.group_hr_holidays_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_user_request",
+    "package": "hr_holidays",
+    "name": "hr.holidays.user.request",
+    "entity": "hr.leave",
+    "group": "hr_holidays.group_hr_holidays_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_employee_request",
+    "package": "hr_holidays",
+    "name": "hr.holidays.employee.request",
+    "entity": "hr.leave",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_employee",
+    "package": "hr_holidays",
+    "name": "Time Off base.group_user read",
+    "entity": "hr.leave",
+    "domain": "[('employee_id.user_id', '=', user.id)]",
+    "groups": "[(4,ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_employee_update",
+    "package": "hr_holidays",
+    "name": "Time Off base.group_user create/write",
+    "entity": "hr.leave",
+    "domain": "[\n            '|',\n                '&',\n                    ('employee_id.user_id', '=', user.id),\n                    ('state', 'not in', ['validate', 'validate1']),\n                '&',\n                    ('validation_type', 'in', ['manager', 'both', 'no_validation']),\n                    ('employee_id.leave_manager_id', '=', user.id),\n        ]",
+    "groups": "[(4,ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_employee_unlink",
+    "package": "hr_holidays",
+    "name": "Time Off base.group_user unlink",
+    "entity": "hr.leave",
+    "domain": "[('employee_id.user_id', '=', user.id), ('state', 'in', ['confirm', 'validate1'])]",
+    "groups": "[(4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_responsible_read",
+    "package": "hr_holidays",
+    "name": "Time Off Responsible read",
+    "entity": "hr.leave",
+    "domain": "[\n                ('employee_id.leave_manager_id', '=', user.id),\n        ]",
+    "groups": "[(4, ref('hr_holidays.group_hr_holidays_responsible'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_responsible_update",
+    "package": "hr_holidays",
+    "name": "Time Off Responsible create/write",
+    "entity": "hr.leave",
+    "domain": "[\n            '|',\n                '&',\n                    ('employee_id.user_id', '=', user.id),\n                    ('state', '!=', 'validate'),\n                ('employee_id.leave_manager_id', '=', user.id),\n        ]",
+    "groups": "[(4, ref('hr_holidays.group_hr_holidays_responsible'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_user_read",
+    "package": "hr_holidays",
+    "name": "Time Off All Approver read",
+    "entity": "hr.leave",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('hr_holidays.group_hr_holidays_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_officer_update",
+    "package": "hr_holidays",
+    "name": "Time Off All Approver create/write",
+    "entity": "hr.leave",
+    "domain": "[\n            '|',\n                '&',\n                    ('employee_id.user_id', '=', user.id),\n                    ('state', '!=', 'validate'),\n                '|',\n                    ('employee_id.user_id', '!=', user.id),\n                    ('employee_id.user_id', '=', False)\n        ]",
+    "groups": "[(4, ref('hr_holidays.group_hr_holidays_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_manager",
+    "package": "hr_holidays",
+    "name": "Time Off Administrator",
+    "entity": "hr.leave",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_hr_holidays_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_rule_multicompany",
+    "package": "hr_holidays",
+    "name": "Time Off: multi company global rule",
+    "entity": "hr.leave",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_holidays.view_evaluation_report_graph",
+    "package": "hr_holidays",
+    "name": "hr.holidays.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Appraisal Analysis",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "date_from"
+      },
+      {
+       "name": "number_of_days"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "date_from"
+      },
+      {
+       "name": "number_of_days",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.view_hr_holidays_filter",
+    "package": "hr_holidays",
+    "name": "hr.holidays.filter",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Time Off"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "activity_user_id",
+       "string": "Activities of"
+      },
+      {
+       "name": "activity_type_id",
+       "string": "Activity type"
+      },
+      {
+       "name": "state",
+       "string": "Status"
+      },
+      {
+       "name": "department_id",
+       "string": "Department"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "waiting_for_me",
+       "string": "Waiting For Me",
+       "domain": "[                         ('state','in',['confirm']),                         '|',                         ('employee_id.user_id', '!=', uid),                         '&',                         ('employee_id.user_id', '=', uid),                         ('employee_id.leave_manager_id', '=', uid)]",
+       "groups": "hr_holidays.group_hr_holidays_responsible,!hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "waiting_for_me_manager",
+       "string": "Waiting For Me",
+       "domain": "[                         ('state','in',['confirm','validate1']),                         '|',                             ('employee_id.user_id', '!=', uid),                             '|',                                 '&',                                     ('state','=','confirm'),                                     ('holiday_status_id.leave_validation_type','=','hr'),                                 ('state','=','validate1')]",
+       "groups": "hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "approve",
+       "string": "First Approval",
+       "domain": "[('state', '=', 'confirm')]"
+      },
+      {
+       "name": "second_approval",
+       "string": "Second Approval",
+       "domain": "[('state', '=', 'validate1')]"
+      },
+      {
+       "name": "to_approve",
+       "string": "To Approve",
+       "domain": "[('state','in',('confirm','validate1'))]"
+      },
+      {
+       "name": "validated",
+       "string": "Approved",
+       "domain": "[('state', '=', 'validate')]"
+      },
+      {
+       "name": "cancelled_leaves",
+       "string": "Cancelled",
+       "domain": "[('state', '=', 'cancel')]"
+      },
+      {
+       "name": "refused_leaves",
+       "string": "Refused",
+       "domain": "[('state', '=', 'refuse')]"
+      },
+      {
+       "name": "my_leaves",
+       "string": "My Time Off",
+       "domain": "[('employee_id.user_id', '=', uid)]"
+      },
+      {
+       "name": "my_team",
+       "string": "My Team",
+       "domain": "['|', ('employee_id.leave_manager_id', '=', uid), ('employee_id.user_id', '=', uid)]",
+       "help": "Time off of people you are manager of"
+      },
+      {
+       "name": "department",
+       "string": "My Department",
+       "domain": "[('employee_id.member_of_department', '=', True)]",
+       "help": "My Department"
+      },
+      {
+       "name": "filter_date_from",
+       "string": "Start Date",
+       "date": "date_from",
+       "default_period": "year"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')                         ]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_employee",
+       "string": "Employee",
+       "context": "{'group_by':'employee_id'}"
+      },
+      {
+       "name": "group_type",
+       "string": "Type",
+       "context": "{'group_by':'holiday_status_id'}"
+      },
+      {
+       "name": "group_state",
+       "string": "Status",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "group_date_from",
+       "string": "Date",
+       "context": "{'group_by':'date_from'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_kanban",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "sample": "1",
+      "class": "o_holidays_view_kanban",
+      "js_class": "time_off_kanban_dashboard"
+     },
+     "fields": [
+      {
+       "name": "supported_attachment_ids_count"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "leave_type_request_unit"
+      },
+      {
+       "name": "request_unit_hours"
+      },
+      {
+       "name": "request_unit_half"
+      },
+      {
+       "name": "request_date_from"
+      },
+      {
+       "name": "request_hour_from"
+      },
+      {
+       "name": "request_hour_to"
+      },
+      {
+       "name": "request_date_to"
+      },
+      {
+       "name": "can_approve"
+      },
+      {
+       "name": "can_validate"
+      },
+      {
+       "name": "can_refuse"
+      },
+      {
+       "name": "request_date_from_period"
+      },
+      {
+       "name": "request_date_to_period"
+      },
+      {
+       "name": "holiday_status_requires_allocation"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "request_hour_from",
+       "widget": "float_time_selection"
+      },
+      {
+       "name": "request_hour_to",
+       "widget": "float_time_selection"
+      },
+      {
+       "name": "duration_display"
+      },
+      {
+       "name": "virtual_remaining_leaves",
+       "widget": "float"
+      },
+      {
+       "name": "max_leaves",
+       "widget": "float"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "request_hour_from",
+       "widget": "float_time_selection"
+      },
+      {
+       "name": "request_hour_to",
+       "widget": "float_time_selection"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "duration_display"
+      },
+      {
+       "name": "supported_attachment_ids_count",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(hr_holidays.action_hr_leave_generate_multi_wizard)d",
+       "string": "New Group Time Off",
+       "type": "action",
+       "class": "btn btn-secondary",
+       "groups": "hr_holidays.group_hr_holidays_responsible"
+      },
+      {
+       "name": "action_approve",
+       "type": "object",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "action_approve",
+       "type": "object",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "action_refuse",
+       "type": "object",
+       "class": "btn btn-secondary"
+      },
+      {
+       "name": "action_approve",
+       "type": "object",
+       "class": "btn btn-sm btn-primary py-0",
+       "groups": "hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "action_approve",
+       "type": "object",
+       "class": "btn btn-sm btn-primary py-0",
+       "groups": "hr_holidays.group_hr_holidays_manager"
+      },
+      {
+       "name": "action_refuse",
+       "type": "object",
+       "class": "btn btn-sm btn-secondary py-0",
+       "groups": "hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "action_documents",
+       "type": "object",
+       "class": "btn btn-link btn-sm ps-0 text-danger"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time_selection": 4,
+      "float": 2,
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_activity",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.activity",
+    "view_type": "activity",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "activity",
+     "root_attributes": {
+      "string": "Time Off Request"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "number_of_days"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "date_from"
+      },
+      {
+       "name": "date_to"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_form",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Time Off Request",
+      "class": "o_hr_leave_form",
+      "duplicate": "false"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "invisible": "1"
+      },
+      {
+       "name": "user_id",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "validation_type != 'both'"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "validation_type == 'both'"
+      },
+      {
+       "name": "dashboard_warning_message",
+       "invisible": "not dashboard_warning_message"
+      },
+      {
+       "name": "leave_type_increases_duration",
+       "invisible": "not leave_type_increases_duration"
+      },
+      {
+       "name": "display_name",
+       "invisible": "not holiday_status_id"
+      },
+      {
+       "name": "holiday_status_id",
+       "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']",
+       "domain": "[                                     '|',                                         ('requires_allocation', '=', False),                                         '&',                                             ('has_valid_allocation', '=', True),                                             '|',                                                 ('allows_negative', '=', True),                                                 '&',                                                     ('virtual_remaining_leaves', '>', 0),                                                     ('allows_negative', '=', False),                                 ]",
+       "context": "{'employee_id': employee_id, 'default_date_from': date_from, 'default_date_to': date_to, 'leave_date_from': date_from}",
+       "options": "{'no_create': True, 'request_type': 'leave'}",
+       "force_save": "1"
+      },
+      {
+       "name": "request_date_from",
+       "widget": "daterange",
+       "readonly": "state != 'confirm'",
+       "required": "not date_from or not date_to",
+       "options": "{'end_date_field': 'request_date_to', 'always_range': '1'}"
+      },
+      {
+       "name": "request_date_to",
+       "invisible": "1"
+      },
+      {
+       "name": "duration_display",
+       "readonly": "1"
+      },
+      {
+       "name": "request_date_from_period",
+       "invisible": "not request_unit_half",
+       "readonly": "state != 'confirm'",
+       "required": "request_unit_half"
+      },
+      {
+       "name": "request_date_to_period",
+       "invisible": "not request_unit_half",
+       "readonly": "state != 'confirm'",
+       "required": "request_unit_half"
+      },
+      {
+       "name": "request_hour_from",
+       "widget": "float_time_selection",
+       "readonly": "state == 'validate'",
+       "required": "request_unit_hours"
+      },
+      {
+       "name": "request_hour_to",
+       "widget": "float_time_selection",
+       "readonly": "state == 'validate'",
+       "required": "request_unit_hours"
+      },
+      {
+       "name": "tz"
+      },
+      {
+       "name": "date_from",
+       "widget": "datetime",
+       "readonly": "1"
+      },
+      {
+       "name": "date_to",
+       "readonly": "1"
+      },
+      {
+       "name": "name",
+       "widget": "text",
+       "readonly": "state != 'confirm'",
+       "nolabel": "1",
+       "placeholder": "No description provided"
+      },
+      {
+       "name": "supported_attachment_ids",
+       "widget": "many2many_binary",
+       "invisible": "state != 'confirm'",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "invisible": "not can_approve or not id",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_approve",
+       "string": "Validate",
+       "type": "object",
+       "invisible": "not can_validate or can_approve or not id",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_back_to_approval",
+       "string": "Back to Approval",
+       "type": "object",
+       "invisible": "not can_back_to_approve or not id"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "type": "object",
+       "invisible": "not can_refuse or not id"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "not can_cancel or not id"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 2,
+      "daterange": 1,
+      "float_time_selection": 2,
+      "datetime": 1,
+      "text": 1,
+      "many2many_binary": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Approve",
+       "name": "action_approve",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "not can_approve or not id"
+      },
+      {
+       "string": "Validate",
+       "name": "action_approve",
+       "invisible": "not can_validate or can_approve or not id",
+       "type": "object",
+       "class": "oe_highlight"
+      },
+      {
+       "string": "Back to Approval",
+       "name": "action_back_to_approval",
+       "type": "object",
+       "invisible": "not can_back_to_approve or not id"
+      },
+      {
+       "string": "Refuse",
+       "name": "action_refuse",
+       "type": "object",
+       "invisible": "not can_refuse or not id"
+      },
+      {
+       "string": "Cancel",
+       "name": "action_cancel",
+       "type": "object",
+       "invisible": "not can_cancel or not id"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "confirm,validate,validate1",
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_form_dashboard",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.form.dashboard",
+    "view_type": "field",
+    "inherits_view": "hr_holidays.hr_leave_view_form",
+    "mode": "primary",
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "holiday_status_id",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "holiday_status_id",
+       "position": "before"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_form_dashboard_new_time_off",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.form.dashboard.new.time.off",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.hr_leave_view_form_dashboard",
+    "mode": "primary",
+    "priority": "17",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='col_left']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='col_left']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_form_dashboard_manager_new_time_off",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.form.dashboard.new.time.off",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.hr_leave_view_form_dashboard_new_time_off",
+    "mode": "primary",
+    "priority": "17",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@widget='many2one_avatar_employee']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@widget='many2one_avatar_employee']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_dashboard",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.dashboard",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "js_class": "time_off_calendar_dashboard",
+      "string": "Time Off Request",
+      "form_view_id": "%(hr_holidays.hr_leave_view_form_dashboard_new_time_off)d",
+      "event_open_popup": "true",
+      "date_start": "date_from",
+      "date_stop": "date_to",
+      "quick_create": "0",
+      "show_date_picker": "0",
+      "show_unusual_days": "True",
+      "color": "color",
+      "hide_time": "True",
+      "mode": "year"
+     },
+     "fields": [
+      {
+       "name": "display_name",
+       "string": ""
+      },
+      {
+       "name": "holiday_status_id",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "invisible": "1"
+      },
+      {
+       "name": "is_hatched",
+       "invisible": "1"
+      },
+      {
+       "name": "is_striked",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date_from",
+      "date_stop": "date_to",
+      "date_delay": null,
+      "color": "color",
+      "mode": "year",
+      "quick_create": "0",
+      "event_open_popup": "true",
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_employee_view_dashboard",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.dashboard",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "string": "Time Off Request",
+      "js_class": "time_off_calendar_dashboard",
+      "form_view_id": "%(hr_holidays.hr_leave_view_form_dashboard_new_time_off)d",
+      "event_open_popup": "true",
+      "date_start": "date_from",
+      "date_stop": "date_to",
+      "mode": "year",
+      "quick_create": "0",
+      "show_date_picker": "0",
+      "show_unusual_days": "True",
+      "color": "color",
+      "hide_time": "True"
+     },
+     "fields": [
+      {
+       "name": "display_name",
+       "string": ""
+      },
+      {
+       "name": "holiday_status_id",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "invisible": "1"
+      },
+      {
+       "name": "is_hatched",
+       "invisible": "1"
+      },
+      {
+       "name": "is_striked",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date_from",
+      "date_stop": "date_to",
+      "date_delay": null,
+      "color": "color",
+      "mode": "year",
+      "quick_create": "0",
+      "event_open_popup": "true",
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_form_manager",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.form.manager",
+    "view_type": "xpath",
+    "inherits_view": "hr_leave_view_form",
+    "mode": "primary",
+    "priority": "16",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='title']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='title']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_calendar",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "js_class": "time_off_calendar_hr_leave",
+      "string": "Time Off Request",
+      "form_view_id": "%(hr_holidays.hr_leave_view_form_dashboard_manager_new_time_off)d",
+      "event_open_popup": "true",
+      "date_start": "date_from",
+      "date_stop": "date_to",
+      "mode": "month",
+      "show_unusual_days": "True",
+      "quick_create": "0",
+      "color": "color"
+     },
+     "fields": [
+      {
+       "name": "holiday_status_id",
+       "invisible": "1"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "state",
+       "invisible": "1"
+      },
+      {
+       "name": "is_hatched",
+       "invisible": "1"
+      },
+      {
+       "name": "is_striked",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date_from",
+      "date_stop": "date_to",
+      "date_delay": null,
+      "color": "color",
+      "mode": "month",
+      "quick_create": "0",
+      "event_open_popup": "true",
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_tree",
+    "package": "hr_holidays",
+    "name": "hr.holidays.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Time Off Requests",
+      "sample": "1",
+      "duplicate": "false",
+      "js_class": "hr_holidays_payslip_list"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']"
+      },
+      {
+       "name": "department_id",
+       "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']",
+       "optional": "hidden"
+      },
+      {
+       "name": "holiday_status_id",
+       "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']"
+      },
+      {
+       "name": "date_from",
+       "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']"
+      },
+      {
+       "name": "date_to",
+       "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']"
+      },
+      {
+       "name": "duration_display",
+       "string": "Duration"
+      },
+      {
+       "name": "name",
+       "optional": "hidden"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-danger": "state == 'refuse'",
+       "decoration-warning": "state in ('confirm','validate1')",
+       "decoration-success": "state == 'validate'"
+      },
+      {
+       "name": "active_employee",
+       "column_invisible": "True"
+      },
+      {
+       "name": "user_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "message_needaction",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "optional": "hidden",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(hr_holidays.action_hr_leave_generate_multi_wizard)d",
+       "string": "New Group Time Off",
+       "type": "action",
+       "class": "btn btn-secondary",
+       "groups": "hr_holidays.group_hr_holidays_responsible"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "class": "btn btn-outline-success",
+       "icon": "fa-thumbs-up"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "type": "object",
+       "class": "btn btn-outline-danger",
+       "icon": "fa-times"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "invisible": "not can_approve",
+       "icon": "fa-thumbs-up"
+      },
+      {
+       "name": "action_approve",
+       "string": "Validate",
+       "type": "object",
+       "invisible": "not can_validate or can_approve",
+       "icon": "fa-check"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "type": "object",
+       "invisible": "not can_refuse",
+       "icon": "fa-times"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1,
+      "badge": 1,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_tree_my",
+    "package": "hr_holidays",
+    "name": "hr.holidays.view.list",
+    "view_type": "xpath",
+    "inherits_view": "hr_leave_view_tree",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_search_my",
+    "package": "hr_holidays",
+    "name": "hr.holidays.view.search.my",
+    "view_type": "xpath",
+    "inherits_view": "view_hr_holidays_filter",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//searchpanel",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//searchpanel",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_search_manager",
+    "package": "hr_holidays",
+    "name": "hr.holidays.view.search.manager",
+    "view_type": "field",
+    "inherits_view": "view_hr_holidays_filter",
+    "mode": "primary",
+    "priority": "33",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "employee_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "position": "after"
+      },
+      {
+       "name": "department_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_search_report",
+    "package": "hr_holidays",
+    "name": "hr.holidays.view.search.report",
+    "view_type": "filter",
+    "inherits_view": "view_hr_holidays_filter",
+    "mode": "primary",
+    "priority": "34",
+    "groups": null,
+    "structure": {
+     "root": "filter",
+     "root_attributes": {
+      "name": "cancelled_leaves",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "cancelled_leaves",
+       "position": "replace"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_view_kanban_my",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.kanban.my",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.hr_leave_view_kanban",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@id='date_part']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@id='date_part']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.view_holiday_pivot",
+    "package": "hr_holidays",
+    "name": "hr.holidays.report_pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Time Off Summary",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "request_hour_from",
+       "invisible": "1"
+      },
+      {
+       "name": "request_hour_to",
+       "invisible": "1"
+      },
+      {
+       "name": "color",
+       "invisible": "1"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "date_from"
+      },
+      {
+       "name": "number_of_days"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "request_hour_from",
+       "invisible": "1"
+      },
+      {
+       "name": "request_hour_to",
+       "invisible": "1"
+      },
+      {
+       "name": "color",
+       "invisible": "1"
+      },
+      {
+       "name": "employee_id",
+       "type": "row"
+      },
+      {
+       "name": "date_from",
+       "type": "col"
+      },
+      {
+       "name": "number_of_days",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.view_holiday_graph",
+    "package": "hr_holidays",
+    "name": "hr.holidays.report_graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Time Off Summary",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "request_hour_from",
+       "invisible": "1"
+      },
+      {
+       "name": "request_hour_to",
+       "invisible": "1"
+      },
+      {
+       "name": "color",
+       "invisible": "1"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "number_of_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "number_of_days"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "request_hour_from",
+       "invisible": "1"
+      },
+      {
+       "name": "request_hour_to",
+       "invisible": "1"
+      },
+      {
+       "name": "color",
+       "invisible": "1"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "number_of_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "number_of_days",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.view_holiday_list",
+    "package": "hr_holidays",
+    "name": "hr.holidays.report_list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Time Off Summary",
+      "sample": "1",
+      "duplicate": "false"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "number_of_days",
+       "string": "# days"
+      },
+      {
+       "name": "date_from",
+       "string": "Start"
+      },
+      {
+       "name": "date_to",
+       "string": "Stop"
+      },
+      {
+       "name": "name",
+       "optional": "hide"
+      },
+      {
+       "name": "state"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.hr_leave_view_form",
+    "package": "hr_holidays_attendance",
+    "name": null,
+    "view_type": "field",
+    "inherits_view": "hr_holidays.hr_leave_view_form_manager",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "holiday_status_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "holiday_status_id",
+       "position": "after"
+      },
+      {
+       "name": "employee_overtime",
+       "widget": "float_time",
+       "invisible": "not employee_id or not overtime_deductible or employee_overtime <= 0",
+       "string": "Extra Hours Available"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_in_hr_holidays.hr_leave_view_form_inherit",
+    "package": "l10n_in_hr_holidays",
+    "name": "hr.leave.view.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.hr_leave_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='dashboard_warning_message']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='dashboard_warning_message']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_holidays.hr_leave_action_new_request",
+    "package": "hr_holidays",
+    "name": "Dashboard",
+    "view_mode": "calendar,list,form,activity",
+    "view_id": null,
+    "search_view_id": "hr_holidays.hr_leave_view_search_my",
+    "domain": "[('user_id', '=', uid), ('employee_id.company_id', 'in', allowed_company_ids)]",
+    "context": "{'short_name': 1, 'search_default_year': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Keep track of your requests.\n            </p><p>\n                A great way to keep track on your time off requests, sick days, and approval status.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.leave"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_action_my_request",
+    "package": "hr_holidays",
+    "name": "Time Off Request",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.leave"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_action_my",
+    "package": "hr_holidays",
+    "name": "My Time Off",
+    "view_mode": "list,form,kanban,activity",
+    "view_id": null,
+    "search_view_id": "hr_leave_view_search_my",
+    "domain": "[('user_id', '=', uid)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Keep track of your requests.\n            </p><p>\n                A great way to keep track on your time off requests, sick days, and approval status.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.leave"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_action_action_approve_department",
+    "package": "hr_holidays",
+    "name": "All Time Off",
+    "view_mode": "kanban,list,form,calendar,activity",
+    "view_id": null,
+    "search_view_id": "hr_holidays.hr_leave_view_search_manager",
+    "domain": "[('employee_id.company_id', 'in', allowed_company_ids)]",
+    "context": "{\n            'search_default_waiting_for_me': 1,\n            'search_default_waiting_for_me_manager': 2,\n            'search_default_current_year': 3,\n            'hide_employee_name': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Meet the time off dashboard.\n            </p><p>\n                A great way to keep track on employee’s time off, sick days, and approval status.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.leave"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_action_holiday_allocation_id",
+    "package": "hr_holidays",
+    "name": "Time Off",
+    "view_mode": "list,kanban,form,calendar,activity",
+    "view_id": null,
+    "search_view_id": "hr_holidays.hr_leave_view_search_manager",
+    "domain": null,
+    "context": "{\n            'hide_employee_name': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Meet the time off dashboard.\n            </p><p>\n                A great way to keep track on employee’s PTOs, sick days, and approval status.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.leave"
+   },
+   {
+    "external_identifier": "hr_holidays.action_hr_available_holidays_report",
+    "package": "hr_holidays",
+    "name": "Time Off by Employee",
+    "view_mode": "list,graph,pivot,calendar,form",
+    "view_id": null,
+    "search_view_id": "hr_holidays.view_hr_holidays_filter",
+    "domain": "[('state', '!=', 'cancel')]",
+    "context": "{'search_default_filter_date_from': 1, 'search_default_group_employee': 1,\n            'search_default_group_type': 1, 'search_default_to_approve': 1, 'search_default_validated': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No Time off yet!\n            </p>\n            <p>\n                Check back later to review all your employees' time off\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.leave"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "hr_holidays.hr_leave_cron_cancel_invalid",
+    "package": "hr_holidays",
+    "name": "Time Off: Cancel invalid leaves",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "hr.leave",
+    "operation": "_cancel_invalid_leaves",
+    "operation_call": "model._cancel_invalid_leaves()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

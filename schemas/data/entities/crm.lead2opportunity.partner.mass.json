@@ -1,0 +1,468 @@
+{
+ "catalog": {
+  "name": "entity:crm.lead2opportunity.partner.mass",
+  "description": "Complete definition of entity Convert Lead to Opportunity (in mass) (crm.lead2opportunity.partner.mass).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "crm.lead2opportunity.partner.mass",
+  "storage_name": "crm_lead2opportunity_partner_mass",
+  "full_name": "Convert Lead to Opportunity (in mass)",
+  "kind": "transient",
+  "description": "Convert Lead to Opportunity (in mass)",
+  "defined_by_package": "crm",
+  "extended_by_packages": [],
+  "mixins": [
+   "crm.lead2opportunity.partner"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "lead_id",
+    "type": "Many2one",
+    "required": false,
+    "defined_in_package": "crm",
+    "string": "Lead",
+    "full_name": "Lead"
+   },
+   {
+    "name": "lead_tomerge_ids",
+    "type": "Many2many",
+    "comodel": "crm.lead",
+    "relation": "crm_convert_lead_mass_lead_rel",
+    "string": "Active Leads",
+    "context": {
+     "active_test": false
+    },
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_ids', [])"
+    },
+    "defined_in_package": "crm",
+    "full_name": "Active Leads",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "string": "Salespersons",
+    "defined_in_package": "crm",
+    "full_name": "Salespersons",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "deduplicate",
+    "type": "Boolean",
+    "string": "Apply deduplication",
+    "default": true,
+    "help": "Merge with existing leads/opportunities of each partner",
+    "defined_in_package": "crm",
+    "full_name": "Apply deduplication"
+   },
+   {
+    "name": "action",
+    "type": "Selection",
+    "selection_add": [
+     [
+      "each_exist_or_create",
+      "Use existing partner or create"
+     ]
+    ],
+    "string": "Related Customer",
+    "ondelete": {
+     "expression": "{'each_exist_or_create': lambda recs: recs.write({'action': 'exist'})}"
+    },
+    "defined_in_package": "crm",
+    "full_name": "Related Customer"
+   },
+   {
+    "name": "force_assignment",
+    "type": "Boolean",
+    "default": false,
+    "defined_in_package": "crm",
+    "string": "Force Assignment",
+    "full_name": "Force Assignment"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "duplicated_lead_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_action",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lead_tomerge_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lead_tomerge_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_commercial_partner_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Setting a company for each lead in mass mode is not supported.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_team_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "user_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When changing the user, also set a team_id or restrict team id\nto the ones user_id is member of. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duplicated_lead_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lead_tomerge_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_and_allocate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "leads",
+     "user_ids",
+     "team_id"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "When \"massively\" (more than one at a time) converting leads to\nopportunities, check the salesteam_id and salesmen_ids and update\nthe values before calling super.",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mass_convert",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_handle_partner",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "lead",
+     "action",
+     "partner_id"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "crm.access_crm_lead2opportunity_partner_mass",
+    "package": "crm",
+    "name": "access.crm.lead2opportunity.partner.mass",
+    "entity": "crm.lead2opportunity.partner.mass",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "crm.view_crm_lead2opportunity_partner_mass",
+    "package": "crm",
+    "name": "crm.lead2opportunity.partner.mass.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Convert to Opportunity"
+     },
+     "fields": [
+      {
+       "name": "lead_tomerge_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "widget": "radio"
+      },
+      {
+       "name": "deduplicate"
+      },
+      {
+       "name": "team_id",
+       "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"
+      },
+      {
+       "name": "user_ids",
+       "widget": "many2many_avatar_user",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "force_assignment"
+      },
+      {
+       "name": "duplicated_lead_ids",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "type",
+       "optional": "hide"
+      },
+      {
+       "name": "contact_name",
+       "optional": "show"
+      },
+      {
+       "name": "country_id",
+       "options": "{'no_open': True, 'no_create': True}",
+       "column_invisible": "context.get('invisible_country', True)"
+      },
+      {
+       "name": "email_from",
+       "optional": "show"
+      },
+      {
+       "name": "stage_id"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "team_id",
+       "optional": "hide"
+      },
+      {
+       "name": "action",
+       "widget": "radio"
+      },
+      {
+       "name": "partner_id",
+       "widget": "res_partner_many2one",
+       "invisible": "action != 'exist'",
+       "required": "action == 'exist'",
+       "context": "{'show_vat': True}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_mass_convert",
+       "string": "Convert to Opportunities",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 2,
+      "many2many_avatar_user": 1,
+      "many2one_avatar_user": 1,
+      "res_partner_many2one": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "crm.action_crm_send_mass_convert",
+    "package": "crm",
+    "name": "Convert to opportunities",
+    "view_mode": "form",
+    "view_id": "view_crm_lead2opportunity_partner_mass",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_crm_lead",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "crm.lead2opportunity.partner.mass"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

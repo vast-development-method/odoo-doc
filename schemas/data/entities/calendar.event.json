@@ -1,0 +1,5581 @@
+{
+ "catalog": {
+  "name": "entity:calendar.event",
+  "description": "Complete definition of entity Calendar Event (calendar.event).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "calendar.event",
+  "storage_name": "calendar_event",
+  "full_name": "Calendar Event",
+  "kind": "persistent",
+  "description": "Calendar Event",
+  "defined_by_package": "calendar",
+  "extended_by_packages": [
+   "calendar_sms",
+   "crm",
+   "google_calendar",
+   "hr_calendar",
+   "hr_holidays",
+   "hr_recruitment",
+   "microsoft_calendar"
+  ],
+  "mixins": [
+   "mail.thread",
+   "google.calendar.sync",
+   "microsoft.calendar.sync"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "start desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_systray_view": "calendar"
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Meeting Subject",
+    "required": true,
+    "defined_in_package": "calendar",
+    "full_name": "Meeting Subject"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "string": "Description",
+    "help": "When synchronization with an external calendar is active, this description is synchronized         with the one of the associated meeting in that external calendar. Any update will be propagated there         and vice versa.",
+    "defined_in_package": "calendar",
+    "full_name": "Description"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Organizer",
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "index": "btree_not_null",
+    "defined_in_package": "calendar",
+    "full_name": "Organizer",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Scheduled by",
+    "related": "user_id.partner_id",
+    "readonly": true,
+    "defined_in_package": "calendar",
+    "full_name": "Scheduled by",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "location",
+    "type": "Char",
+    "string": "Location",
+    "tracking": true,
+    "defined_in_package": "calendar",
+    "full_name": "Location"
+   },
+   {
+    "name": "notes",
+    "type": "Html",
+    "string": "Notes",
+    "defined_in_package": "calendar",
+    "full_name": "Notes"
+   },
+   {
+    "name": "videocall_location",
+    "type": "Char",
+    "string": "Meeting URL",
+    "compute": "_compute_videocall_location",
+    "store": true,
+    "copy": true,
+    "defined_in_package": "calendar",
+    "full_name": "Meeting uniform resource locator"
+   },
+   {
+    "name": "access_token",
+    "type": "Char",
+    "string": "Invitation Token",
+    "store": true,
+    "copy": false,
+    "index": true,
+    "defined_in_package": "calendar",
+    "full_name": "Invitation Token"
+   },
+   {
+    "name": "videocall_source",
+    "type": "Selection",
+    "selection": [
+     [
+      "discuss",
+      "Discuss"
+     ],
+     [
+      "custom",
+      "Custom"
+     ],
+     [
+      "google_meet",
+      "Google Meet"
+     ]
+    ],
+    "compute": "_compute_videocall_source",
+    "defined_in_package": "calendar",
+    "selection_added_by": [
+     "google_calendar"
+    ],
+    "ondelete": {
+     "google_meet": "set discuss"
+    },
+    "extended_in_packages": [
+     "google_calendar"
+    ],
+    "string": "Videocall Source",
+    "full_name": "Videocall Source"
+   },
+   {
+    "name": "videocall_channel_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel",
+    "string": "Discuss Channel",
+    "index": "btree_not_null",
+    "defined_in_package": "calendar",
+    "full_name": "Discuss Channel",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "privacy",
+    "type": "Selection",
+    "selection": [
+     [
+      "public",
+      "Public"
+     ],
+     [
+      "private",
+      "Private"
+     ],
+     [
+      "confidential",
+      "Only internal users"
+     ]
+    ],
+    "string": "Privacy",
+    "help": "People to whom this event will be visible.",
+    "defined_in_package": "calendar",
+    "full_name": "Privacy"
+   },
+   {
+    "name": "effective_privacy",
+    "type": "Selection",
+    "selection": [
+     [
+      "public",
+      "Public"
+     ],
+     [
+      "private",
+      "Private"
+     ],
+     [
+      "confidential",
+      "Only internal users"
+     ]
+    ],
+    "string": "Effective Privacy",
+    "help": "Whether the event is private, considering the user privacy",
+    "compute": "_compute_effective_privacy",
+    "defined_in_package": "calendar",
+    "full_name": "Effective Privacy"
+   },
+   {
+    "name": "show_as",
+    "type": "Selection",
+    "selection": [
+     [
+      "free",
+      "Available"
+     ],
+     [
+      "busy",
+      "Busy"
+     ]
+    ],
+    "string": "Show as",
+    "default": "busy",
+    "required": true,
+    "help": "If the time is shown as 'busy', this event will be visible to other people with either the full         information or simply 'busy' written depending on its privacy. Use this option to let other people know         that you are unavailable during that period of time. \n If the event is shown as 'free', other users know         that you are available during that period of time.",
+    "defined_in_package": "calendar",
+    "full_name": "Show as"
+   },
+   {
+    "name": "is_highlighted",
+    "type": "Boolean",
+    "compute": "_compute_is_highlighted",
+    "string": "Is the Event Highlighted",
+    "defined_in_package": "calendar",
+    "full_name": "Is the Event Highlighted"
+   },
+   {
+    "name": "is_organizer_alone",
+    "type": "Boolean",
+    "compute": "_compute_is_organizer_alone",
+    "string": "Is the Organizer Alone",
+    "help": "Check if the organizer is alone in the event, i.e. if the organizer is the only one that hasn't declined\n        the event (only if the organizer is not the only attendee)",
+    "defined_in_package": "calendar",
+    "full_name": "Is the Organizer Alone"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "tracking": true,
+    "help": "If the active field is set to false, it will allow you to hide the event alarm information without removing it.",
+    "defined_in_package": "calendar",
+    "full_name": "Active"
+   },
+   {
+    "name": "categ_ids",
+    "type": "Many2many",
+    "comodel": "calendar.event.type",
+    "relation": "meeting_category_rel",
+    "column1": "event_id",
+    "column2": "type_id",
+    "string": "Tags",
+    "defined_in_package": "calendar",
+    "full_name": "Tags",
+    "target_entity": "calendar.event.type"
+   },
+   {
+    "name": "start",
+    "type": "Datetime",
+    "string": "Start",
+    "required": true,
+    "tracking": true,
+    "default": {
+     "dynamic": "_default_start"
+    },
+    "index": true,
+    "help": "Start date of an event, without time for full days events",
+    "defined_in_package": "calendar",
+    "full_name": "Start"
+   },
+   {
+    "name": "stop",
+    "type": "Datetime",
+    "string": "Stop",
+    "required": true,
+    "tracking": true,
+    "default": {
+     "dynamic": "_default_stop"
+    },
+    "compute": "_compute_stop",
+    "readonly": false,
+    "store": true,
+    "help": "Stop date of an event, without time for full days events",
+    "defined_in_package": "calendar",
+    "full_name": "Stop"
+   },
+   {
+    "name": "display_time",
+    "type": "Char",
+    "string": "Event Time",
+    "compute": "_compute_display_time",
+    "defined_in_package": "calendar",
+    "full_name": "Event Time"
+   },
+   {
+    "name": "allday",
+    "type": "Boolean",
+    "string": "All Day",
+    "default": false,
+    "defined_in_package": "calendar",
+    "full_name": "All Day"
+   },
+   {
+    "name": "start_date",
+    "type": "Date",
+    "string": "Start Date",
+    "store": true,
+    "tracking": true,
+    "compute": "_compute_dates",
+    "inverse": "_inverse_dates",
+    "defined_in_package": "calendar",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "stop_date",
+    "type": "Date",
+    "string": "End Date",
+    "store": true,
+    "tracking": true,
+    "compute": "_compute_dates",
+    "inverse": "_inverse_dates",
+    "defined_in_package": "calendar",
+    "full_name": "End Date"
+   },
+   {
+    "name": "duration",
+    "type": "Float",
+    "string": "Duration",
+    "compute": "_compute_duration",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Duration"
+   },
+   {
+    "name": "res_id",
+    "type": "Many2oneReference",
+    "string": "Document ID",
+    "model_field": "res_model",
+    "defined_in_package": "calendar",
+    "full_name": "Document identifier"
+   },
+   {
+    "name": "res_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Document Model",
+    "ondelete": "cascade",
+    "defined_in_package": "calendar",
+    "full_name": "Document Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "res_model",
+    "type": "Char",
+    "string": "Document Model Name",
+    "related": "res_model_id.model",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "calendar",
+    "full_name": "Document Model Name"
+   },
+   {
+    "name": "res_model_name",
+    "type": "Char",
+    "related": "res_model_id.name",
+    "defined_in_package": "calendar",
+    "string": "Resource Model Name",
+    "full_name": "Resource Model Name"
+   },
+   {
+    "name": "activity_ids",
+    "type": "One2many",
+    "comodel": "mail.activity",
+    "inverse_name": "calendar_event_id",
+    "string": "Activities",
+    "defined_in_package": "calendar",
+    "full_name": "Activities",
+    "target_entity": "mail.activity"
+   },
+   {
+    "name": "attendee_ids",
+    "type": "One2many",
+    "comodel": "calendar.attendee",
+    "inverse_name": "event_id",
+    "string": "Participant",
+    "defined_in_package": "calendar",
+    "full_name": "Participant",
+    "target_entity": "calendar.attendee"
+   },
+   {
+    "name": "current_attendee",
+    "type": "Many2one",
+    "comodel": "calendar.attendee",
+    "compute": "_compute_current_attendee",
+    "search": "_search_current_attendee",
+    "defined_in_package": "calendar",
+    "string": "Current Attendee",
+    "full_name": "Current Attendee",
+    "target_entity": "calendar.attendee"
+   },
+   {
+    "name": "current_status",
+    "type": "Selection",
+    "string": "Attending?",
+    "related": "current_attendee.state",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Attending?"
+   },
+   {
+    "name": "should_show_status",
+    "type": "Boolean",
+    "compute": "_compute_should_show_status",
+    "defined_in_package": "calendar",
+    "string": "Should Show Status",
+    "full_name": "Should Show Status"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "calendar_event_res_partner_rel",
+    "string": "Attendees",
+    "default": {
+     "dynamic": "_default_partners"
+    },
+    "defined_in_package": "calendar",
+    "full_name": "Attendees",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "invalid_email_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_invalid_email_partner_ids",
+    "defined_in_package": "calendar",
+    "string": "Invalid Email Partner",
+    "full_name": "Invalid Email Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "unavailable_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "string": "Unavailable Attendees",
+    "compute": "_compute_unavailable_partner_ids",
+    "defined_in_package": "calendar",
+    "full_name": "Unavailable Attendees",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "alarm_ids",
+    "type": "Many2many",
+    "comodel": "calendar.alarm",
+    "relation": "calendar_alarm_calendar_event_rel",
+    "string": "Reminders",
+    "ondelete": "restrict",
+    "help": "Notifications sent to all attendees to remind of the meeting.",
+    "defined_in_package": "calendar",
+    "full_name": "Reminders",
+    "target_entity": "calendar.alarm"
+   },
+   {
+    "name": "recurrency",
+    "type": "Boolean",
+    "string": "Recurrent",
+    "defined_in_package": "calendar",
+    "full_name": "Recurrent"
+   },
+   {
+    "name": "recurrence_id",
+    "type": "Many2one",
+    "comodel": "calendar.recurrence",
+    "string": "Recurrence Rule",
+    "index": "btree_not_null",
+    "defined_in_package": "calendar",
+    "full_name": "Recurrence Rule",
+    "target_entity": "calendar.recurrence"
+   },
+   {
+    "name": "follow_recurrence",
+    "type": "Boolean",
+    "default": false,
+    "defined_in_package": "calendar",
+    "string": "Follow Recurrence",
+    "full_name": "Follow Recurrence"
+   },
+   {
+    "name": "recurrence_update",
+    "type": "Selection",
+    "selection": [
+     [
+      "self_only",
+      "This event"
+     ],
+     [
+      "future_events",
+      "This and following events"
+     ],
+     [
+      "all_events",
+      "All events"
+     ]
+    ],
+    "store": false,
+    "copy": false,
+    "default": "self_only",
+    "help": "Choose what to do with other events in the recurrence. Updating All Events is not allowed when dates or time is modified",
+    "defined_in_package": "calendar",
+    "string": "Recurrence Update",
+    "full_name": "Recurrence Update"
+   },
+   {
+    "name": "rrule",
+    "type": "Char",
+    "string": "Recurrent Rule",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Recurrent Rule"
+   },
+   {
+    "name": "rrule_type_ui",
+    "type": "Selection",
+    "selection": {
+     "expression": "RRULE_TYPE_SELECTION_UI"
+    },
+    "string": "Repeat",
+    "compute": "_compute_rrule_type_ui",
+    "readonly": false,
+    "help": "Let the event automatically repeat at that interval",
+    "defined_in_package": "calendar",
+    "full_name": "Repeat"
+   },
+   {
+    "name": "rrule_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "RRULE_TYPE_SELECTION"
+    },
+    "string": "Recurrence",
+    "help": "Let the event automatically repeat at that interval",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Recurrence"
+   },
+   {
+    "name": "event_tz",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "string": "Timezone",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "end_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "END_TYPE_SELECTION"
+    },
+    "string": "Recurrence Termination",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Recurrence Termination"
+   },
+   {
+    "name": "interval",
+    "type": "Integer",
+    "string": "Repeat On",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "help": "Repeat every (Days/Week/Month/Year)",
+    "defined_in_package": "calendar",
+    "full_name": "Repeat On"
+   },
+   {
+    "name": "count",
+    "type": "Integer",
+    "string": "Number of Repetitions",
+    "help": "Repeat x times",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Number of Repetitions"
+   },
+   {
+    "name": "mon",
+    "type": "Boolean",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Mon",
+    "full_name": "Mon"
+   },
+   {
+    "name": "tue",
+    "type": "Boolean",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Tue",
+    "full_name": "Tue"
+   },
+   {
+    "name": "wed",
+    "type": "Boolean",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Wed",
+    "full_name": "Wed"
+   },
+   {
+    "name": "thu",
+    "type": "Boolean",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Thu",
+    "full_name": "Thu"
+   },
+   {
+    "name": "fri",
+    "type": "Boolean",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Fri",
+    "full_name": "Fri"
+   },
+   {
+    "name": "sat",
+    "type": "Boolean",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Sat",
+    "full_name": "Sat"
+   },
+   {
+    "name": "sun",
+    "type": "Boolean",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Sun",
+    "full_name": "Sun"
+   },
+   {
+    "name": "month_by",
+    "type": "Selection",
+    "selection": {
+     "expression": "MONTH_BY_SELECTION"
+    },
+    "string": "Option",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Option"
+   },
+   {
+    "name": "day",
+    "type": "Integer",
+    "string": "Date of month",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "Date of month"
+   },
+   {
+    "name": "weekday",
+    "type": "Selection",
+    "selection": {
+     "expression": "WEEKDAY_SELECTION"
+    },
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Weekday",
+    "full_name": "Weekday"
+   },
+   {
+    "name": "byday",
+    "type": "Selection",
+    "selection": {
+     "expression": "BYDAY_SELECTION"
+    },
+    "string": "By day",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "full_name": "By day"
+   },
+   {
+    "name": "until",
+    "type": "Date",
+    "compute": "_compute_recurrence",
+    "readonly": false,
+    "defined_in_package": "calendar",
+    "string": "Until",
+    "full_name": "Until"
+   },
+   {
+    "name": "display_description",
+    "type": "Boolean",
+    "compute": "_compute_display_description",
+    "defined_in_package": "calendar",
+    "string": "Display Description",
+    "full_name": "Display Description"
+   },
+   {
+    "name": "attendees_count",
+    "type": "Integer",
+    "compute": "_compute_attendees_count",
+    "defined_in_package": "calendar",
+    "string": "Attendees Count",
+    "full_name": "Attendees Count"
+   },
+   {
+    "name": "accepted_count",
+    "type": "Integer",
+    "compute": "_compute_attendees_count",
+    "defined_in_package": "calendar",
+    "string": "Accepted Count",
+    "full_name": "Accepted Count"
+   },
+   {
+    "name": "declined_count",
+    "type": "Integer",
+    "compute": "_compute_attendees_count",
+    "defined_in_package": "calendar",
+    "string": "Declined Count",
+    "full_name": "Declined Count"
+   },
+   {
+    "name": "tentative_count",
+    "type": "Integer",
+    "compute": "_compute_attendees_count",
+    "defined_in_package": "calendar",
+    "string": "Tentative Count",
+    "full_name": "Tentative Count"
+   },
+   {
+    "name": "awaiting_count",
+    "type": "Integer",
+    "compute": "_compute_attendees_count",
+    "defined_in_package": "calendar",
+    "string": "Awaiting Count",
+    "full_name": "Awaiting Count"
+   },
+   {
+    "name": "user_can_edit",
+    "type": "Boolean",
+    "compute": "_compute_user_can_edit",
+    "defined_in_package": "calendar",
+    "string": "User Can Edit",
+    "full_name": "User Can Edit"
+   },
+   {
+    "name": "opportunity_id",
+    "type": "Many2one",
+    "comodel": "crm.lead",
+    "string": "Opportunity",
+    "domain": "[('type', '=', 'opportunity')]",
+    "index": true,
+    "ondelete": "set null",
+    "defined_in_package": "crm",
+    "full_name": "Opportunity",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "google_id",
+    "type": "Char",
+    "string": "Google Calendar Event Id",
+    "compute": "_compute_google_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "google_calendar",
+    "full_name": "Google Calendar Event Id"
+   },
+   {
+    "name": "guests_readonly",
+    "type": "Boolean",
+    "string": "Guests Event Modification Permission",
+    "default": false,
+    "defined_in_package": "google_calendar",
+    "full_name": "Guests Event Modification Permission"
+   },
+   {
+    "name": "applicant_id",
+    "type": "Many2one",
+    "comodel": "hr.applicant",
+    "string": "Applicant",
+    "index": "btree_not_null",
+    "ondelete": "set null",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Applicant",
+    "target_entity": "hr.applicant"
+   },
+   {
+    "name": "microsoft_recurrence_master_id",
+    "type": "Char",
+    "string": "Microsoft Recurrence Master Id",
+    "defined_in_package": "microsoft_calendar",
+    "full_name": "Microsoft Recurrence Master Id"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "get_state_selections",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_partners",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "When active_model is res.partner, the current partners should be attendees ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_start",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_stop",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_should_show_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attendee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_attendee",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attendee_ids",
+         "attendee_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_current_attendee",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_attendees_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attendee_ids",
+         "attendee_ids.state",
+         "partner_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_can_edit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_ids"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invalid_email_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_effective_privacy",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "privacy",
+         "user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_highlighted",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_organizer_alone",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "attendee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check if the organizer of the event is the only one who has accepted the event.\nIt does not apply if the organizer is the only attendee of the event because it\nwould represent a personnal event.\nThe goal of this field is to highlight to the user that the others attendees are\nnot available for this event.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_time",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dates",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allday",
+         "start",
+         "stop"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Adapt the value of start_date(time)/stop_date(time)\naccording to start/stop fields and allday. Also, compute\nthe duration for not allday meeting ; otherwise the\nduration is set to zero, since the meeting last all the day.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "stop",
+         "start"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_stop",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "start",
+         "duration"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_date",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "start_date",
+         "stop_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "This onchange is required for cases where the stop/start is False and we set an allday event.\nThe inverse method is not called in this case because start_date/stop_date are not used in any\ncompute/related, so we need an onchange to set the start/stop values in the form view",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_dates",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "This method is used to set the start and stop values of all day events.\nThe calendar view needs date_start and date_stop values to display correctly the allday events across\nseveral days. As the user edit the {start,stop}_date fields when allday is true,\nthis inverse method is needed to update the  start/stop value and have a relevant calendar view.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_closing_date",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "start",
+         "stop",
+         "start_date",
+         "stop_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The ending date and time cannot be earlier than the starting date and time.\nMeeting “%(name)s” starts at %(start_time)s and ends at %(end_time)s",
+        "line": 455
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The ending date cannot be earlier than the starting date.\nMeeting “%(name)s” starts on %(start_date)s and ends on %(end_date)s",
+        "line": 465
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_organizer_validation_conditions",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Method for check in the microsoft_calendar module that needs to be\noverridden in appointment.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rrule_type_ui",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "recurrence_id",
+         "recurrency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_recurrence",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "recurrence_id",
+         "recurrency",
+         "rrule_type_ui"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "description"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_unavailable_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_ids",
+         "start",
+         "stop"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allday"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_videocall_location",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "videocall_source",
+         "access_token"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_partner_unavailable",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner",
+     "partner_events"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_videocall_location",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_videocall_source",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "videocall_location"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "videocall_location"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_discuss_videocall_location",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "This method sets the videocall_location to a discuss route.\nIf no access_token exists for this event, we create one.\nNote that recurring events will have different access_tokens.\nThis is done by design to prevent users not being able to join a discuss meeting because the base event of the recurrency was deleted.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_discuss_videocall_location",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 152,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_calendar",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_field_value",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_query",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "query",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 107,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to save the recurrence with \"This Event\"",
+        "line": 776
+       }
+      ]
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 62,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_calendar_privacy_write_permissions",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Checks if current user can write on the events, raising UserError when the event is private.\nWe need to manually call the default Access Error because we can't add an access rule for checking\nthe calendar defaut privacy of an user from a 'calendar.event' record, since it is a res.users field.\nOtherwise we would have to create a new computed field on that model, which we don't want.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_private_event_conditions",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Checks if the event is private, returning True if the conditions match and False otherwise. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "privacy",
+         "user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Hide private events' name for events which don't belong to the current user. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "domain",
+     "groupby",
+     "aggregates",
+     "having",
+     "offset",
+     "limit",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_grouping_sets",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "grouping_sets",
+     "aggregates",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "When an event is copied, the attendees should be recreated to avoid sharing the same attendee records\nbetween copies",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_unlink_event",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "attendee_id",
+     "recurrence"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Delete the event after displaying the delete wizard if necessary.\n\n:param attendee_id: The ID of the attendee for the event\n:param recurrence: Boolean indicating if the event is recurring\n:return: Action to delete the event",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mail_get_operation_for_mail_message_operation",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message_operation"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_attendees_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner_commands"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": ":param partner_commands: ORM commands for partner_id field (0 and 1 commands not supported)\n:return: associated attendee_ids ORM commands",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_videocall_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_videocall_channel_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "name",
+     "partner_ids"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_privacy_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_event_over",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Check if the event is over. This method is used to check if the event\nshould trigger invitations with Google Calendar.\n:return: True if the event is over, False otherwise",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_discuss_videocall_location",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "clear_videocall_location",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_calendar_event",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_sendmail",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_composer",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There are no attendees on these events",
+        "line": 1135
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_join_video_call",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_join_meeting",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "partner_id"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Method used when an existing user wants to join\n        ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mass_deletion",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "recurrence_update_setting"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mass_archive",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "recurrence_update_setting"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "The aim of this action purpose is to be called from sync calendar module when mass deletion is not possible.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": "Delete recurrence in the system if in 'all_events' or in 'future_events' edge case, triggering one mail. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_skip_send_mail_status_update",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Overridable getter to identify whether to send invitation/cancelation emails.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": "If a google calendar is not syncing with the user, don't send a mail.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "If microsoft calendar is not syncing, don't send a mail.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_mail_tz",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sync_activities",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_activity_deadline_from_start",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "allday"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_trigger_alarm_types",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "calendar_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_setup_event_recurrent_alarms",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "events_by_alarm"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Setup alarms for recurrent events ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_setup_alarms",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Schedule cron triggers for future events ",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_next_alarm_date",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "events_by_alarm"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_apply_recurrence_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values",
+     "future"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Apply the new recurrence rules in `values`. Create a recurrence if it does not exist\nand create all missing events according to the rrule.\nIf the changes are applied to future\nevents only, a new recurrence is created with the updated rrule.\n\n:param values: new recurrence values to apply\n:param future: rrule values are applied to future events only if True.\n               Rrule changes are applied to all events in the recurrence otherwise.\n               (ignored if no recurrence exists yet).\n:return: events detached from the recurrence",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recurrence_params",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recurrence_params_by_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "event_date"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the recurrence parameters from a date object. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_break_recurrence",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "future"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Breaks the event's recurrence.\nStop the recurrence at the current event if `future` is True, leaving past events in the recurrence.\nIf `future` is False, all events in the recurrence are detached and the recurrence itself is unlinked.\n:return: detached events excluding the current events",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_time_update_dict",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "base_event",
+     "time_values"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Return the update dictionary for shifting the base_event's time to the new date. ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't update a recurrence without base event.",
+        "line": 1380
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_archive_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return parameters for archiving events in calendar module. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the parameters for archiving events. Do not synchronize events after archiving. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_values_to_sync",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Method to be overriden: return candidate values to be synced within rewrite_recurrence function scope. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return True if values being updated intersects with Google synced values and False otherwise. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_update_future_events_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return parameters for updating future events within _update_future_events function scope. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Add parameters for updating events within the _update_future_events function scope. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_remove_sync_id_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return parameters for removing event synchronization id within _update_future_events function scope. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Add parameters for removing event synchronization while updating the events in super class. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_updated_recurrence_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "new_start_date"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Copy values from current recurrence and update the start date weekday. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_future_events",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values",
+     "time_values",
+     "recurrence_values"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Trim the current recurrence detaching the occurrences after current event,\ndeactivate the detached events except for the updated event and apply recurrence values.",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_rewrite_recurrence",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values",
+     "time_values",
+     "recurrence_values"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Delete the current recurrence, reactivate base event and apply updated recurrence values. ",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "change_attendee_status",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "status",
+     "recurrence_update_setting"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "find_partner_customer",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_activity_excluded_models",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "For some models, we don't want to automatically create activities when a calendar.event is created.\n(This is the case notably for appointment.types)\nThis hook method allows to specify those models.\nSee calendar.event create method for details.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reset_attendees_status",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Reset attendees status to pending and accept event for current user. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_start_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Return the event starting date in the event's timezone.\nIf no starting time is assigned (yet), return today as default\n:return: date",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_range",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_display_time_tz",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "get the display_time of the meeting, forcing the timezone. This method is called from email template, to not use sudo(). ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ics_file",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Returns iCalendar file for the event invitation.\n:returns a dict of .ics file content for each meeting",
+      "size_in_lines": 67,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "First you have to specify the date of the invitation.",
+        "line": 1606
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_contact_details_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "organizer",
+     "partners"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Build sanitized HTML with the organizer details and the details\nof the contact partner (only when there is a single non-organizer attendee).",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_new_invited_attendees",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "current_attendees",
+     "previous_attendees",
+     "update_vals"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the attendees who must receive an invitation for a modified calendar event. This method is meant\nto be overridden.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_partner_contact_details_html",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "section_title",
+     "partner"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_customer_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": ":rtype: str\n:returns: html Sanitized HTML description for customer to include in calendar exports",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_customer_summary",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": ":rtype: str\n:returns: The summary to include in calendar exports",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_display_time",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "stop",
+     "zduration",
+     "zallday"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return date and time (from to from) based on duration with timezone in string. Eg :\n1) if user add duration for 2 hours, return : August-23-2013 at (04-30 To 06-30) (Europe/Brussels)\n2) if event all day ,return : AllDay, July-31-2013",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_duration",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "stop"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": "Get the duration value between the 2 given dates. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_date_formats",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "get current date and time format, according to the context lang\n:return: a tuple with (format date, format time)",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recurrent_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_time_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_custom_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_public_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_default_duration",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_do_sms_reminder",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "alarms"
+    ],
+    "definitions": [
+     {
+      "package": "calendar_sms",
+      "decorators": [],
+      "documentation": "Send an SMS text reminder to attendees that haven't declined the event ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_sms",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There are no attendees on these events",
+        "line": 30
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_is_crm_lead",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "defaults",
+     "ctx"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "This method checks if the concerned model is a CRM lead.\nThe information is not always in the defaults values,\nthis is why it is necessary to check the context too.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_google_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "recurrence_id.google_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_google_synced_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_restart_google_sync",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_modify_event_permission",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": "Check if event modification attempt by attendee is valid to avoid duplicate events creation. ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The following event can only be updated by the organizer according to the event permissions set on Google Calendar.",
+        "line": 114
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_sync_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_odoo_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "google_event",
+     "default_reminders"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_odoo_attendee_commands",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "google_event"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_odoo_reminders_commands",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reminders"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_google_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 76,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cancel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_event_user",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_google_insertion_blocked",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sender_user"
+    ],
+    "definitions": [
+     {
+      "package": "google_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_unusual_days",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "date_from",
+     "date_to"
+    ],
+    "definitions": [
+     {
+      "package": "hr_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_events_interval",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_calendar",
+      "decorators": [],
+      "documentation": "This method will returned an Intervals object that represent the event's interval based of its parameters.\n\nIf an event is scheduled for the entire day, its interval will correspond to the work interval defined by the\ncompany's calendar.\nIf an allday event is scheduled on a day when the company is closed, the interval of this event will be empty.",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_employees_availability_for_event",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "schedule_by_partner",
+     "event_interval"
+    ],
+    "definitions": [
+     {
+      "package": "hr_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_need_video_call",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Determine if the event needs a video call or not depending\non the model of the event.\n\nThis method, implemented and invoked in google_calendar, is necessary\ndue to the absence of a bridge module between google_calendar and hr_holidays.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_organizer",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_microsoft_synced_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_restart_microsoft_sync",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_microsoft_sync_status",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Returns True if synchronization with Outlook Calendar is active and False otherwise.\nThe 'microsoft_synchronization_stopped' variable needs to be 'False' and Outlook account must be connected.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_organizer_validation",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "sender_user",
+     "partner_included"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Check if the proposed event organizer can be set accordingly. ",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "For having a different organizer in your event, it is necessary that the organizer have its the system Calendar synced with Outlook Calendar.",
+        "line": 107
+       },
+       {
+        "kind": "ValidationError",
+        "message": "It is necessary adding the proposed organizer as attendee before saving the event.",
+        "line": 111
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_recurrence_overlapping",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "new_start"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Outlook does not allow to modify time fields of an event if this event crosses\nor overlaps the recurrence. In this case a 400 error with the Outlook code \"ErrorOccurrenceCrossingBoundary\"\nis returned. That means that the update violates the following Outlook restriction on recurrence exceptions:\nan occurrence cannot be moved to or before the day of the previous occurrence, and cannot be moved to or after\nthe day of the following occurrence.\nFor example: E1 E2 E3 E4 cannot becomes E1 E3 E2 E4",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Outlook limitation: in a recurrence, an event cannot be moved to or before the day of the previous event, and cannot be moved to or after the day of the following event.",
+        "line": 130
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_is_matching_timeslot",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start",
+     "stop",
+     "allday"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Check if an event matches with the provided timeslot",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_forbid_recurrence_update",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Suggest user to update recurrences in Outlook due to the Outlook Calendar spam limitation.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "error_msg",
+        "line": 159
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_forbid_recurrence_creation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Suggest user to update recurrences in Outlook due to the Outlook Calendar spam limitation.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Due to an Outlook Calendar limitation, recurrent events must be created directly in Outlook Calendar.",
+        "line": 165
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_recreate_event_different_organizer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values",
+     "sender_user"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Copy current event values, delete it and recreate it with the new organizer user. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_organizer_user_change_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the sender user of the event and the partner ids listed on the event values. ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_attendee_status",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attendee_ids"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Merge current status from 'attendees_ids' with new attendees values for avoiding their info loss in write().\nCreate a dict getting the state of each attendee received from 'attendee_ids' variable and then update their state.\n:param attendee_ids: List of attendee commands carrying a dict with 'partner_id' and 'state' keys in its third position.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_microsoft_sync_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_microsoft_to_odoo_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "microsoft_event",
+     "default_reminders",
+     "default_values",
+     "with_ids"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 64,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_microsoft_to_odoo_recurrence_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "microsoft_event",
+     "default_values"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_odoo_attendee_commands_m",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "microsoft_event"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_odoo_reminders_commands_m",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "microsoft_event"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_attendee_status_o2m",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attendee"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_microsoft_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fields_to_sync",
+     "initial_values"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 133,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_attendees_have_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "For a correct synchronization between the system and Outlook Calendar, all attendees must have an email address. However, some events do not respect this condition. As long as the events are incorrect, the calendars will not be synchronized.\nEither update the events/attendees or archive these events %(details)s:\n%(invalid_events)s",
+        "line": 656
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_microsoft_values_occurence",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "initial_values"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cancel_microsoft",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Cancel an Microsoft event.\nThere are 2 cases:\n  1) the organizer is an the system user: he's the only one able to delete the the system event. Attendees can just decline.\n  2) the organizer is NOT an the system user: any attendee should remove the the system event.",
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_event_user_m",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "user_id"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": "Get the user who will send the request to Microsoft (organizer if synchronized and current user otherwise). ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_microsoft_insertion_blocked",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sender_user"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_closing_date",
+    "package": "calendar",
+    "kind": "ValidationError",
+    "message": "The ending date and time cannot be earlier than the starting date and time.\nMeeting “%(name)s” starts at %(start_time)s and ends at %(end_time)s"
+   },
+   {
+    "operation": "_check_closing_date",
+    "package": "calendar",
+    "kind": "ValidationError",
+    "message": "The ending date cannot be earlier than the starting date.\nMeeting “%(name)s” starts on %(start_date)s and ends on %(end_date)s"
+   },
+   {
+    "operation": "write",
+    "package": "calendar",
+    "kind": "UserError",
+    "message": "Unable to save the recurrence with \"This Event\""
+   },
+   {
+    "operation": "action_open_composer",
+    "package": "calendar",
+    "kind": "UserError",
+    "message": "There are no attendees on these events"
+   },
+   {
+    "operation": "_get_time_update_dict",
+    "package": "calendar",
+    "kind": "UserError",
+    "message": "You can't update a recurrence without base event."
+   },
+   {
+    "operation": "_get_ics_file",
+    "package": "calendar",
+    "kind": "UserError",
+    "message": "First you have to specify the date of the invitation."
+   },
+   {
+    "operation": "action_send_sms",
+    "package": "calendar_sms",
+    "kind": "UserError",
+    "message": "There are no attendees on these events"
+   },
+   {
+    "operation": "_check_modify_event_permission",
+    "package": "google_calendar",
+    "kind": "ValidationError",
+    "message": "The following event can only be updated by the organizer according to the event permissions set on Google Calendar."
+   },
+   {
+    "operation": "_check_organizer_validation",
+    "package": "microsoft_calendar",
+    "kind": "ValidationError",
+    "message": "For having a different organizer in your event, it is necessary that the organizer have its the system Calendar synced with Outlook Calendar."
+   },
+   {
+    "operation": "_check_organizer_validation",
+    "package": "microsoft_calendar",
+    "kind": "ValidationError",
+    "message": "It is necessary adding the proposed organizer as attendee before saving the event."
+   },
+   {
+    "operation": "_check_recurrence_overlapping",
+    "package": "microsoft_calendar",
+    "kind": "UserError",
+    "message": "Outlook limitation: in a recurrence, an event cannot be moved to or before the day of the previous event, and cannot be moved to or after the day of the following event."
+   },
+   {
+    "operation": "_forbid_recurrence_update",
+    "package": "microsoft_calendar",
+    "kind": "UserError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "_forbid_recurrence_creation",
+    "package": "microsoft_calendar",
+    "kind": "UserError",
+    "message": "Due to an Outlook Calendar limitation, recurrent events must be created directly in Outlook Calendar."
+   },
+   {
+    "operation": "_ensure_attendees_have_email",
+    "package": "microsoft_calendar",
+    "kind": "ValidationError",
+    "message": "For a correct synchronization between the system and Outlook Calendar, all attendees must have an email address. However, some events do not respect this condition. As long as the events are incorrect, the calendars will not be synchronized.\nEither update the events/attendees or archive these events %(details)s:\n%(invalid_events)s"
+   }
+  ],
+  "state_fields": [
+   "current_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "calendar.access_calendar_event_all_user",
+    "package": "calendar",
+    "name": "calendar.event_all_user",
+    "entity": "calendar.event",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "calendar.access_calendar_event_all_employee",
+    "package": "calendar",
+    "name": "calendar.event_all_employee",
+    "entity": "calendar.event",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "calendar.access_calendar_event_partner_manager",
+    "package": "calendar",
+    "name": "calendar.event.partner.manager",
+    "entity": "calendar.event",
+    "group": "base.group_partner_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "crm.access_calendar_event_manager",
+    "package": "crm",
+    "name": "calendar.event.manager",
+    "entity": "calendar.event",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "crm.access_calendar_event",
+    "package": "crm",
+    "name": "calendar.event",
+    "entity": "calendar.event",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_holidays.access_calendar_event_hr_user",
+    "package": "hr_holidays",
+    "name": "calendar.event.hr.user",
+    "entity": "calendar.event",
+    "group": "hr_holidays.group_hr_holidays_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment.access_calendar_event_hruser",
+    "package": "hr_recruitment",
+    "name": "calendar.event.hruser",
+    "entity": "calendar.event",
+    "group": "group_hr_recruitment_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "calendar.calendar_event_rule_my",
+    "package": "calendar",
+    "name": "Own events",
+    "entity": "calendar.event",
+    "domain": "[('partner_ids', 'in', user.partner_id.id)]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "calendar.calendar_event_rule_employee",
+    "package": "calendar",
+    "name": "All Calendar Event for employees",
+    "entity": "calendar.event",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4,ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "calendar.calendar_event_rule_private",
+    "package": "calendar",
+    "name": "Private events",
+    "entity": "calendar.event",
+    "domain": "['|', ('privacy', '!=', 'private'), '&', ('privacy', '=', 'private'), '|', ('user_id', '=', user.id), ('partner_ids', 'in', user.partner_id.id)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": "False",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "calendar.view_calendar_event_tree",
+    "package": "calendar",
+    "name": "calendar.event.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Meetings",
+      "sample": "1",
+      "multi_edit": "1",
+      "js_class": "calendar_list_view"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "readonly": "recurrency",
+       "string": "Subject",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "start",
+       "readonly": "1",
+       "string": "Start Date"
+      },
+      {
+       "name": "stop",
+       "readonly": "1",
+       "string": "End Date"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "recurrency",
+       "optional": "hide"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags",
+       "readonly": "recurrency",
+       "optional": "show"
+      },
+      {
+       "name": "alarm_ids",
+       "widget": "many2many_tags",
+       "readonly": "recurrency",
+       "optional": "hide"
+      },
+      {
+       "name": "categ_ids",
+       "widget": "many2many_tags",
+       "readonly": "recurrency",
+       "options": "{'color_field': 'color'}",
+       "optional": "hide"
+      },
+      {
+       "name": "recurrency",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "privacy",
+       "readonly": "recurrency",
+       "optional": "hide"
+      },
+      {
+       "name": "show_as",
+       "readonly": "recurrency",
+       "optional": "hide"
+      },
+      {
+       "name": "location",
+       "readonly": "recurrency",
+       "optional": "show"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "readonly": "1"
+      },
+      {
+       "name": "description",
+       "readonly": "recurrency",
+       "optional": "hide"
+      },
+      {
+       "name": "allday",
+       "column_invisible": "True"
+      },
+      {
+       "name": "message_needaction",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_composer",
+       "string": "Send Mail",
+       "type": "object",
+       "context": "{'default_composition_mode':'mass_mail'}"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "many2many_tags": 3,
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "calendar.view_calendar_event_form",
+    "package": "calendar",
+    "name": "calendar.event.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Meetings",
+      "class": "o_calendar_event_form_view",
+      "js_class": "calendar_form"
+     },
+     "fields": [
+      {
+       "name": "recurrence_update",
+       "widget": "radio"
+      },
+      {
+       "name": "res_model_name"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "user_can_edit",
+       "invisible": "1"
+      },
+      {
+       "name": "invalid_email_partner_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "readonly": "not user_can_edit",
+       "placeholder": "e.g. Business Lunch"
+      },
+      {
+       "name": "start_date",
+       "widget": "daterange",
+       "invisible": "not allday",
+       "readonly": "not user_can_edit",
+       "required": "allday",
+       "options": "{'end_date_field': 'stop_date'}"
+      },
+      {
+       "name": "start",
+       "widget": "daterange",
+       "invisible": "allday",
+       "readonly": "not user_can_edit",
+       "required": "not allday",
+       "options": "{'end_date_field': 'stop'}"
+      },
+      {
+       "name": "stop_date",
+       "invisible": "1"
+      },
+      {
+       "name": "stop",
+       "invisible": "1"
+      },
+      {
+       "name": "unavailable_partner_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "readonly": "(id and recurrency) or not user_can_edit",
+       "string": "Duration"
+      },
+      {
+       "name": "allday",
+       "widget": "boolean_toggle",
+       "readonly": "not user_can_edit",
+       "options": "{'autosave': False}",
+       "force_save": "1"
+      },
+      {
+       "name": "location",
+       "readonly": "not user_can_edit",
+       "placeholder": "Online Meeting"
+      },
+      {
+       "name": "videocall_location",
+       "widget": "CopyClipboardChar",
+       "readonly": "videocall_source == 'discuss' or not user_can_edit",
+       "string": "Video Link",
+       "force_save": "1"
+      },
+      {
+       "name": "res_id",
+       "invisible": "not res_id",
+       "readonly": "1",
+       "string": "Linked to"
+      },
+      {
+       "name": "res_model",
+       "invisible": "1"
+      },
+      {
+       "name": "videocall_source",
+       "invisible": "1"
+      },
+      {
+       "name": "access_token",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "current_status",
+       "widget": "selection_badge",
+       "invisible": "not should_show_status",
+       "readonly": "not should_show_status",
+       "required": "should_show_status",
+       "string": "Going?",
+       "options": "{'horizontal': true, 'size': 'sm'}"
+      },
+      {
+       "name": "show_as",
+       "readonly": "not user_can_edit",
+       "nolabel": "1"
+      },
+      {
+       "name": "privacy",
+       "readonly": "not user_can_edit",
+       "nolabel": "1",
+       "placeholder": "User default"
+      },
+      {
+       "name": "should_show_status",
+       "invisible": "1"
+      },
+      {
+       "name": "attendees_count",
+       "nolabel": "1"
+      },
+      {
+       "name": "accepted_count",
+       "nolabel": "1"
+      },
+      {
+       "name": "tentative_count",
+       "nolabel": "1"
+      },
+      {
+       "name": "declined_count",
+       "nolabel": "1"
+      },
+      {
+       "name": "awaiting_count",
+       "nolabel": "1"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2manyattendee",
+       "readonly": "not user_can_edit",
+       "domain": "[('type','!=','private')]",
+       "context": "{'form_view_ref': 'base.view_partner_simple_form'}",
+       "options": "{'no_quick_create': True}",
+       "placeholder": "Select attendees..."
+      },
+      {
+       "name": "notes",
+       "readonly": "not user_can_edit",
+       "options": "{'resizable': false}",
+       "placeholder": "Add notes about this meeting..."
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "not user_can_edit"
+      },
+      {
+       "name": "categ_ids",
+       "widget": "many2many_tags",
+       "readonly": "not user_can_edit",
+       "options": "{'color_field': 'color', 'no_create_edit': True}"
+      },
+      {
+       "name": "description",
+       "readonly": "not user_can_edit",
+       "options": "{'height': 120}",
+       "nolabel": "1",
+       "placeholder": "Add description"
+      },
+      {
+       "name": "alarm_ids",
+       "widget": "many2many_tags",
+       "readonly": "not user_can_edit",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "recurrence_id",
+       "invisible": "1"
+      },
+      {
+       "name": "rrule_type",
+       "invisible": "1"
+      },
+      {
+       "name": "recurrency",
+       "widget": "boolean_toggle",
+       "readonly": "not user_can_edit",
+       "options": "{'autosave': False}"
+      },
+      {
+       "name": "rrule_type_ui",
+       "invisible": "not recurrency",
+       "readonly": "not user_can_edit",
+       "required": "recurrency"
+      },
+      {
+       "name": "interval",
+       "string": "Repeat every"
+      },
+      {
+       "name": "rrule_type",
+       "required": "rrule_type_ui == 'custom'",
+       "nolabel": "1"
+      },
+      {
+       "name": "recurrence_id",
+       "invisible": "1"
+      },
+      {
+       "name": "month_by",
+       "required": "rrule_type_ui == 'monthly' or rrule_type == 'monthly'",
+       "nolabel": "1"
+      },
+      {
+       "name": "day",
+       "invisible": "month_by != 'date'",
+       "required": "(rrule_type_ui == 'monthly' or rrule_type == 'monthly') and month_by == 'date'",
+       "nolabel": "1"
+      },
+      {
+       "name": "byday",
+       "invisible": "month_by != 'day'",
+       "required": "(rrule_type_ui == 'monthly' or rrule_type == 'monthly') and month_by == 'day'",
+       "string": "The",
+       "nolabel": "1"
+      },
+      {
+       "name": "weekday",
+       "invisible": "month_by != 'day'",
+       "required": "(rrule_type_ui == 'monthly' or rrule_type == 'monthly') and month_by == 'day'",
+       "nolabel": "1"
+      },
+      {
+       "name": "end_type",
+       "readonly": "not user_can_edit",
+       "required": "recurrency",
+       "nolabel": "1"
+      },
+      {
+       "name": "count",
+       "invisible": "end_type != 'count'",
+       "readonly": "not user_can_edit",
+       "required": "recurrency",
+       "nolabel": "1"
+      },
+      {
+       "name": "until",
+       "invisible": "end_type != 'end_date'",
+       "readonly": "not user_can_edit",
+       "required": "recurrency and end_type == 'end_date'",
+       "nolabel": "1",
+       "placeholder": "e.g: 12/31/2023"
+      },
+      {
+       "name": "event_tz",
+       "invisible": "not recurrency",
+       "readonly": "not user_can_edit"
+      },
+      {
+       "name": "attendee_ids",
+       "widget": "one2many",
+       "readonly": "1",
+       "mode": "list,kanban"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "email",
+       "widget": "email"
+      },
+      {
+       "name": "phone",
+       "widget": "phone"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "email",
+       "widget": "email"
+      },
+      {
+       "name": "state"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_composer",
+       "string": "Send email",
+       "type": "object",
+       "invisible": "not user_can_edit",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "action_open_calendar_event",
+       "type": "object",
+       "invisible": "not (res_id and res_model_name)",
+       "icon": "fa-bars"
+      },
+      {
+       "name": "clear_videocall_location",
+       "type": "object",
+       "invisible": "not videocall_location or not user_can_edit",
+       "class": "btn btn-link btn-lg ms-1 px-1 py-0",
+       "context": "{'recurrence_update': recurrence_update}"
+      },
+      {
+       "name": "action_join_video_call",
+       "type": "object",
+       "invisible": "not videocall_location or not user_can_edit",
+       "class": "btn btn-link btn-lg px-1 py-0"
+      },
+      {
+       "name": "set_discuss_videocall_location",
+       "type": "object",
+       "invisible": "videocall_location or not user_can_edit",
+       "class": "btn btn-link btn-sm px-0 text-nowrap",
+       "context": "{'recurrence_update': recurrence_update}"
+      },
+      {
+       "name": "action_open_composer",
+       "string": " EMAIL",
+       "type": "object",
+       "invisible": "not user_can_edit",
+       "icon": "fa-envelope"
+      },
+      {
+       "name": "action_sendmail",
+       "string": "Send Invitations",
+       "type": "object",
+       "class": "oe_link",
+       "icon": "fa-envelope"
+      },
+      {
+       "name": "do_tentative",
+       "string": "Uncertain",
+       "type": "object",
+       "invisible": "state not in ('needsAction', 'declined', 'accepted')",
+       "icon": "fa-asterisk"
+      },
+      {
+       "name": "do_accept",
+       "string": "Accept",
+       "type": "object",
+       "invisible": "state not in ('needsAction', 'tentative', 'declined')",
+       "icon": "fa-check text-success"
+      },
+      {
+       "name": "do_decline",
+       "string": "Decline",
+       "type": "object",
+       "invisible": "state not in ('needsAction', 'tentative', 'accepted')",
+       "icon": "fa-times-circle text-danger"
+      },
+      {
+       "name": "do_tentative",
+       "string": "Uncertain",
+       "type": "object",
+       "invisible": "state not in ('needsAction', 'declined', 'accepted')",
+       "class": "btn fa fa-asterisk"
+      },
+      {
+       "name": "do_accept",
+       "string": "Accept",
+       "type": "object",
+       "invisible": "state not in ('needsAction', 'tentative', 'declined')",
+       "class": "btn fa fa-check text-success"
+      },
+      {
+       "name": "do_decline",
+       "string": "Decline",
+       "type": "object",
+       "invisible": "state not in ('needsAction', 'tentative', 'accepted')",
+       "class": "btn fa fa-times-circle text-danger"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "notes",
+       "string": "Notes",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "options",
+       "string": "Options",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "page_invitations",
+       "string": "Invitations",
+       "invisible": "not user_can_edit",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "widgets": {
+      "radio": 1,
+      "daterange": 2,
+      "float_time": 1,
+      "boolean_toggle": 2,
+      "CopyClipboardChar": 1,
+      "selection_badge": 1,
+      "many2manyattendee": 1,
+      "many2one_avatar_user": 1,
+      "many2many_tags": 2,
+      "one2many": 1,
+      "email": 2,
+      "phone": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_open_composer",
+       "class": "btn btn-primary",
+       "type": "object",
+       "string": "Send email",
+       "invisible": "not user_can_edit"
+      }
+     ],
+     "chatter": true,
+     "button_box": [
+      {
+       "icon": "fa-bars",
+       "type": "object",
+       "name": "action_open_calendar_event",
+       "invisible": "not (res_id and res_model_name)"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "calendar.view_calendar_event_form_quick_create",
+    "package": "calendar",
+    "name": "calendar.event.form.quick_create",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Meetings",
+      "class": "o_calendar_event_form_quick_create",
+      "js_class": "calendar_quick_create_form_view"
+     },
+     "fields": [
+      {
+       "name": "invalid_email_partner_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "nolabel": "1",
+       "placeholder": "Add Title"
+      },
+      {
+       "name": "duration",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "start",
+       "widget": "daterange",
+       "invisible": "allday",
+       "options": "{'end_date_field': 'stop'}",
+       "nolabel": "1",
+       "placeholder": "Dates"
+      },
+      {
+       "name": "start_date",
+       "widget": "daterange",
+       "invisible": "not allday",
+       "options": "{'end_date_field': 'stop_date'}",
+       "nolabel": "1",
+       "placeholder": "Dates"
+      },
+      {
+       "name": "allday",
+       "nolabel": "1"
+      },
+      {
+       "name": "stop",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags",
+       "nolabel": "1",
+       "placeholder": "Participants"
+      },
+      {
+       "name": "location",
+       "nolabel": "1",
+       "placeholder": "Location"
+      },
+      {
+       "name": "recurrence_update",
+       "invisible": "1"
+      },
+      {
+       "name": "access_token",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "videocall_location",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "videocall_source",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "videocall_location",
+       "widget": "CopyClipboardChar",
+       "nolabel": "1"
+      },
+      {
+       "name": "privacy",
+       "nolabel": "1",
+       "placeholder": "Visibility"
+      },
+      {
+       "name": "notes",
+       "widget": "calendar_event_notes_html",
+       "nolabel": "1",
+       "placeholder": "Notes"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "set_discuss_videocall_location",
+       "type": "object",
+       "invisible": "videocall_location",
+       "class": "mx-1 btn-link text-nowrap",
+       "context": "{'recurrence_update': recurrence_update}"
+      },
+      {
+       "name": "clear_videocall_location",
+       "class": "btn btn-sm px-0"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "daterange": 2,
+      "many2many_tags": 1,
+      "CopyClipboardChar": 1,
+      "calendar_event_notes_html": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "calendar.view_calendar_event_calendar",
+    "package": "calendar",
+    "name": "calendar.event.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "js_class": "attendee_calendar",
+      "string": "Meetings",
+      "date_start": "start",
+      "date_stop": "stop",
+      "date_delay": "duration",
+      "all_day": "allday",
+      "event_open_popup": "true",
+      "event_limit": "5",
+      "quick_create": "true",
+      "quick_create_view_id": "%(calendar.view_calendar_event_form_quick_create)d",
+      "color": "partner_ids"
+     },
+     "fields": [
+      {
+       "name": "attendees_count",
+       "invisible": "1"
+      },
+      {
+       "name": "accepted_count",
+       "invisible": "1"
+      },
+      {
+       "name": "declined_count",
+       "invisible": "1"
+      },
+      {
+       "name": "user_can_edit",
+       "invisible": "1"
+      },
+      {
+       "name": "is_highlighted",
+       "invisible": "1"
+      },
+      {
+       "name": "privacy",
+       "invisible": "1"
+      },
+      {
+       "name": "effective_privacy",
+       "invisible": "1"
+      },
+      {
+       "name": "recurrency",
+       "invisible": "1"
+      },
+      {
+       "name": "recurrence_update",
+       "invisible": "1"
+      },
+      {
+       "name": "location",
+       "invisible": "not location",
+       "options": "{'icon': 'fa fa-map-marker'}"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2manyattendeeexpandable",
+       "options": "{'block': True, 'icon': 'fa fa-users'}"
+      },
+      {
+       "name": "videocall_location",
+       "widget": "CopyClipboardURL",
+       "invisible": "not videocall_location",
+       "options": "{'icon': 'fa fa-lg fa-video-camera'}"
+      },
+      {
+       "name": "res_model_name",
+       "invisible": "not res_model_name",
+       "options": "{'icon': 'fa fa-link', 'shouldOpenRecord': true}"
+      },
+      {
+       "name": "alarm_ids",
+       "invisible": "not alarm_ids",
+       "options": "{'icon': 'fa fa-bell-o'}"
+      },
+      {
+       "name": "categ_ids",
+       "invisible": "not categ_ids",
+       "options": "{'icon': 'fa fa-tag', 'color_field': 'color'}"
+      },
+      {
+       "name": "partner_id",
+       "string": "Organizer",
+       "options": "{'icon': 'fa fa-user-o'}"
+      },
+      {
+       "name": "description",
+       "invisible": "not display_description",
+       "options": "{'icon': 'fa fa-sticky-note'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2manyattendeeexpandable": 1,
+      "CopyClipboardURL": 1
+     },
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "start",
+      "date_stop": "stop",
+      "date_delay": "duration",
+      "color": "partner_ids",
+      "mode": null,
+      "quick_create": "true",
+      "event_open_popup": "true",
+      "all_day": "allday"
+     }
+    }
+   },
+   {
+    "external_identifier": "calendar.view_calendar_event_search",
+    "package": "calendar",
+    "name": "calendar.event.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Meetings"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Meeting",
+       "filter_domain": "[('name', 'ilike', self)]"
+      },
+      {
+       "name": "partner_ids"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "location"
+      },
+      {
+       "name": "show_as"
+      },
+      {
+       "name": "categ_ids"
+      },
+      {
+       "name": "description"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "mymeetings",
+       "string": "My Meetings",
+       "domain": "[('partner_ids.user_ids', 'in', [uid])]",
+       "help": "My Meetings"
+      },
+      {
+       "name": "filter_start_date",
+       "string": "Date",
+       "date": "start"
+      },
+      {
+       "name": "busy",
+       "string": "Busy",
+       "domain": "[('show_as', '=', 'busy')]"
+      },
+      {
+       "name": "free",
+       "string": "Free",
+       "domain": "[('show_as', '=', 'free')]"
+      },
+      {
+       "name": "default",
+       "string": "Default Privacy",
+       "domain": "[('privacy', '=', False)]"
+      },
+      {
+       "name": "public",
+       "string": "Public",
+       "domain": "[('privacy', '=', 'public')]"
+      },
+      {
+       "name": "private",
+       "string": "Private",
+       "domain": "[('privacy', '=', 'private')]"
+      },
+      {
+       "name": "confidential",
+       "string": "Only Internal Users",
+       "domain": "[('privacy', '=', 'confidential')]"
+      },
+      {
+       "name": "recurrent",
+       "string": "Recurrent",
+       "domain": "[('recurrency', '=', True)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "responsible",
+       "string": "Responsible",
+       "domain": "[]",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "group_by_start",
+       "string": "Date",
+       "domain": "[]",
+       "context": "{'group_by': 'start'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "calendar_sms.view_calendar_event_tree_inherited",
+    "package": "calendar_sms",
+    "name": "calendar.event.list.calendar_sms",
+    "view_type": "xpath",
+    "inherits_view": "calendar.view_calendar_event_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_send_sms",
+       "string": "Send SMS",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "calendar_sms.view_calendar_event_form_inherited",
+    "package": "calendar_sms",
+    "name": "calendar.event.form.calendar_sms",
+    "view_type": "xpath",
+    "inherits_view": "calendar.view_calendar_event_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='send_buttons']",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_send_sms",
+       "string": "SMS",
+       "type": "object",
+       "invisible": "not user_can_edit",
+       "icon": "fa-mobile"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='send_buttons']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "crm.view_crm_meeting_search",
+    "package": "crm",
+    "name": "calendar.event.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "calendar.view_calendar_event_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='description']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "opportunity_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='description']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "google_calendar.view_google_calendar_event",
+    "package": "google_calendar",
+    "name": "google_calendar.event.calendar",
+    "view_type": "field",
+    "inherits_view": "calendar.view_calendar_event_calendar",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "location",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "location",
+       "position": "after"
+      },
+      {
+       "name": "google_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_calendar.view_calendar_event_calendar",
+    "package": "hr_calendar",
+    "name": "view.calendar.event.calendar.inherit.calendar",
+    "view_type": "xpath",
+    "inherits_view": "calendar.view_calendar_event_calendar",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//calendar",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//calendar",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.view_calendar_event_form_inherit",
+    "package": "hr_holidays",
+    "name": "view.calendar.event.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "calendar.view_calendar_event_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//label[@for='videocall_location']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//label[@for='videocall_location']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "microsoft_calendar.view_microsoft_calendar_event",
+    "package": "microsoft_calendar",
+    "name": "microsoft_calendar.event.calendar",
+    "view_type": "field",
+    "inherits_view": "calendar.view_calendar_event_calendar",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "location",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "location",
+       "position": "after"
+      },
+      {
+       "name": "microsoft_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "calendar.action_calendar_event",
+    "package": "calendar",
+    "name": "Meetings",
+    "view_mode": "calendar,list,form",
+    "view_id": "view_calendar_event_calendar",
+    "search_view_id": "view_calendar_event_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            No meetings found. Let's schedule one!\n          </p><p>\n            The calendar is shared between employees and fully integrated with\n            other applications such as the employee leaves or the business\n            opportunities.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "calendar.event"
+   },
+   {
+    "external_identifier": "crm.act_crm_opportunity_calendar_event_new",
+    "package": "crm",
+    "name": "Meetings",
+    "view_mode": "list,form,calendar",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_duration': 4.0, 'default_opportunity_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "calendar.event"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "calendar.calendar_menu_config",
+    "package": "calendar",
+    "name": "Configuration",
+    "parent_id": "calendar.mail_menu_calendar",
+    "action": "calendar.action_calendar_event",
+    "sequence": "40",
+    "groups_id": "base.group_system,base.group_no_one",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "calendar.calendar_template_meeting_update",
+    "package": "calendar",
+    "name": "Calendar: Event Update",
+    "subject": "{{object.name}}: Event update"
+   },
+   {
+    "external_identifier": "calendar.calendar_template_delete_event",
+    "package": "calendar",
+    "name": "Calendar: Event Deleted",
+    "subject": "Deleted event: {{ object.name }}"
+   }
+  ]
+ }
+}

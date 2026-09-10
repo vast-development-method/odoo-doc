@@ -1,0 +1,1165 @@
+{
+ "catalog": {
+  "name": "entity:stock.landed.cost",
+  "description": "Complete definition of entity Stock Landed Cost (stock.landed.cost).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.landed.cost",
+  "storage_name": "stock_landed_cost",
+  "full_name": "Stock Landed Cost",
+  "kind": "persistent",
+  "description": "Stock Landed Cost",
+  "defined_by_package": "stock_landed_costs",
+  "extended_by_packages": [
+   "mrp_landed_costs",
+   "mrp_subcontracting_landed_costs"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "date desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "default": {
+     "dynamic": "lambda self: _('New')"
+    },
+    "copy": false,
+    "readonly": true,
+    "tracking": true,
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Name"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Date",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "copy": false,
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Date"
+   },
+   {
+    "name": "target_model",
+    "type": "Selection",
+    "selection": [
+     [
+      "picking",
+      "Transfers"
+     ],
+     [
+      "manufacturing",
+      "Manufacturing Orders"
+     ]
+    ],
+    "string": "Apply On",
+    "required": true,
+    "default": "picking",
+    "copy": false,
+    "defined_in_package": "stock_landed_costs",
+    "selection_added_by": [
+     "mrp_landed_costs"
+    ],
+    "ondelete": {
+     "manufacturing": "set default"
+    },
+    "extended_in_packages": [
+     "mrp_landed_costs"
+    ],
+    "full_name": "Apply On"
+   },
+   {
+    "name": "picking_ids",
+    "type": "Many2many",
+    "comodel": "stock.picking",
+    "string": "Transfers",
+    "copy": false,
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Transfers",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "cost_lines",
+    "type": "One2many",
+    "comodel": "stock.landed.cost.lines",
+    "inverse_name": "cost_id",
+    "string": "Cost Lines",
+    "copy": true,
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Cost Lines",
+    "target_entity": "stock.landed.cost.lines"
+   },
+   {
+    "name": "valuation_adjustment_lines",
+    "type": "One2many",
+    "comodel": "stock.valuation.adjustment.lines",
+    "inverse_name": "cost_id",
+    "string": "Valuation Adjustments",
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Valuation Adjustments",
+    "target_entity": "stock.valuation.adjustment.lines"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Item Description",
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Item Description"
+   },
+   {
+    "name": "amount_total",
+    "type": "Monetary",
+    "string": "Total",
+    "compute": "_compute_total_amount",
+    "store": true,
+    "tracking": true,
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Total"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "done",
+      "Posted"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "string": "State",
+    "default": "draft",
+    "copy": false,
+    "readonly": true,
+    "tracking": true,
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "State"
+   },
+   {
+    "name": "account_move_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "string": "Journal Entry",
+    "index": "btree_not_null",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Journal Entry",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "account_journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Account Journal",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self._default_account_journal_id()"
+    },
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Account Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "vendor_bill_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "string": "Vendor Bill",
+    "copy": false,
+    "domain": [
+     [
+      "move_type",
+      "=",
+      "in_invoice"
+     ]
+    ],
+    "index": "btree_not_null",
+    "defined_in_package": "stock_landed_costs",
+    "full_name": "Vendor Bill",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "company_id.currency_id",
+    "defined_in_package": "stock_landed_costs",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "mrp_production_ids",
+    "type": "Many2many",
+    "comodel": "mrp.production",
+    "string": "Manufacturing order",
+    "copy": false,
+    "groups": "stock.group_stock_manager",
+    "defined_in_package": "mrp_landed_costs",
+    "full_name": "Manufacturing order",
+    "target_entity": "mrp.production"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_account_journal_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": "Take the journal configured in the company, else fallback on the stock journal.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "cost_lines.price_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_target_model",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "target_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_landed_costs",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "target_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_subtype",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "init_values"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Validated landed costs cannot be cancelled, but you could create negative landed costs to reverse them",
+        "line": 99
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "button_validate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cost and adjustments lines do not match. You should maybe recompute the landed costs.",
+        "line": 109
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "get_valuation_lines",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot apply landed costs on the chosen %s(s). Landed costs can only be applied for products with FIFO or average costing method.",
+        "line": 177
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "compute_landed_cost",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 64,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_targeted_move_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_can_validate",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only draft landed costs can be validated",
+        "line": 250
+       },
+       {
+        "kind": "UserError",
+        "message": "Please define %s on which those additional costs should apply.",
+        "line": 254
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_sum",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_landed_costs",
+      "decorators": [],
+      "documentation": "Check if each cost line its valuation lines sum to the correct amount\nand if the overall total amount is correct also ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "button_cancel",
+    "package": "stock_landed_costs",
+    "kind": "UserError",
+    "message": "Validated landed costs cannot be cancelled, but you could create negative landed costs to reverse them"
+   },
+   {
+    "operation": "button_validate",
+    "package": "stock_landed_costs",
+    "kind": "UserError",
+    "message": "Cost and adjustments lines do not match. You should maybe recompute the landed costs."
+   },
+   {
+    "operation": "get_valuation_lines",
+    "package": "stock_landed_costs",
+    "kind": "UserError",
+    "message": "You cannot apply landed costs on the chosen %s(s). Landed costs can only be applied for products with FIFO or average costing method."
+   },
+   {
+    "operation": "_check_can_validate",
+    "package": "stock_landed_costs",
+    "kind": "UserError",
+    "message": "Only draft landed costs can be validated"
+   },
+   {
+    "operation": "_check_can_validate",
+    "package": "stock_landed_costs",
+    "kind": "UserError",
+    "message": "Please define %s on which those additional costs should apply."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "stock_landed_costs.access_stock_landed_cost",
+    "package": "stock_landed_costs",
+    "name": "stock.landed.cost",
+    "entity": "stock.landed.cost",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp_landed_costs.view_mrp_landed_costs_form",
+    "package": "mrp_landed_costs",
+    "name": "mrp.landed.cost.form",
+    "view_type": "field",
+    "inherits_view": "stock_landed_costs.view_stock_landed_cost_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "target_model",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "target_model",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp_subcontracting_landed_costs.view_mrp_landed_costs_form",
+    "package": "mrp_subcontracting_landed_costs",
+    "name": "mrp.subcontracting.landed.cost.form",
+    "view_type": "field",
+    "inherits_view": "mrp_landed_costs.view_mrp_landed_costs_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "mrp_production_ids",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "mrp_production_ids",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock_landed_costs.view_stock_landed_cost_form",
+    "package": "stock_landed_costs",
+    "name": "stock.landed.cost.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Landed Costs"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "date",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "target_model",
+       "widget": "radio",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "picking_ids",
+       "widget": "many2many_tags",
+       "invisible": "target_model != 'picking'",
+       "readonly": "state == 'done'",
+       "domain": "[('company_id', '=', company_id), '|', ('move_ids.is_in', '!=', False), ('move_ids.is_out', '!=', False)]",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "account_journal_id",
+       "readonly": "state == 'done'",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "account_move_id",
+       "invisible": "not account_move_id"
+      },
+      {
+       "name": "vendor_bill_id"
+      },
+      {
+       "name": "cost_lines",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "product_id",
+       "domain": "[('landed_cost_ok', '=', True)]",
+       "context": "{'default_landed_cost_ok': True}"
+      },
+      {
+       "name": "price_unit"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "split_method"
+      },
+      {
+       "name": "account_id",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "product_id",
+       "domain": "[('landed_cost_ok', '=', True)]",
+       "context": "{'default_landed_cost_ok': True, 'default_type': 'service'}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "account_id",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "split_method"
+      },
+      {
+       "name": "price_unit"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "amount_total"
+      },
+      {
+       "name": "valuation_adjustment_lines",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "quantity"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "former_cost"
+      },
+      {
+       "name": "additional_landed_cost"
+      },
+      {
+       "name": "cost_line_id",
+       "readonly": "1"
+      },
+      {
+       "name": "product_id",
+       "readonly": "1"
+      },
+      {
+       "name": "weight",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "volume",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "quantity",
+       "readonly": "1"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "former_cost",
+       "readonly": "1"
+      },
+      {
+       "name": "final_cost",
+       "readonly": "1"
+      },
+      {
+       "name": "additional_landed_cost"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_validate",
+       "string": "Validate",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "button_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state != 'draft'"
+      },
+      {
+       "name": "compute_landed_cost",
+       "string": "Compute",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "float-end btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "additional_costs",
+       "string": "Additional Costs",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "valuation_adjustments",
+       "string": "Valuation Adjustments",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "radio": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "button_validate",
+       "string": "Validate",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight",
+       "type": "object"
+      },
+      {
+       "name": "button_cancel",
+       "string": "Cancel",
+       "invisible": "state != 'draft'",
+       "type": "object"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,done",
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "stock_landed_costs.view_stock_landed_cost_tree",
+    "package": "stock_landed_costs",
+    "name": "stock.landed.cost.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Landed Costs",
+      "decoration-info": "state == 'draft'",
+      "decoration-muted": "state == 'cancel'"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "date",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state == 'draft'"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state == 'draft'",
+      "decoration-muted": "state == 'cancel'"
+     }
+    }
+   },
+   {
+    "external_identifier": "stock_landed_costs.view_stock_landed_cost_tree2",
+    "package": "stock_landed_costs",
+    "name": "stock.landed.cost.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Landed Costs"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "date",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "stock_landed_costs.stock_landed_cost_view_kanban",
+    "package": "stock_landed_costs",
+    "name": "stock.landed.cost.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "account_journal_id",
+       "readonly": "state == 'done'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "stock_landed_costs.view_stock_landed_cost_search",
+    "package": "stock_landed_costs",
+    "name": "stock.landed.cost.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Landed Costs"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name"
+      },
+      {
+       "name": "picking_ids",
+       "string": "Picking"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "draft",
+       "string": "Draft",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "done",
+       "string": "Done",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "date",
+       "string": "Date",
+       "date": "date"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "status",
+       "string": "Status",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "group_by_month",
+       "string": "Date",
+       "context": "{'group_by': 'date'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock_landed_costs.action_stock_landed_cost",
+    "package": "stock_landed_costs",
+    "name": "Landed Costs",
+    "view_mode": "list,form,kanban",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a new landed cost\n                </p><p>\n                    Landed costs allow you to include additional costs (shipment, insurance, customs duties, etc) into the cost of the product.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "stock.landed.cost"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

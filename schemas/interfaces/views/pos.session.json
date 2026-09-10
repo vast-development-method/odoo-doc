@@ -1,0 +1,497 @@
+{
+ "catalog": {
+  "name": "views:pos.session",
+  "description": "View declarations for entity pos.session.",
+  "record_count": 6,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "point_of_sale.view_pos_session_form",
+   "package": "point_of_sale",
+   "name": "pos.session.form.view",
+   "entity": "pos.session",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Point of Sale Session",
+     "create": "0",
+     "edit": "0"
+    },
+    "fields": [
+     {
+      "name": "state",
+      "widget": "statusbar",
+      "nolabel": "1"
+     },
+     {
+      "name": "failed_pickings",
+      "invisible": "1"
+     },
+     {
+      "name": "rescue",
+      "invisible": "1"
+     },
+     {
+      "name": "order_count",
+      "widget": "statinfo",
+      "string": "Orders"
+     },
+     {
+      "name": "picking_count",
+      "widget": "statinfo",
+      "invisible": "failed_pickings",
+      "string": "Pickings"
+     },
+     {
+      "name": "picking_count",
+      "widget": "statinfo",
+      "invisible": "not failed_pickings",
+      "string": "Pickings"
+     },
+     {
+      "name": "total_payments_amount",
+      "widget": "statinfo",
+      "string": "Payments"
+     },
+     {
+      "name": "name",
+      "invisible": "name == '/'"
+     },
+     {
+      "name": "cash_control",
+      "invisible": "1"
+     },
+     {
+      "name": "user_id",
+      "readonly": "state != 'opening_control'"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "config_id",
+      "readonly": "1"
+     },
+     {
+      "name": "move_id",
+      "readonly": "1",
+      "groups": "account.group_account_readonly"
+     },
+     {
+      "name": "start_at",
+      "invisible": "state == 'opening_control'"
+     },
+     {
+      "name": "stop_at",
+      "invisible": "state != 'closed'"
+     },
+     {
+      "name": "cash_register_balance_start"
+     },
+     {
+      "name": "cash_register_balance_end_real",
+      "invisible": "state != 'closed'"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "open_frontend_cb",
+      "string": "Continue Selling",
+      "type": "object",
+      "invisible": "rescue or state not in ['opening_control', 'opened']"
+     },
+     {
+      "name": "action_pos_session_closing_control",
+      "string": "Close Session & Post Entries",
+      "type": "object",
+      "invisible": "(state != 'closing_control' and not rescue or state == 'closed' and rescue) and state != 'closing_control'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_view_order",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-shopping-basket"
+     },
+     {
+      "name": "action_stock_picking",
+      "type": "object",
+      "invisible": "picking_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-truck"
+     },
+     {
+      "name": "action_show_payments_list",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-dollar"
+     },
+     {
+      "name": "show_journal_items",
+      "type": "object",
+      "class": "oe_stat_button",
+      "groups": "account.group_account_readonly",
+      "icon": "fa-bars"
+     },
+     {
+      "name": "show_cash_register",
+      "type": "object",
+      "invisible": "not cash_control",
+      "class": "oe_stat_button",
+      "groups": "account.group_account_readonly",
+      "icon": "fa-bars"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statusbar": 1,
+     "statinfo": 4
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "open_frontend_cb",
+      "type": "object",
+      "string": "Continue Selling",
+      "invisible": "rescue or state not in ['opening_control', 'opened']"
+     },
+     {
+      "id": "validate_closing_control",
+      "name": "action_pos_session_closing_control",
+      "type": "object",
+      "string": "Close Session & Post Entries",
+      "invisible": "(state != 'closing_control' and not rescue or state == 'closed' and rescue) and state != 'closing_control'",
+      "class": "oe_highlight"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": "opened,closing_control,closed",
+    "chatter": true,
+    "button_box": [
+     {
+      "name": "action_view_order",
+      "class": "oe_stat_button",
+      "icon": "fa-shopping-basket",
+      "type": "object"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "action_stock_picking",
+      "type": "object",
+      "icon": "fa-truck",
+      "invisible": "picking_count == 0"
+     },
+     {
+      "name": "action_show_payments_list",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-dollar"
+     },
+     {
+      "name": "show_journal_items",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-bars",
+      "groups": "account.group_account_readonly"
+     },
+     {
+      "name": "show_cash_register",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-bars",
+      "invisible": "not cash_control",
+      "groups": "account.group_account_readonly"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Point of Sale Session\" create=\"0\" edit=\"0\">\n                <header>\n                    <button name=\"open_frontend_cb\" type=\"object\" string=\"Continue Selling\" invisible=\"rescue or state not in ['opening_control', 'opened']\"/>\n                    <button id=\"validate_closing_control\" name=\"action_pos_session_closing_control\" type=\"object\" string=\"Close Session &amp; Post Entries\" invisible=\"(state != 'closing_control' and not rescue or state == 'closed' and rescue) and state != 'closing_control'\" class=\"oe_highlight\"/>\n                    <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"opened,closing_control,closed\" nolabel=\"1\"/>\n                </header>\n                <sheet>\n                    <field name=\"failed_pickings\" invisible=\"1\"/>\n                    <field name=\"rescue\" invisible=\"1\"/>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button name=\"action_view_order\" class=\"oe_stat_button\" icon=\"fa-shopping-basket\" type=\"object\">\n                            <field name=\"order_count\" widget=\"statinfo\" string=\"Orders\"/>\n                        </button>\n                        <button class=\"oe_stat_button\" name=\"action_stock_picking\" type=\"object\" icon=\"fa-truck\" invisible=\"picking_count == 0\">\n                            <field name=\"picking_count\" widget=\"statinfo\" string=\"Pickings\" invisible=\"failed_pickings\"/>\n                            <field name=\"picking_count\" widget=\"statinfo\" string=\"Pickings\" class=\"text-danger\" invisible=\"not failed_pickings\"/>\n                        </button>\n                        <button name=\"action_show_payments_list\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-dollar\">\n                            <field name=\"total_payments_amount\" widget=\"statinfo\" string=\"Payments\"/>\n                        </button>\n                        <button name=\"show_journal_items\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-bars\" groups=\"account.group_account_readonly\">\n                            <div class=\"o_stat_info\">\n                                <span class=\"o_stat_text\">Journal Items</span>\n                            </div>\n                        </button>\n                        <button name=\"show_cash_register\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-bars\" invisible=\"not cash_control\" groups=\"account.group_account_readonly\">\n                            <div class=\"o_stat_info\">\n                                <span class=\"o_stat_text\">Cash Register</span>\n                            </div>\n                        </button>\n                    </div>\n                    <h1 class=\"oe_title\">\n                        <field name=\"name\" invisible=\"name == '/'\" class=\"oe_inline\"/>\n                    </h1>\n                    <group>\n                        <field name=\"cash_control\" invisible=\"1\"/>\n                        <field name=\"user_id\" readonly=\"state != 'opening_control'\"/>\n                        <field name=\"currency_id\" invisible=\"1\"/>\n                        <field name=\"config_id\" readonly=\"1\"/>\n                        <field name=\"move_id\" readonly=\"1\" groups=\"account.group_account_readonly\"/>\n                        <field name=\"start_at\" invisible=\"state == 'opening_control'\"/>\n                        <field name=\"stop_at\" invisible=\"state != 'closed'\"/>\n                        <field name=\"cash_register_balance_start\"/>\n                        <field name=\"cash_register_balance_end_real\" invisible=\"state != 'closed'\"/>\n                    </group>\n                </sheet>\n                <chatter/>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.view_pos_session_tree",
+   "package": "point_of_sale",
+   "name": "pos.session.list.view",
+   "entity": "pos.session",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Point of Sale Session",
+     "create": "0",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "decoration-bf": "1"
+     },
+     {
+      "name": "config_id"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "state != 'opening_control'"
+     },
+     {
+      "name": "start_at"
+     },
+     {
+      "name": "stop_at"
+     },
+     {
+      "name": "cash_register_balance_start"
+     },
+     {
+      "name": "cash_register_balance_end_real"
+     },
+     {
+      "name": "cash_register_balance_end"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-warning": "state == 'closing_control'",
+      "decoration-success": "state in ('opened', 'closed')",
+      "decoration-info": "state in ('opening_control')"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "0",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Point of Sale Session\" create=\"0\" sample=\"1\">\n                <field name=\"name\" decoration-bf=\"1\"/>\n                <field name=\"config_id\"/>\n                <field name=\"user_id\" widget=\"many2one_avatar_user\" readonly=\"state != 'opening_control'\"/>\n                <field name=\"start_at\"/>\n                <field name=\"stop_at\"/>\n                <field name=\"cash_register_balance_start\"/>\n                <field name=\"cash_register_balance_end_real\"/>\n                <field name=\"cash_register_balance_end\"/>\n                <field name=\"state\" widget=\"badge\" decoration-info=\"state in ('opening_control')\" decoration-success=\"state in ('opened', 'closed')\" decoration-warning=\"state == 'closing_control'\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.view_pos_session_kanban",
+   "package": "point_of_sale",
+   "name": "pos.session.kanban",
+   "entity": "pos.session",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "create": "0",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "config_id"
+     },
+     {
+      "name": "state",
+      "widget": "label_selection",
+      "options": "{'classes': {'opening_control': 'default',                                     'opened': 'success', 'closing_control': 'warning', 'closed': 'warning'}}"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "start_at"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "state != 'opening_control'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "label_selection": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\" create=\"0\" sample=\"1\">\n                <templates>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex\">\n                            <field name=\"config_id\" class=\"fw-bolder mb-1\"/>\n                            <field name=\"state\" widget=\"label_selection\" options=\"{'classes': {'opening_control': 'default',                                     'opened': 'success', 'closing_control': 'warning', 'closed': 'warning'}}\" class=\"ms-auto\"/>\n                        </div>\n                        <field name=\"name\"/>\n                        <footer class=\"pt-1\">\n                            <field name=\"start_at\"/>\n                            <field name=\"user_id\" widget=\"many2one_avatar_user\" readonly=\"state != 'opening_control'\" class=\"ms-auto\"/>\n                        </footer>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.view_pos_session_search",
+   "package": "point_of_sale",
+   "name": "pos.session.search.view",
+   "entity": "pos.session",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Point of Sale Session"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "config_id"
+     },
+     {
+      "name": "user_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_sessions",
+      "string": "My Sessions",
+      "domain": "[('user_id', '=', uid)]"
+     },
+     {
+      "name": "open_sessions",
+      "string": "In Progress",
+      "domain": "[('state', '=', 'opened')]"
+     },
+     {
+      "name": "start_date",
+      "string": "Opening Date",
+      "date": "start_at"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "user",
+      "string": "Opened By",
+      "domain": "[]",
+      "context": "{'group_by' : 'user_id'}"
+     },
+     {
+      "name": "point_of_sale",
+      "string": "Point of Sale",
+      "domain": "[]",
+      "context": "{'group_by': 'config_id'}"
+     },
+     {
+      "name": "status",
+      "string": "Status",
+      "domain": "[]",
+      "context": "{'group_by': 'state'}"
+     },
+     {
+      "name": "opening_date",
+      "string": "Opening Date",
+      "domain": "[]",
+      "context": "{'group_by': 'start_at'}"
+     },
+     {
+      "name": "closing_date",
+      "string": "Closing Date",
+      "domain": "[]",
+      "context": "{'group_by': 'stop_at'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Point of Sale Session\">\n                <field name=\"name\"/>\n                <field name=\"config_id\"/>\n                <field name=\"user_id\"/>\n                <filter name=\"my_sessions\" string=\"My Sessions\" domain=\"[('user_id', '=', uid)]\"/>\n                <separator/>\n                <filter name=\"open_sessions\" string=\"In Progress\" domain=\"[('state', '=', 'opened')]\"/>\n                <separator/>\n                <filter string=\"Opening Date\" name=\"start_date\" date=\"start_at\"/>\n                <group>\n                    <filter string=\"Opened By\" name=\"user\" domain=\"[]\" context=\"{'group_by' : 'user_id'}\"/>\n                    <filter string=\"Point of Sale\" name=\"point_of_sale\" domain=\"[]\" context=\"{'group_by': 'config_id'}\"/>\n                    <filter string=\"Status\" name=\"status\" domain=\"[]\" context=\"{'group_by': 'state'}\"/>\n                    <filter string=\"Opening Date\" name=\"opening_date\" domain=\"[]\" context=\"{'group_by': 'start_at'}\"/>\n                    <filter string=\"Closing Date\" name=\"closing_date\" domain=\"[]\" context=\"{'group_by': 'stop_at'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_sale.view_pos_session_search_inherit_pos_sale",
+   "package": "pos_sale",
+   "name": "pos.session.search.view",
+   "entity": "pos.session",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.view_pos_session_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='config_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "crm_team_id",
+      "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='config_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='config_id']\" position=\"after\">\n                <field name=\"crm_team_id\" context=\"{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_self_order.pos_self_view_pos_session_form",
+   "package": "pos_self_order",
+   "name": "pos.self.session.form.view",
+   "entity": "pos.session",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.view_pos_session_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//button[@name='open_frontend_cb']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//button[@name='open_frontend_cb']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//button[@name='open_frontend_cb']\" position=\"attributes\">\n                <attribute name=\"invisible\">rescue or state not in ['opening_control', 'opened'] or config_id.self_ordering_mode == 'kiosk'</attribute>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

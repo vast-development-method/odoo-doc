@@ -1,0 +1,605 @@
+{
+ "catalog": {
+  "name": "entity:onboarding.onboarding",
+  "description": "Complete definition of entity Onboarding (onboarding.onboarding).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "onboarding.onboarding",
+  "storage_name": "onboarding_onboarding",
+  "full_name": "Onboarding",
+  "kind": "persistent",
+  "description": "Onboarding",
+  "defined_by_package": "onboarding",
+  "extended_by_packages": [
+   "account"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence asc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name of the onboarding",
+    "translate": true,
+    "defined_in_package": "onboarding",
+    "full_name": "Name of the onboarding"
+   },
+   {
+    "name": "route_name",
+    "type": "Char",
+    "string": "One word name",
+    "required": true,
+    "defined_in_package": "onboarding",
+    "full_name": "One word name"
+   },
+   {
+    "name": "step_ids",
+    "type": "Many2many",
+    "comodel": "onboarding.onboarding.step",
+    "string": "Onboarding steps",
+    "defined_in_package": "onboarding",
+    "full_name": "Onboarding steps",
+    "target_entity": "onboarding.onboarding.step"
+   },
+   {
+    "name": "text_completed",
+    "type": "Char",
+    "string": "Message at completion",
+    "default": {
+     "dynamic": "lambda s: s.env._('Nice work! Your configuration is done.')"
+    },
+    "help": "Text shown on onboarding when completed",
+    "defined_in_package": "onboarding",
+    "full_name": "Message at completion"
+   },
+   {
+    "name": "is_per_company",
+    "type": "Boolean",
+    "string": "Should be done per company?",
+    "compute": "_compute_is_per_company",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "onboarding",
+    "full_name": "Should be done per company?"
+   },
+   {
+    "name": "panel_close_action_name",
+    "type": "Char",
+    "string": "Closing action",
+    "help": "Name of the onboarding model action to execute when closing the panel.",
+    "defined_in_package": "onboarding",
+    "full_name": "Closing action"
+   },
+   {
+    "name": "current_progress_id",
+    "type": "Many2one",
+    "comodel": "onboarding.progress",
+    "string": "Onboarding Progress",
+    "compute": "_compute_current_progress",
+    "help": "Onboarding Progress for the current context (company).",
+    "defined_in_package": "onboarding",
+    "full_name": "Onboarding Progress",
+    "target_entity": "onboarding.progress"
+   },
+   {
+    "name": "current_onboarding_state",
+    "type": "Selection",
+    "selection": {
+     "expression": "ONBOARDING_PROGRESS_STATES"
+    },
+    "string": "Completion State",
+    "compute": "_compute_current_progress",
+    "readonly": true,
+    "defined_in_package": "onboarding",
+    "full_name": "Completion State"
+   },
+   {
+    "name": "is_onboarding_closed",
+    "type": "Boolean",
+    "string": "Was panel closed?",
+    "compute": "_compute_current_progress",
+    "defined_in_package": "onboarding",
+    "full_name": "Was panel closed?"
+   },
+   {
+    "name": "progress_ids",
+    "type": "One2many",
+    "comodel": "onboarding.progress",
+    "inverse_name": "onboarding_id",
+    "string": "Onboarding Progress Records",
+    "readonly": true,
+    "help": "All Onboarding Progress Records (across companies).",
+    "defined_in_package": "onboarding",
+    "full_name": "Onboarding Progress Records",
+    "target_entity": "onboarding.progress"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "onboarding",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_route_name_uniq",
+    "kind": "Constraint",
+    "definition": "UNIQUE (route_name)",
+    "message": "Onboarding alias must be unique.",
+    "defined_in_package": "onboarding"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_is_per_company",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "progress_ids",
+         "progress_ids.company_id",
+         "step_ids",
+         "step_ids.is_per_company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_progress",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "progress_ids",
+         "progress_ids.is_onboarding_closed",
+         "progress_ids.onboarding_state",
+         "progress_ids.company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": "Recompute progress step ids if new steps are added/removed.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_close",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": "Close the onboarding panel.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_close_panel",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "xmlid"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Close the onboarding panel identified by its `xmlid`.\n\nIf not found, quietly do nothing.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_refresh_progress_ids",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": "Re-initialize onboarding progress records (after step is_per_company change).\n\nMeant to be called when `is_per_company` of linked steps is modified (or per-company\nsteps are added to an onboarding).",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_toggle_visibility",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_or_create_progress",
+    "kind": "search_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": "Create Progress record(s) as necessary for the context.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_progress",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_rendering_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Compute existence of invoices for company.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_close_panel_account_invoice",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_close_panel_account_dashboard",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "current_onboarding_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "onboarding.access_onboarding_all",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.all",
+    "entity": "onboarding.onboarding",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "onboarding.access_onboarding_user",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.user",
+    "entity": "onboarding.onboarding",
+    "group": "base.group_user",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "onboarding.access_onboarding_manager",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.manager",
+    "entity": "onboarding.onboarding",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "onboarding.onboarding_onboarding_view_tree",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Onboardings"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "current_onboarding_state"
+      },
+      {
+       "name": "is_onboarding_closed"
+      },
+      {
+       "name": "is_per_company",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_toggle_visibility",
+       "string": "Toggle visibility",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "onboarding.onboarding_onboarding_view_form",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "current_progress_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "route_name"
+      },
+      {
+       "name": "is_per_company"
+      },
+      {
+       "name": "is_onboarding_closed"
+      },
+      {
+       "name": "step_ids",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_toggle_visibility",
+       "string": "Toggle visibility",
+       "type": "object",
+       "invisible": "not current_progress_id"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "Onboarding steps",
+       "string": null,
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_toggle_visibility",
+       "type": "object",
+       "string": "Toggle visibility",
+       "invisible": "not current_progress_id"
+      }
+     ],
+     "statusbar_field": "current_progress_id",
+     "statusbar_visible": null,
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "onboarding.action_view_onboarding_onboarding",
+    "package": "onboarding",
+    "name": "Onboardings",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "onboarding.onboarding"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

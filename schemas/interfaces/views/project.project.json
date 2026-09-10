@@ -1,0 +1,2057 @@
+{
+ "catalog": {
+  "name": "views:project.project",
+  "description": "View declarations for entity project.project.",
+  "record_count": 36,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr_timesheet.project_project_view_form_simplified_inherit_timesheet",
+   "package": "hr_timesheet",
+   "name": "project.project.view.form.simplified.inherit.timesheet",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.project_project_view_form_simplified",
+   "mode": null,
+   "priority": "24",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[hasclass('o_settings_container')]",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "allow_timesheets"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[hasclass('o_settings_container')]",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//div[hasclass('o_settings_container')]\" position=\"inside\">\n                    <setting string=\"Timesheets\" help=\"Log time on tasks\">\n                        <field name=\"allow_timesheets\"/>\n                    </setting>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.project_invoice_form",
+   "package": "hr_timesheet",
+   "name": "Inherit project form : Invoicing Data",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.edit_project",
+   "mode": null,
+   "priority": "24",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//header",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "analytic_account_active",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//header",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//header\" position=\"after\">\n                    <field name=\"analytic_account_active\" invisible=\"1\"/>\n                    <t name=\"timesheet_error\" invisible=\"not allow_timesheets or is_template\">\n                        <div class=\"alert alert-warning mb-1 text-center\" role=\"alert\" colspan=\"2\" invisible=\"not account_id or analytic_account_active\">\n                            You cannot log timesheets on this project since it is linked to an inactive analytic account.<br/>\n                            Please switch to another account, or reactivate the current one to timesheet on the project.\n                        </div>\n                    </t>\n                </xpath>\n                <xpath expr=\"//field[@name='date']\" position=\"after\">\n                    <field name=\"allocated_hours\" widget=\"timesheet_uom_no_toggle\" invisible=\"not allow_timesheets\" groups=\"hr_timesheet.group_hr_timesheet_user\"/>\n                </xpath>\n                <xpath expr=\"//group[@name='group_time_managment']\" position=\"attributes\">\n                    <attribute name=\"invisible\">0</attribute>\n                </xpath>\n                <xpath expr=\"//group[@name='group_time_managment']\" position=\"inside\">\n                    <setting class=\"col-lg-12\" id=\"timesheet_settings\" string=\"Timesheets\" help=\"Log time on tasks\">\n                        <field name=\"allow_timesheets\"/>\n                    </setting>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.project_project_view_tree_inherit_sale_project",
+   "package": "hr_timesheet",
+   "name": "project.project.list.inherit.sale.timesheet",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.view_project",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='date']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "allow_timesheets",
+      "column_invisible": "1"
+     },
+     {
+      "name": "allocated_hours",
+      "widget": "timesheet_uom_no_toggle",
+      "invisible": "allocated_hours == 0 or not allow_timesheets",
+      "optional": "hide",
+      "groups": "hr_timesheet.group_hr_timesheet_user"
+     },
+     {
+      "name": "effective_hours",
+      "widget": "timesheet_uom_no_toggle",
+      "invisible": "effective_hours == 0 or not allow_timesheets",
+      "optional": "hide",
+      "groups": "hr_timesheet.group_hr_timesheet_user"
+     },
+     {
+      "name": "remaining_hours",
+      "widget": "timesheet_uom_no_toggle",
+      "invisible": "allocated_hours == 0 or not allow_timesheets",
+      "optional": "hide",
+      "decoration-danger": "remaining_hours < 0",
+      "decoration-warning": "allocated_hours > 0 and (remaining_hours / allocated_hours) < 0.2",
+      "groups": "hr_timesheet.group_hr_timesheet_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom_no_toggle": 3
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='date']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='date']\" position=\"after\">\n                    <field name=\"allow_timesheets\" column_invisible=\"1\"/>\n                    <field name=\"allocated_hours\" widget=\"timesheet_uom_no_toggle\" optional=\"hide\" invisible=\"allocated_hours == 0 or not allow_timesheets\" groups=\"hr_timesheet.group_hr_timesheet_user\"/>\n                    <field name=\"effective_hours\" widget=\"timesheet_uom_no_toggle\" optional=\"hide\" invisible=\"effective_hours == 0 or not allow_timesheets\" groups=\"hr_timesheet.group_hr_timesheet_user\"/>\n                    <field name=\"remaining_hours\" widget=\"timesheet_uom_no_toggle\" decoration-danger=\"remaining_hours &lt; 0\" decoration-warning=\"allocated_hours &gt; 0 and (remaining_hours / allocated_hours) &lt; 0.2\" optional=\"hide\" invisible=\"allocated_hours == 0 or not allow_timesheets\" groups=\"hr_timesheet.group_hr_timesheet_user\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_project_kanban_inherited",
+   "package": "hr_timesheet",
+   "name": "project.project.timesheet.kanban.inherited",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.view_project_kanban",
+   "mode": null,
+   "priority": "24",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//templates",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "allow_timesheets"
+     },
+     {
+      "name": "remaining_hours"
+     },
+     {
+      "name": "encode_uom_in_days"
+     },
+     {
+      "name": "allocated_hours"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//templates",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//templates\" position=\"before\">\n                    <field name=\"allow_timesheets\"/>\n                    <field name=\"remaining_hours\"/>\n                    <field name=\"encode_uom_in_days\"/>\n                    <field name=\"allocated_hours\"/>\n                </xpath>\n                <xpath expr=\"//div[@name='card_menu_view']\" position=\"inside\">\n                    <div role=\"menuitem\" t-if=\"record.allow_timesheets.raw_value and !record.is_template.raw_value\" groups=\"hr_timesheet.group_hr_timesheet_user\">\n                        <a name=\"action_project_timesheets\" type=\"object\">Timesheets</a>\n                    </div>\n                </xpath>\n                <xpath expr=\"//div[hasclass('o_project_kanban_boxes')]\" position=\"after\">\n                    <t t-set=\"badgeColor\" t-value=\"'border-success'\"/>\n                    <t t-set=\"badgeColor\" t-value=\"'border-danger'\" t-if=\"record.remaining_hours.raw_value &lt; 0\"/>\n                    <t t-set=\"title\" t-if=\"record.encode_uom_in_days.raw_value\">Days Remaining</t>\n                    <t t-set=\"title\" t-else=\"\">Time Remaining</t>\n                    <div t-if=\"!record.is_template.raw_value and record.allow_timesheets.raw_value and record.allocated_hours.raw_value &gt; 0\" t-attf-class=\"me-1 ms-1 bg-transparent badge border {{ badgeColor }}\" t-att-title=\"title\" groups=\"hr_timesheet.group_hr_timesheet_user\">\n                        <field name=\"remaining_hours\" widget=\"timesheet_uom\" class=\"p-0\"/>\n                    </div>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_project_project_filter_inherit_timesheet",
+   "package": "hr_timesheet",
+   "name": "project.project.view.inherit.timesheet",
+   "entity": "project.project",
+   "view_type": "filter",
+   "inherits_view": "project.view_project_project_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "late_milestones",
+     "position": "before"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "late_milestones",
+      "position": "before"
+     },
+     {
+      "name": "projects_in_overtime",
+      "string": "Timesheets >100%",
+      "domain": "[('is_project_overtime', '=', True)]",
+      "groups": "project.group_project_manager"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <filter name=\"late_milestones\" position=\"before\">\n                    <filter string=\"Timesheets &gt;100%\" name=\"projects_in_overtime\" domain=\"[('is_project_overtime', '=', True)]\" groups=\"project.group_project_manager\"/>\n                </filter>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.project_templates_view_list_inherit_timesheet",
+   "package": "hr_timesheet",
+   "name": "project.project.template.list.inherit.timesheet",
+   "entity": "project.project",
+   "view_type": "field",
+   "inherits_view": "project.project_templates_view_list",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "effective_hours",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "effective_hours",
+      "position": "replace"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"effective_hours\" position=\"replace\"/>\n                <field name=\"remaining_hours\" position=\"replace\"/>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_project_view_activity",
+   "package": "project",
+   "name": "project.project.view.activity",
+   "entity": "project.project",
+   "view_type": "activity",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "activity",
+    "root_attributes": {
+     "string": "Project",
+     "js_class": "project_project_activity"
+    },
+    "fields": [
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "name",
+      "string": "Project Name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <activity string=\"Project\" js_class=\"project_project_activity\">\n                    <templates>\n                        <div t-name=\"activity-box\" class=\"d-flex\">\n                            <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                            <field name=\"name\" string=\"Project Name\" class=\"flex-grow-1 o_text_block\"/>\n                        </div>\n                    </templates>\n                </activity>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.edit_project",
+   "package": "project",
+   "name": "project.project.form",
+   "entity": "project.project",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Project",
+     "class": "o_form_project_project",
+     "js_class": "project_project_form"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "stage_id",
+      "widget": "statusbar_duration",
+      "domain": "[('company_id', 'in', (company_id, False))]",
+      "options": "{'clickable': '1', 'fold_field': 'fold'}",
+      "groups": "project.group_project_stages"
+     },
+     {
+      "name": "label_tasks",
+      "readonly": "1"
+     },
+     {
+      "name": "closed_task_count"
+     },
+     {
+      "name": "task_count"
+     },
+     {
+      "name": "task_completion_percentage",
+      "widget": "percentage",
+      "options": "{'digits': [1, 0]}"
+     },
+     {
+      "name": "last_update_color",
+      "invisible": "1"
+     },
+     {
+      "name": "update_count",
+      "invisible": "1"
+     },
+     {
+      "name": "last_update_status",
+      "widget": "status_with_color",
+      "readonly": "1"
+     },
+     {
+      "name": "is_favorite",
+      "widget": "project_is_favorite",
+      "options": "{'autosave': False}",
+      "nolabel": "1"
+     },
+     {
+      "name": "name",
+      "widget": "text",
+      "options": "{'line_breaks': False}",
+      "placeholder": "e.g. Office Party"
+     },
+     {
+      "name": "label_tasks",
+      "string": "Name of the Tasks",
+      "placeholder": "e.g. Tasks"
+     },
+     {
+      "name": "partner_id",
+      "widget": "res_partner_many2one"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company",
+      "placeholder": "Visible to all"
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "not active",
+      "string": "Project Manager",
+      "domain": "[('share', '=', False)]"
+     },
+     {
+      "name": "date_start",
+      "widget": "daterange",
+      "required": "date_start or date",
+      "string": "Planned Date",
+      "options": "{\"end_date_field\": \"date\", \"always_range\": \"1\"}"
+     },
+     {
+      "name": "date",
+      "invisible": "1",
+      "required": "date_start"
+     },
+     {
+      "name": "description",
+      "options": "{'resizable': false}",
+      "placeholder": "Project description..."
+     },
+     {
+      "name": "alias_id",
+      "invisible": "1"
+     },
+     {
+      "name": "alias_email",
+      "widget": "email",
+      "invisible": "is_template",
+      "readonly": "1",
+      "groups": "!project.group_project_manager",
+      "nolabel": "1"
+     },
+     {
+      "name": "alias_name",
+      "placeholder": "alias"
+     },
+     {
+      "name": "alias_domain_id",
+      "options": "{'no_create': True, 'no_open': True}",
+      "placeholder": "e.g. mycompany.com"
+     },
+     {
+      "name": "alias_contact",
+      "invisible": "not alias_email",
+      "string": "Accept Emails From"
+     },
+     {
+      "name": "privacy_visibility",
+      "widget": "radio"
+     },
+     {
+      "name": "access_instruction_message",
+      "nolabel": "1"
+     },
+     {
+      "name": "privacy_visibility_warning",
+      "nolabel": "1"
+     },
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "allow_recurring_tasks"
+     },
+     {
+      "name": "allow_task_dependencies"
+     },
+     {
+      "name": "allow_milestones"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_share_project_wizard",
+      "string": "Share Project",
+      "type": "object",
+      "invisible": "privacy_visibility in ['followers', 'employees'] or is_template",
+      "class": "oe_highlight",
+      "context": "{'default_access_mode': 'read'}",
+      "groups": "project.group_project_manager",
+      "data-hotkey": "r"
+     },
+     {
+      "name": "action_view_tasks",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-check"
+     },
+     {
+      "name": "project_update_all_action",
+      "type": "object",
+      "invisible": "is_template",
+      "class": "oe_stat_button",
+      "context": "{'active_id': id}",
+      "groups": "project.group_project_user"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "description",
+      "string": "Description",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "settings",
+      "string": "Settings",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "statusbar_duration": 1,
+     "percentage": 1,
+     "status_with_color": 1,
+     "project_is_favorite": 1,
+     "text": 1,
+     "res_partner_many2one": 1,
+     "many2many_tags": 1,
+     "many2one_avatar_user": 1,
+     "daterange": 1,
+     "email": 1,
+     "radio": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "action_open_share_project_wizard",
+      "string": "Share Project",
+      "type": "object",
+      "class": "oe_highlight",
+      "groups": "project.group_project_manager",
+      "invisible": "privacy_visibility in ['followers', 'employees'] or is_template",
+      "context": "{'default_access_mode': 'read'}",
+      "data-hotkey": "r"
+     }
+    ],
+    "statusbar_field": "stage_id",
+    "statusbar_visible": null,
+    "chatter": true,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "type": "object",
+      "name": "action_view_tasks",
+      "icon": "fa-check"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "project_update_all_action",
+      "type": "object",
+      "groups": "project.group_project_user",
+      "context": "{'active_id': id}",
+      "invisible": "is_template"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Project\" class=\"o_form_project_project\" js_class=\"project_project_form\">\n                    <field name=\"company_id\" invisible=\"1\"/>\n                    <header>\n                        <button name=\"action_open_share_project_wizard\" string=\"Share Project\" type=\"object\" class=\"oe_highlight\" groups=\"project.group_project_manager\" invisible=\"privacy_visibility in ['followers', 'employees'] or is_template\" context=\"{'default_access_mode': 'read'}\" data-hotkey=\"r\"/>\n                        <field name=\"stage_id\" widget=\"statusbar_duration\" options=\"{'clickable': '1', 'fold_field': 'fold'}\" groups=\"project.group_project_stages\" domain=\"[('company_id', 'in', (company_id, False))]\"/>\n                    </header>\n                <sheet string=\"Project\">\n                    <div class=\"oe_button_box\" name=\"button_box\" groups=\"base.group_user\">\n                        <button class=\"oe_stat_button\" type=\"object\" name=\"action_view_tasks\" icon=\"fa-check\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <field name=\"label_tasks\" readonly=\"1\"/>\n                                <span class=\"o_stat_value\">\n                                    <field name=\"closed_task_count\"/> / <field name=\"task_count\"/>\n                                    (<field name=\"task_completion_percentage\" widget=\"percentage\" options=\"{'digits': [1, 0]}\"/>)\n                                </span>\n                            </div>\n                        </button>\n                        <button class=\"oe_stat_button\" name=\"project_update_all_action\" type=\"object\" groups=\"project.group_project_user\" context=\"{'active_id': id}\" invisible=\"is_template\">\n                            <field name=\"last_update_color\" invisible=\"1\"/>\n                            <div class=\"o_stat_info\">\n                                <field name=\"update_count\" invisible=\"1\"/>\n                                <field name=\"last_update_status\" readonly=\"1\" widget=\"status_with_color\" status_label=\"Dashboard\" hideStatusName=\"True\"/>\n                            </div>\n                        </button>\n                    </div>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <widget name=\"web_ribbon\" title=\"Template\" bg_color=\"text-bg-info\" invisible=\"not (is_template and active)\"/>\n\n                    <div class=\"oe_title\">\n                        <h1 class=\"d-flex flex-row\">\n                            <field name=\"is_favorite\" nolabel=\"1\" widget=\"project_is_favorite\" class=\"me-2\" options=\"{'autosave': False}\"/>\n                            <field name=\"name\" options=\"{'line_breaks': False}\" widget=\"text\" class=\"o_text_overflow\" placeholder=\"e.g. Office Party\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <group>\n                            <field name=\"label_tasks\" string=\"Name of the Tasks\" placeholder=\"e.g. Tasks\"/>\n                            <field name=\"partner_id\" widget=\"res_partner_many2one\"/>\n                            <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\"/>\n                            <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\" placeholder=\"Visible to all\"/>\n                        </group>\n                        <group>\n                            <field name=\"active\" invisible=\"1\"/>\n                            <field name=\"user_id\" string=\"Project Manager\" widget=\"many2one_avatar_user\" readonly=\"not active\" domain=\"[('share', '=', False)]\"/>\n                            <field name=\"date_start\" string=\"Planned Date\" widget=\"daterange\" options=\"{&quot;end_date_field&quot;: &quot;date&quot;, &quot;always_range&quot;: &quot;1&quot;}\" required=\"date_start or date\"/>\n                            <field name=\"date\" invisible=\"1\" required=\"date_start\"/>\n                        </group>\n                    </group>\n                    <notebook>\n                        <page name=\"description\" string=\"Description\">\n                            <field name=\"description\" options=\"{'resizable': false}\" placeholder=\"Project description...\"/>\n                        </page>\n                        <page name=\"settings\" string=\"Settings\">\n                            <group>\n                                <group>\n                                    \n                                    \n                                    <field name=\"alias_id\" invisible=\"1\"/>\n                                    <label for=\"alias_name\" string=\"Email Alias\" invisible=\"is_template\"/>\n                                    <field name=\"alias_email\" widget=\"email\" readonly=\"1\" nolabel=\"1\" groups=\"!project.group_project_manager\" invisible=\"is_template\"/>\n                                    <div class=\"d-inline-flex\" groups=\"project.group_project_manager\" invisible=\"is_template\">\n                                        <field name=\"alias_name\" placeholder=\"alias\"/>@\n                                        <field name=\"alias_domain_id\" placeholder=\"e.g. mycompany.com\" options=\"{'no_create': True, 'no_open': True}\"/>\n                                    </div>\n                                    \n                                    <field name=\"alias_contact\" class=\"oe_inline\" string=\"Accept Emails From\" invisible=\"not alias_email\"/>\n                                    <field name=\"privacy_visibility\" widget=\"radio\"/>\n                                    <span colspan=\"2\" class=\"text-muted o_row ps-1\" invisible=\"access_instruction_message == ''\">\n                                        <i class=\"fa fa-lightbulb-o pe-2\" title=\"Info\"/><field class=\"d-inline\" name=\"access_instruction_message\" nolabel=\"1\"/>\n                                    </span>\n                                    <span colspan=\"2\" class=\"text-muted o_row ps-1\" invisible=\"privacy_visibility_warning == ''\">\n                                        <i class=\"fa fa-warning pe-2\" title=\"Warning\"/><field class=\"d-inline\" name=\"privacy_visibility_warning\" nolabel=\"1\"/>\n                                    </span>\n                                </group>\n                                <group name=\"analytic\" groups=\"analytic.group_analytic_accounting\">\n                                    <div class=\"o_flexible_margin_top o_horizontal_separator text-uppercase fw-bolder small mb-3\" colspan=\"2\">analytic</div>\n                                    <field name=\"account_id\"/>\n                                </group>\n                                <group name=\"extra_settings\">\n                                </group>\n                            </group>\n                            <group>\n                                <group name=\"group_tasks_managment\" string=\"Tasks Management\" col=\"1\" class=\"row mt16 o_settings_container\">\n                                    <div>\n                                        <setting class=\"col-lg-12\" id=\"recurring_tasks_setting\" help=\"Auto-generate tasks for regular activities\">\n                                            <field name=\"allow_recurring_tasks\"/>\n                                        </setting>\n                                        <setting class=\"col-lg-12\" id=\"task_dependencies_setting\" help=\"Determine the order in which to perform tasks\">\n                                            <field name=\"allow_task_dependencies\"/>\n                                        </setting>\n                                        <setting class=\"col-lg-12\" id=\"project_milestone_setting\" help=\"Track major progress points that must be reached to achieve success\">\n                                            <field name=\"allow_milestones\"/>\n                                        </setting>\n                                    </div>\n                                </group>\n                                <group name=\"group_time_managment\" string=\"Time Management\" invisible=\"1\" col=\"1\" class=\"row mt16 o_settings_container\"/>\n                            </group>\n                        </page>\n                    </notebook>\n                </sheet>\n                <chatter reload_on_follower=\"True\"/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.view_project_project_filter",
+   "package": "project",
+   "name": "project.project.select",
+   "entity": "project.project",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Project"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Project"
+     },
+     {
+      "name": "tag_ids"
+     },
+     {
+      "name": "user_id",
+      "string": "Project Manager"
+     },
+     {
+      "name": "stage_id",
+      "groups": "project.group_project_stages"
+     },
+     {
+      "name": "partner_id",
+      "invisible": "context.get('default_is_template')",
+      "string": "Customer",
+      "filter_domain": "[('partner_id', 'child_of', self)]"
+     },
+     {
+      "name": "activity_user_id",
+      "string": "Activities of"
+     },
+     {
+      "name": "activity_type_id",
+      "string": "Activity type"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "own_projects",
+      "string": "My Projects",
+      "domain": "[('user_id', '=', uid)]",
+      "invisible": "context.get('default_is_template')"
+     },
+     {
+      "name": "my_projects",
+      "string": "My Favorites",
+      "domain": "[('favorite_user_ids', 'in', uid)]"
+     },
+     {
+      "name": "unassigned_projects",
+      "string": "Unassigned",
+      "domain": "[('user_id', '=', False)]"
+     },
+     {
+      "name": "late_milestones",
+      "string": "Late Milestones",
+      "domain": "[('is_milestone_exceeded', '=', True)]",
+      "invisible": "context.get('default_is_template') or not context.get('allow_milestones', True)",
+      "groups": "project.group_project_milestone"
+     },
+     {
+      "name": "start_date",
+      "string": "Start Date",
+      "date": "date_start"
+     },
+     {
+      "name": "end_date",
+      "string": "End Date",
+      "date": "date"
+     },
+     {
+      "name": "templates",
+      "string": "Templates",
+      "domain": "[('is_template', '=', True)]",
+      "context": "{'render_project_templates': True}",
+      "invisible": "not context.get('display_milestone_deadline')"
+     },
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     },
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "Manager",
+      "string": "Project Manager",
+      "context": "{'group_by': 'user_id'}"
+     },
+     {
+      "name": "groupby_stage",
+      "string": "Stage",
+      "context": "{'group_by': 'stage_id'}",
+      "groups": "project.group_project_stages"
+     },
+     {
+      "name": "status",
+      "string": "Status",
+      "context": "{'group_by': 'last_update_status'}",
+      "invisible": "context.get('default_is_template')"
+     },
+     {
+      "name": "tags",
+      "string": "Tags",
+      "context": "{'group_by': 'tag_ids'}"
+     },
+     {
+      "name": "company",
+      "string": "Company",
+      "context": "{'group_by': 'company_id'}",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search Project\">\n                    <field name=\"name\" string=\"Project\"/>\n                    <field name=\"tag_ids\"/>\n                    <field name=\"user_id\" string=\"Project Manager\"/>\n                    <field name=\"stage_id\" groups=\"project.group_project_stages\"/>\n                    <field name=\"partner_id\" string=\"Customer\" filter_domain=\"[('partner_id', 'child_of', self)]\" invisible=\"context.get('default_is_template')\"/>\n                    <field name=\"activity_user_id\" string=\"Activities of\"/>\n                    <field name=\"activity_type_id\" string=\"Activity type\"/>\n                    <filter string=\"My Projects\" name=\"own_projects\" domain=\"[('user_id', '=', uid)]\" invisible=\"context.get('default_is_template')\"/>\n                    <filter string=\"My Favorites\" name=\"my_projects\" domain=\"[('favorite_user_ids', 'in', uid)]\"/>\n                    <filter string=\"Unassigned\" name=\"unassigned_projects\" domain=\"[('user_id', '=', False)]\"/>\n                    <separator invisible=\"context.get('default_is_template')\"/>\n                    <filter string=\"Late Milestones\" name=\"late_milestones\" domain=\"[('is_milestone_exceeded', '=', True)]\" groups=\"project.group_project_milestone\" invisible=\"context.get('default_is_template') or not context.get('allow_milestones', True)\"/>\n                    <separator invisible=\"context.get('default_is_template')\"/>\n                    <filter string=\"Start Date\" name=\"start_date\" date=\"date_start\" end_month=\"1\" end_year=\"1\"/>\n                    <filter string=\"End Date\" name=\"end_date\" date=\"date\" end_month=\"1\" end_year=\"1\"/>\n                    <separator/>\n                    <filter string=\"Templates\" context=\"{'render_project_templates': True}\" name=\"templates\" domain=\"[('is_template', '=', True)]\" invisible=\"not context.get('display_milestone_deadline')\"/>\n                    <separator/>\n                    <filter string=\"Archived\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n                    <separator invisible=\"1\"/>\n                    <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                    <separator/>\n                    <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                    <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                    <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')]\"/>\n                    <group>\n                        <filter string=\"Project Manager\" name=\"Manager\" context=\"{'group_by': 'user_id'}\"/>\n                        <filter string=\"Stage\" name=\"groupby_stage\" context=\"{'group_by': 'stage_id'}\" groups=\"project.group_project_stages\"/>\n                        <filter string=\"Status\" name=\"status\" context=\"{'group_by': 'last_update_status'}\" invisible=\"context.get('default_is_template')\"/>\n                        <filter string=\"Tags\" name=\"tags\" context=\"{'group_by': 'tag_ids'}\"/>\n                        <filter string=\"Company\" name=\"company\" context=\"{'group_by': 'company_id'}\" groups=\"base.group_multi_company\"/>\n                    </group>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.view_project",
+   "package": "project",
+   "name": "project.project.list",
+   "entity": "project.project",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "decoration-muted": "active == False",
+     "string": "Projects",
+     "multi_edit": "1",
+     "sample": "1",
+     "default_order": "is_favorite desc, sequence, name, id",
+     "js_class": "project_project_list"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "column_invisible": "True"
+     },
+     {
+      "name": "message_needaction",
+      "column_invisible": "True"
+     },
+     {
+      "name": "active",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_milestone_exceeded",
+      "column_invisible": "True"
+     },
+     {
+      "name": "can_mark_milestone_as_done",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_milestone_deadline_exceeded",
+      "column_invisible": "1"
+     },
+     {
+      "name": "allow_milestones",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_favorite",
+      "widget": "project_is_favorite",
+      "string": "Favorite",
+      "optional": "hide",
+      "nolabel": "1"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "partner_id",
+      "invisible": "is_template",
+      "string": "Customer",
+      "optional": "show"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True, 'no_open': True}",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "date_start",
+      "widget": "daterange",
+      "string": "Planned Date",
+      "options": "{'end_date_field': 'date', 'always_range': '1'}",
+      "optional": "hide"
+     },
+     {
+      "name": "date",
+      "column_invisible": "True"
+     },
+     {
+      "name": "milestone_progress",
+      "widget": "progressbar",
+      "invisible": "milestone_progress == 0 or not allow_milestones or is_template",
+      "optional": "hide"
+     },
+     {
+      "name": "next_milestone_id",
+      "invisible": "not allow_milestones or is_template",
+      "optional": "hide",
+      "decoration-danger": "is_milestone_deadline_exceeded",
+      "decoration-success": "can_mark_milestone_as_done"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "string": "Project Manager",
+      "options": "{'no_open':True, 'no_create': True}",
+      "optional": "show"
+     },
+     {
+      "name": "last_update_color",
+      "column_invisible": "True"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}",
+      "optional": "hide"
+     },
+     {
+      "name": "last_update_status",
+      "widget": "project_state_selection",
+      "invisible": "is_template",
+      "string": "Status",
+      "optional": "show",
+      "nolabel": "1"
+     },
+     {
+      "name": "stage_id_color",
+      "column_invisible": "1"
+     },
+     {
+      "name": "stage_id",
+      "widget": "badge",
+      "domain": "[('company_id', 'in', (company_id, False))]",
+      "options": "{'no_open': True, 'color_field': 'stage_id_color'}",
+      "optional": "show"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_tasks",
+      "string": "View Tasks",
+      "type": "object"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "project_is_favorite": 1,
+     "daterange": 1,
+     "progressbar": 1,
+     "many2one_avatar_user": 1,
+     "many2many_tags": 1,
+     "project_state_selection": 1,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "active == False"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list decoration-muted=\"active == False\" string=\"Projects\" multi_edit=\"1\" sample=\"1\" default_order=\"is_favorite desc, sequence, name, id\" js_class=\"project_project_list\">\n                    <field name=\"sequence\" column_invisible=\"True\"/>\n                    <field name=\"message_needaction\" column_invisible=\"True\"/>\n                    <field name=\"active\" column_invisible=\"True\"/>\n                    <field name=\"is_milestone_exceeded\" column_invisible=\"True\"/>\n                    <field name=\"can_mark_milestone_as_done\" column_invisible=\"True\"/>\n                    <field name=\"is_milestone_deadline_exceeded\" column_invisible=\"1\"/>\n                    <field name=\"allow_milestones\" column_invisible=\"True\"/>\n                    <field name=\"is_favorite\" string=\"Favorite\" nolabel=\"1\" widget=\"project_is_favorite\" optional=\"hide\"/>\n                    <field name=\"name\" class=\"fw-bold\"/>\n                    <field name=\"partner_id\" optional=\"show\" string=\"Customer\" invisible=\"is_template\"/>\n                    <field name=\"company_id\" optional=\"show\" groups=\"base.group_multi_company\" options=\"{'no_create': True, 'no_open': True}\"/>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"date_start\" string=\"Planned Date\" widget=\"daterange\" options=\"{'end_date_field': 'date', 'always_range': '1'}\" optional=\"hide\"/>\n                    <field name=\"date\" column_invisible=\"True\"/>\n                    <field name=\"milestone_progress\" widget=\"progressbar\" invisible=\"milestone_progress == 0 or not allow_milestones or is_template\" optional=\"hide\"/>\n                    <field name=\"next_milestone_id\" decoration-danger=\"is_milestone_deadline_exceeded\" decoration-success=\"can_mark_milestone_as_done\" optional=\"hide\" invisible=\"not allow_milestones or is_template\"/>\n                    <field name=\"user_id\" optional=\"show\" string=\"Project Manager\" widget=\"many2one_avatar_user\" options=\"{'no_open':True, 'no_create': True}\"/>\n                    <field name=\"last_update_color\" column_invisible=\"True\"/>\n                    <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\" optional=\"hide\"/>\n                    <field name=\"last_update_status\" string=\"Status\" nolabel=\"1\" width=\"20px\" optional=\"show\" widget=\"project_state_selection\" invisible=\"is_template\"/>\n                    <field name=\"stage_id_color\" column_invisible=\"1\"/>\n                    <field name=\"stage_id\" domain=\"[('company_id', 'in', (company_id, False))]\" optional=\"show\" widget=\"badge\" options=\"{'no_open': True, 'color_field': 'stage_id_color'}\"/>\n                    <button string=\"View Tasks\" name=\"action_view_tasks\" type=\"object\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_list_view_group_stage",
+   "package": "project",
+   "name": "project.project.list.group.stage",
+   "entity": "project.project",
+   "view_type": "list",
+   "inherits_view": "view_project",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "list",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list position=\"attributes\">\n                    <attribute name=\"default_group_by\">stage_id</attribute>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.view_project_config",
+   "package": "project",
+   "name": "project.project.list.config",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.view_project",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//list\" position=\"attributes\">\n                    <attribute name=\"default_order\">sequence, name, id</attribute>\n                </xpath>\n                <field name=\"sequence\" position=\"attributes\">\n                    <attribute name=\"column_invisible\">0</attribute>\n                    <attribute name=\"widget\">handle</attribute>\n                </field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.view_project_config_group_stage",
+   "package": "project",
+   "name": "project.project.list.config.group.stage",
+   "entity": "project.project",
+   "view_type": "list",
+   "inherits_view": "view_project_config",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "list",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list position=\"attributes\">\n                    <attribute name=\"default_group_by\">stage_id</attribute>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.quick_create_project_form",
+   "package": "project",
+   "name": "project.form.quick_create",
+   "entity": "project.project",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "class": "o_form_project_project"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Project Title",
+      "placeholder": "e.g. Office Party"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form class=\"o_form_project_project\">\n                    <group>\n                        <field name=\"name\" string=\"Project Title\" placeholder=\"e.g. Office Party\"/>\n                    </group>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_view_kanban",
+   "package": "project",
+   "name": "project.project.kanban",
+   "entity": "project.project",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Project Name"
+     },
+     {
+      "name": "partner_id",
+      "string": "Contact"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban class=\"o_kanban_mobile\">\n                    <templates>\n                        <t t-name=\"card\">\n                            <field name=\"name\" class=\"fw-bolder\" string=\"Project Name\"/>\n                            <div class=\"d-flex\">\n                                <field name=\"partner_id\" string=\"Contact\"/>\n                                <field name=\"user_id\" class=\"ms-auto\" widget=\"many2one_avatar_user\"/>\n                            </div>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_project_view_form_simplified",
+   "package": "project",
+   "name": "project.project.view.form.simplified",
+   "entity": "project.project",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Project"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "placeholder": "e.g. Office Party"
+     },
+     {
+      "name": "user_id",
+      "invisible": "1"
+     },
+     {
+      "name": "alias_id",
+      "invisible": "1"
+     },
+     {
+      "name": "alias_name",
+      "placeholder": "e.g. office-party"
+     },
+     {
+      "name": "alias_domain_id",
+      "options": "{'no_create': True, 'no_open': True}",
+      "placeholder": "e.g. mycompany.com"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Project\">\n                    <div class=\"oe_title mb-lg-3 mb-md-2\">\n                        <label for=\"name\" string=\"Name\"/>\n                        <h1>\n                            <field name=\"name\" class=\"o_project_name\" placeholder=\"e.g. Office Party\"/>\n                        </h1>\n                    </div>\n                    <field name=\"user_id\" invisible=\"1\"/>\n                    <div class=\"row o_settings_container\"/>\n                    <div name=\"alias_def\" class=\"mt-2\" colspan=\"2\">\n                        <label for=\"alias_name\" string=\"Create tasks by email:\"/>\n                        <span>\n                            <field name=\"alias_id\" invisible=\"1\"/>\n                            <field name=\"alias_name\" placeholder=\"e.g. office-party\"/>@\n                            <field name=\"alias_domain_id\" class=\"oe_inline\" placeholder=\"e.g. mycompany.com\" options=\"{'no_create': True, 'no_open': True}\"/>\n                        </span>\n                    </div>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_project_view_form_simplified_footer",
+   "package": "project",
+   "name": "project.project.view.form.simplified",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.project_project_view_form_simplified",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='alias_def']",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [
+     {
+      "name": "action_view_tasks",
+      "string": "Create project",
+      "type": "object",
+      "class": "btn-primary o_open_tasks",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Discard",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='alias_def']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//div[@name='alias_def']\" position=\"after\">\n                    <footer>\n                        <button string=\"Create project\" name=\"action_view_tasks\" type=\"object\" class=\"btn-primary o_open_tasks\" data-hotkey=\"q\"/>\n                        <button string=\"Discard\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                    </footer>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.view_project_kanban",
+   "package": "project",
+   "name": "project.project.kanban",
+   "entity": "project.project",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "highlight_color": "color",
+     "class": "o_project_kanban",
+     "js_class": "project_project_kanban",
+     "on_create": "project.open_create_project",
+     "action": "action_view_tasks",
+     "type": "object",
+     "quick_create_view": "project.quick_create_project_form",
+     "sample": "1",
+     "default_order": "is_favorite desc, sequence, name, id"
+    },
+    "fields": [
+     {
+      "name": "allow_milestones"
+     },
+     {
+      "name": "rating_count"
+     },
+     {
+      "name": "show_ratings"
+     },
+     {
+      "name": "privacy_visibility"
+     },
+     {
+      "name": "last_update_color"
+     },
+     {
+      "name": "is_milestone_deadline_exceeded"
+     },
+     {
+      "name": "can_mark_milestone_as_done"
+     },
+     {
+      "name": "is_template"
+     },
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "color",
+      "widget": "kanban_color_picker"
+     },
+     {
+      "name": "is_favorite",
+      "widget": "project_is_favorite",
+      "nolabel": "1"
+     },
+     {
+      "name": "display_name"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "date_start",
+      "widget": "daterange",
+      "options": "{'end_date_field': 'date'}"
+     },
+     {
+      "name": "alias_email"
+     },
+     {
+      "name": "rating_avg",
+      "widget": "float",
+      "nolabel": "1"
+     },
+     {
+      "name": "rating_avg",
+      "widget": "float",
+      "nolabel": "1"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}"
+     },
+     {
+      "name": "open_task_count"
+     },
+     {
+      "name": "label_tasks"
+     },
+     {
+      "name": "milestone_count_reached"
+     },
+     {
+      "name": "milestone_count"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "kanban_activity"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "domain": "[('share', '=', False)]"
+     },
+     {
+      "name": "last_update_status",
+      "widget": "project_state_selection"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "kanban_color_picker": 1,
+     "project_is_favorite": 1,
+     "daterange": 1,
+     "float": 2,
+     "many2many_tags": 1,
+     "kanban_activity": 1,
+     "many2one_avatar_user": 1,
+     "project_state_selection": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": [
+     {
+      "field": "last_update_status",
+      "colors": "{\"on_track\": \"success\", \"at_risk\": \"warning\", \"off_track\": \"danger\", \"on_hold\": \"info\", \"done\": \"purple\"}"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban highlight_color=\"color\" class=\"o_project_kanban\" js_class=\"project_project_kanban\" on_create=\"project.open_create_project\" action=\"action_view_tasks\" type=\"object\" quick_create_view=\"project.quick_create_project_form\" sample=\"1\" default_order=\"is_favorite desc, sequence, name, id\">\n                    <field name=\"allow_milestones\"/>\n                    <field name=\"rating_count\"/>\n                    <field name=\"show_ratings\"/>\n                    <field name=\"privacy_visibility\"/>\n                    <field name=\"last_update_color\"/>\n                    <field name=\"is_milestone_deadline_exceeded\"/>\n                    <field name=\"can_mark_milestone_as_done\"/>\n                    <field name=\"is_template\"/>\n                    <progressbar field=\"last_update_status\" colors=\"{&quot;on_track&quot;: &quot;success&quot;, &quot;at_risk&quot;: &quot;warning&quot;, &quot;off_track&quot;: &quot;danger&quot;, &quot;on_hold&quot;: &quot;info&quot;, &quot;done&quot;: &quot;purple&quot;}\"/>\n                    <field name=\"sequence\" widget=\"handle\"/>\n                    <templates>\n                        <t t-name=\"menu\" groups=\"base.group_user\">\n                            <div class=\"container\">\n                                <div class=\"row\">\n                                    <div name=\"card_menu_view\" class=\"col-6\">\n                                        <h5 role=\"menuitem\" class=\"o_kanban_card_manage_title\">\n                                            <span>View</span>\n                                        </h5>\n                                        <div role=\"menuitem\">\n                                            <a name=\"action_view_tasks\" type=\"object\">Tasks</a>\n                                        </div>\n                                        <div role=\"menuitem\" groups=\"project.group_project_milestone\" t-if=\"record.allow_milestones.raw_value and !record.is_template.raw_value\">\n                                            <a name=\"action_get_list_view\" type=\"object\">Milestones</a>\n                                        </div>\n                                    </div>\n                                    <div class=\"col-6 o_kanban_manage_reporting\" t-if=\"!record.is_template.raw_value\">\n                                        <h5 role=\"menuitem\" class=\"o_kanban_card_manage_title\" groups=\"project.group_project_user\">\n                                            <span>Reporting</span>\n                                        </h5>\n                                        <div class=\"d-inline-block\" role=\"menuitem\" groups=\"project.group_project_user\" name=\"task_analysis\">\n                                            <a name=\"action_view_tasks_analysis\" type=\"object\">Tasks Analysis</a>\n                                        </div>\n                                        <div class=\"d-inline-block\" role=\"menuitem\" name=\"project_burndown_menu\" groups=\"project.group_project_user\">\n                                            <a name=\"action_project_task_burndown_chart_report\" type=\"object\">Burndown Chart</a>\n                                        </div>\n                                    </div>\n                                </div>\n                                <div class=\"o_kanban_card_manage_settings row\">\n                                    <div role=\"menuitem\" aria-haspopup=\"true\" class=\"col-6\" groups=\"project.group_project_manager\">\n                                        <field name=\"color\" widget=\"kanban_color_picker\"/>\n                                    </div>\n                                    <div role=\"menuitem\" class=\"col-6\" groups=\"project.group_project_manager\">\n\n                                        <a t-if=\"['portal', 'invited_users'].includes(record.privacy_visibility.raw_value) and !record.is_template.raw_value\" class=\"dropdown-item\" role=\"menuitem\" name=\"action_open_share_project_wizard\" type=\"object\">Share Project</a>\n\n                                        <a class=\"dropdown-item\" role=\"menuitem\" name=\"copy\" type=\"object\">Duplicate</a>\n                                        <a class=\"dropdown-item\" role=\"menuitem\" type=\"open\">Settings</a>\n                                    </div>\n                                    <div class=\"col-12 ps-0\" groups=\"!project.group_project_manager\">\n                                        <div role=\"menuitem\" class=\"w-100\">\n                                            <a class=\"dropdown-item mx-0\" role=\"menuitem\" type=\"open\">View</a>\n                                        </div>\n                                    </div>\n                                </div>\n                            </div>\n                        </t>\n                        <t t-name=\"card\">\n                            <main class=\"o_project_kanban_main\">\n                                <div class=\"d-flex align-items-baseline gap-1\">\n                                    <field name=\"is_favorite\" widget=\"project_is_favorite\" nolabel=\"1\"/>\n                                    <span class=\"text-truncate d-block fs-4 fw-bold\" t-att-title=\"record.display_name.value\"><field name=\"display_name\"/></span>\n                                </div>\n                                <div class=\"o_project_kanban_body min-w-0 pb-4 me-2\">\n                                    <span name=\"partner_name\" class=\"text-muted d-flex align-items-baseline\" t-if=\"record.partner_id.value\">\n                                        <span class=\"fa fa-user me-2\" aria-label=\"Partner\" title=\"Partner\"/><field class=\"text-truncate\" name=\"partner_id\"/>\n                                    </span>\n                                    <div t-if=\"record.date.raw_value or record.date_start.raw_value\" class=\"text-muted d-flex align-items-baseline\">\n                                        <span class=\"fa fa-clock-o me-2\" title=\"Dates\"/>\n                                        <field name=\"date_start\" widget=\"daterange\" options=\"{'end_date_field': 'date'}\"/>\n                                    </div>\n                                    <div t-if=\"record.alias_email.value\" class=\"text-muted text-truncate\" t-att-title=\"record.alias_email.value\">\n                                        <span class=\"fa fa-envelope-o me-2\" aria-label=\"Domain Alias\" title=\"Domain Alias\"/><field name=\"alias_email\"/>\n                                    </div>\n                                    <div t-if=\"record.show_ratings.raw_value and record.rating_count.raw_value &gt; 0\" class=\"d-flex text-muted\">\n                                        <b class=\"me-1\">\n                                            <span class=\"fa mt4 fa-smile-o fw-bolder text-success\" t-if=\"record.rating_avg.raw_value &gt;= 3.66\" title=\"Average Rating: Happy\" role=\"img\" aria-label=\"Happy face\"/>\n                                            <span class=\"fa mt4 fa-meh-o fw-bolder text-warning\" t-elif=\"record.rating_avg.raw_value &gt;= 2.33\" title=\"Average Rating: Neutral\" role=\"img\" aria-label=\"Neutral face\"/>\n                                            <span class=\"fa mt4 fa-frown-o fw-bolder text-danger\" t-else=\"\" title=\"Average Rating: Unhappy\" role=\"img\" aria-label=\"Unhappy face\"/>\n                                        </b>\n                                        <t t-if=\"record.rating_avg.raw_value % 1 == 0\">\n                                            <field name=\"rating_avg\" nolabel=\"1\" widget=\"float\" digits=\"[1, 0]\"/>\n                                        </t>\n                                        <t t-else=\"\">\n                                            <field name=\"rating_avg\" nolabel=\"1\" widget=\"float\" digits=\"[1, 1]\"/>\n                                        </t> / 5\n                                    </div>\n                                    <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\"/>\n                                </div>\n                            </main>\n                            <footer class=\"mt-auto pt-0\">\n                                <div class=\"d-flex align-items-center\">\n                                    <div class=\"o_project_kanban_boxes d-flex align-items-baseline\">\n                                        <a class=\"o_project_kanban_box me-1\" name=\"action_view_tasks\" type=\"object\">\n                                            <div>\n                                                <field name=\"open_task_count\" class=\"o_value\"/>\n                                                <field name=\"label_tasks\" class=\"ms-1\"/>\n                                            </div>\n                                        </a>\n                                        <a groups=\"project.group_project_milestone\" t-if=\"record.allow_milestones and record.allow_milestones.raw_value and record.milestone_count.raw_value &gt; 0\" t-attf-class=\"d-inline-block small me-1 text-{{ record.is_milestone_deadline_exceeded.raw_value ? 'danger' : (record.can_mark_milestone_as_done.raw_value ? 'success' : 'muted') }}\" role=\"button\" name=\"action_get_list_view\" type=\"object\" t-attf-title=\"#{record.milestone_count_reached.value} Milestones reached out of #{record.milestone_count.value}\">\n                                            <span class=\"fa fa-flag me-1\"/>\n                                            <field name=\"milestone_count_reached\"/>/<field name=\"milestone_count\"/>\n                                        </a>\n                                    </div>\n                                    <field name=\"activity_ids\" widget=\"kanban_activity\" class=\"ms-2\"/>\n                                </div>\n                                <div class=\"d-flex ms-auto align-items-center\">\n                                    <field name=\"user_id\" widget=\"many2one_avatar_user\" domain=\"[('share', '=', False)]\" class=\"me-1\"/>\n                                    <field t-if=\"record.last_update_status.value &amp;&amp; widget.editable &amp;&amp; !record.is_template.raw_value\" name=\"last_update_status\" widget=\"project_state_selection\"/>\n                                    <span t-if=\"record.last_update_status.value &amp;&amp; !widget.editable\" t-att-class=\"'o_status_bubble mx-0 o_color_bubble_' + record.last_update_color.value\" t-att-title=\"record.last_update_status.value\"/>\n                                </div>\n                            </footer>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_kanban_view_group_stage",
+   "package": "project",
+   "name": "project.project.kanban.group.stage",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "view_project_kanban",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//kanban",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//kanban",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//kanban\" position=\"attributes\">\n                    <attribute name=\"default_group_by\">stage_id</attribute>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.view_project_config_kanban",
+   "package": "project",
+   "name": "project.kanban.inherit.config.project",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "view_project_kanban",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//kanban",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//kanban",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//kanban\" position=\"attributes\">\n                    <attribute name=\"action\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.view_project_config_kanban_group_stage",
+   "package": "project",
+   "name": "project.kanban.inherit.config.project.group.stage",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "view_project_config_kanban",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//kanban",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//kanban",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//kanban\" position=\"attributes\">\n                    <attribute name=\"default_group_by\">stage_id</attribute>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.view_project_calendar",
+   "package": "project",
+   "name": "project.project.calendar",
+   "entity": "project.project",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "date_start": "date_start",
+     "date_stop": "date",
+     "string": "Projects",
+     "mode": "month",
+     "scales": "month,year",
+     "event_open_popup": "true",
+     "quick_create": "0",
+     "color": "stage_id_color",
+     "js_class": "project_project_calendar"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "invisible": "not partner_id"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "invisible": "not user_id"
+     },
+     {
+      "name": "is_favorite",
+      "widget": "project_is_favorite",
+      "string": "Favorite",
+      "nolabel": "1"
+     },
+     {
+      "name": "stage_id_color",
+      "invisible": "1"
+     },
+     {
+      "name": "stage_id",
+      "invisible": "not stage_id",
+      "groups": "project.group_project_stages"
+     },
+     {
+      "name": "last_update_color",
+      "invisible": "1"
+     },
+     {
+      "name": "last_update_status",
+      "widget": "status_with_color",
+      "invisible": "last_update_status == 'to_define'",
+      "string": "Status"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "invisible": "not tag_ids",
+      "options": "{'color_field': 'color'}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "project_is_favorite": 1,
+     "status_with_color": 1,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "date_start",
+     "date_stop": "date",
+     "date_delay": null,
+     "color": "stage_id_color",
+     "mode": "month",
+     "quick_create": "0",
+     "event_open_popup": "true",
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <calendar date_start=\"date_start\" date_stop=\"date\" string=\"Projects\" mode=\"month\" scales=\"month,year\" event_open_popup=\"true\" quick_create=\"0\" color=\"stage_id_color\" js_class=\"project_project_calendar\">\n                    <field name=\"partner_id\" invisible=\"not partner_id\"/>\n                    <field name=\"user_id\" widget=\"many2one_avatar_user\" invisible=\"not user_id\"/>\n                    <field name=\"is_favorite\" widget=\"project_is_favorite\" nolabel=\"1\" string=\"Favorite\"/>\n                    <field name=\"stage_id_color\" invisible=\"1\"/>\n                    <field name=\"stage_id\" groups=\"project.group_project_stages\" invisible=\"not stage_id\"/>\n                    <field name=\"last_update_color\" invisible=\"1\"/>\n                    <field name=\"last_update_status\" string=\"Status\" widget=\"status_with_color\" invisible=\"last_update_status == 'to_define'\"/>\n                    <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\" invisible=\"not tag_ids\"/>\n                </calendar>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_view_kanban_inherit_project",
+   "package": "project",
+   "name": "project.kanban.inherit.project",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.view_project_kanban",
+   "mode": null,
+   "priority": "200",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "/kanban",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "/kanban",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"/kanban\" position=\"inside\">\n                    <field name=\"id\"/>\n                </xpath>\n                <xpath expr=\"//div[@name='task_analysis']\" position=\"before\">\n                    <div role=\"menuitem\" groups=\"project.group_project_user\">\n                        <a name=\"project_update_all_action\" type=\"object\" t-attf-context=\"{'active_id': #{record.id.raw_value} }\">Dashboard</a>\n                    </div>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_templates_view_form",
+   "package": "project",
+   "name": "project.project.template.form",
+   "entity": "project.project",
+   "view_type": "form",
+   "inherits_view": "project.edit_project",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "form",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form position=\"attributes\">\n                    <attribute name=\"js_class\"/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_templates_view_list",
+   "package": "project",
+   "name": "project.project.template.list",
+   "entity": "project.project",
+   "view_type": "list",
+   "inherits_view": "project.view_project",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "list",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list position=\"attributes\">\n                    <attribute name=\"js_class\"/>\n                    <attribute name=\"default_order\">sequence, is_favorite desc, name, id</attribute>\n                </list>\n                <field name=\"sequence\" position=\"attributes\">\n                    <attribute name=\"column_invisible\">False</attribute>\n                    <attribute name=\"widget\">handle</attribute>\n                </field>\n                <field name=\"partner_id\" position=\"replace\"/>\n                <field name=\"next_milestone_id\" position=\"replace\"/>\n                <field name=\"milestone_progress\" position=\"replace\"/>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_templates_view_kanban",
+   "package": "project",
+   "name": "project.project.template.kanban",
+   "entity": "project.project",
+   "view_type": "kanban",
+   "inherits_view": "project.view_project_kanban",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "kanban",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban position=\"attributes\">\n                    <attribute name=\"js_class\"/>\n                </kanban>\n                <span name=\"partner_name\" position=\"replace\"/>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project_account.project_project_tree_view_account_inherit",
+   "package": "project_account",
+   "name": "project.project.list.view.account.inherit",
+   "entity": "project.project",
+   "view_type": "field",
+   "inherits_view": "project.view_project",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_id",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"partner_id\" position=\"attributes\">\n                <attribute name=\"context\">{'res_partner_search_mode': 'customer'}</attribute>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "project_account.project_project_form_view_account_inherit",
+   "package": "project_account",
+   "name": "project.project.form.view.account.inherit",
+   "entity": "project.project",
+   "view_type": "field",
+   "inherits_view": "project.edit_project",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_id",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"partner_id\" position=\"attributes\">\n                <attribute name=\"context\">{'res_partner_search_mode': 'customer'}</attribute>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.project_project_view_inherit_project_filter",
+   "package": "sale_project",
+   "name": "project.project.select.inherit.project",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.view_project_project_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='partner_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "sale_order_id",
+      "invisible": "context.get('default_is_template')"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='partner_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='partner_id']\" position=\"after\">\n                <field name=\"sale_order_id\" invisible=\"context.get('default_is_template')\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.project_project_view_tree_inherit_sale_project",
+   "package": "sale_project",
+   "name": "project.project.list.inherit.sale.project",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.view_project",
+   "mode": null,
+   "priority": "50",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='partner_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "sale_line_id",
+      "readonly": "1",
+      "optional": "hide"
+     },
+     {
+      "name": "allow_billable",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='partner_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='partner_id']\" position=\"after\">\n                <field name=\"sale_line_id\" optional=\"hide\" readonly=\"1\"/>\n                <field name=\"allow_billable\" column_invisible=\"True\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='partner_id']\" position=\"attributes\">\n                <attribute name=\"invisible\">not allow_billable or is_template</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.view_edit_project_inherit_form",
+   "package": "sale_project",
+   "name": "project.project.view.inherit",
+   "entity": "project.project",
+   "view_type": "div",
+   "inherits_view": "project.edit_project",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "name": "button_box",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "display_sales_stat_buttons",
+      "invisible": "1"
+     },
+     {
+      "name": "allow_billable",
+      "invisible": "1"
+     },
+     {
+      "name": "privacy_visibility",
+      "invisible": "1"
+     },
+     {
+      "name": "sale_order_count",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_customer_preview",
+      "type": "object",
+      "invisible": "not partner_id or not allow_billable or privacy_visibility not in ['invited_users', 'portal'] or is_template",
+      "class": "oe_stat_button",
+      "icon": "fa-globe icon"
+     },
+     {
+      "name": "action_view_sos",
+      "type": "object",
+      "invisible": "not display_sales_stat_buttons or sale_order_count == 0 or is_template",
+      "class": "oe_stat_button",
+      "context": "{                         'create_for_project_id': id,                         'default_project_id': id,                         'default_partner_id': partner_id                     }",
+      "groups": "sales_team.group_sale_salesman_all_leads",
+      "icon": "fa-dollar"
+     },
+     {
+      "name": "action_view_sos",
+      "type": "object",
+      "invisible": "not display_sales_stat_buttons or sale_order_count != 0 or is_template",
+      "class": "oe_stat_button",
+      "context": "{                         'create_for_project_id': id,                         'default_project_id': id,                         'default_partner_id': partner_id                     }",
+      "groups": "sales_team.group_sale_salesman_all_leads",
+      "icon": "fa-dollar"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "name": "button_box",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div name=\"button_box\" position=\"inside\">\n                <field name=\"display_sales_stat_buttons\" invisible=\"1\"/>\n                <field name=\"allow_billable\" invisible=\"1\"/>\n                <field name=\"privacy_visibility\" invisible=\"1\"/>\n                <button class=\"oe_stat_button\" type=\"object\" name=\"action_customer_preview\" icon=\"fa-globe icon\" invisible=\"not partner_id or not allow_billable or privacy_visibility not in ['invited_users', 'portal'] or is_template\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_text\">Preview</span>\n                    </div>\n                </button>\n                <button class=\"oe_stat_button\" type=\"object\" name=\"action_view_sos\" icon=\"fa-dollar\" invisible=\"not display_sales_stat_buttons or sale_order_count == 0 or is_template\" groups=\"sales_team.group_sale_salesman_all_leads\" context=\"{                         'create_for_project_id': id,                         'default_project_id': id,                         'default_partner_id': partner_id                     }\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_value\">\n                            <field name=\"sale_order_count\" nolabel=\"1\"/>\n                        </span>\n                        <span class=\"o_stat_text\">\n                            Sales Orders\n                        </span>\n                    </div>\n                </button>\n                <button class=\"oe_stat_button\" type=\"object\" name=\"action_view_sos\" icon=\"fa-dollar\" invisible=\"not display_sales_stat_buttons or sale_order_count != 0 or is_template\" groups=\"sales_team.group_sale_salesman_all_leads\" context=\"{                         'create_for_project_id': id,                         'default_project_id': id,                         'default_partner_id': partner_id                     }\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_text\">\n                            <span class=\"o_stat_value\">0</span> Sales Order\n                        </span>\n                        <span class=\"o_stat_text\">\n                            Make Billable\n                        </span>\n                    </div>\n                </button>\n            </div>\n            <xpath expr=\"//header\" position=\"inside\">\n                <field name=\"has_any_so_to_invoice\" invisible=\"1\"/>\n                <field name=\"has_any_so_with_nothing_to_invoice\" invisible=\"1\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='partner_id']\" position=\"attributes\">\n                <attribute name=\"invisible\">not allow_billable or is_template</attribute>\n            </xpath>\n            <xpath expr=\"//group[@name='group_time_managment']\" position=\"before\">\n                 <group name=\"group_sales_invoicing\" string=\"Sales &amp; Invoicing\" col=\"1\" class=\"row mt16 o_settings_container col-lg-6\">\n                    <div>\n                        <setting class=\"col-lg-12\" help=\"Invoice your time and material to customers\" id=\"allow_billable_container\">\n                            <field name=\"allow_billable\"/>\n                        </setting>\n                    </div>\n                </group>\n            </xpath>\n            <xpath expr=\"//page[@name='settings']//field[@name='privacy_visibility']\" position=\"after\">\n                <field name=\"reinvoiced_sale_order_id\" invisible=\"not allow_billable or not partner_id or is_template\" context=\"{'default_partner_id': partner_id}\"/>\n                <label for=\"sale_line_id\" invisible=\"not allow_billable or not partner_id or is_template\"/>\n                <div class=\"o_row\" invisible=\"not allow_billable or not partner_id or is_template\">\n                    <field name=\"sale_line_id\" groups=\"!sales_team.group_sale_salesman\" options=\"{'no_create': True, 'no_edit': True, 'delete': False, 'no_open': True}\"/>\n                    <field name=\"sale_line_id\" groups=\"sales_team.group_sale_salesman\" options=\"{'no_create': True}\"/>\n                    <span class=\"fa fa-exclamation-triangle text-warning\" title=\"The sales order associated with this project has been cancelled. We recommend either updating the sales order item or cancelling this project in alignment with the cancellation of the sales order.\" invisible=\"sale_order_state != 'cancel'\"/>\n                </div>\n                <field name=\"sale_order_state\" invisible=\"1\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.project_project_view_form_simplified_inherit",
+   "package": "sale_project",
+   "name": "project.project.view.form.simplified.inherit",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.project_project_view_form_simplified",
+   "mode": null,
+   "priority": "25",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[hasclass('o_settings_container')]",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "allow_billable"
+     },
+     {
+      "name": "partner_id",
+      "widget": "res_partner_many2one",
+      "context": "{'res_partner_search_mode': 'customer'}",
+      "options": "{'no_create_edit': True, 'no_open': True}",
+      "placeholder": "Select who to bill..."
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "res_partner_many2one": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//div[hasclass('o_settings_container')]",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[hasclass('o_settings_container')]\" position=\"inside\">\n                <field name=\"company_id\" invisible=\"1\"/>\n                <setting class=\"col-lg-12\" help=\"Invoice your time and material to customers\" invisible=\"context.get('hide_allow_billable', False)\">\n                    <field name=\"allow_billable\"/>\n                    <div invisible=\"not allow_billable\" class=\"d-flex flex-column flex-sm-row align-items-baseline\">\n                        <label for=\"partner_id\"/>\n                        <field name=\"partner_id\" class=\"ms-1\" widget=\"res_partner_many2one\" context=\"{'res_partner_search_mode': 'customer'}\" options=\"{'no_create_edit': True, 'no_open': True}\" placeholder=\"Select who to bill...\"/>\n                    </div>\n                </setting>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.project_templates_view_list",
+   "package": "sale_project",
+   "name": "project.project.template.list",
+   "entity": "project.project",
+   "view_type": "field",
+   "inherits_view": "project.project_templates_view_list",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "sale_line_id",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "sale_line_id",
+      "position": "replace"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"sale_line_id\" position=\"replace\"/>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.project_project_view_form",
+   "package": "sale_timesheet",
+   "name": "project.project.form.inherit",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.project_invoice_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//button[@name='action_view_sos'][1]",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//button[@name='action_view_sos'][1]",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//button[@name='action_view_sos'][1]\" position=\"attributes\">\n                <attribute name=\"context\">{'create_for_project_id': id, 'default_project_id': id, 'default_partner_id': partner_id}</attribute>\n            </xpath>\n            <xpath expr=\"//button[@name='action_view_sos'][2]\" position=\"attributes\">\n                <attribute name=\"context\">{'create_for_project_id': id, 'default_project_id': id, 'default_partner_id': partner_id}</attribute>\n            </xpath>\n            <xpath expr=\"//page[@name='settings']\" position=\"after\">\n                <page name=\"billing_employee_rate\" string=\"Invoicing\" invisible=\"not allow_billable or not partner_id or is_template\">\n                    <field name=\"sale_line_employee_ids\" mode=\"list,kanban\" context=\"{'default_sale_line_id': sale_line_id}\">\n                        <list editable=\"bottom\">\n                            <field name=\"company_id\" column_invisible=\"True\"/>\n                            <field name=\"partner_id\" column_invisible=\"True\"/>\n                            <field name=\"sale_order_id\" column_invisible=\"True\"/>\n                            <field name=\"employee_id\" widget=\"many2one_avatar_employee\" context=\"{'create_project_employee_mapping': company_id}\"/>\n                            <field name=\"existing_employee_ids\" column_invisible=\"True\"/>\n                            <field name=\"sale_line_id\" column_invisible=\"parent.id\" required=\"True\" options=\"{'no_create': True}\" context=\"{'search_default_order_id': sale_order_id}\"/>\n                            <field name=\"sale_line_id\" column_invisible=\"not parent.id\" required=\"True\" groups=\"!sales_team.group_sale_salesman\" options=\"{'no_create': True}\" context=\"{'search_default_order_id': sale_order_id}\"/>\n                            <field name=\"sale_line_id\" column_invisible=\"not parent.id\" required=\"True\" groups=\"sales_team.group_sale_salesman\" options=\"{'no_create': True, 'no_open': True}\" context=\"{                                     'search_default_order_id': sale_order_id,                                     'so_form_view_ref': 'sale_project.view_order_simple_form',                                     'create_for_employee_mapping': True,                                     'default_partner_id': partner_id,                                     'default_company_id': company_id,                                     'default_project_id': project_id,                                 }\" widget=\"so_line_create_button\"/>\n                            <field name=\"price_unit\" widget=\"monetary\" force_save=\"1\" options=\"{'currency_field': 'currency_id'}\"/>\n                            <field name=\"display_cost\" widget=\"monetary\" options=\"{'currency_field': 'cost_currency_id'}\"/>\n                            <field name=\"is_cost_changed\" column_invisible=\"True\"/>\n                            <field name=\"currency_id\" column_invisible=\"True\"/>\n                            <field name=\"cost_currency_id\" column_invisible=\"True\"/>\n                        </list>\n                        <kanban class=\"o_kanban_mobile\">\n                            <field name=\"currency_id\"/>\n                            <templates>\n                                <t t-name=\"card\">\n                                    <div class=\"row\">\n                                        <div class=\"col-8 d-flex\">\n                                            <field name=\"employee_id\" widget=\"many2one_avatar_employee\"/>\n                                            <field name=\"employee_id\" class=\"fw-bold ps-1\"/>\n                                        </div>\n                                        <div class=\"col-4 float-end text-end\">\n                                            <b>Unit Price: </b>\n                                            <field name=\"price_unit\" widget=\"monetary\" force_save=\"1\" options=\"{'currency_field': 'currency_id'}\"/>\n                                        </div>\n                                    </div>\n                                    <div class=\"row\">\n                                        <field name=\"sale_line_id\" class=\"col-8 text-muted\"/>\n                                        <div class=\"col-4 float-end text-end\">\n                                            <b>Daily Cost: </b>\n                                            <field name=\"display_cost\" widget=\"monetary\" options=\"{'currency_field': 'currency_id'}\"/>\n                                        </div>\n                                    </div>\n                                </t>\n                            </templates>\n                        </kanban>\n                        <form string=\"Timesheet Activities\">\n                            <sheet>\n                                <group>\n                                    <field name=\"existing_employee_ids\" invisible=\"1\"/>\n                                    <field name=\"partner_id\" invisible=\"1\"/>\n                                    <field name=\"sale_order_id\" invisible=\"1\"/>\n                                    <field name=\"currency_id\" invisible=\"1\"/>\n                                    <field name=\"employee_id\" widget=\"many2one_avatar_employee\" required=\"1\"/>\n                                    <field name=\"sale_line_id\" invisible=\"parent.id\" options=\"{'no_create': True}\" context=\"{'search_default_order_id': sale_order_id}\"/>\n                                    <field name=\"sale_line_id\" invisible=\"not parent.id\" required=\"True\" groups=\"!sales_team.group_sale_salesman\" options=\"{'no_create': True}\" context=\"{'search_default_order_id': sale_order_id}\"/>\n                                    <field name=\"sale_line_id\" invisible=\"not parent.id\" required=\"True\" groups=\"sales_team.group_sale_salesman\" options=\"{'no_create': True}\" widget=\"so_line_create_button\" context=\"{                                             'search_default_order_id': sale_order_id,                                             'so_form_view_ref': 'sale_project.view_order_simple_form',                                             'create_for_employee_mapping': True,                                             'default_partner_id': partner_id,                                             'default_company_id': company_id,                                             'default_project_id': project_id,                                          }\"/>\n                                    <field name=\"price_unit\" widget=\"monetary\" readonly=\"True\" force_save=\"1\" options=\"{'currency_field': 'currency_id'}\"/>\n                                    <field name=\"display_cost\" widget=\"monetary\" options=\"{'currency_field': 'currency_id'}\"/>\n                                </group>\n                            </sheet>\n                        </form>\n                    </field>\n                    <p class=\"text-muted\">\n                        <i class=\"fa fa-lightbulb-o\"/>\n                        <span>\n                            Define the rate at which an employee's time is billed based on their expertise, skills, or experience.\n                            To bill the same service at a different rate, create separate sales order items.\n                        </span>\n                    </p>\n                </page>\n            </xpath>\n            <xpath expr=\"//page[@name='settings']//field[@name='allow_billable']\" position=\"after\">\n                <div invisible=\"not allow_billable or not allow_timesheets\" class=\"text-muted\">\n                    Timesheets without a sales order item are reported as\n                    <field name=\"billing_type\" nolabel=\"1\" class=\"w-auto\"/>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.project_project_view_kanban_inherit_sale_timesheet",
+   "package": "sale_timesheet",
+   "name": "project.project.kanban.inherit.sale.timesheet",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.view_project_kanban_inherited",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='allow_timesheets']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "allow_billable"
+     },
+     {
+      "name": "warning_employee_rate",
+      "invisible": "1"
+     },
+     {
+      "name": "sale_order_id",
+      "invisible": "1"
+     },
+     {
+      "name": "pricing_type",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='allow_timesheets']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='allow_timesheets']\" position=\"after\">\n                <field name=\"allow_billable\"/>\n                <field name=\"warning_employee_rate\" invisible=\"1\"/>\n                <field name=\"sale_order_id\" invisible=\"1\"/>\n                <field name=\"pricing_type\" invisible=\"1\"/>\n            </xpath>\n            <xpath expr=\"//div[hasclass('o_kanban_manage_reporting')]\" position=\"inside\">\n                <div role=\"menuitem\" t-if=\"record.show_ratings.raw_value\" groups=\"project.group_project_manager\">\n                   <a name=\"action_view_all_rating\" type=\"object\">\n                    Customer Ratings\n                    </a>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.project_project_view_kanban_inherit_sale_timesheet_so_button",
+   "package": "sale_timesheet",
+   "name": "project.project.kanban.inherit.sale.timesheet.so.button",
+   "entity": "project.project",
+   "view_type": "xpath",
+   "inherits_view": "project.view_project_kanban",
+   "mode": null,
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='card_menu_view']",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='card_menu_view']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@name='card_menu_view']\" position=\"inside\">\n                <div t-if=\"record.allow_billable.raw_value and record.sale_order_id.raw_value and record.pricing_type.raw_value != 'task_rate'\" role=\"menuitem\" groups=\"sales_team.group_sale_salesman_all_leads\">\n                    <a name=\"action_view_sos\" type=\"object\">Sales Orders</a>\n                </div>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

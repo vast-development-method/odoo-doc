@@ -1,0 +1,115 @@
+{
+ "catalog": {
+  "name": "views:peppol.registration",
+  "description": "View declarations for entity peppol.registration.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account_peppol.peppol_registration_form",
+   "package": "account_peppol",
+   "name": "peppol.registration.form",
+   "entity": "peppol.registration",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "class": "form_peppol_registration"
+    },
+    "fields": [
+     {
+      "name": "peppol_warnings",
+      "widget": "actionable_errors"
+     },
+     {
+      "name": "parent_company_name",
+      "readonly": "1"
+     },
+     {
+      "name": "use_parent_connection_selection",
+      "widget": "radio"
+     },
+     {
+      "name": "peppol_eas",
+      "widget": "peppol_non_focusable_selection",
+      "readonly": "use_parent_connection",
+      "nolabel": "1",
+      "placeholder": "Peppol ID"
+     },
+     {
+      "name": "peppol_endpoint",
+      "readonly": "use_parent_connection",
+      "nolabel": "1"
+     },
+     {
+      "name": "contact_email",
+      "readonly": "use_parent_connection",
+      "string": "Email"
+     },
+     {
+      "name": "phone_number",
+      "readonly": "use_parent_connection",
+      "required": "edi_mode not in ('demo', 'test')",
+      "string": "Phone"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "button_register_with_itsme",
+      "type": "object",
+      "invisible": "not display_itsme_login",
+      "class": "btn btn-primary"
+     },
+     {
+      "name": "button_register_peppol_participant",
+      "string": "Activate Peppol",
+      "type": "object",
+      "invisible": "edi_mode != 'prod' or not display_no_auth_buttons",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "button_register_peppol_participant",
+      "string": "Activate Peppol (Test)",
+      "type": "object",
+      "invisible": "edi_mode != 'test' or not display_no_auth_buttons",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "button_register_peppol_participant",
+      "string": "Activate Peppol (Demo)",
+      "type": "object",
+      "invisible": "edi_mode != 'demo' or not display_no_auth_buttons",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Cancel",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "actionable_errors": 1,
+     "radio": 1,
+     "peppol_non_focusable_selection": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form class=\"form_peppol_registration\">\n                <sheet>\n                    <div class=\"m-0\" name=\"warnings\" invisible=\"not peppol_warnings\">\n                        <field name=\"peppol_warnings\" class=\"o_field_html\" widget=\"actionable_errors\"/>\n                    </div>\n\n                    <div name=\"peppol_registration\">\n                        <p class=\"text-muted\" invisible=\"not use_parent_connection\">\n                            This branch company will use the active Peppol connection found on\n                            <field name=\"parent_company_name\" class=\"oe_inline o_form_label\" readonly=\"1\"/>\n                            and send invoices via Peppol on their behalf.\n                        </p>\n                        <p class=\"text-muted\" invisible=\"use_parent_connection\">\n                            Send electronic invoices, and receive bills automatically via Peppol.\n                        </p>\n\n                        <div class=\"mb-3\" invisible=\"not display_use_parent_connection_selection\">\n                            <field name=\"use_parent_connection_selection\" widget=\"radio\"/>\n                        </div>\n\n                        <group col=\"1\">\n                            <group>\n                                <field name=\"peppol_eas\" placeholder=\"Peppol ID\" nolabel=\"1\" readonly=\"use_parent_connection\" widget=\"peppol_non_focusable_selection\" class=\"o_field_peppol_eas_selection\"/>\n                                <field name=\"peppol_endpoint\" nolabel=\"1\" default_focus=\"1\" readonly=\"use_parent_connection\"/>\n                                <field name=\"contact_email\" readonly=\"use_parent_connection\" string=\"Email\"/>\n                                <field name=\"phone_number\" required=\"edi_mode not in ('demo', 'test')\" readonly=\"use_parent_connection\" string=\"Phone\"/>\n                            </group>\n                        </group>\n                        <div class=\"text-muted col\" invisible=\"edi_mode != 'prod'\">\n                            By clicking the button below:\n                            <ul>\n                                <li>I accept that the system may process my e-invoices,</li>\n                                <li>I reckon I'm allowed to register this company.</li>\n                            </ul>\n                        </div>\n                        <div class=\"text-muted col\" invisible=\"1\">\n                            If you don't have Itsme, please contact\n                            <a href=\"https://www.the system.com/help\" target=\"_blank\">support</a>.\n                        </div>\n                        <div class=\"text-muted col\" invisible=\"edi_mode != 'test'\">\n                            Test mode allows sending e-invoices through the test Peppol network.<br/>\n                            By clicking the button below I accept that the system may process my e-invoices.\n                        </div>\n                    </div>\n                </sheet>\n                <footer>\n\n                    <button class=\"btn btn-primary\" name=\"button_register_with_itsme\" type=\"object\" invisible=\"not display_itsme_login\">\n                        <b>Authenticate</b>\n                    </button>\n\n                    \n                    <button string=\"Activate Peppol\" name=\"button_register_peppol_participant\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\" invisible=\"edi_mode != 'prod' or not display_no_auth_buttons\"/>\n                    <button string=\"Activate Peppol (Test)\" name=\"button_register_peppol_participant\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\" invisible=\"edi_mode != 'test' or not display_no_auth_buttons\"/>\n                    <button string=\"Activate Peppol (Demo)\" name=\"button_register_peppol_participant\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\" invisible=\"edi_mode != 'demo' or not display_no_auth_buttons\"/>\n                    <button string=\"Cancel\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  }
+ ]
+}

@@ -1,0 +1,749 @@
+{
+ "catalog": {
+  "name": "entity:sale.advance.payment.inv",
+  "description": "Complete definition of entity Sales Advance Payment Invoice (sale.advance.payment.inv).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sale.advance.payment.inv",
+  "storage_name": "sale_advance_payment_inv",
+  "full_name": "Sales Advance Payment Invoice",
+  "kind": "transient",
+  "description": "Sales Advance Payment Invoice",
+  "defined_by_package": "sale",
+  "extended_by_packages": [
+   "l10n_in_sale",
+   "sale_timesheet"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "advance_payment_method",
+    "type": "Selection",
+    "selection": [
+     [
+      "delivered",
+      "Regular invoice"
+     ],
+     [
+      "percentage",
+      "Down payment (percentage)"
+     ],
+     [
+      "fixed",
+      "Down payment (fixed amount)"
+     ]
+    ],
+    "string": "Create Invoice",
+    "default": "delivered",
+    "required": true,
+    "help": "A standard invoice is issued with all the order lines ready for invoicing,according to their invoicing policy (based on ordered or delivered quantity).",
+    "defined_in_package": "sale",
+    "full_name": "Create Invoice"
+   },
+   {
+    "name": "count",
+    "type": "Integer",
+    "string": "Order Count",
+    "compute": "_compute_count",
+    "defined_in_package": "sale",
+    "full_name": "Order Count"
+   },
+   {
+    "name": "sale_order_ids",
+    "type": "Many2many",
+    "comodel": "sale.order",
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_ids')"
+    },
+    "defined_in_package": "sale",
+    "string": "Sale Order",
+    "full_name": "Sale Order",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "has_down_payments",
+    "type": "Boolean",
+    "string": "Has down payments",
+    "compute": "_compute_has_down_payments",
+    "defined_in_package": "sale",
+    "full_name": "Has down payments"
+   },
+   {
+    "name": "deduct_down_payments",
+    "type": "Boolean",
+    "string": "Deduct down payments",
+    "default": true,
+    "defined_in_package": "sale",
+    "full_name": "Deduct down payments"
+   },
+   {
+    "name": "amount",
+    "type": "Float",
+    "string": "Down Payment",
+    "help": "The percentage of amount to be invoiced in advance.",
+    "defined_in_package": "sale",
+    "full_name": "Down Payment"
+   },
+   {
+    "name": "fixed_amount",
+    "type": "Monetary",
+    "string": "Down Payment Amount (Fixed)",
+    "help": "The fixed amount to be invoiced in advance.",
+    "defined_in_package": "sale",
+    "full_name": "Down Payment Amount (Fixed)"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "compute": "_compute_currency_id",
+    "store": true,
+    "defined_in_package": "sale",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "compute": "_compute_company_id",
+    "store": true,
+    "defined_in_package": "sale",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "amount_invoiced",
+    "type": "Monetary",
+    "string": "Already invoiced",
+    "compute": "_compute_invoice_amounts",
+    "help": "Only confirmed down payments are considered.",
+    "defined_in_package": "sale",
+    "full_name": "Already invoiced"
+   },
+   {
+    "name": "display_draft_invoice_warning",
+    "type": "Boolean",
+    "compute": "_compute_display_draft_invoice_warning",
+    "defined_in_package": "sale",
+    "string": "Display Draft Invoice Warning",
+    "full_name": "Display Draft Invoice Warning"
+   },
+   {
+    "name": "consolidated_billing",
+    "type": "Boolean",
+    "string": "Consolidated Billing",
+    "default": true,
+    "help": "Create one invoice for all orders related to same customer, same invoicing address and same delivery address.",
+    "defined_in_package": "sale",
+    "full_name": "Consolidated Billing"
+   },
+   {
+    "name": "date_start_invoice_timesheet",
+    "type": "Date",
+    "string": "Start Date",
+    "help": "Only timesheets not yet invoiced (and validated, if applicable) from this period will be invoiced. If the period is not indicated, all timesheets not yet invoiced (and validated, if applicable) will be invoiced without distinction.",
+    "defined_in_package": "sale_timesheet",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_end_invoice_timesheet",
+    "type": "Date",
+    "string": "End Date",
+    "help": "Only timesheets not yet invoiced (and validated, if applicable) from this period will be invoiced. If the period is not indicated, all timesheets not yet invoiced (and validated, if applicable) will be invoiced without distinction.",
+    "defined_in_package": "sale_timesheet",
+    "full_name": "End Date"
+   },
+   {
+    "name": "invoicing_timesheet_enabled",
+    "type": "Boolean",
+    "compute": "_compute_invoicing_timesheet_enabled",
+    "store": true,
+    "export_string_translation": false,
+    "defined_in_package": "sale_timesheet",
+    "string": "Invoicing Timesheet Enabled",
+    "full_name": "Invoicing Timesheet Enabled"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_down_payments",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_draft_invoice_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoice_amounts",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_advance_payment_method",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "advance_payment_method"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_amount_is_positive",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The value of the down payment amount must be positive.",
+        "line": 115
+       },
+       {
+        "kind": "UserError",
+        "message": "The value of the down payment amount must be positive.",
+        "line": 117
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create_invoices",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "view_draft_invoices",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_invoices",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sale_orders"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": "Override method from sale/wizard/sale_make_invoice_advance.py\n\nWhen the user want to invoice the timesheets to the SO\nup to a specific period then we need to recompute the\nqty_to_invoice for each product_id in sale.order.line,\nbefore creating the invoice.",
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_down_payment_invoice_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order",
+     "so_lines"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Prepare the values to create a down payment invoice.\n\n:param order:       The current sale order.\n:param so_lines:    The \"fake\" down payment SO lines created on the sale order.\n:return:            The values to create a new invoice.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_down_payment_invoice_line_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order",
+     "so_line",
+     "account"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Prepare the invoice line values to be part of a down payment invoice.\n\n:param order:   The current sale order.\n:param so_line: The \"fake\" down payment SO line created on the sale order.\n:param account: The down payment account to use.\n:return:        The values to create a new invoice line.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_down_payment_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Retrieve the down payment account to use.\n:param product: A product.\n:return: An accounting account or None if not found.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_invoice_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order",
+     "so_line",
+     "accounts"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoicing_timesheet_enabled",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_amount_is_positive",
+    "package": "sale",
+    "kind": "UserError",
+    "message": "The value of the down payment amount must be positive."
+   },
+   {
+    "operation": "_check_amount_is_positive",
+    "package": "sale",
+    "kind": "UserError",
+    "message": "The value of the down payment amount must be positive."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "sale.access_sale_advance_payment_inv",
+    "package": "sale",
+    "name": "access.sale.advance.payment.inv",
+    "entity": "sale.advance.payment.inv",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "sale.sale_advance_payment_inv_rule",
+    "package": "sale",
+    "name": "Sales Advance Payment Invoice Rule",
+    "entity": "sale.advance.payment.inv",
+    "domain": "[('create_uid', '=', user.id)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "sale.view_sale_advance_payment_inv",
+    "package": "sale",
+    "name": "Invoice Orders",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Invoice Sales Order"
+     },
+     "fields": [
+      {
+       "name": "display_draft_invoice_warning",
+       "invisible": "1"
+      },
+      {
+       "name": "has_down_payments",
+       "invisible": "1"
+      },
+      {
+       "name": "sale_order_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "count",
+       "invisible": "count == 1"
+      },
+      {
+       "name": "consolidated_billing",
+       "invisible": "count == 1"
+      },
+      {
+       "name": "advance_payment_method",
+       "widget": "radio",
+       "invisible": "count > 1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "fixed_amount",
+       "invisible": "advance_payment_method != 'fixed'",
+       "required": "advance_payment_method == 'fixed'"
+      },
+      {
+       "name": "amount",
+       "invisible": "advance_payment_method != 'percentage'",
+       "required": "advance_payment_method == 'percentage'"
+      },
+      {
+       "name": "amount_invoiced"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "create_invoices",
+       "string": "Create Draft",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "sale_timesheet.sale_advance_payment_inv_timesheet_view_form",
+    "package": "sale_timesheet",
+    "name": "sale_timesheet.sale.advance.payment.inv.view.form",
+    "view_type": "form",
+    "inherits_view": "sale.view_sale_advance_payment_inv",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "form",
+       "attributes": {
+        "position": "attributes"
+       },
+       "position": "attributes"
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "sale.action_view_sale_advance_payment_inv",
+    "package": "sale",
+    "name": "Create invoice(s)",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "sale.model_sale_order",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "sale.advance.payment.inv"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

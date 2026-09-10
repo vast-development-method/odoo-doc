@@ -1,0 +1,3201 @@
+{
+ "catalog": {
+  "name": "entity:ir.actions.server",
+  "description": "Complete definition of entity Server Actions (ir.actions.server).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.actions.server",
+  "storage_name": "ir_act_server",
+  "full_name": "Server Actions",
+  "kind": "persistent",
+  "description": "Server Actions",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "mail",
+   "sms",
+   "base_automation",
+   "website"
+  ],
+  "mixins": [
+   "ir.actions.actions",
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence,name,id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_allow_sudo_commands": false
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "compute": "_compute_name",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "mail"
+    ],
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "automated_name",
+    "type": "Char",
+    "compute": "_compute_name",
+    "store": true,
+    "defined_in_package": "base",
+    "string": "Automated Name",
+    "full_name": "Automated Name"
+   },
+   {
+    "name": "type",
+    "type": "Char",
+    "default": "ir.actions.server",
+    "defined_in_package": "base",
+    "string": "Type",
+    "full_name": "Type"
+   },
+   {
+    "name": "usage",
+    "type": "Selection",
+    "selection": [
+     [
+      "ir_actions_server",
+      "Server Action"
+     ],
+     [
+      "ir_cron",
+      "Scheduled Action"
+     ],
+     [
+      "base_automation",
+      "Automation Rule"
+     ]
+    ],
+    "string": "Usage",
+    "default": "ir_actions_server",
+    "required": true,
+    "defined_in_package": "base",
+    "selection_added_by": [
+     "base_automation"
+    ],
+    "ondelete": {
+     "base_automation": "cascade"
+    },
+    "extended_in_packages": [
+     "base_automation"
+    ],
+    "full_name": "Usage"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "object_write",
+      "Update Record"
+     ],
+     [
+      "object_create",
+      "Create Record"
+     ],
+     [
+      "object_copy",
+      "Duplicate Record"
+     ],
+     [
+      "code",
+      "Execute Code"
+     ],
+     [
+      "webhook",
+      "Send Webhook Notification"
+     ],
+     [
+      "multi",
+      "Multi Actions"
+     ],
+     [
+      "next_activity",
+      "Create Activity"
+     ],
+     [
+      "mail_post",
+      "Send Email"
+     ],
+     [
+      "followers",
+      "Add Followers"
+     ],
+     [
+      "remove_followers",
+      "Remove Followers"
+     ],
+     [
+      "sms",
+      "Send SMS"
+     ]
+    ],
+    "string": "Type",
+    "required": true,
+    "copy": true,
+    "help": "Type of server action. The following values are available:\n- 'Update a Record': update the values of a record\n- 'Create Activity': create an activity (Discuss)\n- 'Send Email': post a message, a note or send an email (Discuss)\n- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n- 'Create Record': create a new record with new values\n- 'Execute Code': a block of Python code that will be executed\n- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n- 'Multi Actions': define an action that triggers several other server actions\n",
+    "defined_in_package": "base",
+    "tracking": true,
+    "selection_added_by": [
+     "mail",
+     "sms"
+    ],
+    "ondelete": {
+     "sms": "cascade"
+    },
+    "extended_in_packages": [
+     "mail",
+     "sms"
+    ],
+    "full_name": "Type"
+   },
+   {
+    "name": "allowed_states",
+    "type": "Json",
+    "string": "Allowed states",
+    "compute": "_compute_allowed_states",
+    "defined_in_package": "base",
+    "full_name": "Allowed states"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 5,
+    "help": "When dealing with multiple actions, the execution order is based on the sequence. Low number means high priority.",
+    "defined_in_package": "base",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Model",
+    "required": true,
+    "ondelete": "cascade",
+    "index": true,
+    "help": "Model on which the server action runs.",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "mail"
+    ],
+    "full_name": "Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "available_model_ids",
+    "type": "Many2many",
+    "comodel": "ir.model",
+    "string": "Available Models",
+    "compute": "_compute_available_model_ids",
+    "store": false,
+    "defined_in_package": "base",
+    "full_name": "Available Models",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "model_name",
+    "type": "Char",
+    "related": "model_id.model",
+    "string": "Model Name",
+    "defined_in_package": "base",
+    "full_name": "Model Name"
+   },
+   {
+    "name": "warning",
+    "type": "Text",
+    "string": "Warning",
+    "compute": "_compute_warning",
+    "recursive": true,
+    "defined_in_package": "base",
+    "full_name": "Warning"
+   },
+   {
+    "name": "ir_cron_ids",
+    "type": "One2many",
+    "comodel": "ir.cron",
+    "inverse_name": "ir_actions_server_id",
+    "string": "Scheduled Action",
+    "context": {
+     "active_test": false
+    },
+    "defined_in_package": "base",
+    "full_name": "Scheduled Action",
+    "target_entity": "ir.cron"
+   },
+   {
+    "name": "code",
+    "type": "Text",
+    "string": "Python Code",
+    "groups": "base.group_system",
+    "help": "Write Python code that the action will execute. Some variables are available for use; help about python expression is given in the help tab.",
+    "defined_in_package": "base",
+    "full_name": "Python Code"
+   },
+   {
+    "name": "show_code_history",
+    "type": "Boolean",
+    "compute": "_compute_show_code_history",
+    "defined_in_package": "base",
+    "string": "Show Code History",
+    "full_name": "Show Code History"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "comodel": "ir.actions.server",
+    "string": "Parent Action",
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "base",
+    "full_name": "Parent Action",
+    "target_entity": "ir.actions.server"
+   },
+   {
+    "name": "child_ids",
+    "type": "One2many",
+    "comodel": "ir.actions.server",
+    "inverse_name": "parent_id",
+    "copy": true,
+    "domain": {
+     "dynamic": "lambda self: str(self._get_children_domain())"
+    },
+    "string": "Child Actions",
+    "help": "Child server actions that will be executed. Note that the last return returned action value will be used as global return value.",
+    "defined_in_package": "base",
+    "full_name": "Child Actions",
+    "target_entity": "ir.actions.server"
+   },
+   {
+    "name": "crud_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Record to Create",
+    "compute": "_compute_crud_relations",
+    "inverse": "_set_crud_model_id",
+    "readonly": false,
+    "store": true,
+    "help": "Specify which kind of record should be created. Set this field only to specify a different model than the base model.",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "mail"
+    ],
+    "full_name": "Record to Create",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "crud_model_name",
+    "type": "Char",
+    "related": "crud_model_id.model",
+    "string": "Target Model Name",
+    "readonly": true,
+    "defined_in_package": "base",
+    "full_name": "Target Model Name"
+   },
+   {
+    "name": "link_field_id",
+    "type": "Many2one",
+    "comodel": "ir.model.fields",
+    "string": "Link Field",
+    "help": "Specify a field used to link the newly created record on the record used by the server action.",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "mail"
+    ],
+    "full_name": "Link Field",
+    "target_entity": "ir.model.fields"
+   },
+   {
+    "name": "group_ids",
+    "type": "Many2many",
+    "comodel": "res.groups",
+    "relation": "ir_act_server_group_rel",
+    "column1": "act_id",
+    "column2": "gid",
+    "string": "Allowed Groups",
+    "help": "Groups that can execute the server action. Leave empty to allow everybody.",
+    "defined_in_package": "base",
+    "full_name": "Allowed Groups",
+    "target_entity": "res.groups"
+   },
+   {
+    "name": "update_field_id",
+    "type": "Many2one",
+    "comodel": "ir.model.fields",
+    "string": "Field to Update",
+    "ondelete": "cascade",
+    "compute": "_compute_crud_relations",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "base",
+    "full_name": "Field to Update",
+    "target_entity": "ir.model.fields"
+   },
+   {
+    "name": "update_path",
+    "type": "Char",
+    "string": "Field to Update Path",
+    "help": "Path to the field to update, e.g. 'partner_id.name'",
+    "default": {
+     "dynamic": "_default_update_path"
+    },
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "mail"
+    ],
+    "full_name": "Field to Update Path"
+   },
+   {
+    "name": "update_related_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "compute": "_compute_crud_relations",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "base",
+    "string": "Update Related Model",
+    "full_name": "Update Related Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "update_field_type",
+    "type": "Selection",
+    "related": "update_field_id.ttype",
+    "readonly": true,
+    "defined_in_package": "base",
+    "string": "Update Field Type",
+    "full_name": "Update Field Type"
+   },
+   {
+    "name": "update_m2m_operation",
+    "type": "Selection",
+    "selection": [
+     [
+      "add",
+      "Adding"
+     ],
+     [
+      "remove",
+      "Removing"
+     ],
+     [
+      "set",
+      "Setting it to"
+     ],
+     [
+      "clear",
+      "Clearing it"
+     ]
+    ],
+    "string": "Many2many Operations",
+    "default": "add",
+    "defined_in_package": "base",
+    "full_name": "Many2many Operations"
+   },
+   {
+    "name": "update_boolean_value",
+    "type": "Selection",
+    "selection": [
+     [
+      "true",
+      "Yes (True)"
+     ],
+     [
+      "false",
+      "No (False)"
+     ]
+    ],
+    "string": "Boolean Value",
+    "default": "true",
+    "defined_in_package": "base",
+    "full_name": "Boolean Value"
+   },
+   {
+    "name": "value",
+    "type": "Text",
+    "help": "For Python expressions, this field may hold a Python expression that can use the same values as for the code field on the server action,e.g. `env.user.name` to set the current user's name as the value or `record.id` to set the ID of the record on which the action is run.\n\nFor Static values, the value will be used directly without evaluation, e.g.`42` or `My custom name` or the selected record.",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "mail"
+    ],
+    "string": "Value",
+    "full_name": "Value"
+   },
+   {
+    "name": "evaluation_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "value",
+      "Update"
+     ],
+     [
+      "sequence",
+      "Sequence"
+     ],
+     [
+      "equation",
+      "Compute"
+     ]
+    ],
+    "string": "Value Type",
+    "default": "value",
+    "change_default": true,
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "mail"
+    ],
+    "full_name": "Value Type"
+   },
+   {
+    "name": "html_value",
+    "type": "Html",
+    "defined_in_package": "base",
+    "string": "Hypertext markup language Value",
+    "full_name": "Hypertext markup language Value"
+   },
+   {
+    "name": "sequence_id",
+    "type": "Many2one",
+    "comodel": "ir.sequence",
+    "string": "Sequence to use",
+    "defined_in_package": "base",
+    "full_name": "Sequence to use",
+    "target_entity": "ir.sequence"
+   },
+   {
+    "name": "resource_ref",
+    "type": "Reference",
+    "string": "Record",
+    "inverse": "_set_resource_ref",
+    "selection_method": "_selection_target_model",
+    "defined_in_package": "base",
+    "full_name": "Record"
+   },
+   {
+    "name": "selection_value",
+    "type": "Many2one",
+    "comodel": "ir.model.fields.selection",
+    "string": "Custom Value",
+    "ondelete": "cascade",
+    "domain": "[(\"field_id\", \"=\", update_field_id)]",
+    "inverse": "_set_selection_value",
+    "defined_in_package": "base",
+    "full_name": "Custom Value",
+    "target_entity": "ir.model.fields.selection"
+   },
+   {
+    "name": "value_field_to_show",
+    "type": "Selection",
+    "selection": [
+     [
+      "value",
+      "value"
+     ],
+     [
+      "html_value",
+      "html_value"
+     ],
+     [
+      "sequence_id",
+      "sequence_id"
+     ],
+     [
+      "resource_ref",
+      "reference"
+     ],
+     [
+      "update_boolean_value",
+      "update_boolean_value"
+     ],
+     [
+      "selection_value",
+      "selection_value"
+     ]
+    ],
+    "compute": "_compute_value_field_to_show",
+    "defined_in_package": "base",
+    "string": "Value Field To Show",
+    "full_name": "Value Field To Show"
+   },
+   {
+    "name": "webhook_url",
+    "type": "Char",
+    "string": "Webhook URL",
+    "help": "URL to send the POST request to.",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "mail"
+    ],
+    "full_name": "Webhook uniform resource locator"
+   },
+   {
+    "name": "webhook_field_ids",
+    "type": "Many2many",
+    "comodel": "ir.model.fields",
+    "relation": "ir_act_server_webhook_field_rel",
+    "column1": "server_id",
+    "column2": "field_id",
+    "string": "Webhook Fields",
+    "help": "Fields to send in the POST request. The id and model of the record are always sent as '_id' and '_model'. The name of the action that triggered the webhook is always sent as '_name'.",
+    "defined_in_package": "base",
+    "full_name": "Webhook Fields",
+    "target_entity": "ir.model.fields"
+   },
+   {
+    "name": "webhook_sample_payload",
+    "type": "Text",
+    "string": "Sample Payload",
+    "compute": "_compute_webhook_sample_payload",
+    "defined_in_package": "base",
+    "full_name": "Sample Payload"
+   },
+   {
+    "name": "followers_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "specific",
+      "Specific Followers"
+     ],
+     [
+      "generic",
+      "Dynamic Followers"
+     ]
+    ],
+    "help": "\n            - Specific Followers: select specific contacts to add/remove from record's followers.\n            - Dynamic Followers: all contacts of the chosen record's field will be added/removed from followers.\n        ",
+    "string": "Followers Type",
+    "compute": "_compute_followers_type",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Followers Type"
+   },
+   {
+    "name": "followers_partner_field_name",
+    "type": "Char",
+    "string": "Followers Field",
+    "compute": "_compute_followers_info",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Followers Field"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_followers_info",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "string": "Partner",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "string": "Email Template",
+    "domain": "[('model_id', '=', model_id)]",
+    "compute": "_compute_template_id",
+    "ondelete": "set null",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Email Template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "mail_post_autofollow",
+    "type": "Boolean",
+    "string": "Subscribe Recipients",
+    "compute": "_compute_mail_post_autofollow",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Subscribe Recipients"
+   },
+   {
+    "name": "mail_post_method",
+    "type": "Selection",
+    "selection": [
+     [
+      "email",
+      "Email"
+     ],
+     [
+      "comment",
+      "Message"
+     ],
+     [
+      "note",
+      "Note"
+     ]
+    ],
+    "string": "Send Email As",
+    "compute": "_compute_mail_post_method",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Send Email As"
+   },
+   {
+    "name": "activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Activity Type",
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', model_name)]",
+    "compute": "_compute_activity_info",
+    "readonly": false,
+    "store": true,
+    "ondelete": "restrict",
+    "defined_in_package": "mail",
+    "full_name": "Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "activity_summary",
+    "type": "Char",
+    "string": "Title",
+    "compute": "_compute_activity_info",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Title"
+   },
+   {
+    "name": "activity_note",
+    "type": "Html",
+    "string": "Note",
+    "compute": "_compute_activity_info",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Note"
+   },
+   {
+    "name": "activity_date_deadline_range",
+    "type": "Integer",
+    "string": "Due Date In",
+    "compute": "_compute_activity_info",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Due Date In"
+   },
+   {
+    "name": "activity_date_deadline_range_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "days",
+      "Days"
+     ],
+     [
+      "weeks",
+      "Weeks"
+     ],
+     [
+      "months",
+      "Months"
+     ]
+    ],
+    "string": "Due type",
+    "compute": "_compute_activity_info",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Due type"
+   },
+   {
+    "name": "activity_user_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "specific",
+      "Specific User"
+     ],
+     [
+      "generic",
+      "Dynamic User (based on record)"
+     ]
+    ],
+    "string": "User Type",
+    "compute": "_compute_activity_info",
+    "readonly": false,
+    "store": true,
+    "help": "Use 'Specific User' to always assign the same user on the next activity. Use 'Dynamic User' to specify the field name of the user to choose on the record.",
+    "defined_in_package": "mail",
+    "full_name": "User Type"
+   },
+   {
+    "name": "activity_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "compute": "_compute_activity_user_info",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "activity_user_field_name",
+    "type": "Char",
+    "string": "User Field",
+    "compute": "_compute_activity_user_info",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "User Field"
+   },
+   {
+    "name": "sms_template_id",
+    "type": "Many2one",
+    "comodel": "sms.template",
+    "string": "SMS Template",
+    "compute": "_compute_sms_template_id",
+    "ondelete": "set null",
+    "readonly": false,
+    "store": true,
+    "domain": "[('model_id', '=', model_id)]",
+    "defined_in_package": "sms",
+    "full_name": "text message Template",
+    "target_entity": "sms.template"
+   },
+   {
+    "name": "sms_method",
+    "type": "Selection",
+    "selection": [
+     [
+      "sms",
+      "SMS (without note)"
+     ],
+     [
+      "comment",
+      "SMS (with note)"
+     ],
+     [
+      "note",
+      "Note only"
+     ]
+    ],
+    "string": "Send SMS As",
+    "compute": "_compute_sms_method",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "sms",
+    "full_name": "Send text message As"
+   },
+   {
+    "name": "base_automation_id",
+    "type": "Many2one",
+    "comodel": "base.automation",
+    "string": "Automation Rule",
+    "index": "btree_not_null",
+    "ondelete": "cascade",
+    "defined_in_package": "base_automation",
+    "full_name": "Automation Rule",
+    "target_entity": "base.automation"
+   },
+   {
+    "name": "xml_id",
+    "type": "Char",
+    "string": "External ID",
+    "compute": "_compute_xml_id",
+    "help": "ID of the action if defined in a XML file",
+    "defined_in_package": "website",
+    "full_name": "External identifier"
+   },
+   {
+    "name": "website_path",
+    "type": "Char",
+    "string": "Website Path",
+    "defined_in_package": "website",
+    "full_name": "Website Path"
+   },
+   {
+    "name": "website_url",
+    "type": "Char",
+    "string": "Website Url",
+    "compute": "_get_website_url",
+    "help": "The full URL to access the server action through the website.",
+    "defined_in_package": "website",
+    "full_name": "Website Url"
+   },
+   {
+    "name": "website_published",
+    "type": "Boolean",
+    "string": "Available on the Website",
+    "copy": false,
+    "help": "A code server action can be executed from the website, using a dedicated controller. The address is <base>/website/action/<website_path>. Set this field as True to allow users to run this action. If it is set to False the action cannot be run through the website.",
+    "defined_in_package": "website",
+    "full_name": "Available on the Website"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_update_path",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_code_history",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_warning_depends",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "base_automation",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_warning_messages",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "base_automation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_states",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._warning_depends()"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_children_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "base_automation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_action_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_name_depends",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._name_depends()"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_name",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_model_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "base_automation",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "usage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Stricter model limit: based on automation rule ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_crud_relations",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id",
+         "update_path",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the crud_model_id and update_field_id fields.\n\nThe crud_model_id is the model on which the action will create or update\nrecords. In the case of record creation, it is the same as the main model\nof the action. For record update, it will be the model linked to the last\nfield in the update_path.\nThis is only used for object_create and object_write actions.\nThe update_field_id is the field at the end of the update_path that will\nbe updated by the action - only used for object_write actions.",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_traverse_path",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Traverse the update_path to find the target model and field.\n\n:return: a tuple (model, field) where model is the target model and field is the target field",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_relation_chain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "searched_field_name"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The path contained by the field '%(searched_field)s' contains a non-relational field (%(current_field)s) that is not the last field in the path. You can't traverse non-relational fields (even in the quantum realm). Make sure only the last field in the path is non-relational.",
+        "line": 932
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_webhook_sample_payload",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "model_id",
+         "webhook_field_ids",
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_python_code",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "msg",
+        "line": 965
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_children",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id",
+         "child_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Recursion found in child server actions",
+        "line": 970
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Following child actions have warnings: %(children)s",
+        "line": 973
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_readable_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_runner",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_action",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Create a contextual action for each server action. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink_action",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Remove the contextual actions created for the server actions. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "history_wizard_action",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_code_multi",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override to allow returning response the same way action is already\nreturned by the basic server action behavior. Note that response has\npriority over action, avoid using both.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_multi",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_object_write",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Apply specified write changes to active_id.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_webhook",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Send a post request with a read of the selected field on active_id.",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "I'll be happy to send a webhook for you, but you really need to give me a URL to reach out to...",
+        "line": 1047
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_run_action_object_copy",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Duplicate specified model object.\nIf applicable, link active_id.<self.link_field_id> to the new record.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_object_create",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Create specified model object with specified name contained in value.\n\nIf applicable, link active_id.<self.link_field_id> to the new record.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_eval_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "action"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Prepare the context used when evaluating python code, like the\npython formulas or code server actions.\n\n:param action: the current server action\n:type action: browse record\n:returns: dict -- evaluation context given to (safe_)safe_eval ",
+      "size_in_lines": 39,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override the method giving the evaluation context but also the\ncontext used in all subsequent calls. Add the mail_notify_force_send\nkey set to False in the context. This way all notification emails linked\nto the currently executed action will be set in the queue instead of\nsent directly. This will avoid possible break in transactions. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "base_automation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override to add the request object in eval_context. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "run",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Runs the server action. For each server action, the\n:samp:`_run_action_{TYPE}[_multi]` method is called. This allows easy\noverriding of the server actions.\n\nThe ``_multi`` suffix means the runner can operate on multiple records,\notherwise if there are multiple records the runner will be called once\nfor each.\n\nThe call context should contain the following keys:\n\nactive_id\n    id of the current object (single mode)\nactive_model\n    current model that should equal the action's model\nactive_ids (optional)\n   ids of the current records (mass mode). If ``active_ids`` and\n   ``active_id`` are present, ``active_ids`` is given precedence.\n\n:return: an ``action_id`` to be executed, or ``False`` is finished\n         correctly without return action",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_execute_action_on_records",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You don't have enough access rights to run this action.",
+        "line": 1222
+       },
+       {
+        "kind": "AccessError",
+        "message": "You don't have enough access rights to run this action.",
+        "line": 1231
+       },
+       {
+        "kind": "AccessError",
+        "message": "You don't have enough access rights to run this action.",
+        "line": 1242
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_value_field_to_show",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "evaluation_type",
+         "update_field_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_selection_target_model",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_crud_model_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "crud_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_resource_ref",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "resource_ref"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_selection_value",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "selection_value"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_eval_value",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_parent_action",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_scheduled_action",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_template_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mail_post_autofollow",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "mail_post_method"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mail_post_method",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_followers_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_followers_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "followers_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_user_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id",
+         "activity_user_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_followers_multi",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_remove_followers_multi",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_recompute",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "When an activity is set on update of a record,\nupdate might be triggered many times by recomputes.\nWhen need to know it to skip these steps.\nExcept if the computed field is supposed to trigger the action",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_mail_post_multi",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_next_activity",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sms_template_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sms_method",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_action_sms_multi",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "eval_context"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_automation",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base_automation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_xml_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "website_path",
+     "xml_id"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "website_published",
+         "website_path",
+         "xml_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_get_relation_chain",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "The path contained by the field '%(searched_field)s' contains a non-relational field (%(current_field)s) that is not the last field in the path. You can't traverse non-relational fields (even in the quantum realm). Make sure only the last field in the path is non-relational."
+   },
+   {
+    "operation": "_check_python_code",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "msg"
+   },
+   {
+    "operation": "_check_children",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "Recursion found in child server actions"
+   },
+   {
+    "operation": "_check_children",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "Following child actions have warnings: %(children)s"
+   },
+   {
+    "operation": "_run_action_webhook",
+    "package": "base",
+    "kind": "UserError",
+    "message": "I'll be happy to send a webhook for you, but you really need to give me a URL to reach out to..."
+   },
+   {
+    "operation": "_can_execute_action_on_records",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "You don't have enough access rights to run this action."
+   },
+   {
+    "operation": "_can_execute_action_on_records",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "You don't have enough access rights to run this action."
+   },
+   {
+    "operation": "_can_execute_action_on_records",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "You don't have enough access rights to run this action."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_actions_server_group_system",
+    "package": "base",
+    "name": "ir_actions_server_group_system",
+    "entity": "ir.actions.server",
+    "group": "group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.view_server_action_form",
+    "package": "base",
+    "name": "Server Action",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Server Action"
+     },
+     "fields": [
+      {
+       "name": "automated_name",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "Set an explicit name"
+      },
+      {
+       "name": "model_id",
+       "options": "{'no_create': True, 'no_open': True}",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "model_id",
+       "invisible": "context.get('default_model_id')",
+       "domain": "[('id', 'in', available_model_ids)]",
+       "options": "{'no_create': True, 'no_open': True}",
+       "groups": "!base.group_no_one"
+      },
+      {
+       "name": "group_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "allowed_states",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "selection_badge_with_filter",
+       "options": "{'size': 'sm', 'allowed_selection_field': 'allowed_states'}"
+      },
+      {
+       "name": "warning",
+       "nolabel": "1"
+      },
+      {
+       "name": "evaluation_type"
+      },
+      {
+       "name": "update_path",
+       "widget": "field_selector",
+       "required": "state == 'object_write'",
+       "options": "{'model': 'model_name', 'allow_properties': False}"
+      },
+      {
+       "name": "update_field_id",
+       "invisible": "True"
+      },
+      {
+       "name": "update_related_model_id",
+       "invisible": "True"
+      },
+      {
+       "name": "update_m2m_operation",
+       "invisible": "evaluation_type != 'value' or update_field_type not in ['one2many', 'many2many']",
+       "required": "update_field_type in ['one2many', 'many2many']"
+      },
+      {
+       "name": "value",
+       "invisible": "update_field_id == False or value_field_to_show != 'value' or evaluation_type != 'value'",
+       "string": "Custom Value",
+       "placeholder": "Set a value..."
+      },
+      {
+       "name": "html_value",
+       "invisible": "update_field_id == False or value_field_to_show != 'html_value' or evaluation_type != 'value'",
+       "string": "Custom Value",
+       "placeholder": "Set a value..."
+      },
+      {
+       "name": "sequence_id",
+       "invisible": "evaluation_type != 'sequence'",
+       "required": "evaluation_type == 'sequence'",
+       "placeholder": "Select a sequence..."
+      },
+      {
+       "name": "resource_ref",
+       "invisible": "update_field_id == False or value_field_to_show != 'resource_ref' or evaluation_type == 'equation' or update_m2m_operation == 'clear'",
+       "string": "Custom Value",
+       "options": "{'model_field': 'update_related_model_id', 'no_create': True, 'no_open': True}",
+       "placeholder": "Choose a value..."
+      },
+      {
+       "name": "selection_value",
+       "invisible": "update_field_id == False or value_field_to_show != 'selection_value' or evaluation_type == 'equation'",
+       "options": "{'no_create': True, 'no_open': True}",
+       "placeholder": "Choose a value..."
+      },
+      {
+       "name": "update_boolean_value",
+       "invisible": "evaluation_type != 'value' or value_field_to_show != 'update_boolean_value'",
+       "required": "value_field_to_show == 'update_boolean_value'"
+      },
+      {
+       "name": "value",
+       "widget": "code",
+       "string": "Expression",
+       "options": "{'mode': 'python'}"
+      },
+      {
+       "name": "crud_model_id",
+       "required": "state in ['object_create', 'object_copy']",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "value",
+       "widget": "char",
+       "invisible": "state != 'object_create'",
+       "string": "Name",
+       "placeholder": "e.g. Follow-up"
+      },
+      {
+       "name": "resource_ref",
+       "invisible": "crud_model_id == False or state != 'object_copy'",
+       "required": "state == 'object_copy'",
+       "string": "Duplicate from",
+       "options": "{'model_field': 'crud_model_id', 'no_create': True, 'no_open': True}",
+       "placeholder": "Choose a record..."
+      },
+      {
+       "name": "link_field_id",
+       "domain": "[('model_id', '=', model_id), ('relation', '=', crud_model_name),                                         ('ttype', 'in', ['many2one', 'one2many', 'many2many'])]",
+       "context": "{'default_model_id': model_id, 'default_relation': crud_model_name}",
+       "options": "{'no_create': True, 'no_open': True}",
+       "placeholder": "Select a field to link the record to"
+      },
+      {
+       "name": "webhook_url",
+       "string": "URL",
+       "placeholder": "e.g. https://maker.ifttt.com/use/..."
+      },
+      {
+       "name": "webhook_field_ids",
+       "widget": "many2many_tags",
+       "string": "Fields",
+       "domain": "[('model_id', '=', model_id)]",
+       "context": "{'hide_model': 1}",
+       "placeholder": "Select fields to include in the request..."
+      },
+      {
+       "name": "webhook_sample_payload",
+       "widget": "code",
+       "readonly": "1",
+       "string": "Sample Payload",
+       "options": "{'mode': 'javascript'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "child_ids",
+       "widget": "many2many",
+       "context": "{                                     'is_modal': 1,                                     'default_model_id': model_id,                                 }",
+       "mode": "kanban"
+      },
+      {
+       "name": "code",
+       "widget": "code",
+       "invisible": "state != 'code'",
+       "options": "{'mode': 'python'}",
+       "placeholder": "Enter Python code here. Help about Python expression is available in the help tab of this document."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "create_action",
+       "string": "Create Contextual Action",
+       "type": "object",
+       "invisible": "binding_model_id",
+       "class": "btn-primary"
+      },
+      {
+       "name": "unlink_action",
+       "string": "Remove Contextual Action",
+       "type": "object",
+       "invisible": "not binding_model_id"
+      },
+      {
+       "name": "run",
+       "string": "Run",
+       "type": "object",
+       "invisible": "model_name != 'ir.actions.server' or state != 'code'",
+       "class": "btn-primary"
+      },
+      {
+       "name": "history_wizard_action",
+       "string": "Code History",
+       "type": "object",
+       "invisible": "not show_code_history"
+      },
+      {
+       "name": "action_open_parent_action",
+       "type": "object",
+       "invisible": "not parent_id",
+       "class": "oe_stat_button",
+       "icon": "fa-database"
+      },
+      {
+       "name": "action_open_scheduled_action",
+       "type": "object",
+       "invisible": "not ir_cron_ids or context.key != 'server_action'",
+       "class": "oe_stat_button",
+       "context": "{'key': 'ir_cron'}",
+       "icon": "fa-refresh"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": null,
+       "string": "Code",
+       "invisible": "state != 'code'",
+       "groups": null
+      },
+      {
+       "name": "ir_actions_server_code_help",
+       "string": "Help",
+       "invisible": "state != 'code'",
+       "groups": null
+      },
+      {
+       "name": "usage",
+       "string": "Usage",
+       "invisible": "1",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "many2many_tags": 2,
+      "selection_badge_with_filter": 1,
+      "field_selector": 1,
+      "code": 3,
+      "char": 1,
+      "many2many": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "create_action",
+       "string": "Create Contextual Action",
+       "type": "object",
+       "class": "btn-primary",
+       "invisible": "binding_model_id",
+       "help": "Display an option in the 'More' top-menu in order to run this action."
+      },
+      {
+       "name": "unlink_action",
+       "string": "Remove Contextual Action",
+       "type": "object",
+       "invisible": "not binding_model_id",
+       "help": "Remove 'More' top-menu contextual action related to this action"
+      },
+      {
+       "name": "run",
+       "string": "Run",
+       "type": "object",
+       "class": "btn-primary",
+       "invisible": "model_name != 'ir.actions.server' or state != 'code'",
+       "help": "Run this action manually."
+      },
+      {
+       "name": "history_wizard_action",
+       "string": "Code History",
+       "type": "object",
+       "invisible": "not show_code_history",
+       "help": "View code history and restore a previous version"
+      }
+     ],
+     "chatter": false,
+     "button_box": [
+      {
+       "type": "object",
+       "name": "action_open_parent_action",
+       "invisible": "not parent_id",
+       "class": "oe_stat_button",
+       "icon": "fa-database"
+      },
+      {
+       "type": "object",
+       "name": "action_open_scheduled_action",
+       "invisible": "not ir_cron_ids or context.key != 'server_action'",
+       "context": "{'key': 'ir_cron'}",
+       "class": "oe_stat_button",
+       "icon": "fa-refresh"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "base.view_server_action_kanban",
+    "package": "base",
+    "name": "Server Actions",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "state"
+      },
+      {
+       "name": "evaluation_type"
+      },
+      {
+       "name": "value"
+      },
+      {
+       "name": "value_field_to_show"
+      },
+      {
+       "name": "update_field_type"
+      },
+      {
+       "name": "update_m2m_operation"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "delete",
+       "type": "delete",
+       "class": "btn fa fa-trash fa-xl px-3 ms-auto"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "base.view_server_action_tree",
+    "package": "base",
+    "name": "Server Actions",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Server Actions"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "usage"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.view_server_action_search",
+    "package": "base",
+    "name": "ir.actions.server.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Server Actions"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Server Action"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "state"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "toplevel_actions",
+       "string": "Top-level actions",
+       "domain": "[('parent_id', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "action_type",
+       "string": "Action Type",
+       "domain": "[]",
+       "context": "{'group_by':'state'}"
+      },
+      {
+       "name": "model",
+       "string": "Model",
+       "domain": "[]",
+       "context": "{'group_by':'model_id'}"
+      },
+      {
+       "name": "usage",
+       "string": "Usage",
+       "domain": "[]",
+       "context": "{'group_by':'usage'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "base_automation.view_server_action_form",
+    "package": "base_automation",
+    "name": "Server Actions",
+    "view_type": "xpath",
+    "inherits_view": "base.view_server_action_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_open_automation",
+       "type": "object",
+       "invisible": "not base_automation_id",
+       "class": "oe_stat_button",
+       "icon": "fa-bolt"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.view_server_action_form_template",
+    "package": "mail",
+    "name": "ir.actions.server.form",
+    "view_type": "xpath",
+    "inherits_view": "base.view_server_action_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sms.ir_actions_server_view_form",
+    "package": "sms",
+    "name": "ir.actions.server.view.form.inherit.sms",
+    "view_type": "xpath",
+    "inherits_view": "base.view_server_action_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//t[@name='action_content']",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "sms_template_id",
+       "required": "state == 'sms'",
+       "context": "{'default_model': model_name}",
+       "placeholder": "Choose a template..."
+      },
+      {
+       "name": "sms_method",
+       "required": "state == 'sms'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//t[@name='action_content']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website.view_server_action_form_website",
+    "package": "website",
+    "name": "ir.actions.server.form.website",
+    "view_type": "data",
+    "inherits_view": "base.view_server_action_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "website_published",
+       "string": "Use in website"
+      },
+      {
+       "name": "xml_id",
+       "invisible": "1"
+      },
+      {
+       "name": "website_path",
+       "invisible": "not website_published"
+      },
+      {
+       "name": "website_url",
+       "widget": "url",
+       "invisible": "not website_published",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "url": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//page[@name='usage']",
+       "position": "inside"
+      },
+      {
+       "expr": "//page[@name='usage']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website.view_server_action_search_website",
+    "package": "website",
+    "name": "ir.actions.server.search.website",
+    "view_type": "xpath",
+    "inherits_view": "base.view_server_action_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='state']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "website",
+       "string": "Website",
+       "domain": "[('website_published', '=', True), ('state', '=', 'code')]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='state']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.action_server_action",
+    "package": "base",
+    "name": "Server Actions",
+    "view_mode": "list,form",
+    "view_id": "view_server_action_tree",
+    "search_view_id": "view_server_action_search",
+    "domain": null,
+    "context": "{\n                'key':'server_action',\n                'search_default_toplevel_actions': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.actions.server"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

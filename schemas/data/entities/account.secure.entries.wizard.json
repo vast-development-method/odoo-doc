@@ -1,0 +1,499 @@
+{
+ "catalog": {
+  "name": "entity:account.secure.entries.wizard",
+  "description": "Complete definition of entity Secure Journal Entries (account.secure.entries.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.secure.entries.wizard",
+  "storage_name": "account_secure_entries_wizard",
+  "full_name": "Secure Journal Entries",
+  "kind": "transient",
+  "description": "Secure Journal Entries",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_id.account_fiscal_country_id.code",
+    "defined_in_package": "account",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "hash_date",
+    "type": "Date",
+    "string": "Hash All Entries",
+    "required": true,
+    "compute": "_compute_hash_date",
+    "store": true,
+    "readonly": false,
+    "help": "The selected Date",
+    "defined_in_package": "account",
+    "full_name": "Hash All Entries"
+   },
+   {
+    "name": "chains_to_hash_with_gaps",
+    "type": "Json",
+    "compute": "_compute_data",
+    "defined_in_package": "account",
+    "string": "Chains To Hash With Gaps",
+    "full_name": "Chains To Hash With Gaps"
+   },
+   {
+    "name": "max_hash_date",
+    "type": "Date",
+    "string": "Max Hash Date",
+    "compute": "_compute_max_hash_date",
+    "help": "Highest Date such that all posted journal entries prior to (including) the date are secured. Only journal entries after the hard lock date are considered.",
+    "defined_in_package": "account",
+    "full_name": "Max Hash Date"
+   },
+   {
+    "name": "unreconciled_bank_statement_line_ids",
+    "type": "Many2many",
+    "compute": "_compute_data",
+    "comodel": "account.bank.statement.line",
+    "help": "All unreconciled bank statement lines before the selected date.",
+    "defined_in_package": "account",
+    "string": "Unreconciled Bank Statement Line",
+    "full_name": "Unreconciled Bank Statement Line",
+    "target_entity": "account.bank.statement.line"
+   },
+   {
+    "name": "not_hashable_unlocked_move_ids",
+    "type": "Many2many",
+    "compute": "_compute_data",
+    "comodel": "account.move",
+    "help": "All unhashable moves before the selected date that are not protected by the Hard Lock Date",
+    "defined_in_package": "account",
+    "string": "Not Hashable Unlocked Move",
+    "full_name": "Not Hashable Unlocked Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "move_to_hash_ids",
+    "type": "Many2many",
+    "compute": "_compute_data",
+    "comodel": "account.move",
+    "help": "All moves that will be hashed",
+    "defined_in_package": "account",
+    "string": "Move To Hash",
+    "full_name": "Move To Hash",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "warnings",
+    "type": "Json",
+    "compute": "_compute_warnings",
+    "defined_in_package": "account",
+    "string": "Warnings",
+    "full_name": "Warnings"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_hash_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "max_hash_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_max_hash_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "company_id.user_hard_lock_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_chains_to_hash",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "hash_date"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "company_id.user_hard_lock_date",
+         "hash_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_warnings",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "chains_to_hash_with_gaps",
+         "hash_date",
+         "not_hashable_unlocked_move_ids",
+         "max_hash_date",
+         "unreconciled_bank_statement_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 69,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_unhashed_moves_in_hashed_period_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "hash_date",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the domain to find all moves before `self.hash_date` that have not been hashed yet.\nWe ignore whether hashing is activated for the journal or not.\n:return a search domain",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_draft_moves_in_hashed_period_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_show_moves",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "moves"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_show_draft_moves_in_hashed_period",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_secure_entries",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Set a date. The moves will be secured up to including this date.",
+        "line": 264
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_secure_entries",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Set a date. The moves will be secured up to including this date."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_secure_entries_wizard",
+    "package": "account",
+    "name": "access.account.secure.entries.wizard",
+    "entity": "account.secure.entries.wizard",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.view_account_secure_entries_wizard",
+    "package": "account",
+    "name": "account.secure.entries.wizard.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Secure Journal Entries"
+     },
+     "fields": [
+      {
+       "name": "warnings",
+       "widget": "actionable_errors"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "hash_date",
+       "options": "{'warn_future': true}",
+       "placeholder": "Not hashed"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_secure_entries",
+       "string": "Secure Entries",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "v"
+      },
+      {
+       "string": "Discard",
+       "special": "cancel",
+       "data-hotkey": "z"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "actionable_errors": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "l10n_de.view_account_secure_entries_wizard",
+    "package": "l10n_de",
+    "name": "account.secure.entries.wizard.form",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_secure_entries_wizard",
+    "mode": "extension",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='hash_date']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='hash_date']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_view_account_secure_entries_wizard",
+    "package": "account",
+    "name": "Secure Journal Entries",
+    "view_mode": "form",
+    "view_id": "view_account_secure_entries_wizard",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.secure.entries.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

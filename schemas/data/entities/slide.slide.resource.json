@@ -1,0 +1,374 @@
+{
+ "catalog": {
+  "name": "entity:slide.slide.resource",
+  "description": "Complete definition of entity Additional resource for a particular slide (slide.slide.resource).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "slide.slide.resource",
+  "storage_name": "slide_slide_resource",
+  "full_name": "Additional resource for a particular slide",
+  "kind": "persistent",
+  "description": "Additional resource for a particular slide",
+  "defined_by_package": "website_slides",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "slide_id",
+    "type": "Many2one",
+    "comodel": "slide.slide",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "website_slides",
+    "string": "Slide",
+    "full_name": "Slide",
+    "target_entity": "slide.slide"
+   },
+   {
+    "name": "resource_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "file",
+      "File"
+     ],
+     [
+      "url",
+      "Link"
+     ]
+    ],
+    "required": true,
+    "defined_in_package": "website_slides",
+    "string": "Resource Type",
+    "full_name": "Resource Type"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "compute": "_compute_name",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Name"
+   },
+   {
+    "name": "data",
+    "type": "Binary",
+    "string": "Resource",
+    "compute": "_compute_reset_resources",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Resource"
+   },
+   {
+    "name": "file_name",
+    "type": "Char",
+    "store": true,
+    "defined_in_package": "website_slides",
+    "string": "File Name",
+    "full_name": "File Name"
+   },
+   {
+    "name": "link",
+    "type": "Char",
+    "string": "Link",
+    "compute": "_compute_reset_resources",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Link"
+   },
+   {
+    "name": "download_url",
+    "type": "Char",
+    "string": "Download URL",
+    "compute": "_compute_download_url",
+    "defined_in_package": "website_slides",
+    "full_name": "Download uniform resource locator"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "defined_in_package": "website_slides",
+    "full_name": "Sequence"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_url",
+    "kind": "Constraint",
+    "definition": "CHECK (resource_type != 'url' OR link IS NOT NULL)",
+    "message": "A resource of type url must contain a link.",
+    "defined_in_package": "website_slides"
+   },
+   {
+    "name": "_check_file_type",
+    "kind": "Constraint",
+    "definition": "CHECK (resource_type != 'file' OR link IS NULL)",
+    "message": "A resource of type file cannot contain a link.",
+    "defined_in_package": "website_slides"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_reset_resources",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "resource_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "file_name",
+         "resource_type",
+         "data",
+         "link"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_download_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "file_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_link_type",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "data"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Resource %(resource_name)s is a link and should not contain a data file",
+        "line": 73
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_link_type",
+    "package": "website_slides",
+    "kind": "ValidationError",
+    "message": "Resource %(resource_name)s is a link and should not contain a data file"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_slides.access_slide_slide_resource_all",
+    "package": "website_slides",
+    "name": "slide.slide.resource.all",
+    "entity": "slide.slide.resource",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_slide_resource_public",
+    "package": "website_slides",
+    "name": "slide.slide.resource.public",
+    "entity": "slide.slide.resource",
+    "group": "base.group_public",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_slide_resource_portal",
+    "package": "website_slides",
+    "name": "slide.slide.resource.portal",
+    "entity": "slide.slide.resource",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_slide_resource_internal",
+    "package": "website_slides",
+    "name": "slide.slide.resource.internal",
+    "entity": "slide.slide.resource",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_slide_resource_publisher",
+    "package": "website_slides",
+    "name": "slide.slide.resource.publisher",
+    "entity": "slide.slide.resource",
+    "group": "website_slides.group_website_slides_officer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_slides.rule_slide_slide_resource_downloadable",
+    "package": "website_slides",
+    "name": "Resource: read restricted to channel members and channel responsible",
+    "entity": "slide.slide.resource",
+    "domain": "[('slide_id.channel_id.is_member', '=', True)]",
+    "groups": "[(4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_slide_resource_officer_read",
+    "package": "website_slides",
+    "name": "Resource: officer: read all",
+    "entity": "slide.slide.resource",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_slide_resource_officer_crud",
+    "package": "website_slides",
+    "name": "Resource: officer: crud own only",
+    "entity": "slide.slide.resource",
+    "domain": "[('slide_id.channel_id.user_id', '=', user.id)]",
+    "groups": "[(4, ref('group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_slide_resource_downloadable_manager",
+    "package": "website_slides",
+    "name": "Resource: manager: crud all",
+    "entity": "slide.slide.resource",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_website_slides_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   }
+  ],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

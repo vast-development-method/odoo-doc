@@ -1,0 +1,3108 @@
+{
+ "catalog": {
+  "name": "entity:stock.warehouse.orderpoint",
+  "description": "Complete definition of entity Minimum Inventory Rule (stock.warehouse.orderpoint).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.warehouse.orderpoint",
+  "storage_name": "stock_warehouse_orderpoint",
+  "full_name": "Minimum Inventory Rule",
+  "kind": "persistent",
+  "description": "Minimum Inventory Rule",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "purchase_stock",
+   "mrp",
+   "mrp",
+   "mrp_subcontracting_dropshipping",
+   "sale_mrp"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "location_id,company_id,id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "copy": false,
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env['ir.sequence'].next_by_code('stock.orderpoint')"
+    },
+    "defined_in_package": "stock",
+    "full_name": "Name"
+   },
+   {
+    "name": "trigger",
+    "type": "Selection",
+    "selection": [
+     [
+      "auto",
+      "Auto"
+     ],
+     [
+      "manual",
+      "Manual"
+     ]
+    ],
+    "string": "Trigger",
+    "default": "auto",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Trigger"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "help": "If the active field is set to False, it will allow you to hide the orderpoint without removing it.",
+    "defined_in_package": "stock",
+    "full_name": "Active"
+   },
+   {
+    "name": "snoozed_until",
+    "type": "Date",
+    "string": "Snoozed",
+    "help": "Hidden until next scheduler.",
+    "defined_in_package": "stock",
+    "full_name": "Snoozed"
+   },
+   {
+    "name": "warehouse_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse",
+    "string": "Warehouse",
+    "compute": "_compute_warehouse_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "check_company": true,
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "Warehouse",
+    "target_entity": "stock.warehouse"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Location",
+    "index": true,
+    "compute": "_compute_location_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "ondelete": "cascade",
+    "required": true,
+    "check_company": true,
+    "defined_in_package": "stock",
+    "full_name": "Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "product_tmpl_id",
+    "type": "Many2one",
+    "comodel": "product.template",
+    "related": "product_id.product_tmpl_id",
+    "defined_in_package": "stock",
+    "string": "Product Tmpl",
+    "full_name": "Product Tmpl",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "domain": "[('product_tmpl_id', '=', context.get('active_id', False))] if context.get('active_model') == 'product.template' else [('id', '=', context.get('default_product_id', False))] if context.get('default_product_id') else [('is_storable', '=', True)]",
+    "ondelete": "cascade",
+    "required": true,
+    "check_company": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "Product Category",
+    "type": "Many2one",
+    "comodel": "product.category",
+    "related": "product_id.categ_id",
+    "defined_in_package": "stock",
+    "string": "Product Category",
+    "full_name": "Product Category",
+    "target_entity": "product.category"
+   },
+   {
+    "name": "product_uom",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "related": "product_id.uom_id",
+    "defined_in_package": "stock",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "product_uom_name",
+    "type": "Char",
+    "string": "Product unit of measure label",
+    "related": "product_uom.display_name",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "Product unit of measure label"
+   },
+   {
+    "name": "product_min_qty",
+    "type": "Float",
+    "string": "Min Quantity",
+    "digits": "Product Unit",
+    "required": true,
+    "default": 0.0,
+    "help": "The minimum Stock level that will trigger a replenishment.",
+    "defined_in_package": "stock",
+    "full_name": "Min Quantity"
+   },
+   {
+    "name": "product_max_qty",
+    "type": "Float",
+    "string": "Max Quantity",
+    "digits": "Product Unit",
+    "required": true,
+    "default": 0.0,
+    "compute": "_compute_product_max_qty",
+    "readonly": false,
+    "store": true,
+    "help": "Stock level to reach when replenishing.",
+    "defined_in_package": "stock",
+    "full_name": "Max Quantity"
+   },
+   {
+    "name": "allowed_replenishment_uom_ids",
+    "type": "Many2many",
+    "comodel": "uom.uom",
+    "compute": "_compute_allowed_replenishment_uom_ids",
+    "defined_in_package": "stock",
+    "string": "Allowed Replenishment Unit of measure",
+    "full_name": "Allowed Replenishment Unit of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "replenishment_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Multiple",
+    "domain": "[('id', 'in', allowed_replenishment_uom_ids)]",
+    "help": "The procurement quantity will be rounded up to a multiple of this unit/packaging. If it is not set, it is not rounded.",
+    "defined_in_package": "stock",
+    "full_name": "Multiple",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "replenishment_uom_id_placeholder",
+    "type": "Char",
+    "compute": "_compute_replenishment_uom_id_placeholder",
+    "defined_in_package": "stock",
+    "string": "Replenishment Unit of measure Identifier Placeholder",
+    "full_name": "Replenishment Unit of measure Identifier Placeholder"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "index": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "stock",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "allowed_location_ids",
+    "type": "One2many",
+    "comodel": "stock.location",
+    "compute": "_compute_allowed_location_ids",
+    "defined_in_package": "stock",
+    "string": "Allowed Location",
+    "full_name": "Allowed Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "rule_ids",
+    "type": "Many2many",
+    "comodel": "stock.rule",
+    "string": "Rules used",
+    "compute": "_compute_rules",
+    "defined_in_package": "stock",
+    "full_name": "Rules used",
+    "target_entity": "stock.rule"
+   },
+   {
+    "name": "lead_horizon_date",
+    "type": "Date",
+    "compute": "_compute_lead_days",
+    "defined_in_package": "stock",
+    "string": "Lead Horizon Date",
+    "full_name": "Lead Horizon Date"
+   },
+   {
+    "name": "lead_days",
+    "type": "Float",
+    "compute": "_compute_lead_days",
+    "defined_in_package": "stock",
+    "string": "Lead Days",
+    "full_name": "Lead Days"
+   },
+   {
+    "name": "route_id",
+    "type": "Many2one",
+    "comodel": "stock.route",
+    "string": "Route",
+    "domain": "['|', ('product_selectable', '=', True), ('rule_ids.action', 'in', ['buy', 'manufacture'])]",
+    "inverse": "_inverse_route_id",
+    "defined_in_package": "stock",
+    "full_name": "Route",
+    "target_entity": "stock.route"
+   },
+   {
+    "name": "route_id_placeholder",
+    "type": "Char",
+    "compute": "_compute_route_id_placeholder",
+    "defined_in_package": "stock",
+    "string": "Route Identifier Placeholder",
+    "full_name": "Route Identifier Placeholder"
+   },
+   {
+    "name": "effective_route_id",
+    "type": "Many2one",
+    "comodel": "stock.route",
+    "search": "_search_effective_route_id",
+    "compute": "_compute_effective_route_id",
+    "store": false,
+    "help": "Either the route set directly or the one computed to be used by this replenishment",
+    "defined_in_package": "stock",
+    "string": "Effective Route",
+    "full_name": "Effective Route",
+    "target_entity": "stock.route"
+   },
+   {
+    "name": "qty_on_hand",
+    "type": "Float",
+    "string": "On Hand",
+    "readonly": true,
+    "compute": "_compute_qty",
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "full_name": "On Hand"
+   },
+   {
+    "name": "qty_forecast",
+    "type": "Float",
+    "string": "Forecast",
+    "readonly": true,
+    "compute": "_compute_qty",
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "full_name": "Forecast"
+   },
+   {
+    "name": "qty_to_order",
+    "type": "Float",
+    "string": "To Order",
+    "compute": "_compute_qty_to_order",
+    "inverse": "_inverse_qty_to_order",
+    "search": "_search_qty_to_order",
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "full_name": "To Order"
+   },
+   {
+    "name": "qty_to_order_computed",
+    "type": "Float",
+    "string": "To Order Computed",
+    "store": true,
+    "compute": "_compute_qty_to_order_computed",
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "full_name": "To Order Computed"
+   },
+   {
+    "name": "qty_to_order_manual",
+    "type": "Float",
+    "string": "To Order Manual",
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "full_name": "To Order Manual"
+   },
+   {
+    "name": "days_to_order",
+    "type": "Float",
+    "compute": "_compute_days_to_order",
+    "help": "Numbers of days  in advance that replenishments demands are created.",
+    "defined_in_package": "stock",
+    "string": "Days To Order",
+    "full_name": "Days To Order"
+   },
+   {
+    "name": "unwanted_replenish",
+    "type": "Boolean",
+    "string": "Unwanted Replenish",
+    "compute": "_compute_unwanted_replenish",
+    "defined_in_package": "stock",
+    "full_name": "Unwanted Replenish"
+   },
+   {
+    "name": "show_supply_warning",
+    "type": "Boolean",
+    "compute": "_compute_show_supply_warning",
+    "defined_in_package": "stock",
+    "string": "Show Supply Warning",
+    "full_name": "Show Supply Warning"
+   },
+   {
+    "name": "deadline_date",
+    "type": "Date",
+    "string": "Deadline",
+    "compute": "_compute_deadline_date",
+    "store": true,
+    "readonly": true,
+    "help": "Date before which you should order to avoid falling below the minimum. If you have nothing to order while a deadline is found, it may be because a future arrival is expected after the minimum quantity is reached (potential stockout). Check the Forecast Report.",
+    "defined_in_package": "stock",
+    "full_name": "Deadline"
+   },
+   {
+    "name": "show_supplier",
+    "type": "Boolean",
+    "string": "Show supplier column",
+    "compute": "_compute_show_supplier",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Show supplier column"
+   },
+   {
+    "name": "supplier_id",
+    "type": "Many2one",
+    "comodel": "product.supplierinfo",
+    "string": "Vendor Pricelist",
+    "check_company": true,
+    "domain": "['|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]",
+    "inverse": "_inverse_supplier_id",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Vendor Pricelist",
+    "target_entity": "product.supplierinfo"
+   },
+   {
+    "name": "supplier_id_placeholder",
+    "type": "Char",
+    "compute": "_compute_supplier_id_placeholder",
+    "defined_in_package": "purchase_stock",
+    "string": "Supplier Identifier Placeholder",
+    "full_name": "Supplier Identifier Placeholder"
+   },
+   {
+    "name": "vendor_ids",
+    "type": "One2many",
+    "related": "product_id.seller_ids",
+    "string": "Vendors",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Vendors"
+   },
+   {
+    "name": "effective_vendor_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "search": "_search_effective_vendor_id",
+    "compute": "_compute_effective_vendor_id",
+    "store": false,
+    "help": "Either the vendor set directly or the one computed to be used by this replenishment",
+    "defined_in_package": "purchase_stock",
+    "string": "Effective Vendor",
+    "full_name": "Effective Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "available_vendor",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Available Vendor",
+    "search": "_search_available_vendor",
+    "store": false,
+    "help": "Any vendor on the product's pricelist",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Available Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "show_bom",
+    "type": "Boolean",
+    "string": "Show BoM column",
+    "compute": "_compute_show_bom",
+    "defined_in_package": "mrp",
+    "full_name": "Show bill of materials column"
+   },
+   {
+    "name": "bom_id",
+    "type": "Many2one",
+    "comodel": "mrp.bom",
+    "string": "Bill of Materials",
+    "check_company": true,
+    "domain": "[('type', '=', 'normal'), '&', '|', ('company_id', '=', company_id), ('company_id', '=', False), '|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]",
+    "inverse": "_inverse_bom_id",
+    "defined_in_package": "mrp",
+    "full_name": "Bill of Materials",
+    "target_entity": "mrp.bom"
+   },
+   {
+    "name": "bom_id_placeholder",
+    "type": "Char",
+    "compute": "_compute_bom_id_placeholder",
+    "defined_in_package": "mrp",
+    "string": "Bill of materials Identifier Placeholder",
+    "full_name": "Bill of materials Identifier Placeholder"
+   },
+   {
+    "name": "effective_bom_id",
+    "type": "Many2one",
+    "comodel": "mrp.bom",
+    "string": "Effective Bill of Materials",
+    "search": "_search_effective_bom_id",
+    "compute": "_compute_effective_bom_id",
+    "store": false,
+    "help": "Either the Bill of Materials set directly or the one computed to be used by this replenishment",
+    "defined_in_package": "mrp",
+    "full_name": "Effective Bill of Materials",
+    "target_entity": "mrp.bom"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_product_location_check",
+    "kind": "Constraint",
+    "definition": "unique (product_id, location_id, company_id)",
+    "message": "A replenishment rule already exists for this product on this location.",
+    "defined_in_package": "stock"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_allowed_location_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "warehouse_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_supply_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_deadline_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "location_id",
+         "product_min_qty",
+         "route_id",
+         "product_id.route_ids",
+         "product_id.stock_move_ids.date",
+         "product_id.stock_move_ids.state",
+         "product_id.seller_ids",
+         "product_id.seller_ids.delay",
+         "company_id.horizon_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "This function first checks if the qty_on_hand is less than the product_min_qty. If it is the case,\nthe deadline_date is set to the current day. Afterwards if there are still orderpoints to compute,\nit retrieves all the outgoing and incoming moves until the lead_horizon_date and adds (or subtracts)\nthem to the qty_on_hand. The first instance when the qty_on_hand dips below the product_min_qty is\nthe deadline date. ",
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "supplier_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Extend to add more depends values ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "bom_id",
+         "product_id.bom_ids.produce_delay"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Extend to add more depends values ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lead_days",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "rule_ids",
+         "product_id.seller_ids",
+         "product_id.seller_ids.delay",
+         "company_id.horizon_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "supplier_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rules",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_id",
+         "product_id",
+         "location_id",
+         "company_id",
+         "warehouse_id",
+         "product_id.route_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_max_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_min_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_replenishment_uom_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_id",
+         "product_id",
+         "product_id.seller_ids",
+         "product_id.seller_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_replenishment_uom_id_placeholder",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allowed_replenishment_uom_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_route_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_route_id_placeholder",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.categ_id",
+         "product_id.route_ids",
+         "product_id.categ_id.route_ids",
+         "location_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_effective_route_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_id",
+         "product_id",
+         "product_id.categ_id",
+         "product_id.route_ids",
+         "product_id.categ_id.route_ids",
+         "location_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_effective_route_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_days_to_order",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_min_max_qty",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "product_min_qty",
+         "product_max_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The minimum quantity must be less than or equal to the maximum quantity.",
+        "line": 255
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_warehouse_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "location_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_location_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "warehouse_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Finds location id for changed warehouse. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_unwanted_replenish",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "qty_to_order",
+         "product_max_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can not create a snoozed orderpoint that is not manually triggered.",
+        "line": 297
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only snooze manual orderpoints. You should rather archive 'auto-trigger' orderpoints if you do not want them to be triggered.",
+        "line": 307
+       },
+       {
+        "kind": "UserError",
+        "message": "Changing the company of this record is forbidden at this point, you should rather archive it and create a new one.",
+        "line": 304
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_product_forecast_report",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_orderpoints",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_stock_replenishment_info",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_replenish",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "force_to_max"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "RedirectWarning",
+        "message": "e",
+        "line": 352
+       },
+       {
+        "kind": "re-raise",
+        "message": "e",
+        "line": 351
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_replenish_auto",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "location_id",
+         "product_id.stock_move_ids",
+         "product_id.stock_move_ids.state",
+         "product_id.stock_move_ids.date",
+         "product_id.stock_move_ids.product_uom_qty",
+         "product_id.seller_ids.delay"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_to_order",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "qty_to_order_manual",
+         "qty_to_order_computed"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_qty_to_order",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_qty_to_order",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_to_order_computed",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "replenishment_uom_id",
+         "product_min_qty",
+         "product_max_qty",
+         "product_id",
+         "location_id",
+         "product_id.seller_ids.delay",
+         "company_id.horizon_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.purchase_order_line_ids.product_qty",
+         "product_id.purchase_order_line_ids.state",
+         "supplier_id",
+         "supplier_id.product_uom_id",
+         "product_id.seller_ids",
+         "product_id.seller_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Extend to add more depends values\nTODO: Probably performance costly due to x2many in depends",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "bom_id",
+         "bom_id.product_uom_id",
+         "product_id.bom_ids",
+         "product_id.bom_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Extend to add more depends values ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_rule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_route",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_replenishment_multiple_alternative",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qty_to_order"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "This method is used to get the alternative replenishment_uom_id for the orderpoint if not set manually.\nTo be overridden in relevant modules.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_qty_to_order",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qty_in_progress_by_orderpoint"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_days_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Used to call `virtual_available` when running an orderpoint.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_orderpoint_action",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Create manual orderpoints for missing product in each warehouses. It also removes\norderpoints that have been replenish. In order to do it:\n- It uses the report.stock.quantity to find missing quantity per product/warehouse\n- It checks if orderpoint already exist to refill this location.\n- It checks if it exists other sources (e.g RFQ) tha refill the warehouse.\n- It creates the orderpoints for missing quantity that were not refill by an upper option.\n\nreturn replenish report ir.actions.act_window",
+      "size_in_lines": 142,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_remove_manual_qty_to_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_orderpoint_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "location"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_replenishment_order_notification",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_quantity_in_progress",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Return Quantities that are not yet in virtual stock but should be deduced from orderpoint rule\n(example: purchases created from orderpoints)",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 63,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_processed_orderpoints",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_procurement_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Prepare specific key for moves or other components that will be created from a stock rule\ncomming from an orderpoint. This method could be override in order to add other custom key that could\nbe used in move/po creation.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_procure_orderpoint_confirm",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "use_new_cursor",
+     "company_id",
+     "raise_user_error"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Create procurements based on orderpoints.\n:param bool use_new_cursor: if set, use a dedicated cursor and auto-commit after processing\n    1000 orderpoints.\n    This is appropriate for batch jobs only.",
+      "size_in_lines": 82,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_process_scheduler",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Confirm the productions only after all the orderpoints have run their\nprocurement to avoid the new procurement created from the production conflict\nwith them. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_orderpoint_procurement_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_orderpoint_products",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_orderpoint_locations",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_multiple_rounded_qty",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qty_to_order"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_horizon_days",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Return the value for Horizon. This can be (in order of priority):\n- the value set in context in the replenishment view\n- the value set on the company of the all the records in self. There should be at most 1 company_id on self.\n- the value set on the company of the user if all else fail.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_supplier",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "effective_route_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_supplier_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_supplier_id_placeholder",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "effective_route_id",
+         "supplier_id",
+         "rule_ids",
+         "product_id.seller_ids",
+         "product_id.seller_ids.delay"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_effective_vendor_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "effective_route_id",
+         "supplier_id",
+         "rule_ids",
+         "product_id.seller_ids",
+         "product_id.seller_ids.delay"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_effective_vendor_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_available_vendor",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_purchase",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": "This function returns an action that display existing\npurchase orders of given orderpoint.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_supplier",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_matching_boms",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_bom",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "effective_route_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_bom_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_bom_id_placeholder",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "effective_route_id",
+         "bom_id",
+         "rule_ids",
+         "product_id.bom_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_effective_bom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "effective_route_id",
+         "bom_id",
+         "rule_ids",
+         "product_id.bom_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_effective_bom_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_bom",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_product_is_not_kit",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A product with a kit-type bill of materials can not have a reordering rule.",
+        "line": 325
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_min_max_qty",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "The minimum quantity must be less than or equal to the maximum quantity."
+   },
+   {
+    "operation": "create",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You can not create a snoozed orderpoint that is not manually triggered."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You can only snooze manual orderpoints. You should rather archive 'auto-trigger' orderpoints if you do not want them to be triggered."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."
+   },
+   {
+    "operation": "action_replenish",
+    "package": "stock",
+    "kind": "RedirectWarning",
+    "message": "e"
+   },
+   {
+    "operation": "check_product_is_not_kit",
+    "package": "mrp",
+    "kind": "ValidationError",
+    "message": "A product with a kit-type bill of materials can not have a reordering rule."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "purchase_stock.access_stock_warehouse_orderpoint_manager",
+    "package": "purchase_stock",
+    "name": "stock.warehouse.orderpoint",
+    "entity": "stock.warehouse.orderpoint",
+    "group": "purchase.group_purchase_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase_stock.access_stock_warehouse_orderpoint_user",
+    "package": "purchase_stock",
+    "name": "stock.warehouse.orderpoint",
+    "entity": "stock.warehouse.orderpoint",
+    "group": "purchase.group_purchase_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_stock.access_stock_warehouse_orderpoint_sale_salesman",
+    "package": "sale_stock",
+    "name": "stock.warehouse.orderpoint",
+    "entity": "stock.warehouse.orderpoint",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_stock_warehouse_orderpoint",
+    "package": "stock",
+    "name": "stock.warehouse.orderpoint",
+    "entity": "stock.warehouse.orderpoint",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_stock_warehouse_orderpoint_system",
+    "package": "stock",
+    "name": "stock.warehouse.orderpoint system",
+    "entity": "stock.warehouse.orderpoint",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp.view_warehouse_orderpoint_tree_editable_inherited_purchase",
+    "package": "mrp",
+    "name": "stock.warehouse.orderpoint.list.editable.inherit.purchase",
+    "view_type": "field",
+    "inherits_view": "stock.view_warehouse_orderpoint_tree_editable",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "route_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "route_id",
+       "position": "after"
+      },
+      {
+       "name": "show_bom",
+       "column_invisible": "True"
+      },
+      {
+       "name": "bom_id_placeholder",
+       "column_invisible": "True"
+      },
+      {
+       "name": "bom_id",
+       "widget": "stock.forced_placeholder",
+       "invisible": "not show_bom",
+       "context": "{'default_product_tmpl_id': product_tmpl_id, 'display_bom_uom_qty': True}",
+       "options": "{'placeholder_field': 'bom_id_placeholder'}",
+       "optional": "hide",
+       "decoration-muted": "not bom_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "stock.forced_placeholder": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase_mrp.view_warehouse_orderpoint_tree_editable",
+    "package": "purchase_mrp",
+    "name": "stock.warehouse.orderpoint.list.editable.inherit.show_route",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_warehouse_orderpoint_tree_editable",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='route_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='route_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_stock.view_warehouse_orderpoint_tree_editable_inherited_mrp",
+    "package": "purchase_stock",
+    "name": "stock.warehouse.orderpoint.list.editable.inherit.mrp",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_warehouse_orderpoint_tree_editable",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_stock_replenishment_info']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "show_supplier",
+       "column_invisible": "True"
+      },
+      {
+       "name": "supplier_id_placeholder",
+       "column_invisible": "True"
+      },
+      {
+       "name": "supplier_id",
+       "widget": "stock.forced_placeholder",
+       "invisible": "not show_supplier",
+       "string": "Vendor",
+       "options": "{'no_create': True, 'placeholder_field': 'supplier_id_placeholder'}",
+       "optional": "hidden",
+       "decoration-muted": "not supplier_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "stock.forced_placeholder": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_stock_replenishment_info']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_stock.warehouse_orderpoint_search_inherit",
+    "package": "purchase_stock",
+    "name": "stock.warehouse.orderpoint.search.inherit",
+    "view_type": "xpath",
+    "inherits_view": "stock.stock_reorder_report_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='product_category_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "effective_vendor_id",
+       "string": "Vendor"
+      },
+      {
+       "name": "available_vendor"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='product_category_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_warehouse_orderpoint_kanban",
+    "package": "stock",
+    "name": "stock.warehouse.orderpoint.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "product_min_qty"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "product_max_qty"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_warehouse_orderpoint_tree_editable",
+    "package": "stock",
+    "name": "stock.warehouse.orderpoint.list.editable",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Reordering Rules",
+      "editable": "bottom",
+      "js_class": "stock_orderpoint_list",
+      "sample": "1",
+      "multi_edit": "1",
+      "export_xlsx": "0"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_category_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_tmpl_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "unwanted_replenish",
+       "column_invisible": "True"
+      },
+      {
+       "name": "route_id_placeholder",
+       "column_invisible": "True"
+      },
+      {
+       "name": "replenishment_uom_id_placeholder",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_id",
+       "readonly": "product_id",
+       "context": "{'default_is_storable': True}",
+       "force_save": "1"
+      },
+      {
+       "name": "location_id",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "warehouse_id",
+       "options": "{'no_create': True}",
+       "optional": "hide",
+       "groups": "stock.group_stock_multi_warehouses"
+      },
+      {
+       "name": "qty_on_hand",
+       "force_save": "1"
+      },
+      {
+       "name": "qty_forecast",
+       "force_save": "1"
+      },
+      {
+       "name": "route_id",
+       "widget": "stock.forced_placeholder",
+       "options": "{'no_create': True, 'no_open': True, 'placeholder_field': 'route_id_placeholder'}",
+       "optional": "hidden",
+       "decoration-muted": "not route_id"
+      },
+      {
+       "name": "trigger",
+       "optional": "hide"
+      },
+      {
+       "name": "product_min_qty",
+       "string": "Min",
+       "optional": "show"
+      },
+      {
+       "name": "product_max_qty",
+       "string": "Max",
+       "optional": "show"
+      },
+      {
+       "name": "replenishment_uom_id",
+       "widget": "stock.forced_placeholder",
+       "options": "{'no_create': True, 'placeholder_field': 'replenishment_uom_id_placeholder'}",
+       "optional": "hide",
+       "decoration-muted": "not replenishment_uom_id"
+      },
+      {
+       "name": "qty_to_order",
+       "readonly": "trigger == 'auto'"
+      },
+      {
+       "name": "qty_to_order_manual",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_uom_name",
+       "string": "Unit",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "deadline_date",
+       "string": "Deadline",
+       "optional": "hide",
+       "decoration-danger": "deadline_date < current_date"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_product_forecast_report",
+       "type": "object",
+       "invisible": "not id or unwanted_replenish",
+       "icon": "fa-area-chart"
+      },
+      {
+       "name": "action_product_forecast_report",
+       "type": "object",
+       "invisible": "not id or not unwanted_replenish",
+       "icon": "fa-warning text-warning"
+      },
+      {
+       "name": "action_stock_replenishment_info",
+       "type": "object",
+       "invisible": "not id or show_supply_warning",
+       "icon": "fa-info-circle"
+      },
+      {
+       "name": "action_stock_replenishment_info",
+       "type": "object",
+       "invisible": "not id or not show_supply_warning",
+       "icon": "fa-warning text-warning"
+      },
+      {
+       "name": "action_remove_manual_qty_to_order",
+       "type": "object",
+       "invisible": "not qty_to_order_manual",
+       "icon": "fa-undo"
+      },
+      {
+       "name": "action_remove_manual_qty_to_order",
+       "type": "object",
+       "invisible": "qty_to_order_manual",
+       "class": "disabled opacity-0",
+       "icon": "fa-undo"
+      },
+      {
+       "name": "action_replenish",
+       "string": "Order",
+       "type": "object",
+       "invisible": "qty_to_order <= 0.0",
+       "class": "o_replenish_buttons",
+       "icon": "fa-truck"
+      },
+      {
+       "name": "action_replenish_auto",
+       "string": "Automate",
+       "type": "object",
+       "invisible": "qty_to_order <= 0.0 or trigger == 'auto'",
+       "class": "o_replenish_buttons",
+       "icon": "fa-refresh"
+      },
+      {
+       "name": "%(action_orderpoint_snooze)d",
+       "string": "Snooze",
+       "type": "action",
+       "invisible": "trigger != 'manual'",
+       "class": "text-warning",
+       "context": "{'default_orderpoint_ids': [id]}",
+       "icon": "fa-bell-slash"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "stock.forced_placeholder": 2
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "stock.stock_reorder_report_search",
+    "package": "stock",
+    "name": "stock.warehouse.orderpoint.reorder.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Replenishment Report Search"
+     },
+     "fields": [
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "product_category_id"
+      },
+      {
+       "name": "effective_route_id",
+       "string": "Route"
+      },
+      {
+       "name": "warehouse_id",
+       "groups": "stock.group_stock_multi_warehouses"
+      },
+      {
+       "name": "location_id",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "location_id",
+       "string": "Locations",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "trigger",
+       "string": "Trigger"
+      },
+      {
+       "name": "product_category_id",
+       "string": "Category"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      },
+      {
+       "name": "filter_creation_manual_trigger",
+       "string": "Manual",
+       "domain": "[('trigger', '=', 'manual')]"
+      },
+      {
+       "name": "filter_creation_automatic_trigger",
+       "string": "Automatic",
+       "domain": "[('trigger', '=', 'auto')]"
+      },
+      {
+       "name": "filter_to_reorder",
+       "string": "To Reorder",
+       "domain": "[('qty_to_order', '>', 0.0)]"
+      },
+      {
+       "name": "filter_not_snoozed",
+       "string": "Not Snoozed",
+       "domain": "['|', ('snoozed_until', '=', False), ('snoozed_until', '<=', 'today')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_warehouse",
+       "string": "Warehouse",
+       "domain": "[]",
+       "context": "{'group_by': 'warehouse_id'}",
+       "groups": "stock.group_stock_multi_warehouses"
+      },
+      {
+       "name": "groupby_location",
+       "string": "Location",
+       "domain": "[]",
+       "context": "{'group_by': 'location_id'}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "groupby_product",
+       "string": "Product",
+       "domain": "[]",
+       "context": "{'group_by': 'product_id'}"
+      },
+      {
+       "name": "groupby_category",
+       "string": "Category",
+       "domain": "[]",
+       "context": "{'group_by': 'product_category_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock.warehouse_orderpoint_search",
+    "package": "stock",
+    "name": "stock.warehouse.orderpoint.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Reordering Rules Search"
+     },
+     "fields": [
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "name",
+       "string": "Reordering Rule"
+      },
+      {
+       "name": "trigger"
+      },
+      {
+       "name": "warehouse_id",
+       "groups": "stock.group_stock_multi_warehouses"
+      },
+      {
+       "name": "location_id",
+       "groups": "stock.group_stock_multi_locations"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "warehouse",
+       "string": "Warehouse",
+       "domain": "[]",
+       "context": "{'group_by': 'warehouse_id'}",
+       "groups": "stock.group_stock_multi_warehouses"
+      },
+      {
+       "name": "location",
+       "string": "Location",
+       "domain": "[]",
+       "context": "{'group_by': 'location_id'}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "product",
+       "string": "Product",
+       "domain": "[]",
+       "context": "{'group_by': 'product_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_warehouse_orderpoint_form",
+    "package": "stock",
+    "name": "stock.warehouse.orderpoint.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Reordering Rules"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "route_id",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "product_min_qty"
+      },
+      {
+       "name": "product_uom_name"
+      },
+      {
+       "name": "product_max_qty"
+      },
+      {
+       "name": "product_uom_name"
+      },
+      {
+       "name": "replenishment_uom_id",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "allowed_location_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "warehouse_id",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "location_id",
+       "domain": "[('id', 'in', allowed_location_ids)]",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "stock.action_stock_replenishment_info",
+       "string": "Forecast Description",
+       "type": "action",
+       "invisible": "not id",
+       "icon": "fa-area-chart"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_warehouse_orderpoint_tree_editable_show_trigger",
+    "package": "stock",
+    "name": "stock.warehouse.orderpoint.list.editable.inherit.show_trigger",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_warehouse_orderpoint_tree_editable",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='trigger']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='trigger']",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock.action_orderpoint_replenish",
+    "package": "stock",
+    "name": "Replenishment",
+    "view_mode": "list,kanban,form",
+    "view_id": "view_warehouse_orderpoint_tree_editable",
+    "search_view_id": "stock_reorder_report_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_replenishment\">\n            You are good, no replenishment to perform!\n          </p><p>\n            You'll find here smart replenishment propositions based on inventory forecasts.\n            Choose the quantity to buy or manufacture and launch orders in a click.\n            To save time in the future, set the rules as \"automated\".\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "stock.warehouse.orderpoint"
+   },
+   {
+    "external_identifier": "stock.action_orderpoint",
+    "package": "stock",
+    "name": "Reordering Rules",
+    "view_mode": "list,kanban,form",
+    "view_id": "view_warehouse_orderpoint_tree_editable_show_trigger",
+    "search_view_id": "warehouse_orderpoint_search",
+    "domain": null,
+    "context": "{'search_default_trigger': 'auto'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            No reordering rule found\n          </p><p>\n            Define a minimum stock rule so that the system automatically creates requests for quotations or confirmed manufacturing orders to resupply your stock.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "stock.warehouse.orderpoint"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "stock.action_replenishment",
+    "package": "stock",
+    "name": "Replenishment",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

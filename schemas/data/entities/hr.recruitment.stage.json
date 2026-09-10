@@ -1,0 +1,458 @@
+{
+ "catalog": {
+  "name": "entity:hr.recruitment.stage",
+  "description": "Complete definition of entity Recruitment Stages (hr.recruitment.stage).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.recruitment.stage",
+  "storage_name": "hr_recruitment_stage",
+  "full_name": "Recruitment Stages",
+  "kind": "persistent",
+  "description": "Recruitment Stages",
+  "defined_by_package": "hr_recruitment",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Stage Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Stage Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 10,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "job_ids",
+    "type": "Many2many",
+    "comodel": "hr.job",
+    "string": "Job Specific",
+    "help": "Specific jobs that use this stage. Other jobs will not use this stage.",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Job Specific",
+    "target_entity": "hr.job"
+   },
+   {
+    "name": "requirements",
+    "type": "Text",
+    "string": "Requirements",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Requirements"
+   },
+   {
+    "name": "template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "string": "Email Template",
+    "help": "If set, a message is posted on the applicant using the template when the applicant is set to the stage.",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Email Template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "fold",
+    "type": "Boolean",
+    "string": "Folded in Kanban",
+    "help": "This stage is folded in the kanban view when there are no records in that stage to display.",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Folded in Kanban"
+   },
+   {
+    "name": "hired_stage",
+    "type": "Boolean",
+    "string": "Hired Stage",
+    "help": "If checked, this stage is used to determine the hire date of an applicant",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Hired Stage"
+   },
+   {
+    "name": "rotting_threshold_days",
+    "type": "Integer",
+    "string": "Days to rot",
+    "default": 0,
+    "help": "Day count before applicants in this stage become stale.         Set to 0 to disable.  Changing this parameter will not affect the rotting status/date of resources last updated before this change.",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Days to rot"
+   },
+   {
+    "name": "legend_blocked",
+    "type": "Char",
+    "string": "Red Kanban Label",
+    "default": {
+     "dynamic": "lambda self: _('Blocked')"
+    },
+    "translate": true,
+    "required": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Red Kanban Label"
+   },
+   {
+    "name": "legend_waiting",
+    "type": "Char",
+    "string": "Orange Kanban Label",
+    "default": {
+     "dynamic": "lambda self: _('Waiting')"
+    },
+    "translate": true,
+    "required": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Orange Kanban Label"
+   },
+   {
+    "name": "legend_done",
+    "type": "Char",
+    "string": "Green Kanban Label",
+    "default": {
+     "dynamic": "lambda self: _('Ready for Next Stage')"
+    },
+    "translate": true,
+    "required": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Green Kanban Label"
+   },
+   {
+    "name": "legend_normal",
+    "type": "Char",
+    "string": "Grey Kanban Label",
+    "default": {
+     "dynamic": "lambda self: _('In Progress')"
+    },
+    "translate": true,
+    "required": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Grey Kanban Label"
+   },
+   {
+    "name": "is_warning_visible",
+    "type": "Boolean",
+    "compute": "_compute_is_warning_visible",
+    "defined_in_package": "hr_recruitment",
+    "string": "Is Warning Visible",
+    "full_name": "Is Warning Visible"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_warning_visible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "hired_stage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_recruitment.access_hr_recruitment_stage_interviewer",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.stage.interviewer",
+    "entity": "hr.recruitment.stage",
+    "group": "group_hr_recruitment_interviewer",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_recruitment.access_hr_recruitment_stage_user",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.stage.user",
+    "entity": "hr.recruitment.stage",
+    "group": "group_hr_recruitment_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_recruitment.access_hr_recruitment_stage_manager",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.stage.manager",
+    "entity": "hr.recruitment.stage",
+    "group": "group_hr_recruitment_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_recruitment.hr_recruitment_stage_tree",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.stage.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Stages"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "rotting_threshold_days",
+       "optional": "hide"
+      },
+      {
+       "name": "fold"
+      },
+      {
+       "name": "hired_stage"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.view_hr_recruitment_stage_kanban",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.stage.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "fold",
+       "widget": "boolean"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "boolean": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_recruitment_stage_form",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.stage.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Stage"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "sequence",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "template_id",
+       "domain": "[('model_id.model', '=', 'hr.applicant')]",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "fold"
+      },
+      {
+       "name": "hired_stage"
+      },
+      {
+       "name": "is_warning_visible",
+       "invisible": "1"
+      },
+      {
+       "name": "job_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "rotting_threshold_days",
+       "invisible": "hired_stage"
+      },
+      {
+       "name": "legend_normal",
+       "nolabel": "1"
+      },
+      {
+       "name": "legend_blocked",
+       "nolabel": "1"
+      },
+      {
+       "name": "legend_waiting",
+       "nolabel": "1"
+      },
+      {
+       "name": "legend_done",
+       "nolabel": "1"
+      },
+      {
+       "name": "requirements",
+       "placeholder": "You can define the requirements here. They will be displayed when you hover over the stage title."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_recruitment.hr_job_stage_act",
+    "package": "hr_recruitment",
+    "name": "Recruitment / Applicants Stages",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[]",
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Add a new stage in the recruitment process\n                </p><p>\n                    Define here your stages of the recruitment process, for example:\n                    qualification call, first interview, second interview, refused,\n                    hired.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.recruitment.stage"
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_recruitment_stage_act",
+    "package": "hr_recruitment",
+    "name": "Stages",
+    "view_mode": "list,kanban,form",
+    "view_id": "hr_recruitment_stage_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Add a new stage in the recruitment process\n            </p><p>\n                Don't forget to specify the department if your recruitment process\n                is different according to the job position.\n            </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.recruitment.stage"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,346 @@
+{
+ "catalog": {
+  "name": "entity:reset.view.arch.wizard",
+  "description": "Complete definition of entity Reset View Architecture Wizard (reset.view.arch.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "reset.view.arch.wizard",
+  "storage_name": "reset_view_arch_wizard",
+  "full_name": "Reset View Architecture Wizard",
+  "kind": "transient",
+  "description": "Reset View Architecture Wizard",
+  "defined_by_package": "base",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "view_id",
+    "type": "Many2one",
+    "comodel": "ir.ui.view",
+    "string": "View",
+    "defined_in_package": "base",
+    "full_name": "View",
+    "target_entity": "ir.ui.view"
+   },
+   {
+    "name": "view_name",
+    "type": "Char",
+    "related": "view_id.name",
+    "string": "View Name",
+    "defined_in_package": "base",
+    "full_name": "View Name"
+   },
+   {
+    "name": "has_diff",
+    "type": "Boolean",
+    "compute": "_compute_arch_diff",
+    "defined_in_package": "base",
+    "string": "Has Diff",
+    "full_name": "Has Diff"
+   },
+   {
+    "name": "arch_diff",
+    "type": "Html",
+    "string": "Architecture Diff",
+    "readonly": true,
+    "compute": "_compute_arch_diff",
+    "sanitize_tags": false,
+    "defined_in_package": "base",
+    "full_name": "Architecture Diff"
+   },
+   {
+    "name": "reset_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "soft",
+      "Restore previous version (soft reset)."
+     ],
+     [
+      "hard",
+      "Reset to file version (hard reset)."
+     ],
+     [
+      "other_view",
+      "Reset to another view."
+     ]
+    ],
+    "string": "Reset Mode",
+    "default": "soft",
+    "required": true,
+    "defined_in_package": "base",
+    "full_name": "Reset Mode"
+   },
+   {
+    "name": "compare_view_id",
+    "type": "Many2one",
+    "comodel": "ir.ui.view",
+    "string": "Compare To View",
+    "defined_in_package": "base",
+    "full_name": "Compare To View",
+    "target_entity": "ir.ui.view"
+   },
+   {
+    "name": "arch_to_compare",
+    "type": "Text",
+    "string": "Arch To Compare To",
+    "compute": "_compute_arch_diff",
+    "defined_in_package": "base",
+    "full_name": "Arch To Compare To"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Can't compare more than two views.",
+        "line": 2669
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_arch_diff",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reset_mode",
+         "view_id",
+         "compare_view_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Depending of `reset_mode`, return the differences between the\ncurrent view arch and either its previous arch, its initial arch or\nanother view arch.",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "reset_view_button",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "default_get",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "Can't compare more than two views."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_reset_view_arch_wizard_group_system",
+    "package": "base",
+    "name": "reset_view_arch_wizard group_system",
+    "entity": "reset.view.arch.wizard",
+    "group": "group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "base.access_reset_view_arch_wizard",
+    "package": "base",
+    "name": "access.reset.view.arch.wizard",
+    "entity": "reset.view.arch.wizard",
+    "group": "base.group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.reset_view_arch_wizard_view",
+    "package": "base",
+    "name": "Reset View Architecture",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Reset View Architecture"
+     },
+     "fields": [
+      {
+       "name": "has_diff",
+       "invisible": "1"
+      },
+      {
+       "name": "view_id",
+       "invisible": "1"
+      },
+      {
+       "name": "view_name"
+      },
+      {
+       "name": "compare_view_id",
+       "invisible": "reset_mode != 'other_view'",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "reset_mode",
+       "widget": "radio"
+      },
+      {
+       "name": "arch_diff",
+       "invisible": "not arch_diff"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "reset_view_button",
+       "string": "Reset View",
+       "type": "object",
+       "invisible": "not has_diff",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website.reset_view_arch_wizard_view",
+    "package": "website",
+    "name": null,
+    "view_type": "field",
+    "inherits_view": "base.reset_view_arch_wizard_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "compare_view_id",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "compare_view_id",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.reset_view_arch_wizard_action",
+    "package": "base",
+    "name": "Compare/Reset",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_ir_ui_view",
+    "binding_type": null,
+    "binding_view_types": "form,list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "reset.view.arch.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

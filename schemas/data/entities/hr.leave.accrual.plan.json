@@ -1,0 +1,859 @@
+{
+ "catalog": {
+  "name": "entity:hr.leave.accrual.plan",
+  "description": "Complete definition of entity Accrual Plan (hr.leave.accrual.plan).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.leave.accrual.plan",
+  "storage_name": "hr_leave_accrual_plan",
+  "full_name": "Accrual Plan",
+  "kind": "persistent",
+  "description": "Accrual Plan",
+  "defined_by_package": "hr_holidays",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Name"
+   },
+   {
+    "name": "time_off_type_id",
+    "type": "Many2one",
+    "comodel": "hr.leave.type",
+    "string": "Time Off Type",
+    "check_company": true,
+    "index": "btree_not_null",
+    "help": "Specify if this accrual plan can only be used with this Time Off Type.\n                Leave empty if this accrual plan can be used with any Time Off Type.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Type",
+    "target_entity": "hr.leave.type"
+   },
+   {
+    "name": "employees_count",
+    "type": "Integer",
+    "string": "Employees",
+    "compute": "_compute_employee_count",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Employees"
+   },
+   {
+    "name": "level_ids",
+    "type": "One2many",
+    "comodel": "hr.leave.accrual.level",
+    "inverse_name": "accrual_plan_id",
+    "copy": true,
+    "string": "Milestones",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Milestones",
+    "target_entity": "hr.leave.accrual.level"
+   },
+   {
+    "name": "allocation_ids",
+    "type": "One2many",
+    "comodel": "hr.leave.allocation",
+    "inverse_name": "accrual_plan_id",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Allocation",
+    "full_name": "Allocation",
+    "target_entity": "hr.leave.allocation"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "domain": {
+     "dynamic": "lambda self: [('id', 'in', self.env.companies.ids)]"
+    },
+    "compute": "_compute_company_id",
+    "store": "True",
+    "readonly": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "transition_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "immediately",
+      "Immediately"
+     ],
+     [
+      "end_of_accrual",
+      "After this accrual's period"
+     ]
+    ],
+    "export_string_translation": false,
+    "default": "immediately",
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Transition Mode",
+    "full_name": "Transition Mode"
+   },
+   {
+    "name": "show_transition_mode",
+    "type": "Boolean",
+    "compute": "_compute_show_transition_mode",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Show Transition Mode",
+    "full_name": "Show Transition Mode"
+   },
+   {
+    "name": "is_based_on_worked_time",
+    "type": "Boolean",
+    "compute": "_compute_is_based_on_worked_time",
+    "store": true,
+    "readonly": false,
+    "export_string_translation": false,
+    "help": "Only excludes requests where the time off type is set as unpaid kind of.",
+    "defined_in_package": "hr_holidays",
+    "string": "Is Based On Worked Time",
+    "full_name": "Is Based On Worked Time"
+   },
+   {
+    "name": "accrued_gain_time",
+    "type": "Selection",
+    "selection": [
+     [
+      "start",
+      "At the start of the accrual period"
+     ],
+     [
+      "end",
+      "At the end of the accrual period"
+     ]
+    ],
+    "export_string_translation": false,
+    "default": "end",
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Accrued Gain Time",
+    "full_name": "Accrued Gain Time"
+   },
+   {
+    "name": "can_be_carryover",
+    "type": "Boolean",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Can Be Carryover",
+    "full_name": "Can Be Carryover"
+   },
+   {
+    "name": "carryover_date",
+    "type": "Selection",
+    "selection": [
+     [
+      "year_start",
+      "At the start of the year"
+     ],
+     [
+      "allocation",
+      "At the allocation date"
+     ],
+     [
+      "other",
+      "Custom date"
+     ]
+    ],
+    "export_string_translation": false,
+    "default": "year_start",
+    "required": true,
+    "string": "Carry-Over Time",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Carry-Over Time"
+   },
+   {
+    "name": "carryover_day",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_selection_days"
+    },
+    "compute": "_compute_carryover_day",
+    "export_string_translation": false,
+    "store": true,
+    "readonly": false,
+    "default": "1",
+    "defined_in_package": "hr_holidays",
+    "string": "Carryover Day",
+    "full_name": "Carryover Day"
+   },
+   {
+    "name": "carryover_month",
+    "type": "Selection",
+    "selection": [
+     [
+      "1",
+      "January"
+     ],
+     [
+      "2",
+      "February"
+     ],
+     [
+      "3",
+      "March"
+     ],
+     [
+      "4",
+      "April"
+     ],
+     [
+      "5",
+      "May"
+     ],
+     [
+      "6",
+      "June"
+     ],
+     [
+      "7",
+      "July"
+     ],
+     [
+      "8",
+      "August"
+     ],
+     [
+      "9",
+      "September"
+     ],
+     [
+      "10",
+      "October"
+     ],
+     [
+      "11",
+      "November"
+     ],
+     [
+      "12",
+      "December"
+     ]
+    ],
+    "export_string_translation": false,
+    "default": {
+     "dynamic": "lambda self: str(fields.Date.today().month)"
+    },
+    "defined_in_package": "hr_holidays",
+    "string": "Carryover Month",
+    "full_name": "Carryover Month"
+   },
+   {
+    "name": "added_value_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "day",
+      "Days"
+     ],
+     [
+      "hour",
+      "Hours"
+     ]
+    ],
+    "export_string_translation": false,
+    "default": "day",
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Added Value Type",
+    "full_name": "Added Value Type"
+   },
+   {
+    "name": "level_count",
+    "type": "Integer",
+    "string": "Levels",
+    "compute": "_compute_level_count",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Levels"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_show_transition_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "level_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_level_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "level_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_employee_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allocation_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "time_off_type_id.company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_based_on_worked_time",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "accrued_gain_time"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_carryover_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "carryover_month"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_accrual_plan_employees",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_accrual_plan_level",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_accrual_plan_level",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "level_id"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prevent_used_plan_unlink",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Some of the accrual plans you're trying to delete are linked to an existing allocation. Delete or cancel them first.",
+        "line": 167
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_prevent_used_plan_unlink",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "Some of the accrual plans you're trying to delete are linked to an existing allocation. Delete or cancel them first."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_holidays.access_hr_leave_accrual_plan_user",
+    "package": "hr_holidays",
+    "name": "hr.leave.accrual.plan.user",
+    "entity": "hr.leave.accrual.plan",
+    "group": "hr_holidays.group_hr_holidays_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_holidays.access_hr_leave_accrual_plan_manager",
+    "package": "hr_holidays",
+    "name": "hr.leave.accrual.plan.manager",
+    "entity": "hr.leave.accrual.plan",
+    "group": "hr_holidays.group_hr_holidays_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_holidays.hr_leave_accrual_plan_rule_multi_company",
+    "package": "hr_holidays",
+    "name": "Accrual plan multi company rule",
+    "entity": "hr.leave.accrual.plan",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_holidays.hr_accrual_plan_view_tree",
+    "package": "hr_holidays",
+    "name": "hr.leave.accrual.plan.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Accrual Plans",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "level_count"
+      },
+      {
+       "name": "employees_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_accrual_plan_view_form",
+    "package": "hr_holidays",
+    "name": "hr.leave.accrual.plan.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Accrual Plan",
+      "class": "o_accrual_plan_form"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "show_transition_mode",
+       "invisible": "1"
+      },
+      {
+       "name": "employees_count",
+       "widget": "statinfo"
+      },
+      {
+       "name": "name",
+       "required": "id",
+       "placeholder": "e.g. Seniority Plan, PTO, RTT, ..."
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "accrued_gain_time",
+       "widget": "radio",
+       "nolabel": "1"
+      },
+      {
+       "name": "is_based_on_worked_time",
+       "widget": "boolean_radio",
+       "readonly": "accrued_gain_time == 'start'",
+       "options": "{                                                     'yes_label_element_id': 'is_based_on_worked_time_yes',                                                     'no_label_element_id': 'is_based_on_worked_time_no'                                                 }"
+      },
+      {
+       "name": "can_be_carryover"
+      },
+      {
+       "name": "carryover_date",
+       "widget": "radio_followed_by_element",
+       "options": "{'links': {'other': 'carryover_custom_date'}, 'observe': 'carryover'}"
+      },
+      {
+       "name": "carryover_day",
+       "widget": "day_selection",
+       "required": "carryover_date == 'other'",
+       "placeholder": "select a day"
+      },
+      {
+       "name": "carryover_month",
+       "required": "carryover_date == 'other'",
+       "placeholder": "select a month"
+      },
+      {
+       "name": "transition_mode",
+       "widget": "radio"
+      },
+      {
+       "name": "level_ids",
+       "widget": "accrual_levels",
+       "invisible": "not level_ids"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_accrual_plan_employees",
+       "type": "object",
+       "invisible": "employees_count == 0",
+       "class": "oe_stat_button",
+       "groups": "hr.group_hr_user",
+       "icon": "fa-users"
+      },
+      {
+       "name": "action_create_accrual_plan_level",
+       "string": "Create a milestone",
+       "type": "object",
+       "class": "btn btn-primary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1,
+      "radio": 2,
+      "boolean_radio": 1,
+      "radio_followed_by_element": 1,
+      "day_selection": 1,
+      "accrual_levels": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_open_accrual_plan_employees",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-users",
+       "invisible": "employees_count == 0",
+       "groups": "hr.group_hr_user"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_accrual_plan_view_search",
+    "package": "hr_holidays",
+    "name": "hr.leave.accrual.plan.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Accrual Plan"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "company_id",
+       "string": "Company",
+       "context": "{'group_by':'company_id'}",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_holidays.open_view_accrual_plans",
+    "package": "hr_holidays",
+    "name": "Accrual Plans",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create an Accrual Plan\n            </p>\n            <p>\n                Use accrual plans to give determined amount of time following the rules you define\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.leave.accrual.plan"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

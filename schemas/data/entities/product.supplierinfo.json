@@ -1,0 +1,1296 @@
+{
+ "catalog": {
+  "name": "entity:product.supplierinfo",
+  "description": "Complete definition of entity Supplier Pricelist (product.supplierinfo).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.supplierinfo",
+  "storage_name": "product_supplierinfo",
+  "full_name": "Supplier Pricelist",
+  "kind": "persistent",
+  "description": "Supplier Pricelist",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "purchase",
+   "purchase_stock",
+   "mrp_subcontracting",
+   "purchase_requisition"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, min_qty DESC, price, id",
+  "display_name_field": "partner_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Vendor",
+    "ondelete": "cascade",
+    "required": true,
+    "check_company": true,
+    "defined_in_package": "product",
+    "full_name": "Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "product_name",
+    "type": "Char",
+    "string": "Vendor Product Name",
+    "help": "This vendor's product name will be used when printing a request for quotation. Keep empty to use the internal one.",
+    "defined_in_package": "product",
+    "full_name": "Vendor Product Name"
+   },
+   {
+    "name": "product_code",
+    "type": "Char",
+    "string": "Vendor Product Code",
+    "help": "This vendor's product code will be used when printing a request for quotation. Keep empty to use the internal one.",
+    "defined_in_package": "product",
+    "full_name": "Vendor Product Code"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 1,
+    "help": "Assigns the priority to the list of product vendor.",
+    "defined_in_package": "product",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "compute": "_compute_product_uom_id",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "defined_in_package": "product",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "min_qty",
+    "type": "Float",
+    "string": "Quantity",
+    "default": 0.0,
+    "required": true,
+    "digits": "Product Unit",
+    "help": "The quantity to purchase from this vendor to benefit from the unit price. If a vendor unit is set, quantity should be specified in this unit, otherwise it should be specified in the default unit of the product.",
+    "defined_in_package": "product",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "price",
+    "type": "Float",
+    "string": "Unit Price",
+    "min_display_digits": "Product Price",
+    "default": 0.0,
+    "help": "The price to purchase a product",
+    "defined_in_package": "product",
+    "full_name": "Unit Price"
+   },
+   {
+    "name": "price_discounted",
+    "type": "Float",
+    "string": "Discounted Price",
+    "compute": "_compute_price_discounted",
+    "defined_in_package": "product",
+    "full_name": "Discounted Price"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company.id"
+    },
+    "index": 1,
+    "defined_in_package": "product",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "default": {
+     "dynamic": "lambda self: self.env.company.currency_id.id"
+    },
+    "required": true,
+    "defined_in_package": "product",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "date_start",
+    "type": "Date",
+    "string": "Start Date",
+    "help": "Start date for this vendor price",
+    "defined_in_package": "product",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_end",
+    "type": "Date",
+    "string": "End Date",
+    "help": "End date for this vendor price",
+    "defined_in_package": "product",
+    "full_name": "End Date"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product Variant",
+    "check_company": true,
+    "domain": "[('product_tmpl_id', '=', product_tmpl_id)] if product_tmpl_id else []",
+    "compute": "_compute_product_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "help": "If not set, the vendor price will apply to all variants of this product.",
+    "defined_in_package": "product",
+    "full_name": "Product Variant",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_tmpl_id",
+    "type": "Many2one",
+    "comodel": "product.template",
+    "string": "Product Template",
+    "check_company": true,
+    "compute": "_compute_product_tmpl_id",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "product",
+    "full_name": "Product Template",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "product_variant_count",
+    "type": "Integer",
+    "string": "Variant Count",
+    "related": "product_tmpl_id.product_variant_count",
+    "defined_in_package": "product",
+    "full_name": "Variant Count"
+   },
+   {
+    "name": "delay",
+    "type": "Integer",
+    "string": "Lead Time",
+    "default": 1,
+    "required": true,
+    "help": "Lead time in days between the confirmation of the purchase order and the receipt of the products in your warehouse. Used by the scheduler for automatic computation of the purchase order planning.",
+    "defined_in_package": "product",
+    "full_name": "Lead Time"
+   },
+   {
+    "name": "discount",
+    "type": "Float",
+    "string": "Discount (%)",
+    "digits": "Discount",
+    "readonly": false,
+    "defined_in_package": "product",
+    "full_name": "Discount (%)"
+   },
+   {
+    "name": "last_purchase_date",
+    "type": "Date",
+    "string": "Last Purchase",
+    "compute": "_compute_last_purchase_date",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Last Purchase"
+   },
+   {
+    "name": "show_set_supplier_button",
+    "type": "Boolean",
+    "string": "Show Set Supplier Button",
+    "compute": "_compute_show_set_supplier_button",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Show Set Supplier Button"
+   },
+   {
+    "name": "is_subcontractor",
+    "type": "Boolean",
+    "string": "Subcontracted",
+    "compute": "_compute_is_subcontractor",
+    "help": "Choose a vendor of type subcontractor if you want to subcontract the product",
+    "defined_in_package": "mrp_subcontracting",
+    "full_name": "Subcontracted"
+   },
+   {
+    "name": "purchase_requisition_id",
+    "type": "Many2one",
+    "comodel": "purchase.requisition",
+    "related": "purchase_requisition_line_id.requisition_id",
+    "string": "Agreement",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Agreement",
+    "target_entity": "purchase.requisition"
+   },
+   {
+    "name": "purchase_requisition_line_id",
+    "type": "Many2one",
+    "comodel": "purchase.requisition.line",
+    "index": "btree_not_null",
+    "defined_in_package": "purchase_requisition",
+    "string": "Purchase Requisition Line",
+    "full_name": "Purchase Requisition Line",
+    "target_entity": "purchase.requisition.line"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_product_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_tmpl_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_tmpl_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_discounted",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "discount",
+         "price"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_tmpl_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_tmpl_id",
+         "product_variant_count"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_tmpl_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_tmpl_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Clear product variant if it no longer matches the product template.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_import_templates",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sanitize_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Sanitize vals to sync product variant & template on read/write.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_filtered_supplier",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "product_id",
+     "params"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_partner_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_last_purchase_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_set_supplier_button",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "min_qty",
+         "product_uom_id",
+         "currency_id",
+         "price"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "use_simplified_supplier_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_supplier",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_subcontractor",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "product_id",
+         "product_tmpl_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_product_supplierinfo_manager",
+    "package": "mrp",
+    "name": "product.supplierinfo user",
+    "entity": "product.supplierinfo",
+    "group": "mrp.group_mrp_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "point_of_sale.access_product_product_supplierinfo_user",
+    "package": "point_of_sale",
+    "name": "product.supplierinfo user",
+    "entity": "product.supplierinfo",
+    "group": "group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_supplierinfo_user",
+    "package": "product",
+    "name": "product.supplierinfo.user",
+    "entity": "product.supplierinfo",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_supplierinfo_manager",
+    "package": "product",
+    "name": "product.supplierinfo.manager",
+    "entity": "product.supplierinfo",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "purchase.access_product_supplierinfo_purchase_manager",
+    "package": "purchase",
+    "name": "product.supplierinfo purchase_manager",
+    "entity": "product.supplierinfo",
+    "group": "purchase.group_purchase_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "product.product_supplierinfo_comp_rule",
+    "package": "product",
+    "name": "product supplierinfo company rule",
+    "entity": "product.supplierinfo",
+    "domain": "['|', ('company_id', '=', False), ('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mrp_subcontracting.product_supplierinfo_subcontractor_tree_view",
+    "package": "mrp_subcontracting",
+    "name": "product.supplierinfo.subcontractor.list.view",
+    "view_type": "xpath",
+    "inherits_view": "product.product_supplierinfo_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='partner_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "is_subcontractor",
+       "readonly": "1",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='partner_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product.product_supplierinfo_form_view",
+    "package": "product",
+    "name": "product.supplierinfo.form.view",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Vendor Information"
+     },
+     "fields": [
+      {
+       "name": "product_variant_count",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_id",
+       "context": "{'res_partner_search_mode': 'supplier'}"
+      },
+      {
+       "name": "product_name"
+      },
+      {
+       "name": "product_code"
+      },
+      {
+       "name": "delay"
+      },
+      {
+       "name": "product_tmpl_id",
+       "invisible": "context.get('visible_product_tmpl_id', True)",
+       "string": "Product"
+      },
+      {
+       "name": "product_id",
+       "options": "{'no_create': True}",
+       "groups": "product.group_product_variant"
+      },
+      {
+       "name": "product_id",
+       "invisible": "1",
+       "groups": "!product.group_product_variant"
+      },
+      {
+       "name": "min_qty"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "options": "{'no_open': True}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "price"
+      },
+      {
+       "name": "currency_id",
+       "options": "{'no_open': True}",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "date_end"
+      },
+      {
+       "name": "discount"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "product.product_supplierinfo_search_view",
+    "package": "product",
+    "name": "product.supplierinfo.search.view",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Vendor"
+     },
+     "fields": [
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "product_tmpl_id"
+      },
+      {
+       "name": "product_name"
+      },
+      {
+       "name": "product_code"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "active_products",
+       "string": "Active Products",
+       "domain": "['|', ('product_tmpl_id.active', '=', True),('product_id.active', '=', True)]"
+      },
+      {
+       "name": "active",
+       "string": "Active",
+       "domain": "['|', ('date_end', '=', False), ('date_end', '>=',  'today -1d')]"
+      },
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('date_end', '<',  'today -1d')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_product",
+       "string": "Product",
+       "domain": "[]",
+       "context": "{'group_by': 'product_tmpl_id'}"
+      },
+      {
+       "name": "groupby_vendor",
+       "string": "Vendor",
+       "domain": "[]",
+       "context": "{'group_by': 'partner_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "product.product_supplierinfo_view_kanban",
+    "package": "product",
+    "name": "product.supplierinfo.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "price",
+       "widget": "monetary"
+      },
+      {
+       "name": "min_qty"
+      },
+      {
+       "name": "delay"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "product.product_supplierinfo_tree_view",
+    "package": "product",
+    "name": "product.supplierinfo.list.view",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Vendor Information",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "1"
+      },
+      {
+       "name": "product_id",
+       "readonly": "1",
+       "domain": "[('product_tmpl_id', '=', context.get('default_product_tmpl_id'))] if context.get('default_product_tmpl_id') else [('product_tmpl_id', '=', product_tmpl_id)]",
+       "column_invisible": "context.get('product_template_invisible_variant', False)",
+       "optional": "hide",
+       "groups": "product.group_product_variant"
+      },
+      {
+       "name": "product_tmpl_id",
+       "readonly": "1",
+       "string": "Product",
+       "column_invisible": "context.get('visible_product_tmpl_id', True)"
+      },
+      {
+       "name": "product_name",
+       "optional": "hide"
+      },
+      {
+       "name": "product_code",
+       "optional": "hide"
+      },
+      {
+       "name": "date_start",
+       "optional": "hide"
+      },
+      {
+       "name": "date_end",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "min_qty",
+       "optional": "hide"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "context": "{'product_id': product_id}",
+       "options": "{'no_quick_create': True}",
+       "optional": "show",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "price"
+      },
+      {
+       "name": "discount",
+       "optional": "hide"
+      },
+      {
+       "name": "currency_id",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "delay",
+       "optional": "show"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "purchase.product_supplierinfo_tree_view2",
+    "package": "purchase",
+    "name": "product.supplierinfo.list.view2",
+    "view_type": "xpath",
+    "inherits_view": "product.product_supplierinfo_tree_view",
+    "mode": "primary",
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase.product_product_supplierinfo_tree_view2",
+    "package": "purchase",
+    "name": "product.supplierinfo.list.view2.product",
+    "view_type": "xpath",
+    "inherits_view": "purchase.product_supplierinfo_tree_view2",
+    "mode": "primary",
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='product_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='product_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition.product_supplierinfo_tree_view_inherit",
+    "package": "purchase_requisition",
+    "name": "product.template.product.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "product.product_supplierinfo_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='product_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "purchase_requisition_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='product_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition.supplier_info_form_inherit",
+    "package": "purchase_requisition",
+    "name": "product.supplierinfo.requisition.view",
+    "view_type": "field",
+    "inherits_view": "product.product_supplierinfo_form_view",
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "product_code",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "product_code",
+       "position": "after"
+      },
+      {
+       "name": "purchase_requisition_id",
+       "invisible": "not purchase_requisition_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase_stock.product_supplierinfo_replenishment_tree_view",
+    "package": "purchase_stock",
+    "name": "product.supplierinfo.replenishment.list.view",
+    "view_type": "field",
+    "inherits_view": "product.product_supplierinfo_tree_view",
+    "mode": "primary",
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "delay",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "delay",
+       "position": "after"
+      },
+      {
+       "name": "show_set_supplier_button",
+       "column_invisible": "True"
+      },
+      {
+       "name": "last_purchase_date"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_set_supplier",
+       "string": "Set as Supplier",
+       "type": "object",
+       "invisible": "not show_set_supplier_button",
+       "class": "btn btn-link"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "product.product_supplierinfo_type_action",
+    "package": "product",
+    "name": "Vendor Pricelists",
+    "view_mode": "list,form,kanban",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'visible_product_tmpl_id': False, 'search_default_active_products': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No vendor pricelist found\n            </p><p>\n                Register the prices requested by your vendors for each product, based on the quantity and the period.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "product.supplierinfo"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "purchase.menu_product_pricelist_action2_purchase",
+    "package": "purchase",
+    "name": null,
+    "parent_id": "menu_purchase_config",
+    "action": "product.product_supplierinfo_type_action",
+    "sequence": "1",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

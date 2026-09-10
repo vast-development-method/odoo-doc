@@ -1,0 +1,1831 @@
+{
+ "catalog": {
+  "name": "entity:uom.uom",
+  "description": "Complete definition of entity Product Unit of Measure (uom.uom).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "uom.uom",
+  "storage_name": "uom_uom",
+  "full_name": "Product Unit of Measure",
+  "kind": "persistent",
+  "description": "Product Unit of Measure",
+  "defined_by_package": "uom",
+  "extended_by_packages": [
+   "product",
+   "account",
+   "stock",
+   "hr_timesheet",
+   "point_of_sale",
+   "l10n_ar",
+   "l10n_cl",
+   "l10n_eg_edi_eta",
+   "l10n_es_edi_facturae",
+   "l10n_hu_edi",
+   "l10n_id_efaktur_coretax",
+   "l10n_in",
+   "l10n_tr_nilvera"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, relative_uom_id, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": "relative_uom_id",
+  "hierarchy_path_stored": true,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Unit Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "uom",
+    "full_name": "Unit Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "compute": "_compute_sequence",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "defined_in_package": "uom",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "relative_factor",
+    "type": "Float",
+    "string": "Contains",
+    "default": 1.0,
+    "digits": 0,
+    "required": true,
+    "help": "How much bigger or smaller this unit is compared to the reference UoM for this unit",
+    "defined_in_package": "uom",
+    "full_name": "Contains"
+   },
+   {
+    "name": "rounding",
+    "type": "Float",
+    "string": "Rounding Precision",
+    "compute": "_compute_rounding",
+    "defined_in_package": "uom",
+    "full_name": "Rounding Precision"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "help": "Uncheck the active field to disable a unit of measure without deleting it.",
+    "defined_in_package": "uom",
+    "full_name": "Active"
+   },
+   {
+    "name": "relative_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Reference Unit",
+    "ondelete": "cascade",
+    "index": "btree_not_null",
+    "defined_in_package": "uom",
+    "full_name": "Reference Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "related_uom_ids",
+    "type": "One2many",
+    "comodel": "uom.uom",
+    "inverse_name": "relative_uom_id",
+    "string": "Related UoMs",
+    "defined_in_package": "uom",
+    "full_name": "Related UoMs",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "factor",
+    "type": "Float",
+    "string": "Absolute Quantity",
+    "digits": 0,
+    "compute": "_compute_factor",
+    "recursive": true,
+    "store": true,
+    "defined_in_package": "uom",
+    "full_name": "Absolute Quantity"
+   },
+   {
+    "name": "parent_path",
+    "type": "Char",
+    "index": true,
+    "defined_in_package": "uom",
+    "string": "Parent Path",
+    "full_name": "Parent Path"
+   },
+   {
+    "name": "product_uom_ids",
+    "type": "One2many",
+    "comodel": "product.uom",
+    "inverse_name": "uom_id",
+    "string": "Barcodes",
+    "domain": {
+     "dynamic": "_domain_product_uoms"
+    },
+    "defined_in_package": "product",
+    "full_name": "Barcodes",
+    "target_entity": "product.uom"
+   },
+   {
+    "name": "fiscal_country_codes",
+    "type": "Char",
+    "compute": "_compute_fiscal_country_codes",
+    "defined_in_package": "account",
+    "string": "Fiscal Country Codes",
+    "full_name": "Fiscal Country Codes"
+   },
+   {
+    "name": "package_type_id",
+    "type": "Many2one",
+    "comodel": "stock.package.type",
+    "string": "Package Type",
+    "defined_in_package": "stock",
+    "full_name": "Package Type",
+    "target_entity": "stock.package.type"
+   },
+   {
+    "name": "route_ids",
+    "type": "Many2many",
+    "related": "package_type_id.route_ids",
+    "string": "Routes",
+    "help": "Routes propagated from the package type",
+    "defined_in_package": "stock",
+    "full_name": "Routes"
+   },
+   {
+    "name": "timesheet_widget",
+    "type": "Char",
+    "string": "Widget",
+    "export_string_translation": false,
+    "defined_in_package": "hr_timesheet",
+    "full_name": "Widget"
+   },
+   {
+    "name": "is_pos_groupable",
+    "type": "Boolean",
+    "string": "Group Products in POS",
+    "help": "Check if you want to group products of this unit in point of sale orders",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Group Products in point of sale"
+   },
+   {
+    "name": "l10n_ar_afip_code",
+    "type": "Char",
+    "string": "Code",
+    "help": "Argentina: This code will be used on electronic invoice.",
+    "defined_in_package": "l10n_ar",
+    "full_name": "Code"
+   },
+   {
+    "name": "l10n_cl_sii_code",
+    "type": "Char",
+    "string": "SII Code",
+    "defined_in_package": "l10n_cl",
+    "full_name": "immediate supply of information Code"
+   },
+   {
+    "name": "l10n_eg_unit_code_id",
+    "type": "Many2one",
+    "comodel": "l10n_eg_edi.uom.code",
+    "string": "ETA Unit Code",
+    "help": "This is the type of unit according to egyptian tax authority",
+    "defined_in_package": "l10n_eg_edi_eta",
+    "full_name": "ETA Unit Code",
+    "target_entity": "l10n_eg_edi.uom.code"
+   },
+   {
+    "name": "l10n_es_edi_facturae_uom_code",
+    "type": "Selection",
+    "selection": [
+     [
+      "01",
+      "Units"
+     ],
+     [
+      "02",
+      "Hours"
+     ],
+     [
+      "03",
+      "Kilograms"
+     ],
+     [
+      "04",
+      "Liters"
+     ],
+     [
+      "05",
+      "Other"
+     ],
+     [
+      "06",
+      "Boxes"
+     ],
+     [
+      "07",
+      "Trays, one layer no cover, plastic"
+     ],
+     [
+      "08",
+      "Barrels"
+     ],
+     [
+      "09",
+      "Jerricans, cylindrical"
+     ],
+     [
+      "10",
+      "Bags"
+     ],
+     [
+      "11",
+      "Carboys, non-protected"
+     ],
+     [
+      "12",
+      "Bottles, non-protected, cylindrical"
+     ],
+     [
+      "13",
+      "Canisters"
+     ],
+     [
+      "14",
+      "Tetra Briks"
+     ],
+     [
+      "15",
+      "Centiliters"
+     ],
+     [
+      "16",
+      "Centimeters"
+     ],
+     [
+      "17",
+      "Bins"
+     ],
+     [
+      "18",
+      "Dozens"
+     ],
+     [
+      "19",
+      "Cases"
+     ],
+     [
+      "20",
+      "Demijohns, non-protected"
+     ],
+     [
+      "21",
+      "Grams"
+     ],
+     [
+      "22",
+      "Kilometers"
+     ],
+     [
+      "23",
+      "Cans, rectangular"
+     ],
+     [
+      "24",
+      "Bunches"
+     ],
+     [
+      "25",
+      "Meters"
+     ],
+     [
+      "26",
+      "Millimeters"
+     ],
+     [
+      "27",
+      "6-Packs"
+     ],
+     [
+      "28",
+      "Packages"
+     ],
+     [
+      "29",
+      "Portions"
+     ],
+     [
+      "30",
+      "Rolls"
+     ],
+     [
+      "31",
+      "Envelopes"
+     ],
+     [
+      "32",
+      "Tubs"
+     ],
+     [
+      "33",
+      "Cubic meter"
+     ],
+     [
+      "34",
+      "Second"
+     ],
+     [
+      "35",
+      "Watt"
+     ],
+     [
+      "36",
+      "Kilowatt-hour"
+     ]
+    ],
+    "string": "Spanish EDI Units",
+    "default": "05",
+    "required": true,
+    "defined_in_package": "l10n_es_edi_facturae",
+    "full_name": "Spanish electronic data interchange Units"
+   },
+   {
+    "name": "l10n_hu_edi_code",
+    "type": "Selection",
+    "selection": [
+     [
+      "PIECE",
+      "Piece"
+     ],
+     [
+      "KILOGRAM",
+      "Kilogram"
+     ],
+     [
+      "TON",
+      "Ton"
+     ],
+     [
+      "KWH",
+      "Kilowatt hour"
+     ],
+     [
+      "DAY",
+      "Day"
+     ],
+     [
+      "HOUR",
+      "Hour"
+     ],
+     [
+      "MINUTE",
+      "Minute"
+     ],
+     [
+      "MONTH",
+      "Month"
+     ],
+     [
+      "LITER",
+      "Liter"
+     ],
+     [
+      "KILOMETER",
+      "Kilometer"
+     ],
+     [
+      "CUBIC_METER",
+      "Cubic meter"
+     ],
+     [
+      "METER",
+      "Meter"
+     ],
+     [
+      "LINEAR_METER",
+      "Linear meter"
+     ],
+     [
+      "CARTON",
+      "Carton"
+     ],
+     [
+      "PACK",
+      "Package"
+     ]
+    ],
+    "string": "NAV UoM code",
+    "help": "Choose the corresponding code, or leave blank if none correspond.",
+    "defined_in_package": "l10n_hu_edi",
+    "full_name": "NAV unit of measure code"
+   },
+   {
+    "name": "l10n_id_uom_code",
+    "type": "Many2one",
+    "comodel": "l10n_id_efaktur_coretax.uom.code",
+    "string": "E-Faktur UoM code",
+    "defined_in_package": "l10n_id_efaktur_coretax",
+    "full_name": "E-Faktur unit of measure code",
+    "target_entity": "l10n_id_efaktur_coretax.uom.code"
+   },
+   {
+    "name": "l10n_in_code",
+    "type": "Char",
+    "string": "Indian GST UQC",
+    "help": "Unique Quantity Code (UQC) under GST",
+    "defined_in_package": "l10n_in",
+    "full_name": "Indian goods and services tax UQC"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_factor_gt_zero",
+    "kind": "Constraint",
+    "definition": "CHECK (relative_factor!=0)",
+    "message": "The conversion ratio for a unit of measure cannot be 0!",
+    "defined_in_package": "uom"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_unprotected_uom_xml_ids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "Return a list of UoM XML IDs that are not protected by default.\nNote: Some of these may be protected via overrides in other modules.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sequence",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "relative_factor"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rounding",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "All Units of Measure share the same rounding precision defined in 'Product Unit'.\nSet in a compute to ensure compatibility with previous calls to `uom.rounding`.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_factor",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "relative_factor",
+         "relative_uom_id",
+         "relative_uom_id.factor"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_critical_fields",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "relative_factor"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_factor",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "relative_factor",
+         "relative_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Reference unit of measure is missing.",
+        "line": 101
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_master_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The following units of measure are used by the system and cannot be deleted: %s\nYou can archive them instead.",
+        "line": 109
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "round",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "value",
+     "rounding_method"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "Round the value using the 'Product Unit' precision",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "compare",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "value1",
+     "value2"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "Compare two measures after rounding them with the 'Product Unit' precision\n\n:param value1: origin value to compare\n:param value2: value to compare to\n:return: -1, 0 or 1, if ``value1`` is lower than, equal to, or greater than ``value2``.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "is_zero",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "Check if the value is zero after rounding with the 'Product Unit' precision",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "relative_factor",
+         "relative_uom_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "formatted_display_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_quantity",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "qty",
+     "to_unit",
+     "round",
+     "rounding_method",
+     "raise_if_failure"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "Convert the given quantity from the current UoM `self` into a given one\n:param qty: the quantity to convert\n:param to_unit: the destination UomUom record (uom.uom)\n:param raise_if_failure: only if the conversion is not possible\n    - if true, raise an exception if the conversion is not possible (different UomUom category),\n    - otherwise, return the initial quantity",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_qty",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "product_qty",
+     "uom_id",
+     "rounding_method"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "Check if product_qty in given uom is a multiple of the packaging qty.\nIf not, rounding the product_qty to closest multiple of the packaging qty\naccording to the rounding_method \"UP\", \"HALF-UP or \"DOWN\".",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "price",
+     "to_unit"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_protected_uoms",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "Verifies self does not contain protected uoms.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_common_reference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "other_uom"
+    ],
+    "definitions": [
+     {
+      "package": "uom",
+      "decorators": [],
+      "documentation": "Check if `self` and `other_uom` have a common reference unit ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_product_uoms",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_packaging_barcodes",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_fiscal_country_codes",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "allowed_company_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_unece_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Returns the UNECE code used for international trading for corresponding to the UoM as per\nhttps://unece.org/fileadmin/DAM/cefact/recommendations/rec20/rec20_rev3_Annex2e.pdf",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_tr_nilvera",
+      "decorators": [],
+      "documentation": "This depends on the mapping from https://developer.nilvera.com/en/code-lists#birim-kodlari ",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_uom_from_unece_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "unece_code"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "error_msg",
+        "line": 1383
+       },
+       {
+        "kind": "UserError",
+        "message": "error_msg",
+        "line": 1388
+       },
+       {
+        "kind": "UserError",
+        "message": "error_msg",
+        "line": 1393
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_adjust_uom_quantities",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "qty",
+     "quant_uom"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "This method adjust the quantities of a procurement if its UoM isn't the same\nas the one of the quant and the parameter 'propagate_uom' is not set.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_search_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_factor",
+    "package": "uom",
+    "kind": "UserError",
+    "message": "Reference unit of measure is missing."
+   },
+   {
+    "operation": "_unlink_except_master_data",
+    "package": "uom",
+    "kind": "UserError",
+    "message": "The following units of measure are used by the system and cannot be deleted: %s\nYou can archive them instead."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "error_msg"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_timesheet.access_uom_uom_hr_timesheet",
+    "package": "hr_timesheet",
+    "name": "uom.uom.timesheet.user",
+    "entity": "uom.uom",
+    "group": "hr_timesheet.group_hr_timesheet_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mrp.access_uom_uom_user",
+    "package": "mrp",
+    "name": "uom.uom user",
+    "entity": "uom.uom",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mrp_subcontracting.access_subcontracting_portal_uom",
+    "package": "mrp_subcontracting",
+    "name": "subcontracting.portal.uom",
+    "entity": "uom.uom",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_uom_uom_product_manager",
+    "package": "product",
+    "name": "uom.uom.product.manager",
+    "entity": "uom.uom",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale.access_uom_uom_user",
+    "package": "sale",
+    "name": "uom.uom.user",
+    "entity": "uom.uom",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "uom.access_uom_uom_manager",
+    "package": "uom",
+    "name": "uom.uom.manager",
+    "entity": "uom.uom",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "uom.access_uom_uom_user",
+    "package": "uom",
+    "name": "uom.uom.user",
+    "entity": "uom.uom",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_uom_public",
+    "package": "website_sale",
+    "name": "uom.uom public",
+    "entity": "uom.uom",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_uom_portal",
+    "package": "website_sale",
+    "name": "uom.uom portal",
+    "entity": "uom.uom",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.product_uom_form_view_inherit",
+    "package": "account",
+    "name": "product_uom_form_view_inherit",
+    "view_type": "xpath",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "fiscal_country_codes",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_ar.product_uom_tree_view",
+    "package": "l10n_ar",
+    "name": "uom.uom.list",
+    "view_type": "list",
+    "inherits_view": "uom.product_uom_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "l10n_ar_afip_code",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "l10n_ar.product_uom_form_view",
+    "package": "l10n_ar",
+    "name": "uom.uom.form",
+    "view_type": "div",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "relative_factor",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_ar_afip_code",
+       "invisible": "'AR' not in fiscal_country_codes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "relative_factor",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_eg_edi_eta.product_uom_form_view_inherit",
+    "package": "l10n_eg_edi_eta",
+    "name": "product_uom_form_view_inherit",
+    "view_type": "xpath",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_eg_unit_code_id",
+       "invisible": "'EG' not in fiscal_country_codes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_facturae.product_uom_tree_view_inherit_l10n_es_edi_facturae",
+    "package": "l10n_es_edi_facturae",
+    "name": "uom.uom.list.inherit.l10n_es_edi_facturae",
+    "view_type": "field",
+    "inherits_view": "uom.product_uom_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "l10n_es_edi_facturae_uom_code",
+       "string": "Spanish Facturae EDI type"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_facturae.product_uom_form_view_inherit_l10n_es_edi_facturae",
+    "package": "l10n_es_edi_facturae",
+    "name": "uom.uom.form.inherit.l10n_es_edi_facturae",
+    "view_type": "field",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "l10n_es_edi_facturae_uom_code",
+       "string": "Spanish Facturae EDI type"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_hu_edi.uom_uom_form_inherit_l10n_hu_edi",
+    "package": "l10n_hu_edi",
+    "name": "uom.uom.inherit.l10n_hu_edi",
+    "view_type": "xpath",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_hu_edi_code",
+       "invisible": "'HU' not in fiscal_country_codes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_id_efaktur_coretax.product_uom_form_view_inherit_coretax",
+    "package": "l10n_id_efaktur_coretax",
+    "name": "uom.uom.form.inherit.coretax",
+    "view_type": "xpath",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='relative_factor']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_id_uom_code"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='relative_factor']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_in.product_uom_form_view_inherit_l10n_in",
+    "package": "l10n_in",
+    "name": "uom.uom.form",
+    "view_type": "xpath",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_in_code",
+       "invisible": "'IN' not in fiscal_country_codes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.product_uom_form_view_inherit",
+    "package": "point_of_sale",
+    "name": "product.uom.form.view.inherit",
+    "view_type": "div",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "relative_factor",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "is_pos_groupable",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "relative_factor",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product.uom_uom_form_view_inherit",
+    "package": "product",
+    "name": "uom.uom.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//sheet",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_open_packaging_barcodes",
+       "type": "object",
+       "class": "oe_stat_button",
+       "context": "{'default_uom_id': id}",
+       "icon": "fa-barcode"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//sheet",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.product_uom_tree_view_inherit",
+    "package": "stock",
+    "name": "uom.uom.list.inherit",
+    "view_type": "field",
+    "inherits_view": "uom.product_uom_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "package_type_id",
+       "groups": "stock.group_tracking_lot"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock.product_uom_form_view_inherit",
+    "package": "stock",
+    "name": "uom.uom.form.inherit",
+    "view_type": "div",
+    "inherits_view": "uom.product_uom_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "relative_factor",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "package_type_id",
+       "readonly": "(context.get('product_id') or context.get('product_ids')) and id",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "product_uom_ids",
+       "widget": "many2many_barcode_tags",
+       "invisible": "not (context.get('product_id') and id)",
+       "readonly": "not context.get('product_id')",
+       "context": "{'default_uom_id': id, 'default_product_id': context.get('product_id')}",
+       "options": "{'no_create_edit': True, 'no_open': True}",
+       "force_save": "1"
+      },
+      {
+       "name": "route_ids",
+       "widget": "many2many_tags",
+       "invisible": "not route_ids",
+       "groups": "stock.group_adv_location"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_barcode_tags": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "relative_factor",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "uom.product_uom_tree_view",
+    "package": "uom",
+    "name": "uom.uom.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Units & Packagings"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "relative_factor",
+       "invisible": "relative_factor == 1 and not relative_uom_id"
+      },
+      {
+       "name": "relative_uom_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "uom.product_uom_form_view",
+    "package": "uom",
+    "name": "uom.uom.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Units of Measure"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "readonly": "(context.get('product_id') or context.get('product_ids')) and id"
+      },
+      {
+       "name": "relative_factor",
+       "readonly": "(context.get('product_id') or context.get('product_ids')) and id"
+      },
+      {
+       "name": "relative_uom_id",
+       "readonly": "(context.get('product_id') or context.get('product_ids')) and id",
+       "placeholder": "Reference Unit"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "uom.uom_uom_view_search",
+    "package": "uom",
+    "name": "uom.uom.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search UOM"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "uom.product_uom_form_action",
+    "package": "uom",
+    "name": "Units & Packagings",
+    "view_mode": null,
+    "view_id": "product_uom_tree_view",
+    "search_view_id": "uom_uom_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Add a new unit of measure\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "uom.uom"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "purchase.menu_purchase_uom_form_action",
+    "package": "purchase",
+    "name": "Units & Packagings",
+    "parent_id": "purchase.menu_product_in_config_purchase",
+    "action": "uom.product_uom_form_action",
+    "sequence": "10",
+    "groups_id": "uom.group_uom",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.menu_product_uom_form_action",
+    "package": "sale",
+    "name": "Units & Packagings",
+    "parent_id": null,
+    "action": "uom.product_uom_form_action",
+    "sequence": "35",
+    "groups_id": "uom.group_uom",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "stock.menu_stock_uom_form_action",
+    "package": "stock",
+    "name": "Units & Packagings",
+    "parent_id": "menu_product_in_config_stock",
+    "action": "uom.product_uom_form_action",
+    "sequence": "5",
+    "groups_id": "uom.group_uom",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

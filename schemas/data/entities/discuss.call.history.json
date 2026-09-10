@@ -1,0 +1,332 @@
+{
+ "catalog": {
+  "name": "entity:discuss.call.history",
+  "description": "Complete definition of entity Keep the call history (discuss.call.history).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "discuss.call.history",
+  "storage_name": "discuss_call_history",
+  "full_name": "Keep the call history",
+  "kind": "persistent",
+  "description": "Keep the call history",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "im_livechat"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "start_dt DESC, id DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel",
+    "index": true,
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "mail",
+    "string": "Channel",
+    "full_name": "Channel",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "duration_hour",
+    "type": "Float",
+    "compute": "_compute_duration_hour",
+    "defined_in_package": "mail",
+    "string": "Duration Hour",
+    "full_name": "Duration Hour"
+   },
+   {
+    "name": "start_dt",
+    "type": "Datetime",
+    "index": true,
+    "required": true,
+    "defined_in_package": "mail",
+    "string": "Start Dt",
+    "full_name": "Start Dt"
+   },
+   {
+    "name": "end_dt",
+    "type": "Datetime",
+    "defined_in_package": "mail",
+    "string": "End Dt",
+    "full_name": "End Dt"
+   },
+   {
+    "name": "start_call_message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "index": true,
+    "defined_in_package": "mail",
+    "string": "Start Call Message",
+    "full_name": "Start Call Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "livechat_participant_history_ids",
+    "type": "Many2many",
+    "comodel": "im_livechat.channel.member.history",
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Participant History",
+    "full_name": "Livechat Participant History",
+    "target_entity": "im_livechat.channel.member.history"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_channel_id_not_null_constraint",
+    "kind": "Constraint",
+    "definition": "CHECK (channel_id IS NOT NULL)",
+    "message": "Call history must have a channel",
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_start_dt_is_not_null_constraint",
+    "kind": "Constraint",
+    "definition": "CHECK (start_dt IS NOT NULL)",
+    "message": "Call history must have a start date",
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_message_id_unique_constraint",
+    "kind": "Constraint",
+    "definition": "UNIQUE (start_call_message_id)",
+    "message": "Messages can only be linked to one call history",
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_channel_id_end_dt_idx",
+    "kind": "Index",
+    "definition": "(channel_id, end_dt) WHERE end_dt IS NULL",
+    "message": null,
+    "defined_in_package": "mail"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_duration_hour",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "start_dt",
+         "end_dt"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_discuss_call_history_user",
+    "package": "mail",
+    "name": "discuss.call.history.user",
+    "entity": "discuss.call.history",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_discuss_call_history_public",
+    "package": "mail",
+    "name": "discuss.call.history.public",
+    "entity": "discuss.call.history",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_discuss_call_history_portal",
+    "package": "mail",
+    "name": "discuss.call.history.portal",
+    "entity": "discuss.call.history",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "im_livechat.ir_rule_discuss_call_history_im_livechat_group_user",
+    "package": "im_livechat",
+    "name": "discuss.call.history: livechat users can access all call histories",
+    "entity": "discuss.call.history",
+    "domain": "[('channel_id.channel_type', '=', 'livechat')]",
+    "groups": "[(4, ref('im_livechat_group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_call_history_read_all",
+    "package": "mail",
+    "name": "discuss.call.history: read call history of accessible channels",
+    "entity": "discuss.call.history",
+    "domain": "[\n                    \"|\",\n                        \"&\",\n                            (\"channel_id.channel_type\", \"!=\", \"channel\"),\n                            \"|\",\n                                (\"channel_id.is_member\", \"=\", True),\n                                (\"channel_id.parent_channel_id.is_member\", \"=\", True),\n                        \"&\",\n                            (\"channel_id.channel_type\", \"=\", \"channel\"),\n                            \"|\",\n                                (\"channel_id.group_public_id\", \"=\", False),\n                                (\"channel_id.group_public_id\", \"in\", user.all_group_ids.ids),\n                ]",
+    "groups": "[                     Command.link(ref('base.group_user')),                     Command.link(ref('base.group_portal')),                     Command.link(ref('base.group_public')),                 ]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mail.discuss_call_history_view_tree",
+    "package": "mail",
+    "name": "discuss.call.history.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Call History",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "start_dt"
+      },
+      {
+       "name": "end_dt"
+      },
+      {
+       "name": "duration_hour",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.discuss_call_history_view_form",
+    "package": "mail",
+    "name": "discuss.call.history.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Call History"
+     },
+     "fields": [
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "start_dt"
+      },
+      {
+       "name": "end_dt"
+      },
+      {
+       "name": "duration_hour",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.discuss_call_history_action",
+    "package": "mail",
+    "name": "Call History",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\"create\": False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.call.history"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

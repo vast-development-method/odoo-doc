@@ -1,0 +1,333 @@
+{
+ "catalog": {
+  "name": "entity:mrp.bom.byproduct",
+  "description": "Complete definition of entity Byproduct (mrp.bom.byproduct).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mrp.bom.byproduct",
+  "storage_name": "mrp_bom_byproduct",
+  "full_name": "Byproduct",
+  "kind": "persistent",
+  "description": "Byproduct",
+  "defined_by_package": "mrp",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": "product_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "By-product",
+    "required": true,
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "By-product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "bom_id.company_id",
+    "store": true,
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "mrp",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "product_qty",
+    "type": "Float",
+    "string": "Quantity",
+    "default": 1.0,
+    "digits": "Product Unit",
+    "required": true,
+    "defined_in_package": "mrp",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "required": true,
+    "compute": "_compute_product_uom_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "defined_in_package": "mrp",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "bom_id",
+    "type": "Many2one",
+    "comodel": "mrp.bom",
+    "string": "BoM",
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "mrp",
+    "full_name": "bill of materials",
+    "target_entity": "mrp.bom"
+   },
+   {
+    "name": "allowed_operation_ids",
+    "type": "One2many",
+    "comodel": "mrp.routing.workcenter",
+    "related": "bom_id.operation_ids",
+    "defined_in_package": "mrp",
+    "string": "Allowed Operation",
+    "full_name": "Allowed Operation",
+    "target_entity": "mrp.routing.workcenter"
+   },
+   {
+    "name": "operation_id",
+    "type": "Many2one",
+    "comodel": "mrp.routing.workcenter",
+    "string": "Produced in Operation",
+    "check_company": true,
+    "domain": "[('id', 'in', allowed_operation_ids)]",
+    "defined_in_package": "mrp",
+    "full_name": "Produced in Operation",
+    "target_entity": "mrp.routing.workcenter"
+   },
+   {
+    "name": "possible_bom_product_template_attribute_value_ids",
+    "type": "Many2many",
+    "related": "bom_id.possible_product_template_attribute_value_ids",
+    "defined_in_package": "mrp",
+    "string": "Possible Bill of materials Product Template Attribute Value",
+    "full_name": "Possible Bill of materials Product Template Attribute Value"
+   },
+   {
+    "name": "bom_product_template_attribute_value_ids",
+    "type": "Many2many",
+    "comodel": "product.template.attribute.value",
+    "string": "Apply on Variants",
+    "ondelete": "restrict",
+    "domain": "[('id', 'in', possible_bom_product_template_attribute_value_ids)]",
+    "help": "BOM Product Variants needed to apply this line.",
+    "defined_in_package": "mrp",
+    "full_name": "Apply on Variants",
+    "target_entity": "product.template.attribute.value"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "defined_in_package": "mrp",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "cost_share",
+    "type": "Float",
+    "string": "Cost Share (%)",
+    "digits": [
+     5,
+     2
+    ],
+    "help": "The percentage of the final production cost for this by-product line (divided between the quantity produced).The total of all by-products' cost share must be less than or equal to 100.",
+    "defined_in_package": "mrp",
+    "full_name": "Cost Share (%)"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_product_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Changes UoM if product_id changes. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_skip_byproduct_line",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product",
+     "never_attribute_values"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Control if a byproduct line should be produced, can be inherited to add\ncustom control.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_add_from_catalog",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_lines_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "default",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_mrp_bom_byproduct_user",
+    "package": "mrp",
+    "name": "mrp.bom.byproduct",
+    "entity": "mrp.bom.byproduct",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mrp.access_mrp_bom_byproduct_manager",
+    "package": "mrp",
+    "name": "mrp.bom.byproduct manager",
+    "entity": "mrp.bom.byproduct",
+    "group": "mrp.group_mrp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp.mrp_bom_byproduct_form_view",
+    "package": "mrp",
+    "name": "mrp.bom.byproduct.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Byproduct"
+     },
+     "fields": [
+      {
+       "name": "allowed_operation_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "operation_id",
+       "options": "{'no_quick_create':True,'no_create_edit':True}",
+       "groups": "mrp.group_mrp_routings"
+      },
+      {
+       "name": "possible_bom_product_template_attribute_value_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "bom_product_template_attribute_value_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_create': True}",
+       "groups": "product.group_product_variant"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

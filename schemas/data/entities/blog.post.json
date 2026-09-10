@@ -1,0 +1,975 @@
+{
+ "catalog": {
+  "name": "entity:blog.post",
+  "description": "Complete definition of entity Blog Post (blog.post).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "blog.post",
+  "storage_name": "blog_post",
+  "full_name": "Blog Post",
+  "kind": "persistent",
+  "description": "Blog Post",
+  "defined_by_package": "website_blog",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread",
+   "website.seo.metadata",
+   "website.published.multi.mixin",
+   "website.page_visibility_options.mixin",
+   "website.cover_properties.mixin",
+   "website.searchable.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": "read",
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Title",
+    "required": true,
+    "translate": true,
+    "default": "",
+    "defined_in_package": "website_blog",
+    "full_name": "Title"
+   },
+   {
+    "name": "subtitle",
+    "type": "Char",
+    "string": "Sub Title",
+    "translate": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Sub Title"
+   },
+   {
+    "name": "author_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Author",
+    "default": {
+     "dynamic": "lambda self: self.env.user.partner_id"
+    },
+    "index": "btree_not_null",
+    "defined_in_package": "website_blog",
+    "full_name": "Author",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "author_avatar",
+    "type": "Binary",
+    "related": "author_id.image_128",
+    "string": "Avatar",
+    "readonly": false,
+    "defined_in_package": "website_blog",
+    "full_name": "Avatar"
+   },
+   {
+    "name": "author_name",
+    "type": "Char",
+    "related": "author_id.display_name",
+    "string": "Author Name",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Author Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Active"
+   },
+   {
+    "name": "blog_id",
+    "type": "Many2one",
+    "comodel": "blog.blog",
+    "string": "Blog",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "default": {
+     "dynamic": "lambda self: self.env['blog.blog'].search([], limit=1)"
+    },
+    "defined_in_package": "website_blog",
+    "full_name": "Blog",
+    "target_entity": "blog.blog"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "blog.tag",
+    "string": "Tags",
+    "defined_in_package": "website_blog",
+    "full_name": "Tags",
+    "target_entity": "blog.tag"
+   },
+   {
+    "name": "content",
+    "type": "Html",
+    "string": "Content",
+    "default": {
+     "dynamic": "_default_content"
+    },
+    "translate": {
+     "expression": "html_translate"
+    },
+    "sanitize": false,
+    "defined_in_package": "website_blog",
+    "full_name": "Content"
+   },
+   {
+    "name": "teaser",
+    "type": "Text",
+    "string": "Teaser",
+    "compute": "_compute_teaser",
+    "inverse": "_set_teaser",
+    "translate": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Teaser"
+   },
+   {
+    "name": "teaser_manual",
+    "type": "Text",
+    "string": "Teaser Content",
+    "translate": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Teaser Content"
+   },
+   {
+    "name": "website_message_ids",
+    "type": "One2many",
+    "domain": {
+     "dynamic": "lambda self: [('model', '=', self._name), ('message_type', '=', 'comment'), '&', ('is_internal', '=', False), ('subtype_id.internal', '=', False)]"
+    },
+    "defined_in_package": "website_blog",
+    "string": "Website Message",
+    "full_name": "Website Message"
+   },
+   {
+    "name": "create_date",
+    "type": "Datetime",
+    "string": "Created on",
+    "readonly": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Created on"
+   },
+   {
+    "name": "published_date",
+    "type": "Datetime",
+    "string": "Published Date",
+    "defined_in_package": "website_blog",
+    "full_name": "Published Date"
+   },
+   {
+    "name": "post_date",
+    "type": "Datetime",
+    "string": "Publishing date",
+    "compute": "_compute_post_date",
+    "inverse": "_set_post_date",
+    "store": true,
+    "help": "The blog post will be visible for your visitors as of this date on the website if it is set as published.",
+    "defined_in_package": "website_blog",
+    "full_name": "Publishing date"
+   },
+   {
+    "name": "create_uid",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Created by",
+    "readonly": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Created by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "write_date",
+    "type": "Datetime",
+    "string": "Last Updated on",
+    "readonly": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Last Updated on"
+   },
+   {
+    "name": "write_uid",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Last Contributor",
+    "readonly": true,
+    "defined_in_package": "website_blog",
+    "full_name": "Last Contributor",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "visits",
+    "type": "Integer",
+    "string": "No of Views",
+    "copy": false,
+    "default": 0,
+    "readonly": true,
+    "defined_in_package": "website_blog",
+    "full_name": "No of Views"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "related": "blog_id.website_id",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "website_blog",
+    "string": "Website",
+    "full_name": "Website"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_content",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_teaser",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "content",
+         "teaser_manual"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_teaser",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_post_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "create_date",
+         "published_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_post_date",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_for_publication",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_access_action",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "access_uid",
+     "force_website"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": "Instead of the classic form view, redirect to the post on website\ndirectly if user is an employee or if the post is published. ",
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_get_recipients_groups",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "model_description",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_thread_by_inbox",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "recipients_data",
+     "msg_vals",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_website_meta",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_get_detail",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "website",
+     "order",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "website_blog",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 49,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_blog.blog_post_public",
+    "package": "website_blog",
+    "name": "blog.post",
+    "entity": "blog.post",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_blog.blog_post_portal",
+    "package": "website_blog",
+    "name": "blog.post",
+    "entity": "blog.post",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_blog.blog_post_employee",
+    "package": "website_blog",
+    "name": "blog.post",
+    "entity": "blog.post",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_blog.blog_post",
+    "package": "website_blog",
+    "name": "blog.post",
+    "entity": "blog.post",
+    "group": "website.group_website_designer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_blog.website_blog_post_public",
+    "package": "website_blog",
+    "name": "Blog Post: public: published only",
+    "entity": "blog.post",
+    "domain": "[('website_published', '=', True)]",
+    "groups": "[(4, ref('base.group_public')), (4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "website_blog.view_blog_post_form",
+    "package": "website_blog",
+    "name": "blog.post.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Blog Post"
+     },
+     "fields": [
+      {
+       "name": "is_published",
+       "widget": "website_redirect_button"
+      },
+      {
+       "name": "blog_id"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "Blog Post Title"
+      },
+      {
+       "name": "subtitle",
+       "placeholder": "Blog Subtitle"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "author_id"
+      },
+      {
+       "name": "create_date",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "visits"
+      },
+      {
+       "name": "post_date"
+      },
+      {
+       "name": "write_uid"
+      },
+      {
+       "name": "write_date"
+      },
+      {
+       "name": "website_meta_title",
+       "string": "Meta Title"
+      },
+      {
+       "name": "website_meta_description",
+       "string": "Meta Description"
+      },
+      {
+       "name": "website_meta_keywords",
+       "string": "Meta Keywords"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "seo",
+       "string": "SEO",
+       "invisible": null,
+       "groups": "base.group_no_one"
+      }
+     ],
+     "widgets": {
+      "website_redirect_button": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_blog.blog_post_view_kanban",
+    "package": "website_blog",
+    "name": "blog.post.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "js_class": "website_pages_kanban",
+      "class": "o_kanban_mobile",
+      "action": "open_website_url",
+      "type": "object",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "website_id"
+      },
+      {
+       "name": "blog_id"
+      },
+      {
+       "name": "post_date"
+      },
+      {
+       "name": "author_id",
+       "widget": "image",
+       "options": "{'preview_image': 'avatar_128'}"
+      },
+      {
+       "name": "is_published",
+       "widget": "boolean_toggle"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "website_blog.view_blog_post_search",
+    "package": "website_blog",
+    "name": "blog.post.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Blog Post"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Content",
+       "filter_domain": "['|', ('name','ilike',self), ('content','ilike',self)]"
+      },
+      {
+       "name": "write_uid"
+      },
+      {
+       "name": "blog_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_blog",
+       "string": "Blog",
+       "domain": "[]",
+       "context": "{'group_by': 'blog_id'}"
+      },
+      {
+       "name": "group_by_author",
+       "string": "Author",
+       "domain": "[]",
+       "context": "{'group_by': 'create_uid'}"
+      },
+      {
+       "name": "last_contributor",
+       "string": "Last Contributor",
+       "domain": "[]",
+       "context": "{'group_by': 'write_uid'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_blog.view_blog_post_list",
+    "package": "website_blog",
+    "name": "Blog Post Pages List",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "js_class": "website_pages_list",
+      "type": "object",
+      "action": "open_website_url",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "website_url"
+      },
+      {
+       "name": "author_id",
+       "optional": "show"
+      },
+      {
+       "name": "blog_id",
+       "optional": "hide"
+      },
+      {
+       "name": "create_uid",
+       "optional": "hide"
+      },
+      {
+       "name": "write_uid",
+       "optional": "hide"
+      },
+      {
+       "name": "write_date",
+       "optional": "hide"
+      },
+      {
+       "name": "is_seo_optimized"
+      },
+      {
+       "name": "is_published"
+      },
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_blog.blog_post_view_form_add",
+    "package": "website_blog",
+    "name": "blog.post.view.form.add",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "js_class": "website_new_content_form"
+     },
+     "fields": [
+      {
+       "name": "website_url",
+       "invisible": "1"
+      },
+      {
+       "name": "blog_id",
+       "string": "Select Blog"
+      },
+      {
+       "name": "name",
+       "placeholder": "Blog Post Title"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_blog.action_blog_post",
+    "package": "website_blog",
+    "name": "Blog Post Pages",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "view_blog_post_search",
+    "domain": null,
+    "context": "{'create_action': 'website_blog.blog_post_action_add'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "blog.post"
+   },
+   {
+    "external_identifier": "website_blog.blog_post_action_add",
+    "package": "website_blog",
+    "name": "New Blog Post",
+    "view_mode": "form",
+    "view_id": "blog_post_view_form_add",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "blog.post"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

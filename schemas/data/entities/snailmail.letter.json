@@ -1,0 +1,940 @@
+{
+ "catalog": {
+  "name": "entity:snailmail.letter",
+  "description": "Complete definition of entity Snailmail Letter (snailmail.letter).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "snailmail.letter",
+  "storage_name": "snailmail_letter",
+  "full_name": "Snailmail Letter",
+  "kind": "persistent",
+  "description": "Snailmail Letter",
+  "defined_by_package": "snailmail",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Sent by",
+    "defined_in_package": "snailmail",
+    "full_name": "Sent by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "model",
+    "type": "Char",
+    "string": "Model",
+    "required": true,
+    "defined_in_package": "snailmail",
+    "full_name": "Model"
+   },
+   {
+    "name": "res_id",
+    "type": "Integer",
+    "string": "Document ID",
+    "required": true,
+    "defined_in_package": "snailmail",
+    "full_name": "Document identifier"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Recipient",
+    "required": true,
+    "defined_in_package": "snailmail",
+    "full_name": "Recipient",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company.id"
+    },
+    "defined_in_package": "snailmail",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "report_template",
+    "type": "Many2one",
+    "comodel": "ir.actions.report",
+    "string": "Optional report to print and attach",
+    "defined_in_package": "snailmail",
+    "full_name": "Optional report to print and attach",
+    "target_entity": "ir.actions.report"
+   },
+   {
+    "name": "attachment_id",
+    "type": "Many2one",
+    "comodel": "ir.attachment",
+    "string": "Attachment",
+    "ondelete": "cascade",
+    "index": "btree_not_null",
+    "defined_in_package": "snailmail",
+    "full_name": "Attachment",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "attachment_datas",
+    "type": "Binary",
+    "string": "Document",
+    "related": "attachment_id.datas",
+    "defined_in_package": "snailmail",
+    "full_name": "Document"
+   },
+   {
+    "name": "attachment_fname",
+    "type": "Char",
+    "string": "Attachment Filename",
+    "related": "attachment_id.name",
+    "defined_in_package": "snailmail",
+    "full_name": "Attachment Filename"
+   },
+   {
+    "name": "color",
+    "type": "Boolean",
+    "string": "Color",
+    "default": {
+     "dynamic": "lambda self: self.env.company.snailmail_color"
+    },
+    "defined_in_package": "snailmail",
+    "full_name": "Color"
+   },
+   {
+    "name": "cover",
+    "type": "Boolean",
+    "string": "Cover Page",
+    "default": {
+     "dynamic": "lambda self: self.env.company.snailmail_cover"
+    },
+    "defined_in_package": "snailmail",
+    "full_name": "Cover Page"
+   },
+   {
+    "name": "duplex",
+    "type": "Boolean",
+    "string": "Both side",
+    "default": {
+     "dynamic": "lambda self: self.env.company.snailmail_duplex"
+    },
+    "defined_in_package": "snailmail",
+    "full_name": "Both side"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "pending",
+      "In Queue"
+     ],
+     [
+      "sent",
+      "Sent"
+     ],
+     [
+      "error",
+      "Error"
+     ],
+     [
+      "canceled",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "readonly": true,
+    "copy": false,
+    "default": "pending",
+    "required": true,
+    "help": "When a letter is created, the status is 'Pending'.\nIf the letter is correctly sent, the status goes in 'Sent',\nIf not, it will got in state 'Error' and the error message will be displayed in the field 'Error Message'.",
+    "defined_in_package": "snailmail",
+    "full_name": "Status"
+   },
+   {
+    "name": "error_code",
+    "type": "Selection",
+    "selection": {
+     "expression": "[(err_code, err_code) for err_code in ERROR_CODES]"
+    },
+    "string": "Error",
+    "defined_in_package": "snailmail",
+    "full_name": "Error"
+   },
+   {
+    "name": "info_msg",
+    "type": "Html",
+    "string": "Information",
+    "defined_in_package": "snailmail",
+    "full_name": "Information"
+   },
+   {
+    "name": "reference",
+    "type": "Char",
+    "string": "Related Record",
+    "compute": "_compute_reference",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "snailmail",
+    "full_name": "Related Record"
+   },
+   {
+    "name": "message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "string": "Snailmail Status Message",
+    "index": "btree_not_null",
+    "defined_in_package": "snailmail",
+    "full_name": "Snailmail Status Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "notification_ids",
+    "type": "One2many",
+    "comodel": "mail.notification",
+    "inverse_name": "letter_id",
+    "string": "Notifications",
+    "defined_in_package": "snailmail",
+    "full_name": "Notifications",
+    "target_entity": "mail.notification"
+   },
+   {
+    "name": "street",
+    "type": "Char",
+    "string": "Street",
+    "defined_in_package": "snailmail",
+    "full_name": "Street"
+   },
+   {
+    "name": "street2",
+    "type": "Char",
+    "string": "Street2",
+    "defined_in_package": "snailmail",
+    "full_name": "Street2"
+   },
+   {
+    "name": "zip",
+    "type": "Char",
+    "string": "Zip",
+    "defined_in_package": "snailmail",
+    "full_name": "Zip"
+   },
+   {
+    "name": "city",
+    "type": "Char",
+    "string": "City",
+    "defined_in_package": "snailmail",
+    "full_name": "City"
+   },
+   {
+    "name": "state_id",
+    "type": "Many2one",
+    "comodel": "res.country.state",
+    "string": "State",
+    "defined_in_package": "snailmail",
+    "full_name": "State",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Country",
+    "defined_in_package": "snailmail",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attachment_id",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reference",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model",
+         "res_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_attachment_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "attachment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_report_pdf",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_attachment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": "This method will check if we have any existent attachement matching the model\nand res_ids and create them if not found.",
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please use an A4 Paper format.",
+        "line": 165
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_count_pages_pdf",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_pdf"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": "Count the number of pages of the given pdf file.\n:param bin_pdf : binary content of the pdf file",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_snailmail_create",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "route"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": "Create a dictionnary object to send to snailmail server.\n\n:return: Dict in the form:\n{\n    account_token: string,    //IAP Account token of the user\n    documents: [{\n        pages: int,\n        pdf_bin: pdf file\n        res_id: int (client-side res_id),\n        res_model: char (client-side res_model),\n        address: {\n            name: char,\n            street: char,\n            street2: char (OPTIONAL),\n            zip: int,\n            city: char,\n            state: char (state code (OPTIONAL)),\n            country_code: char (country code)\n        }\n        return_address: {\n            name: char,\n            street: char,\n            street2: char (OPTIONAL),\n            zip: int,\n            city: char,at\n            state: char (state code (OPTIONAL)),\n            country_code: char (country code)\n        }\n    }],\n    options: {\n        color: boolean (true if color, false if black-white),\n        duplex: boolean (true if duplex, false otherwise),\n        currency_name: char\n    }\n}",
+      "size_in_lines": 118,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_error_message",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "error"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_failure_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "error"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_snailmail_print",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "immediate"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_snailmail_print_invalid_address",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_snailmail_print_valid_address",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": "get response\n{\n    'request_code': RESPONSE_OK, # because we receive 200 if good or fail\n    'total_cost': total_cost,\n    'credit_error': credit_error,\n    'request': {\n        'documents': documents,\n        'options': options\n        }\n    }\n}",
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "re-raise",
+        "message": "ae",
+        "line": 399
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "snailmail_print",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "cancel",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_snailmail_cron",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "autocommit"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_valid_address",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_cover_address_split",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_append_cover_page",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "invoice_bin"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_overwrite_margins",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "invoice_bin"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": "Fill the margins with white for validation purposes.",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_fetch_attachment",
+    "package": "snailmail",
+    "kind": "UserError",
+    "message": "Please use an A4 Paper format."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "snailmail.access_snailmail_letter_user",
+    "package": "snailmail",
+    "name": "snailmail.letter.user",
+    "entity": "snailmail.letter",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "snailmail.access_snailmail_letter_system",
+    "package": "snailmail",
+    "name": "snailmail.letter.system",
+    "entity": "snailmail.letter",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "snailmail.snailmail_letter_list",
+    "package": "snailmail",
+    "name": "snailmail.letter.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "decoration-danger": "state=='error'",
+      "decoration-muted": "state=='sent'",
+      "string": "Letters"
+     },
+     "fields": [
+      {
+       "name": "attachment_id",
+       "string": "Document"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "info_msg",
+       "widget": "html"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "html": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-danger": "state=='error'",
+      "decoration-muted": "state=='sent'"
+     }
+    }
+   },
+   {
+    "external_identifier": "snailmail.snailmail_letter_form",
+    "package": "snailmail",
+    "name": "snailmail.letter.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "reference",
+       "widget": "reference"
+      },
+      {
+       "name": "attachment_datas"
+      },
+      {
+       "name": "attachment_fname",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "info_msg",
+       "widget": "html"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "color"
+      },
+      {
+       "name": "duplex"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "snailmail_print",
+       "string": "Send Now",
+       "type": "object",
+       "invisible": "state not in ('pending', 'error')",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state not in ('pending', 'error')"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "reference": 1,
+      "html": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "snailmail_print",
+       "string": "Send Now",
+       "type": "object",
+       "invisible": "state not in ('pending', 'error')",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state not in ('pending', 'error')"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "pending,sent,canceled",
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "snailmail.action_mail_letters",
+    "package": "snailmail",
+    "name": "Snailmail Letters",
+    "view_mode": "form,list",
+    "view_id": "snailmail_letter_list",
+    "search_view_id": null,
+    "domain": "[('state', '!=', 'draft')]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "snailmail.letter"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "snailmail.snailmail_print",
+    "package": "snailmail",
+    "name": "Snailmail: process letters queue",
+    "interval_number": "24",
+    "interval_type": "hours",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "snailmail.letter",
+    "operation": "_snailmail_cron",
+    "operation_call": "model._snailmail_cron()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

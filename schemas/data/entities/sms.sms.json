@@ -1,0 +1,1008 @@
+{
+ "catalog": {
+  "name": "entity:sms.sms",
+  "description": "Complete definition of entity Outgoing text message (sms.sms).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sms.sms",
+  "storage_name": "sms_sms",
+  "full_name": "Outgoing text message",
+  "kind": "persistent",
+  "description": "Outgoing SMS",
+  "defined_by_package": "sms",
+  "extended_by_packages": [
+   "mass_mailing_sms",
+   "sms_twilio"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id DESC",
+  "display_name_field": "number",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "uuid",
+    "type": "Char",
+    "string": "UUID",
+    "copy": false,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: uuid4().hex"
+    },
+    "help": "Alternate way to identify a SMS record, used for delivery reports",
+    "defined_in_package": "sms",
+    "full_name": "UUID"
+   },
+   {
+    "name": "number",
+    "type": "Char",
+    "string": "Number",
+    "defined_in_package": "sms",
+    "full_name": "Number"
+   },
+   {
+    "name": "body",
+    "type": "Text",
+    "defined_in_package": "sms",
+    "string": "Body",
+    "full_name": "Body"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Customer",
+    "defined_in_package": "sms",
+    "full_name": "Customer",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "mail_message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "index": true,
+    "defined_in_package": "sms",
+    "string": "Mail Message",
+    "full_name": "Mail Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "outgoing",
+      "In Queue"
+     ],
+     [
+      "process",
+      "Processing"
+     ],
+     [
+      "pending",
+      "Sent"
+     ],
+     [
+      "sent",
+      "Delivered"
+     ],
+     [
+      "error",
+      "Error"
+     ],
+     [
+      "canceled",
+      "Cancelled"
+     ]
+    ],
+    "string": "SMS Status",
+    "readonly": true,
+    "copy": false,
+    "default": "outgoing",
+    "required": true,
+    "defined_in_package": "sms",
+    "full_name": "text message Status"
+   },
+   {
+    "name": "failure_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "unknown",
+      "Unknown error"
+     ],
+     [
+      "sms_number_missing",
+      "Missing Number"
+     ],
+     [
+      "sms_number_format",
+      "Wrong Number Format"
+     ],
+     [
+      "sms_country_not_supported",
+      "Country Not Supported"
+     ],
+     [
+      "sms_registration_needed",
+      "Country-specific Registration Required"
+     ],
+     [
+      "sms_credit",
+      "Insufficient Credit"
+     ],
+     [
+      "sms_server",
+      "Server Error"
+     ],
+     [
+      "sms_acc",
+      "Unregistered Account"
+     ],
+     [
+      "sms_blacklist",
+      "Blacklisted"
+     ],
+     [
+      "sms_duplicate",
+      "Duplicate"
+     ],
+     [
+      "sms_optout",
+      "Opted Out"
+     ],
+     [
+      "twilio_authentication",
+      "Authentication Error\""
+     ],
+     [
+      "twilio_callback",
+      "Incorrect callback URL"
+     ],
+     [
+      "twilio_from_missing",
+      "Missing From Number"
+     ],
+     [
+      "twilio_from_to",
+      "From / To identic"
+     ]
+    ],
+    "copy": false,
+    "defined_in_package": "sms",
+    "selection_added_by": [
+     "sms_twilio"
+    ],
+    "extended_in_packages": [
+     "sms_twilio"
+    ],
+    "string": "Failure Type",
+    "full_name": "Failure Type"
+   },
+   {
+    "name": "sms_tracker_id",
+    "type": "Many2one",
+    "comodel": "sms.tracker",
+    "string": "SMS trackers",
+    "compute": "_compute_sms_tracker_id",
+    "defined_in_package": "sms",
+    "full_name": "text message trackers",
+    "target_entity": "sms.tracker"
+   },
+   {
+    "name": "to_delete",
+    "type": "Boolean",
+    "string": "Marked for deletion",
+    "default": false,
+    "help": "Will automatically be deleted, while notifications will not be deleted in any case.",
+    "defined_in_package": "sms",
+    "full_name": "Marked for deletion"
+   },
+   {
+    "name": "mailing_id",
+    "type": "Many2one",
+    "comodel": "mailing.mailing",
+    "string": "Mass Mailing",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Mass Mailing",
+    "target_entity": "mailing.mailing"
+   },
+   {
+    "name": "mailing_trace_ids",
+    "type": "One2many",
+    "comodel": "mailing.trace",
+    "inverse_name": "sms_id_int",
+    "string": "Statistics",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Statistics",
+    "target_entity": "mailing.trace"
+   },
+   {
+    "name": "sms_twilio_sid",
+    "type": "Char",
+    "related": "sms_tracker_id.sms_twilio_sid",
+    "depends": [
+     "sms_tracker_id"
+    ],
+    "defined_in_package": "sms_twilio",
+    "string": "Text message Twilio Sid",
+    "full_name": "Text message Twilio Sid"
+   },
+   {
+    "name": "record_company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "ondelete": "set null",
+    "defined_in_package": "sms_twilio",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_uuid_unique",
+    "kind": "Constraint",
+    "definition": "unique(uuid)",
+    "message": "UUID must be unique",
+    "defined_in_package": "sms"
+   }
+  ],
+  "operations": [
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sms_twilio",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sms_tracker_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "uuid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_canceled",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_error",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "failure_type"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_outgoing",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "unlink_failed",
+     "unlink_sent",
+     "raise_exception"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Main API method to send SMS.\n\nThis contacts an external server. If the transaction fails, it may be\nretried which can result in sending multiple SMS messages!\n\n  :param unlink_failed: unlink failed SMS after IAP feedback;\n  :param unlink_sent: unlink sent SMS after IAP feedback;\n  :param raise_exception: raise if there is an issue contacting IAP;",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_by_api",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sms_twilio",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "resend_failed",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_queue",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "CRON job to send queued SMS messages. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_send_batch_size",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sms_twilio",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sms_company",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sms_twilio",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "unlink_failed",
+     "unlink_sent",
+     "raise_exception"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Send SMS after checking the number (presence and formatting).",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_with_api",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sms_api",
+     "unlink_failed",
+     "unlink_sent",
+     "raise_exception"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Send SMS after checking the number (presence and formatting).",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_sms_state_and_trackers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "new_state",
+     "failure_type"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Update sms state update and related tracking records (notifications, traces).",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_handle_call_result_hook",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "results"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Further process SMS sending API results.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sms_twilio",
+      "decorators": [],
+      "documentation": "Store the sid of Twilio on the SMS tracking record (as SMS will be deleted)\n:param results: a list of dict in the form [{\n    'uuid': the system's id of the SMS,\n    'state': State of the SMS in the system,\n    'sms_twilio_sid': Twilio's id of the SMS,\n}, ...]",
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_device",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_body_short_links",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": "Override to tweak shortened URLs by adding statistics ids, allowing to\nfind customer back once clicked. ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "fields_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "allfields",
+     "attributes"
+    ],
+    "definitions": [
+     {
+      "package": "sms_twilio",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "sms.access_sms_sms_all",
+    "package": "sms",
+    "name": "access.sms.sms.all",
+    "entity": "sms.sms",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sms.access_sms_sms_system",
+    "package": "sms",
+    "name": "access.sms.sms.system",
+    "entity": "sms.sms",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "sms.sms_tsms_view_form",
+    "package": "sms",
+    "name": "sms.sms.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "SMS"
+     },
+     "fields": [
+      {
+       "name": "to_delete",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "partner_id",
+       "string": "Contact"
+      },
+      {
+       "name": "mail_message_id",
+       "invisible": "not mail_message_id",
+       "readonly": "1"
+      },
+      {
+       "name": "number",
+       "required": "1"
+      },
+      {
+       "name": "failure_type",
+       "invisible": "not failure_type",
+       "readonly": "1"
+      },
+      {
+       "name": "body",
+       "widget": "sms_widget",
+       "readonly": "state in ('process', 'sent')",
+       "required": "1",
+       "string": "Message"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "send",
+       "string": "Send Now",
+       "type": "object",
+       "invisible": "state != 'outgoing' or to_delete",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_set_outgoing",
+       "string": "Retry",
+       "type": "object",
+       "invisible": "state not in ('error', 'canceled')"
+      },
+      {
+       "name": "action_set_canceled",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state not in ('error', 'outgoing')"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "sms_widget": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "send",
+       "string": "Send Now",
+       "type": "object",
+       "invisible": "state != 'outgoing' or to_delete",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_set_outgoing",
+       "string": "Retry",
+       "type": "object",
+       "invisible": "state not in ('error', 'canceled')"
+      },
+      {
+       "name": "action_set_canceled",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state not in ('error', 'outgoing')"
+      }
+     ],
+     "statusbar_field": "to_delete",
+     "statusbar_visible": null,
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "sms.sms_sms_view_tree",
+    "package": "sms",
+    "name": "sms.sms.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "SMS Templates"
+     },
+     "fields": [
+      {
+       "name": "number"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "failure_type"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-danger": "state == 'error'",
+       "decoration-success": "state == 'sent'",
+       "decoration-info": "state == 'outgoing'",
+       "decoration-muted": "state == 'canceled'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "send",
+       "string": "Send Now",
+       "type": "object",
+       "invisible": "state != 'outgoing'",
+       "icon": "fa-paper-plane"
+      },
+      {
+       "name": "action_set_outgoing",
+       "string": "Retry",
+       "type": "object",
+       "invisible": "state not in ('error', 'canceled')",
+       "icon": "fa-repeat"
+      },
+      {
+       "name": "action_set_canceled",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state not in ('error', 'outgoing')",
+       "icon": "fa-times-circle"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "sms.sms_sms_view_search",
+    "package": "sms",
+    "name": "sms.sms.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search SMS Templates"
+     },
+     "fields": [
+      {
+       "name": "number"
+      },
+      {
+       "name": "partner_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sms_twilio.sms_sms_view_form",
+    "package": "sms_twilio",
+    "name": "sms.sms.view.form.inherit.twilio",
+    "view_type": "xpath",
+    "inherits_view": "sms.sms_tsms_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='failure_type']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "sms_twilio_sid",
+       "invisible": "not sms_twilio_sid"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='failure_type']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "sms.sms_sms_action",
+    "package": "sms",
+    "name": "SMS",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('to_delete', '!=', True)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "sms.sms"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "sms.ir_actions_server_sms_sms_resend",
+    "package": "sms",
+    "name": "Resend",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "sms.ir_cron_sms_scheduler_action",
+    "package": "sms",
+    "name": "SMS: SMS Queue Manager",
+    "interval_number": "24",
+    "interval_type": "hours",
+    "priority": null,
+    "active": null,
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "sms.sms",
+    "operation": "_process_queue",
+    "operation_call": "model._process_queue()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

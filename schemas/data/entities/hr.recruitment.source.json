@@ -1,0 +1,386 @@
+{
+ "catalog": {
+  "name": "entity:hr.recruitment.source",
+  "description": "Complete definition of entity Source of Applicants (hr.recruitment.source).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.recruitment.source",
+  "storage_name": "hr_recruitment_source",
+  "full_name": "Source of Applicants",
+  "kind": "persistent",
+  "description": "Source of Applicants",
+  "defined_by_package": "hr_recruitment",
+  "extended_by_packages": [
+   "website_hr_recruitment"
+  ],
+  "mixins": [
+   "utm.source.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "email",
+    "type": "Char",
+    "related": "alias_id.display_name",
+    "string": "Email",
+    "readonly": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Email"
+   },
+   {
+    "name": "has_domain",
+    "type": "Char",
+    "compute": "_compute_has_domain",
+    "defined_in_package": "hr_recruitment",
+    "string": "Has Domain",
+    "full_name": "Has Domain"
+   },
+   {
+    "name": "job_id",
+    "type": "Many2one",
+    "comodel": "hr.job",
+    "string": "Job",
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Job",
+    "target_entity": "hr.job"
+   },
+   {
+    "name": "alias_id",
+    "type": "Many2one",
+    "comodel": "mail.alias",
+    "string": "Alias ID",
+    "ondelete": "restrict",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Alias identifier",
+    "target_entity": "mail.alias"
+   },
+   {
+    "name": "medium_id",
+    "type": "Many2one",
+    "comodel": "utm.medium",
+    "default": {
+     "dynamic": "lambda self: self.env['utm.medium']._fetch_or_create_utm_medium('website')"
+    },
+    "defined_in_package": "hr_recruitment",
+    "string": "Medium",
+    "full_name": "Medium",
+    "target_entity": "utm.medium"
+   },
+   {
+    "name": "campaign_id",
+    "type": "Many2one",
+    "comodel": "utm.campaign",
+    "defined_in_package": "hr_recruitment",
+    "string": "Campaign",
+    "full_name": "Campaign",
+    "target_entity": "utm.campaign"
+   },
+   {
+    "name": "url",
+    "type": "Char",
+    "compute": "_compute_url",
+    "string": "Tracker URL",
+    "defined_in_package": "website_hr_recruitment",
+    "full_name": "Tracker uniform resource locator"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_has_domain",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_alias",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_and_get_alias",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": "Cascade delete aliases to avoid useless / badly configured aliases. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "source_id",
+         "source_id.name",
+         "job_id",
+         "job_id.company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_recruitment.access_hr_recruitment_source_hr_officer",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.source",
+    "entity": "hr.recruitment.source",
+    "group": "group_hr_recruitment_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment.access_hr_recruitment_source_all",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.source",
+    "entity": "hr.recruitment.source",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_recruitment.hr_recruitment_source_tree",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.source.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Sources of Applicants",
+      "editable": "top",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "has_domain",
+       "column_invisible": "True"
+      },
+      {
+       "name": "campaign_id",
+       "optional": "show"
+      },
+      {
+       "name": "source_id",
+       "readonly": "id",
+       "optional": "show",
+       "decoration-bf": "1",
+       "placeholder": "e.g. LinkedIn"
+      },
+      {
+       "name": "medium_id",
+       "optional": "show"
+      },
+      {
+       "name": "email",
+       "widget": "RecruitmentCopyClipboardChar",
+       "invisible": "not has_domain",
+       "options": "{'content_generation_function_name': 'create_and_get_alias', 'displayed_value': 'Email'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "RecruitmentCopyClipboardChar": 1
+     },
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_recruitment_source_view_search",
+    "package": "hr_recruitment",
+    "name": "hr.recruitment.source.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Source"
+     },
+     "fields": [
+      {
+       "name": "source_id"
+      },
+      {
+       "name": "job_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.view_hr_recruitment_tree_url",
+    "package": "website_hr_recruitment",
+    "name": "hr.recruitment.list.inherit.url",
+    "view_type": "xpath",
+    "inherits_view": "hr_recruitment.hr_recruitment_source_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='medium_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "url",
+       "widget": "RecruitmentCopyClipboardChar",
+       "options": "{'displayed_value': 'URL'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "RecruitmentCopyClipboardChar": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='medium_id']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_recruitment.action_hr_job_sources",
+    "package": "hr_recruitment",
+    "name": "Trackers",
+    "view_mode": "list",
+    "view_id": null,
+    "search_view_id": "hr_recruitment_source_view_search",
+    "domain": null,
+    "context": "{'search_default_job_id': [active_id], 'default_job_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Want to analyse where applications come from ?\n                </p><p>\n                    Use emails and links trackers\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.recruitment.source"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

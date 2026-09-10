@@ -1,0 +1,7667 @@
+{
+ "catalog": {
+  "name": "entity:pos.order",
+  "description": "Complete definition of entity Point of Sale Orders (pos.order).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "pos.order",
+  "storage_name": "pos_order",
+  "full_name": "Point of Sale Orders",
+  "kind": "persistent",
+  "description": "Point of Sale Orders",
+  "defined_by_package": "point_of_sale",
+  "extended_by_packages": [
+   "pos_restaurant",
+   "pos_sale",
+   "l10n_ch_pos",
+   "l10n_co_pos",
+   "l10n_es_edi_tbai_pos",
+   "l10n_es_edi_verifactu_pos",
+   "l10n_es_pos",
+   "l10n_fr_pos_cert",
+   "l10n_id_pos",
+   "l10n_in_pos",
+   "l10n_jo_edi_pos",
+   "l10n_my_edi_pos",
+   "l10n_sa_pos",
+   "l10n_sa_edi_pos",
+   "l10n_tw_edi_ecpay_pos",
+   "l10n_vn_edi_viettel_pos",
+   "pos_event",
+   "pos_hr",
+   "pos_loyalty",
+   "pos_mrp",
+   "pos_online_payment",
+   "pos_self_order",
+   "pos_online_payment_self_order",
+   "pos_restaurant_adyen",
+   "pos_sms"
+  ],
+  "mixins": [
+   "portal.mixin",
+   "pos.bus.mixin",
+   "pos.load.mixin",
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "date_order desc, name desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_mailing_enabled": true
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Order Ref",
+    "required": true,
+    "readonly": true,
+    "copy": false,
+    "default": "/",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Ref"
+   },
+   {
+    "name": "last_order_preparation_change",
+    "type": "Char",
+    "string": "Last preparation change",
+    "help": "Last printed state of the order",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Last preparation change"
+   },
+   {
+    "name": "date_order",
+    "type": "Datetime",
+    "string": "Date",
+    "readonly": true,
+    "index": true,
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "defined_in_package": "point_of_sale",
+    "full_name": "Date"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Employee",
+    "help": "Employee who uses the cash register.",
+    "default": {
+     "dynamic": "lambda self: self.env.uid"
+    },
+    "defined_in_package": "point_of_sale",
+    "full_name": "Employee",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "amount_difference",
+    "type": "Monetary",
+    "string": "Difference",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Difference"
+   },
+   {
+    "name": "amount_tax",
+    "type": "Monetary",
+    "string": "Taxes",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Taxes"
+   },
+   {
+    "name": "amount_total",
+    "type": "Monetary",
+    "string": "Total",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Total"
+   },
+   {
+    "name": "amount_paid",
+    "type": "Monetary",
+    "string": "Paid",
+    "required": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Paid"
+   },
+   {
+    "name": "amount_return",
+    "type": "Monetary",
+    "string": "Returned",
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Returned"
+   },
+   {
+    "name": "margin",
+    "type": "Monetary",
+    "string": "Margin",
+    "compute": "_compute_margin",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Margin"
+   },
+   {
+    "name": "margin_percent",
+    "type": "Float",
+    "string": "Margin (%)",
+    "compute": "_compute_margin",
+    "digits": [
+     12,
+     4
+    ],
+    "defined_in_package": "point_of_sale",
+    "full_name": "Margin (%)"
+   },
+   {
+    "name": "is_total_cost_computed",
+    "type": "Boolean",
+    "compute": "_compute_is_total_cost_computed",
+    "help": "Allows to know if all the total cost of the order lines have already been computed",
+    "defined_in_package": "point_of_sale",
+    "string": "Is Total Cost Computed",
+    "full_name": "Is Total Cost Computed"
+   },
+   {
+    "name": "lines",
+    "type": "One2many",
+    "comodel": "pos.order.line",
+    "inverse_name": "order_id",
+    "string": "Order Lines",
+    "copy": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Lines",
+    "target_entity": "pos.order.line"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "readonly": true,
+    "index": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_id.account_fiscal_country_id.code",
+    "defined_in_package": "point_of_sale",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "pricelist_id",
+    "type": "Many2one",
+    "comodel": "product.pricelist",
+    "string": "Pricelist",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Pricelist",
+    "target_entity": "product.pricelist"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Customer",
+    "change_default": true,
+    "index": "btree_not_null",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Customer",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "sequence_number",
+    "type": "Integer",
+    "string": "Sequence Number",
+    "copy": false,
+    "help": "A session-unique sequence number for the order. Negative if generated from the client",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Sequence Number"
+   },
+   {
+    "name": "session_id",
+    "type": "Many2one",
+    "comodel": "pos.session",
+    "string": "Session",
+    "index": true,
+    "domain": "[('state', '=', 'opened')]",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Session",
+    "target_entity": "pos.session"
+   },
+   {
+    "name": "config_id",
+    "type": "Many2one",
+    "comodel": "pos.config",
+    "compute": "_compute_order_config_id",
+    "string": "Point of Sale",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Point of Sale",
+    "target_entity": "pos.config"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "config_id.currency_id",
+    "string": "Currency",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "currency_rate",
+    "type": "Float",
+    "string": "Currency Rate",
+    "compute": "_compute_currency_rate",
+    "compute_sudo": true,
+    "store": true,
+    "digits": 0,
+    "readonly": true,
+    "help": "The rate of the currency to the currency of rate applicable at the date of the order",
+    "defined_in_package": "point_of_sale",
+    "extended_in_packages": [
+     "pos_sale"
+    ],
+    "full_name": "Currency Rate"
+   },
+   {
+    "name": "is_refund",
+    "type": "Boolean",
+    "string": "Is Refund",
+    "readonly": true,
+    "default": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Is Refund"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "New"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ],
+     [
+      "paid",
+      "Paid"
+     ],
+     [
+      "done",
+      "Posted"
+     ]
+    ],
+    "string": "Status",
+    "readonly": true,
+    "copy": false,
+    "default": "draft",
+    "index": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Status"
+   },
+   {
+    "name": "account_move",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "string": "Invoice",
+    "readonly": true,
+    "copy": false,
+    "index": "btree_not_null",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Invoice",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "picking_ids",
+    "type": "One2many",
+    "comodel": "stock.picking",
+    "inverse_name": "pos_order_id",
+    "defined_in_package": "point_of_sale",
+    "string": "Picking",
+    "full_name": "Picking",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "picking_count",
+    "type": "Integer",
+    "compute": "_compute_picking_count",
+    "defined_in_package": "point_of_sale",
+    "string": "Picking Count",
+    "full_name": "Picking Count"
+   },
+   {
+    "name": "failed_pickings",
+    "type": "Boolean",
+    "compute": "_compute_picking_count",
+    "defined_in_package": "point_of_sale",
+    "string": "Failed Pickings",
+    "full_name": "Failed Pickings"
+   },
+   {
+    "name": "picking_type_id",
+    "type": "Many2one",
+    "comodel": "stock.picking.type",
+    "related": "session_id.config_id.picking_type_id",
+    "string": "Operation Type",
+    "readonly": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Operation Type",
+    "target_entity": "stock.picking.type"
+   },
+   {
+    "name": "stock_reference_ids",
+    "type": "Many2many",
+    "comodel": "stock.reference",
+    "relation": "stock_reference_pos_order_rel",
+    "column1": "pos_order_id",
+    "column2": "reference_id",
+    "string": "Reference",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Reference",
+    "target_entity": "stock.reference"
+   },
+   {
+    "name": "preset_id",
+    "type": "Many2one",
+    "comodel": "pos.preset",
+    "string": "Preset",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Preset",
+    "target_entity": "pos.preset"
+   },
+   {
+    "name": "floating_order_name",
+    "type": "Char",
+    "string": "Order Name",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Name"
+   },
+   {
+    "name": "general_customer_note",
+    "type": "Text",
+    "string": "General Customer Note",
+    "defined_in_package": "point_of_sale",
+    "full_name": "General Customer Note"
+   },
+   {
+    "name": "internal_note",
+    "type": "Text",
+    "string": "Internal Note",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Internal Note"
+   },
+   {
+    "name": "nb_print",
+    "type": "Integer",
+    "string": "Number of Print",
+    "readonly": true,
+    "copy": false,
+    "default": 0,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Number of Print"
+   },
+   {
+    "name": "pos_reference",
+    "type": "Char",
+    "string": "Receipt Number",
+    "readonly": true,
+    "copy": false,
+    "index": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Receipt Number"
+   },
+   {
+    "name": "sale_journal",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "related": "session_id.config_id.journal_id",
+    "string": "Sales Journal",
+    "store": true,
+    "readonly": true,
+    "ondelete": "restrict",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Sales Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "fiscal_position_id",
+    "type": "Many2one",
+    "comodel": "account.fiscal.position",
+    "string": "Fiscal Position",
+    "readonly": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Fiscal Position",
+    "target_entity": "account.fiscal.position"
+   },
+   {
+    "name": "payment_ids",
+    "type": "One2many",
+    "comodel": "pos.payment",
+    "inverse_name": "pos_order_id",
+    "string": "Payments",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Payments",
+    "target_entity": "pos.payment"
+   },
+   {
+    "name": "session_move_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "string": "Session Journal Entry",
+    "related": "session_id.move_id",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Session Journal Entry",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "to_invoice",
+    "type": "Boolean",
+    "string": "To invoice",
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "To invoice"
+   },
+   {
+    "name": "shipping_date",
+    "type": "Date",
+    "string": "Shipping Date",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Shipping Date"
+   },
+   {
+    "name": "preset_time",
+    "type": "Datetime",
+    "string": "Hour",
+    "help": "Hour of the day for the order",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Hour"
+   },
+   {
+    "name": "is_invoiced",
+    "type": "Boolean",
+    "string": "Is Invoiced",
+    "compute": "_compute_is_invoiced",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Is Invoiced"
+   },
+   {
+    "name": "is_tipped",
+    "type": "Boolean",
+    "string": "Is this already tipped?",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Is this already tipped?"
+   },
+   {
+    "name": "tip_amount",
+    "type": "Monetary",
+    "string": "Tip Amount",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Tip Amount"
+   },
+   {
+    "name": "refund_orders_count",
+    "type": "Integer",
+    "string": "Number of Refund Orders",
+    "compute": "_compute_refund_related_fields",
+    "help": "Number of orders where items from this order were refunded",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Number of Refund Orders"
+   },
+   {
+    "name": "refunded_order_id",
+    "type": "Many2one",
+    "comodel": "pos.order",
+    "compute": "_compute_refund_related_fields",
+    "help": "Order from which items were refunded in this order",
+    "defined_in_package": "point_of_sale",
+    "string": "Refunded Order",
+    "full_name": "Refunded Order",
+    "target_entity": "pos.order"
+   },
+   {
+    "name": "has_refundable_lines",
+    "type": "Boolean",
+    "string": "Has Refundable Lines",
+    "compute": "_compute_has_refundable_lines",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Has Refundable Lines"
+   },
+   {
+    "name": "ticket_code",
+    "type": "Char",
+    "help": "5 digits alphanumeric code to be used by portal user to request an invoice",
+    "defined_in_package": "point_of_sale",
+    "string": "Ticket Code",
+    "full_name": "Ticket Code"
+   },
+   {
+    "name": "tracking_number",
+    "type": "Char",
+    "string": "Order Number",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Number"
+   },
+   {
+    "name": "uuid",
+    "type": "Char",
+    "string": "Uuid",
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: str(uuid4())"
+    },
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Uuid"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "string": "Email",
+    "compute": "_compute_contact_details",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Email"
+   },
+   {
+    "name": "mobile",
+    "type": "Char",
+    "string": "Mobile",
+    "compute": "_compute_contact_details",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Mobile"
+   },
+   {
+    "name": "is_edited",
+    "type": "Boolean",
+    "string": "Edited",
+    "compute": "_compute_is_edited",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Edited"
+   },
+   {
+    "name": "has_deleted_line",
+    "type": "Boolean",
+    "string": "Has Deleted Line",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Has Deleted Line"
+   },
+   {
+    "name": "order_edit_tracking",
+    "type": "Boolean",
+    "related": "config_id.order_edit_tracking",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "string": "Order Edit Tracking",
+    "full_name": "Order Edit Tracking"
+   },
+   {
+    "name": "available_payment_method_ids",
+    "type": "Many2many",
+    "comodel": "pos.payment.method",
+    "related": "config_id.payment_method_ids",
+    "string": "Available Payment Methods",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Available Payment Methods",
+    "target_entity": "pos.payment.method"
+   },
+   {
+    "name": "invoice_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "invoiced",
+      "Fully Invoiced"
+     ],
+     [
+      "to_invoice",
+      "To Invoice"
+     ]
+    ],
+    "string": "Invoice Status",
+    "compute": "_compute_invoice_status",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Invoice Status"
+   },
+   {
+    "name": "reversed_move_ids",
+    "type": "One2many",
+    "comodel": "account.move",
+    "inverse_name": "reversed_pos_order_id",
+    "string": "Reversal Account Moves",
+    "help": "List of account moves created when this POS order was reversed and invoiced after session close.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Reversal Account Moves",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "source",
+    "type": "Selection",
+    "string": "Origin",
+    "selection": [
+     [
+      "pos",
+      "Point of Sale"
+     ],
+     [
+      "mobile",
+      "Self-Order Mobile"
+     ],
+     [
+      "kiosk",
+      "Self-Order Kiosk"
+     ]
+    ],
+    "default": "pos",
+    "defined_in_package": "point_of_sale",
+    "selection_added_by": [
+     "pos_self_order"
+    ],
+    "extended_in_packages": [
+     "pos_self_order"
+    ],
+    "full_name": "Origin"
+   },
+   {
+    "name": "table_id",
+    "type": "Many2one",
+    "comodel": "restaurant.table",
+    "string": "Table",
+    "help": "The table where this order was served",
+    "index": "btree_not_null",
+    "readonly": true,
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Table",
+    "target_entity": "restaurant.table"
+   },
+   {
+    "name": "customer_count",
+    "type": "Integer",
+    "string": "Guests",
+    "help": "The amount of customers that have been served by this order.",
+    "readonly": true,
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Guests"
+   },
+   {
+    "name": "course_ids",
+    "type": "One2many",
+    "comodel": "restaurant.order.course",
+    "inverse_name": "order_id",
+    "string": "Courses",
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Courses",
+    "target_entity": "restaurant.order.course"
+   },
+   {
+    "name": "crm_team_id",
+    "type": "Many2one",
+    "comodel": "crm.team",
+    "string": "Sales Team",
+    "ondelete": "set null",
+    "defined_in_package": "pos_sale",
+    "full_name": "Sales Team",
+    "target_entity": "crm.team"
+   },
+   {
+    "name": "sale_order_count",
+    "type": "Integer",
+    "string": "Sale Order Count",
+    "compute": "_count_sale_order",
+    "readonly": true,
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "pos_sale",
+    "full_name": "Sale Order Count"
+   },
+   {
+    "name": "l10n_es_tbai_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "to_send",
+      "To Send"
+     ],
+     [
+      "sent",
+      "Sent"
+     ]
+    ],
+    "string": "TicketBAI status",
+    "compute": "_compute_l10n_es_tbai_state",
+    "defined_in_package": "l10n_es_edi_tbai_pos",
+    "full_name": "TicketBAI status"
+   },
+   {
+    "name": "l10n_es_tbai_chain_index",
+    "type": "Integer",
+    "string": "TicketBAI chain index",
+    "help": "Invoice index in chain, set if and only if an in-chain XML was submitted and did not error",
+    "related": "l10n_es_tbai_post_document_id.chain_index",
+    "defined_in_package": "l10n_es_edi_tbai_pos",
+    "full_name": "TicketBAI chain index"
+   },
+   {
+    "name": "l10n_es_tbai_post_document_id",
+    "type": "Many2one",
+    "comodel": "l10n_es_edi_tbai.document",
+    "copy": false,
+    "defined_in_package": "l10n_es_edi_tbai_pos",
+    "string": "Localization Es electronic invoicing (Basque) Post Document",
+    "full_name": "Localization Es electronic invoicing (Basque) Post Document",
+    "target_entity": "l10n_es_edi_tbai.document"
+   },
+   {
+    "name": "l10n_es_tbai_post_file",
+    "type": "Binary",
+    "string": "TicketBAI Post File",
+    "related": "l10n_es_tbai_post_document_id.xml_attachment_id.datas",
+    "defined_in_package": "l10n_es_edi_tbai_pos",
+    "full_name": "TicketBAI Post File"
+   },
+   {
+    "name": "l10n_es_tbai_post_file_name",
+    "type": "Char",
+    "string": "TicketBAI Post Attachment Name",
+    "related": "l10n_es_tbai_post_document_id.xml_attachment_id.name",
+    "defined_in_package": "l10n_es_edi_tbai_pos",
+    "full_name": "TicketBAI Post Attachment Name"
+   },
+   {
+    "name": "l10n_es_tbai_is_required",
+    "type": "Boolean",
+    "string": "TicketBAI required",
+    "related": "company_id.l10n_es_tbai_is_enabled",
+    "defined_in_package": "l10n_es_edi_tbai_pos",
+    "full_name": "TicketBAI required"
+   },
+   {
+    "name": "l10n_es_tbai_refund_reason",
+    "type": "Selection",
+    "selection": {
+     "expression": "TBAI_REFUND_REASONS"
+    },
+    "string": "Invoice Refund Reason Code (TicketBai)",
+    "help": "BOE-A-1992-28740. Ley 37/1992, de 28 de diciembre, del Impuesto sobre el Valor Añadido. Artículo 80. Modificación de la base imponible.",
+    "copy": false,
+    "defined_in_package": "l10n_es_edi_tbai_pos",
+    "full_name": "Invoice Refund Reason Code (TicketBai)"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_required",
+    "type": "Boolean",
+    "string": "Veri*Factu Required",
+    "related": "company_id.l10n_es_edi_verifactu_required",
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "Veri*Factu Required"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_document_ids",
+    "type": "One2many",
+    "comodel": "l10n_es_edi_verifactu.document",
+    "inverse_name": "pos_order_id",
+    "string": "Veri*Factu Documents",
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "Veri*Factu Documents",
+    "target_entity": "l10n_es_edi_verifactu.document"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_state",
+    "type": "Selection",
+    "string": "Veri*Factu Status",
+    "selection": [
+     [
+      "rejected",
+      "Rejected"
+     ],
+     [
+      "registered_with_errors",
+      "Registered with Errors"
+     ],
+     [
+      "accepted",
+      "Accepted"
+     ],
+     [
+      "cancelled",
+      "Cancelled"
+     ]
+    ],
+    "compute": "_compute_l10n_es_edi_verifactu_state",
+    "store": true,
+    "help": "- Rejected: Successfully sent to the AEAT, but it was rejected during validation\n                - Registered with Errors: Registered at the AEAT, but the AEAT has some issues with the sent document\n                - Accepted: Registered by the AEAT without errors\n                - Cancelled: Registered by the AEAT as cancelled",
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "Veri*Factu Status"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_warning_level",
+    "type": "Char",
+    "string": "Veri*Factu Warning Level",
+    "compute": "_compute_l10n_es_edi_verifactu_warning",
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "Veri*Factu Warning Level"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_warning",
+    "type": "Html",
+    "string": "Veri*Factu Warning",
+    "compute": "_compute_l10n_es_edi_verifactu_warning",
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "Veri*Factu Warning"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_qr_code",
+    "type": "Char",
+    "string": "Veri*Factu QR Code",
+    "compute": "_compute_l10n_es_edi_verifactu_qr_code",
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "Veri*Factu quick response Code"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_refund_reason",
+    "type": "Selection",
+    "selection": [
+     [
+      "R1",
+      "R1: Art 80.1 and 80.2 and error of law"
+     ],
+     [
+      "R2",
+      "R2: Art. 80.3"
+     ],
+     [
+      "R3",
+      "R3: Art. 80.4"
+     ],
+     [
+      "R4",
+      "R4: Rest"
+     ],
+     [
+      "R5",
+      "R5: Corrective invoices concerning simplified invoices"
+     ]
+    ],
+    "string": "Veri*Factu Refund Reason",
+    "copy": false,
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "Veri*Factu Refund Reason"
+   },
+   {
+    "name": "is_l10n_es_simplified_invoice",
+    "type": "Boolean",
+    "string": "Simplified invoice",
+    "defined_in_package": "l10n_es_pos",
+    "full_name": "Simplified invoice"
+   },
+   {
+    "name": "l10n_es_simplified_invoice_number",
+    "type": "Char",
+    "string": "Simplified invoice number",
+    "compute": "_compute_l10n_es_simplified_invoice_number",
+    "defined_in_package": "l10n_es_pos",
+    "full_name": "Simplified invoice number"
+   },
+   {
+    "name": "l10n_fr_hash",
+    "type": "Char",
+    "string": "Inalteralbility Hash",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Inalteralbility Hash"
+   },
+   {
+    "name": "l10n_fr_secure_sequence_number",
+    "type": "Integer",
+    "string": "Inalteralbility No Gap Sequence #",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Inalteralbility No Gap Sequence #"
+   },
+   {
+    "name": "l10n_fr_string_to_hash",
+    "type": "Char",
+    "compute": "_compute_string_to_hash",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "string": "Localization Fr String To Hash",
+    "full_name": "Localization Fr String To Hash"
+   },
+   {
+    "name": "previous_order_id",
+    "type": "Many2one",
+    "comodel": "pos.order",
+    "string": "Previous Order",
+    "readonly": true,
+    "compute": "_compute_previous_order",
+    "store": true,
+    "copy": false,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Previous Order",
+    "target_entity": "pos.order"
+   },
+   {
+    "name": "pos_version",
+    "type": "Char",
+    "help": "Version of the system that created the order",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "string": "Point of sale Version",
+    "full_name": "Point of sale Version"
+   },
+   {
+    "name": "l10n_id_qris_transaction_ids",
+    "type": "Many2many",
+    "comodel": "l10n_id.qris.transaction",
+    "groups": "account.group_account_invoice",
+    "defined_in_package": "l10n_id_pos",
+    "string": "Localization Identifier Qris Transaction",
+    "full_name": "Localization Identifier Qris Transaction",
+    "target_entity": "l10n_id.qris.transaction"
+   },
+   {
+    "name": "l10n_jo_edi_pos_return_reason",
+    "type": "Char",
+    "string": "Return Reason",
+    "help": "Return Reason reported to JoFotara",
+    "defined_in_package": "l10n_jo_edi_pos",
+    "full_name": "Return Reason"
+   },
+   {
+    "name": "l10n_jo_edi_pos_enabled",
+    "type": "Boolean",
+    "related": "company_id.l10n_jo_edi_pos_enabled",
+    "defined_in_package": "l10n_jo_edi_pos",
+    "string": "Localization Jo Electronic data interchange Point of sale Enabled",
+    "full_name": "Localization Jo Electronic data interchange Point of sale Enabled"
+   },
+   {
+    "name": "l10n_jo_edi_pos_uuid",
+    "type": "Char",
+    "string": "Order UUID",
+    "copy": false,
+    "compute": "_compute_l10n_jo_edi_pos_uuid",
+    "store": true,
+    "defined_in_package": "l10n_jo_edi_pos",
+    "full_name": "Order UUID"
+   },
+   {
+    "name": "l10n_jo_edi_pos_qr",
+    "type": "Char",
+    "string": "QR",
+    "copy": false,
+    "defined_in_package": "l10n_jo_edi_pos",
+    "full_name": "quick response"
+   },
+   {
+    "name": "l10n_jo_edi_pos_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "to_send",
+      "To Send"
+     ],
+     [
+      "sent",
+      "Sent"
+     ],
+     [
+      "demo",
+      "Sent (Demo)"
+     ]
+    ],
+    "string": "JoFotara State",
+    "tracking": true,
+    "copy": false,
+    "defined_in_package": "l10n_jo_edi_pos",
+    "full_name": "JoFotara State"
+   },
+   {
+    "name": "l10n_jo_edi_pos_error",
+    "type": "Text",
+    "string": "JoFotara Error",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "l10n_jo_edi_pos",
+    "full_name": "JoFotara Error"
+   },
+   {
+    "name": "l10n_jo_edi_pos_computed_xml",
+    "type": "Binary",
+    "string": "Jordan E-Invoice computed XML File",
+    "compute": "_compute_l10n_jo_edi_pos_computed_xml",
+    "help": "Jordan: technical field computing e-invoice XML data, useful at submission failure scenarios.",
+    "defined_in_package": "l10n_jo_edi_pos",
+    "full_name": "Jordan E-Invoice computed extensible markup language File"
+   },
+   {
+    "name": "l10n_jo_edi_pos_xml_attachment_id",
+    "type": "Many2one",
+    "comodel": "ir.attachment",
+    "string": "Jordan E-Invoice XML",
+    "help": "Jordan: e-invoice XML.",
+    "defined_in_package": "l10n_jo_edi_pos",
+    "full_name": "Jordan E-Invoice extensible markup language",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "Consolidated Invoices",
+    "type": "Many2many",
+    "comodel": "myinvois.document",
+    "relation": "myinvois_document_pos_order_rel",
+    "column1": "order_id",
+    "column2": "document_id",
+    "groups": "account.group_account_invoice",
+    "defined_in_package": "l10n_my_edi_pos",
+    "string": "Consolidated Invoices",
+    "full_name": "Consolidated Invoices",
+    "target_entity": "myinvois.document"
+   },
+   {
+    "name": "l10n_sa_reason",
+    "type": "Selection",
+    "string": "ZATCA Reason",
+    "selection": {
+     "expression": "ADJUSTMENT_REASONS"
+    },
+    "defined_in_package": "l10n_sa_pos",
+    "full_name": "ZATCA Reason"
+   },
+   {
+    "name": "l10n_sa_reason_value",
+    "type": "Char",
+    "compute": "_compute_l10n_sa_reason_value",
+    "defined_in_package": "l10n_sa_pos",
+    "string": "Localization Sa Reason Value",
+    "full_name": "Localization Sa Reason Value"
+   },
+   {
+    "name": "l10n_sa_invoice_qr_code_str",
+    "type": "Char",
+    "related": "account_move.l10n_sa_qr_code_str",
+    "string": "ZATCA QR Code",
+    "defined_in_package": "l10n_sa_edi_pos",
+    "full_name": "ZATCA quick response Code"
+   },
+   {
+    "name": "l10n_sa_invoice_edi_state",
+    "type": "Selection",
+    "related": "account_move.edi_state",
+    "string": "Electronic invoicing",
+    "defined_in_package": "l10n_sa_edi_pos",
+    "full_name": "Electronic invoicing"
+   },
+   {
+    "name": "l10n_tw_edi_is_print",
+    "type": "Boolean",
+    "string": "Print",
+    "defined_in_package": "l10n_tw_edi_ecpay_pos",
+    "full_name": "Print"
+   },
+   {
+    "name": "l10n_tw_edi_love_code",
+    "type": "Char",
+    "string": "Love Code",
+    "defined_in_package": "l10n_tw_edi_ecpay_pos",
+    "full_name": "Love Code"
+   },
+   {
+    "name": "l10n_tw_edi_carrier_type",
+    "type": "Selection",
+    "string": "Carrier Type",
+    "selection": [
+     [
+      "1",
+      "ECpay e-invoice carrier"
+     ],
+     [
+      "2",
+      "Citizen Digital Certificate"
+     ],
+     [
+      "3",
+      "Mobile Barcode"
+     ],
+     [
+      "4",
+      "EasyCard"
+     ],
+     [
+      "5",
+      "iPass"
+     ]
+    ],
+    "defined_in_package": "l10n_tw_edi_ecpay_pos",
+    "full_name": "Carrier Type"
+   },
+   {
+    "name": "l10n_tw_edi_carrier_number",
+    "type": "Char",
+    "string": "Carrier Number",
+    "defined_in_package": "l10n_tw_edi_ecpay_pos",
+    "full_name": "Carrier Number"
+   },
+   {
+    "name": "l10n_tw_edi_carrier_number_2",
+    "type": "Char",
+    "string": "Carrier Number 2",
+    "defined_in_package": "l10n_tw_edi_ecpay_pos",
+    "full_name": "Carrier Number 2"
+   },
+   {
+    "name": "l10n_tw_edi_is_b2b",
+    "type": "Boolean",
+    "string": "Is B2B",
+    "compute": "_compute_l10n_tw_edi_is_b2b",
+    "defined_in_package": "l10n_tw_edi_ecpay_pos",
+    "full_name": "Is business to business"
+   },
+   {
+    "name": "l10n_vn_credit_note_reason",
+    "type": "Char",
+    "string": "Credit Note Reason",
+    "copy": false,
+    "defined_in_package": "l10n_vn_edi_viettel_pos",
+    "full_name": "Credit Note Reason"
+   },
+   {
+    "name": "l10n_vn_has_sinvoice_pdf",
+    "type": "Boolean",
+    "compute": "_compute_sinvoice_has_pdf",
+    "string": "SInvoice PDF Available",
+    "defined_in_package": "l10n_vn_edi_viettel_pos",
+    "full_name": "SInvoice Portable Document Format Available"
+   },
+   {
+    "name": "l10n_vn_sinvoice_state",
+    "type": "Selection",
+    "related": "account_move.l10n_vn_edi_invoice_state",
+    "defined_in_package": "l10n_vn_edi_viettel_pos",
+    "string": "Localization Vn Sinvoice State",
+    "full_name": "Localization Vn Sinvoice State"
+   },
+   {
+    "name": "attendee_count",
+    "type": "Integer",
+    "string": "Attendee Count",
+    "compute": "_compute_attendee_count",
+    "defined_in_package": "pos_event",
+    "full_name": "Attendee Count"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Cashier",
+    "help": "The employee who uses the cash register.",
+    "defined_in_package": "pos_hr",
+    "full_name": "Cashier",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "cashier",
+    "type": "Char",
+    "string": "Cashier name",
+    "compute": "_compute_cashier",
+    "store": true,
+    "defined_in_package": "pos_hr",
+    "full_name": "Cashier name"
+   },
+   {
+    "name": "online_payment_method_id",
+    "type": "Many2one",
+    "comodel": "pos.payment.method",
+    "compute": "_compute_online_payment_method_id",
+    "defined_in_package": "pos_online_payment",
+    "string": "Online Payment Method",
+    "full_name": "Online Payment Method",
+    "target_entity": "pos.payment.method"
+   },
+   {
+    "name": "next_online_payment_amount",
+    "type": "Float",
+    "string": "Next online payment amount to pay",
+    "digits": 0,
+    "required": false,
+    "defined_in_package": "pos_online_payment",
+    "full_name": "Next online payment amount to pay"
+   },
+   {
+    "name": "table_stand_number",
+    "type": "Char",
+    "string": "Table Stand Number",
+    "defined_in_package": "pos_self_order",
+    "full_name": "Table Stand Number"
+   },
+   {
+    "name": "self_ordering_table_id",
+    "type": "Many2one",
+    "comodel": "restaurant.table",
+    "string": "Table reference",
+    "readonly": true,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Table reference",
+    "target_entity": "restaurant.table"
+   },
+   {
+    "name": "use_self_order_online_payment",
+    "type": "Boolean",
+    "compute": "_compute_use_self_order_online_payment",
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "pos_online_payment_self_order",
+    "string": "Use Self Order Online Payment",
+    "full_name": "Use Self Order Online Payment"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_uuid",
+    "kind": "Constraint",
+    "definition": "unique (uuid)",
+    "message": "An order with this uuid already exists",
+    "defined_in_package": "point_of_sale"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_get_valid_session",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No open session available. Please open a new session to capture the order.",
+        "line": 53
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_order",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "order",
+     "existing_order"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create or update an pos.order from a given dictionary.\n\n:param dict order: dictionary representing the order.\n:param existing_order: order to be updated or False.\n:type existing_order: pos.order.\n:returns: id of created/updated pos.order\n:rtype: int",
+      "size_in_lines": 95,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "There are a few cases where we want to block the creation of the order to maintain correct data for the EDI. ",
+      "size_in_lines": 37,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You must invoice a refund for an order that has been submitted to MyInvois.",
+        "line": 53
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot invoice a refund for an order that has not been submitted to MyInvois yet.",
+        "line": 55
+       }
+      ]
+     },
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_saved_order",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "draft"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No invoice journal configured for this POS session.",
+        "line": 167
+       }
+      ]
+     },
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please create an invoice for an amount over %s.",
+        "line": 73
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot invoice a refund whose linked order hasn't been invoiced.",
+        "line": 77
+       },
+       {
+        "kind": "UserError",
+        "message": "Please invoice the refund as the linked order has been invoiced.",
+        "line": 79
+       }
+      ]
+     },
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The order needs to be invoiced since its total amount is above %s€.",
+        "line": 227
+       },
+       {
+        "kind": "UserError",
+        "message": "You have to specify a refund reason.",
+        "line": 232
+       },
+       {
+        "kind": "UserError",
+        "message": "A partner has to be specified for the selected Veri*Factu Refund Reason.",
+        "line": 236
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_clean_payment_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount_paid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_payment_lines",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "pos_order",
+     "order",
+     "pos_session",
+     "draft"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Create account.bank.statement.lines from the dictionary given to the parent function.\n\nIf the payment_line is an updated version of an existing one, the existing payment_line will first be\nremoved before making a new one.\n:param pos_order: dictionary representing the order.\n:type pos_order: dict.\n:param order: Order object the payment lines should belong to.\n:type order: pos.order\n:param pos_session: PoS session the order was created in.\n:type pos_session: pos.session\n:param draft: Indicate that the pos_order is not validated yet.\n:type draft: bool.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No cash statement found for this session. Unable to record returned cash.",
+        "line": 200
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_tax_base_line_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Convert pos order lines into dictionaries that would be used to compute taxes later.\n\n:return: A list of python dictionaries (see '_prepare_base_line_for_taxes_computation' in account.tax).",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invoice_lines_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "line_values",
+     "pos_line",
+     "move_type"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_invoice_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move_type"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Prepare a list of orm commands containing the dictionaries to fill the\n'invoice_line_ids' field when creating an invoice.\n\n:return: A list of Command.create to fill 'invoice_line_ids' when calling account.move.create.",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pos_anglo_saxon_price_unit",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "partner_id",
+     "quantity"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_preparation_change",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_to_keep_last_preparation_change",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoice_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_move"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_order_config_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "session_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_refund_related_fields",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lines.refund_orderline_ids",
+         "lines.refunded_orderline_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_refundable_lines",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lines.refunded_qty",
+         "lines.qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_invoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_move"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_picking_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_ids",
+         "picking_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_rate",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_order",
+         "company_id",
+         "currency_id",
+         "company_id.currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_order",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_total_cost_computed",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lines.is_total_cost_computed"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_contact_details",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_cost_in_real_time",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Compute the total cost of the order when it's processed by the server. It will compute the total cost of all the lines\nif it's possible. If a margin of one of the order's lines cannot be computed (because of session_id.update_stock_at_closing),\nthen the margin of said order is not computed (it will be computed when closing the session).",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_cost_at_session_closing",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "stock_moves"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Compute the margin at the end of the session. This method should be called to compute the remaining lines margin\ncontaining a storable product with a fifo/avco cost method and then compute the order margin",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_margin",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lines.margin",
+         "is_total_cost_computed"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_amount_all",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "payment_ids",
+         "lines"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_prices",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't: create a pos order from the backend interface, or unset the pricelist, or create a pos.order in a python test with Form tool, or edit the form view in studio if no PoS order exist",
+        "line": 514
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_edited",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lines.is_edited",
+         "has_deleted_line"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_partner_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_draft_or_cancel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "In order to delete a sale, it must be new or cancelled.",
+        "line": 556
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_sequence_number",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "session",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": "Override: do not allow updating the sequence number for Spanish pos orders",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_complete_values_from_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "session",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This order has already been paid. You cannot set it back to draft or edit it.",
+        "line": 611
+       },
+       {
+        "kind": "UserError",
+        "message": "The paid amount is different from the total amount of the order.",
+        "line": 620
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot change the payment of a printed order.",
+        "line": 624
+       }
+      ]
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "According to the French law, you cannot modify a point of sale order. Forbidden fields: %s.",
+        "line": 205
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot overwrite the values ensuring the inalterability of the point of sale.",
+        "line": 208
+       }
+      ]
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_pm_change_log",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_markup_list_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_order_name_from_pos_reference",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "session"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Return the order name from the sequence prefix and the receipt reference (``pos_reference``).",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_order_name",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "session"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_reference_last_part",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_stock_picking",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_invoice",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_invoices",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_refunded_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_refund_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_pos_order_paid",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rounded_amount",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "force_round"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_bank_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_invoice",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "move_vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 52,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn_edi_viettel_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_pos_order_paid",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Order %s is not fully paid.",
+        "line": 888
+       },
+       {
+        "kind": "UserError",
+        "message": "Order %s is not fully paid.",
+        "line": 898
+       }
+      ]
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": "Once an order is paid, sync it with JoFotara if possible",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_invoice_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "We have orders filtered by company > config > partners > fiscal_positions so it won't make any issue\nwhen we access user, partner, bank or similar directly.",
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_co_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot mix orders that require TicketBAI with those that don't.",
+        "line": 105
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot consolidate orders with different TicketBAI refund reasons.",
+        "line": 109
+       }
+      ]
+     },
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "With Veri*Factu enabled, POS orders cannot be consolidated into one invoice.",
+        "line": 283
+       }
+      ]
+     },
+     {
+      "package": "l10n_es_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sa_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot create a consolidated invoice for POS orders with different ZATCA refund reasons.",
+        "line": 20
+       }
+      ]
+     },
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "POS orders from different companies cannot be consolidated into one invoice.",
+        "line": 39
+       },
+       {
+        "kind": "UserError",
+        "message": "With EcPay enabled, POS orders cannot be consolidated into one invoice.",
+        "line": 44
+       }
+      ]
+     },
+     {
+      "package": "l10n_vn_edi_viettel_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_product_aml_dict",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "base_line_vals",
+     "update_base_line_vals",
+     "rate",
+     "sign"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_aml_values_list_per_nature",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 137,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_misc_reversal_move",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_moves"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Create a misc move to reverse POS orders and \"remove\" it from the POS closing entry.\nThis is done by taking data from the orders and using it to somewhat replicate the resulting entry in orders to\nreverse partially the movements done in the POS closing entry.",
+      "size_in_lines": 52,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_pos_order_invoice",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invoice_post_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_payments",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_pos_order_invoice",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Some orders are already being invoiced. Please try again later.",
+        "line": 1200
+       }
+      ]
+     },
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The order can not be invoiced. It is waiting to send a Veri*Factu record to the AEAT already.",
+        "line": 259
+       }
+      ]
+     },
+     {
+      "package": "l10n_es_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This order has been included in a consolidated invoice and cannot be invoiced separately.",
+        "line": 77
+       },
+       {
+        "kind": "UserError",
+        "message": "You must set the identification information on the commercial partner.",
+        "line": 88
+       },
+       {
+        "kind": "UserError",
+        "message": "You must set a TIN number on the commercial partner.",
+        "line": 90
+       }
+      ]
+     },
+     {
+      "package": "l10n_sa_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reconcile_invoice_payments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "invoice",
+     "payment_moves"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_pos_order_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The order delivery / pickup date is in the future. You cannot cancel it.",
+        "line": 1245
+       },
+       {
+        "kind": "UserError",
+        "message": "This order has already been paid. You cannot set it back to draft or edit it.",
+        "line": 1247
+       }
+      ]
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_open_order",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_order_log_representation",
+    "kind": "preparation_rule",
+    "arguments": [
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "staticmethod",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_log_order_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "sync_from_ui",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "orders"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create and update Orders from the frontend PoS application.\n\nCreate new orders and update orders that are in draft status. If an order already exists with a status\ndifferent from 'draft' it will be discarded, otherwise it will be saved to the database. If saved with\n'draft' status the order can be overwritten later by this function.\n\n:param orders: dictionary with the orders to be created.\n:type orders: dict.\n:returns: list of db-ids for the created and updated orders.\n:rtype: list",
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You can only refund products from the same order.",
+        "line": 1292
+       }
+      ]
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 90,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "read_pos_orders",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "read_pos_data_uuid",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "uuid"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "read_pos_data",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_refunded_orders",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_create_picking_real_time",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_force_create_picking_real_time",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_order_picking",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "add_payment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Create a new payment for the order",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_refund_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "current_session"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mail_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "email",
+     "ticket",
+     "basic_ticket"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_refund",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Create a copy of order to refund them.\n\nreturn The newly created refund orders.",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "To return product(s), you need to open a session in the POS %s",
+        "line": 1437
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "refund",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_mail",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_receipt",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "email",
+     "ticket_image",
+     "basic_image"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The mail template with xmlid %s has been deleted.",
+        "line": 1486
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_mail_attachments",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "name",
+     "ticket",
+     "basic_ticket"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "remove_from_ui",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "server_ids"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Remove orders from the frontend PoS application\n\nRemove orders from the server by id.\n:param server_ids: list of the id's of orders to remove from the server.\n:type server_ids: list.\n:returns: list -- list of db-ids for the removed orders.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "search_paid_order_ids",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "config_id",
+     "domain",
+     "limit",
+     "offset"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Search for 'paid' orders that satisfy the given domain, limit and offset.",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_pos_log",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "body"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_stock_reports_to_print",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_count_sale_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_sale_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fields_for_order_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_order_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order_line"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_es_tbai_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_es_tbai_post_document_id.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_l10n_es_pos_tbai_qrurl",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": "Retrieve the QR Code from the related ticketbai document . ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "l10n_es_tbai_retry_post",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "error",
+        "line": 134
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_tbai_post",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_tbai_get_document_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_tbai_create_edi_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "cancel"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_tbai_get_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_tbai_get_attachment_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_tbai_get_credit_note_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_es_edi_verifactu_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "l10n_es_edi_verifactu_state",
+         "l10n_es_edi_verifactu_document_ids",
+         "l10n_es_edi_verifactu_document_ids.state",
+         "l10n_es_edi_verifactu_document_ids.errors"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_es_edi_verifactu_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_es_edi_verifactu_document_ids",
+         "l10n_es_edi_verifactu_document_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_es_edi_verifactu_qr_code",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_es_edi_verifactu_document_ids",
+         "l10n_es_edi_verifactu_document_ids.json_attachment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_verifactu_get_tax_applicability",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": "Currently we only support a single Veri*Factu Tax Applicability per Veri*Factu document.\nIn `_check_record_values` of model 'l10n_es_edi_verifactu.document' we check:\nThere is only a single Veri*Factu Tax Applicability on the whole move.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_verifactu_get_clave_regimen",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": "Currently we only support a single Clave Regimen per Veri*Factu document.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "l10n_es_edi_verifactu_button_send",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_verifactu_check",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "cancellation"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_verifactu_get_record_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "cancellation"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 61,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_verifactu_create_documents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "cancellation"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_verifactu_mark_for_next_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "cancellation"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_order_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "ui_order"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "l10n_es_edi_verifactu_get_invoice_name",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_es_simplified_invoice_number",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_move"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_invoice_name",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_previous_order",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_fr_secure_sequence_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "An error occurred when computing the inalterability. Impossible to get the unique previous posted point of sale order.",
+        "line": 78
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_new_hash",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": "Returns the hash to write on pos orders when they get posted",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_hash",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "previous_hash"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": "Computes the hash of the browse_record given as self, based on the hash\nof the previous record in the company's securisation sequence given as parameter",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_string_to_hash",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 82,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_pos_so",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": true
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "According to French law, you cannot delete a point of sale order.",
+        "line": 223
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_auto_init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_jo_edi_pos_uuid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_l10n_jo_edi_pos_state",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "l10n_jo_edi_pos_state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_order_scope_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_jo_edi_pos_get_payment_type",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": ":returns: 'cash', 'receivable', or None if payments are of different types or missing.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_order_payment_method_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_order_tax_payer_type_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_submit_to_jofotara",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_jo_edi_pos_get_xml_attachment_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_jo_validate_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_jo_edi_send",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_l10n_jo_edi_pos",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_jo_edi_pos_computed_xml",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code",
+         "l10n_jo_edi_pos_error"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "download_l10n_jo_edi_pos_computed_xml",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The following errors have to be fixed in order to create an XML:\n",
+        "line": 176
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_is_single_jo_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_link_xml_and_qr_to_invoice",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "invoice"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_show_myinvois_documents",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_active_consolidated_invoice",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "including_in_progress"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "Small helper to get the currently active consolidated invoice if more that one is linked to an order. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_sa_reason_value",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_sa_reason"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_settle_or_deposit_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa_edi_pos",
+      "decorators": [],
+      "documentation": "Check if the invoice is linked to a POS settlement order\nOnly available when pos_settle_due module is installed",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_tw_edi_is_b2b",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_tw_edi_set_invoice_month",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "create_date"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Calculate the Taiwanese invoice billing period string.\n\nIn Taiwan, electronic uniform invoices are issued based on the\nMinguo calendar and grouped into bimonthly periods.\n\n1. Year: The Minguo year is calculated by subtracting 1911 from the\n   Western year (e.g., 2026 - 1911 = 115年(year)).\n2. Bimonthly Periods: Invoices are declared in fixed 2-month clusters:\n   - Jan/Feb, Mar/Apr, May/Jun, Jul/Aug, Sep/Oct, Nov/Dec.\n   - Even months round backward (e.g., February belongs to 1-2月(month)).\n   - Odd months round forward (e.g., May belongs to 5-6月(month)).\n\n:param str create_date: UTC timestamp string (\"YYYY-MM-DD HH:MM:SS\")\n:return str: Formatted period (e.g., \"115年5-6月\")",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "l10n_tw_edi_get_uniform_invoice",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sinvoice_has_pdf",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_vn_edi_viettel_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_move.l10n_vn_edi_sinvoice_pdf_file"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_attendee_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lines.event_registration_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_attendee_list",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send_paid_order_mail",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "lines_with_event"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "print_event_tickets",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "print_event_badges",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_cashier",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "validate_coupon_programs",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "point_changes",
+     "new_codes"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": "This is called upon validating the order in the pos.\n\nThis will check the balance for any pre-existing coupon to make sure that the rewards are in fact all claimable.\nThis will also check that any set code for coupons do not exist in the database.",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "add_loyalty_history_lines",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "coupon_data",
+     "coupon_updates"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "confirm_coupon_programs",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "coupon_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": "This is called after the order is created.\n\nThis will create all necessary coupons and link them to their line orders etc..\n\nIt will also return the points of all concerned coupons to be updated in the cache.",
+      "size_in_lines": 113,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_existing_gift_cards",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "coupon_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_existing_loyalty_cards",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "coupon_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_remove_duplicate_coupon_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "coupon_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_mail_attachment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "name",
+     "ticket",
+     "basic_receipt"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_online_payment_method_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "config_id.payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "use_self_order_online_payment",
+         "config_id.self_order_online_payment_method_id",
+         "config_id.payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_amount_unpaid",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_and_set_online_payments_data",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "next_online_payment_amount"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": "Allows to update the amount to pay for the next online payment and\nget online payments already made and how much remains to be paid.\nIf next_online_payment_amount is different than False, updates the\nnext online payment amount, otherwise, the next online payment amount\nis unchanged.\nIf next_online_payment_amount is 0 and the order has no successful\nonline payment, is in draft state, is not a restaurant order and the\npos.config has no trusted config, then the order is deleted from the\ndatabase, because it was probably added for the online payment flow.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_next_online_payment_amount",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_checked_next_online_payment_amount",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_notification",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "order_ids"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_self_order_receipt",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": "Hook for receipt processing extensions such as the blackbox module.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_self_order_receipt",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "email",
+     "mail_template_id",
+     "ticket_image",
+     "basic_image"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The mail template with xmlid %s has been deleted.",
+        "line": 96
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_send_payment_result",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_result"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_pos_order_lines",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "pos_config",
+     "order",
+     "line",
+     "fiscal_position_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 61,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Invalid product attribute",
+        "line": 160
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid quantity",
+        "line": 149
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_pos_order",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "pos_config",
+     "order",
+     "device_type",
+     "table"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 85,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Invalid preset",
+        "line": 192
+       },
+       {
+        "kind": "UserError",
+        "message": "Preset is not available in self-ordering",
+        "line": 195
+       },
+       {
+        "kind": "UserError",
+        "message": "Preset is not available in this configuration",
+        "line": 198
+       },
+       {
+        "kind": "UserError",
+        "message": "The order ID isn't linked to the order UUID. This is a sign of a tampered payload.",
+        "line": 229
+       }
+      ]
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_combo_lines",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": "Refuse an order whose combo hierarchy has been tampered with.\n\nA combo child is the only line whose price is derived from another line instead of\nfrom its own product (see _compute_combo_price), so a parent or a combo item chosen\nfreely from the public self-order route is a way to get any product for the price of\na combo item.",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Invalid combo line",
+        "line": 298
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid combo line",
+        "line": 306
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "recompute_prices",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_line_price",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "line"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_line_subtotals",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "line"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": "Recompute the price_subtotal and price_subtotal_incl of a line based on its\nprice_unit, quantity, and taxes.\nIn self order the price_unit is always computed server-side, so this method\nis called after the price_unit is set.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_combo_price",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "parent_line"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": "This method is a python version of the system/addons/point_of_sale/static/src/app/models/utils/compute_combo_items.js\nIt is used to compute the price of combo items on the server side when an order is received from\nthe POS frontend. In an accounting perspective, isn't correct but we still waiting the combo\ncomputation from accounting side.",
+      "size_in_lines": 95,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_order_to_print",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_self_order_online_payment",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "config_id.self_order_online_payment_method_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_notification_online_payment_status",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "status"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_sent_message_on_sms",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "phone",
+     "_",
+     "basic_image"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_get_valid_session",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "No open session available. Please open a new session to capture the order."
+   },
+   {
+    "operation": "_process_saved_order",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "No invoice journal configured for this POS session."
+   },
+   {
+    "operation": "_process_payment_lines",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "No cash statement found for this session. Unable to record returned cash."
+   },
+   {
+    "operation": "_compute_prices",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You can't: create a pos order from the backend interface, or unset the pricelist, or create a pos.order in a python test with Form tool, or edit the form view in studio if no PoS order exist"
+   },
+   {
+    "operation": "_unlink_except_draft_or_cancel",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "In order to delete a sale, it must be new or cancelled."
+   },
+   {
+    "operation": "write",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "This order has already been paid. You cannot set it back to draft or edit it."
+   },
+   {
+    "operation": "write",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "The paid amount is different from the total amount of the order."
+   },
+   {
+    "operation": "write",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You cannot change the payment of a printed order."
+   },
+   {
+    "operation": "action_pos_order_paid",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Order %s is not fully paid."
+   },
+   {
+    "operation": "action_pos_order_paid",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Order %s is not fully paid."
+   },
+   {
+    "operation": "_generate_pos_order_invoice",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Some orders are already being invoiced. Please try again later."
+   },
+   {
+    "operation": "action_pos_order_cancel",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "The order delivery / pickup date is in the future. You cannot cancel it."
+   },
+   {
+    "operation": "action_pos_order_cancel",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "This order has already been paid. You cannot set it back to draft or edit it."
+   },
+   {
+    "operation": "sync_from_ui",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You can only refund products from the same order."
+   },
+   {
+    "operation": "_refund",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "To return product(s), you need to open a session in the POS %s"
+   },
+   {
+    "operation": "action_send_receipt",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "The mail template with xmlid %s has been deleted."
+   },
+   {
+    "operation": "_process_saved_order",
+    "package": "l10n_es_edi_tbai_pos",
+    "kind": "UserError",
+    "message": "Please create an invoice for an amount over %s."
+   },
+   {
+    "operation": "_process_saved_order",
+    "package": "l10n_es_edi_tbai_pos",
+    "kind": "UserError",
+    "message": "You cannot invoice a refund whose linked order hasn't been invoiced."
+   },
+   {
+    "operation": "_process_saved_order",
+    "package": "l10n_es_edi_tbai_pos",
+    "kind": "UserError",
+    "message": "Please invoice the refund as the linked order has been invoiced."
+   },
+   {
+    "operation": "_prepare_invoice_vals",
+    "package": "l10n_es_edi_tbai_pos",
+    "kind": "UserError",
+    "message": "You cannot mix orders that require TicketBAI with those that don't."
+   },
+   {
+    "operation": "_prepare_invoice_vals",
+    "package": "l10n_es_edi_tbai_pos",
+    "kind": "UserError",
+    "message": "You cannot consolidate orders with different TicketBAI refund reasons."
+   },
+   {
+    "operation": "l10n_es_tbai_retry_post",
+    "package": "l10n_es_edi_tbai_pos",
+    "kind": "UserError",
+    "message": "error"
+   },
+   {
+    "operation": "_process_saved_order",
+    "package": "l10n_es_edi_verifactu_pos",
+    "kind": "UserError",
+    "message": "The order needs to be invoiced since its total amount is above %s€."
+   },
+   {
+    "operation": "_process_saved_order",
+    "package": "l10n_es_edi_verifactu_pos",
+    "kind": "UserError",
+    "message": "You have to specify a refund reason."
+   },
+   {
+    "operation": "_process_saved_order",
+    "package": "l10n_es_edi_verifactu_pos",
+    "kind": "UserError",
+    "message": "A partner has to be specified for the selected Veri*Factu Refund Reason."
+   },
+   {
+    "operation": "_generate_pos_order_invoice",
+    "package": "l10n_es_edi_verifactu_pos",
+    "kind": "UserError",
+    "message": "The order can not be invoiced. It is waiting to send a Veri*Factu record to the AEAT already."
+   },
+   {
+    "operation": "_prepare_invoice_vals",
+    "package": "l10n_es_edi_verifactu_pos",
+    "kind": "UserError",
+    "message": "With Veri*Factu enabled, POS orders cannot be consolidated into one invoice."
+   },
+   {
+    "operation": "_compute_previous_order",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "An error occurred when computing the inalterability. Impossible to get the unique previous posted point of sale order."
+   },
+   {
+    "operation": "write",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "According to the French law, you cannot modify a point of sale order. Forbidden fields: %s."
+   },
+   {
+    "operation": "write",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "You cannot overwrite the values ensuring the inalterability of the point of sale."
+   },
+   {
+    "operation": "_unlink_except_pos_so",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "According to French law, you cannot delete a point of sale order."
+   },
+   {
+    "operation": "download_l10n_jo_edi_pos_computed_xml",
+    "package": "l10n_jo_edi_pos",
+    "kind": "ValidationError",
+    "message": "The following errors have to be fixed in order to create an XML:\n"
+   },
+   {
+    "operation": "_process_order",
+    "package": "l10n_my_edi_pos",
+    "kind": "UserError",
+    "message": "You must invoice a refund for an order that has been submitted to MyInvois."
+   },
+   {
+    "operation": "_process_order",
+    "package": "l10n_my_edi_pos",
+    "kind": "UserError",
+    "message": "You cannot invoice a refund for an order that has not been submitted to MyInvois yet."
+   },
+   {
+    "operation": "_generate_pos_order_invoice",
+    "package": "l10n_my_edi_pos",
+    "kind": "UserError",
+    "message": "This order has been included in a consolidated invoice and cannot be invoiced separately."
+   },
+   {
+    "operation": "_generate_pos_order_invoice",
+    "package": "l10n_my_edi_pos",
+    "kind": "UserError",
+    "message": "You must set the identification information on the commercial partner."
+   },
+   {
+    "operation": "_generate_pos_order_invoice",
+    "package": "l10n_my_edi_pos",
+    "kind": "UserError",
+    "message": "You must set a TIN number on the commercial partner."
+   },
+   {
+    "operation": "_prepare_invoice_vals",
+    "package": "l10n_sa_pos",
+    "kind": "UserError",
+    "message": "You cannot create a consolidated invoice for POS orders with different ZATCA refund reasons."
+   },
+   {
+    "operation": "_prepare_invoice_vals",
+    "package": "l10n_tw_edi_ecpay_pos",
+    "kind": "UserError",
+    "message": "POS orders from different companies cannot be consolidated into one invoice."
+   },
+   {
+    "operation": "_prepare_invoice_vals",
+    "package": "l10n_tw_edi_ecpay_pos",
+    "kind": "UserError",
+    "message": "With EcPay enabled, POS orders cannot be consolidated into one invoice."
+   },
+   {
+    "operation": "action_send_self_order_receipt",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "The mail template with xmlid %s has been deleted."
+   },
+   {
+    "operation": "_check_pos_order_lines",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "Invalid product attribute"
+   },
+   {
+    "operation": "_check_pos_order_lines",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "Invalid quantity"
+   },
+   {
+    "operation": "_check_pos_order",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "Invalid preset"
+   },
+   {
+    "operation": "_check_pos_order",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "Preset is not available in self-ordering"
+   },
+   {
+    "operation": "_check_pos_order",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "Preset is not available in this configuration"
+   },
+   {
+    "operation": "_check_pos_order",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "The order ID isn't linked to the order UUID. This is a sign of a tampered payload."
+   },
+   {
+    "operation": "_check_combo_lines",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "Invalid combo line"
+   },
+   {
+    "operation": "_check_combo_lines",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "Invalid combo line"
+   }
+  ],
+  "state_fields": [
+   "state",
+   "invoice_status",
+   "l10n_es_tbai_state",
+   "l10n_es_edi_verifactu_state",
+   "l10n_jo_edi_pos_state",
+   "l10n_sa_invoice_edi_state",
+   "l10n_vn_sinvoice_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_pos_order",
+    "package": "point_of_sale",
+    "name": "pos.order",
+    "entity": "pos.order",
+    "group": "group_pos_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "point_of_sale.access_pos_order_stock_worker",
+    "package": "point_of_sale",
+    "name": "pos.order stock_worker",
+    "entity": "pos.order",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "point_of_sale.rule_pos_multi_company",
+    "package": "point_of_sale",
+    "name": "Point Of Sale Order",
+    "entity": "pos.order",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "l10n_es_edi_tbai_pos.view_pos_order_form_inherit_l10n_es_pos_tbai",
+    "package": "l10n_es_edi_tbai_pos",
+    "name": "pos.order.form.inherit.l10n_es_edi_tbai_pos",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_pos_order_invoice']",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "l10n_es_tbai_post_document_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_pos_order_invoice']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu_pos.view_pos_order_filter",
+    "package": "l10n_es_edi_verifactu_pos",
+    "name": "pos.order.list.select",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_order_filter",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='status']",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "l10n_es_edi_verifactu_state",
+       "string": "Veri*Factu State",
+       "context": "{'group_by': 'l10n_es_edi_verifactu_state'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='status']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu_pos.view_pos_order_tree",
+    "package": "l10n_es_edi_verifactu_pos",
+    "name": "pos.order.tree",
+    "view_type": "field",
+    "inherits_view": "point_of_sale.view_pos_order_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "state",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "position": "after"
+      },
+      {
+       "name": "l10n_es_edi_verifactu_state",
+       "widget": "badge",
+       "optional": "hide",
+       "decoration-danger": "l10n_es_edi_verifactu_state not in ('cancelled', 'accepted', 'registered_with_errors')",
+       "decoration-warning": "l10n_es_edi_verifactu_state == 'registered_with_errors'",
+       "decoration-success": "l10n_es_edi_verifactu_state == 'accepted'",
+       "decoration-muted": "l10n_es_edi_verifactu_state == 'cancelled'"
+      },
+      {
+       "name": "sequence_number",
+       "string": "Simplified Invoice Number",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu_pos.view_pos_order_form_inherit_l10n_es_pos_verifactu",
+    "package": "l10n_es_edi_verifactu_pos",
+    "name": "pos.order.form.inherit.l10n_es_edi_verifactu_pos",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "l10n_es_edi_verifactu_button_send",
+       "string": "Send Veri*Factu",
+       "type": "object",
+       "invisible": "account_move or not l10n_es_edi_verifactu_required or l10n_es_edi_verifactu_state in ('registered_with_errors', 'accepted')"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_es_pos.view_pos_pos_form_simplified_invoice",
+    "package": "l10n_es_pos",
+    "name": "pos.order.form",
+    "view_type": "field",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "l10n_es_simplified_invoice_number",
+       "invisible": "not l10n_es_simplified_invoice_number",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_pos.view_pos_order_tree",
+    "package": "l10n_es_pos",
+    "name": null,
+    "view_type": "field",
+    "inherits_view": "point_of_sale.view_pos_order_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "pos_reference",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "pos_reference",
+       "position": "before"
+      },
+      {
+       "name": "l10n_es_simplified_invoice_number"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_fr_pos_cert.pos_order_form_inherit",
+    "package": "l10n_fr_pos_cert",
+    "name": "pos.order.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='pos_reference']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_fr_hash",
+       "string": "Hash",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='pos_reference']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_in_pos.view_pos_pos_form_inherit",
+    "package": "l10n_in_pos",
+    "name": "pos.order.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lines']/list/field[@name='product_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_in_hsn_code",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lines']/list/field[@name='product_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_jo_edi_pos.view_pos_pos_form",
+    "package": "l10n_jo_edi_pos",
+    "name": "pos.order.form",
+    "view_type": "header",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "header",
+     "root_attributes": {
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "button_l10n_jo_edi_pos",
+       "string": "JoFotara (Jordan)",
+       "type": "object",
+       "invisible": "country_code != 'JO' or not l10n_jo_edi_pos_enabled or state in ['draft', 'cancel'] or l10n_jo_edi_pos_state in ['demo', 'sent']"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "header",
+       "attributes": {
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_jo_edi_pos.view_pos_order_tree",
+    "package": "l10n_jo_edi_pos",
+    "name": null,
+    "view_type": "field",
+    "inherits_view": "point_of_sale.view_pos_order_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "state",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "position": "before"
+      },
+      {
+       "name": "l10n_jo_edi_pos_state",
+       "widget": "badge",
+       "optional": "hide",
+       "decoration-success": "l10n_jo_edi_pos_state in ['demo', 'sent']"
+      },
+      {
+       "name": "l10n_jo_edi_pos_error",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_jo_edi_pos.view_pos_order_filter",
+    "package": "l10n_jo_edi_pos",
+    "name": "pos.order.list.select.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_order_filter",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='status']",
+      "position": "before"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "l10n_jo_edi_pos_state",
+       "string": "JoFotara Receipt State",
+       "context": "{'group_by': 'l10n_jo_edi_pos_state'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='status']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_my_edi_pos.view_pos_pos_form",
+    "package": "l10n_my_edi_pos",
+    "name": "pos.order.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "consolidated_invoice_ids",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_show_myinvois_documents",
+       "type": "object",
+       "invisible": "not consolidated_invoice_ids",
+       "class": "oe_stat_button",
+       "groups": "account.group_account_invoice",
+       "icon": "fa-sun-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_tw_edi_ecpay_pos.view_pos_order_form_inherit_ecpay",
+    "package": "l10n_tw_edi_ecpay_pos",
+    "name": "pos_order_ecpay_view_form",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//notebook",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "l10n_tw_edi_is_print",
+       "invisible": "l10n_tw_edi_is_b2b",
+       "readonly": "account_move"
+      },
+      {
+       "name": "l10n_tw_edi_love_code",
+       "invisible": "l10n_tw_edi_is_print or l10n_tw_edi_is_b2b or l10n_tw_edi_carrier_type",
+       "readonly": "account_move"
+      },
+      {
+       "name": "l10n_tw_edi_carrier_type",
+       "invisible": "l10n_tw_edi_is_print or l10n_tw_edi_is_b2b or l10n_tw_edi_love_code",
+       "readonly": "account_move"
+      },
+      {
+       "name": "l10n_tw_edi_carrier_number",
+       "invisible": "l10n_tw_edi_carrier_type not in ['2', '3', '4', '5'] or l10n_tw_edi_is_print or l10n_tw_edi_is_b2b or l10n_tw_edi_love_code",
+       "readonly": "account_move",
+       "required": "l10n_tw_edi_carrier_type in ['2', '3', '4', '5'] and not l10n_tw_edi_is_print and not l10n_tw_edi_is_b2b"
+      },
+      {
+       "name": "l10n_tw_edi_carrier_number_2",
+       "invisible": "l10n_tw_edi_carrier_type not in ['4', '5'] or l10n_tw_edi_is_print or l10n_tw_edi_is_b2b or l10n_tw_edi_love_code",
+       "readonly": "account_move",
+       "required": "l10n_tw_edi_carrier_type in ['4', '5'] and not l10n_tw_edi_is_print and not l10n_tw_edi_is_b2b"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": null,
+       "string": "Ecpay",
+       "invisible": "country_code != 'TW' or refunded_order_id",
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//notebook",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_pos_form",
+    "package": "point_of_sale",
+    "name": "pos.order.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Point of Sale Orders",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "state == 'cancel'"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "state != 'cancel'"
+      },
+      {
+       "name": "has_refundable_lines",
+       "invisible": "1"
+      },
+      {
+       "name": "failed_pickings",
+       "invisible": "1"
+      },
+      {
+       "name": "picking_count",
+       "widget": "statinfo",
+       "invisible": "failed_pickings",
+       "string": "Pickings"
+      },
+      {
+       "name": "picking_count",
+       "widget": "statinfo",
+       "invisible": "not failed_pickings",
+       "string": "Pickings"
+      },
+      {
+       "name": "refund_orders_count",
+       "widget": "statinfo",
+       "string": "Refunds"
+      },
+      {
+       "name": "refunded_order_id",
+       "widget": "statinfo",
+       "string": "Refunded Orders"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "source",
+       "readonly": "True"
+      },
+      {
+       "name": "date_order"
+      },
+      {
+       "name": "session_id",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "user_id",
+       "readonly": "account_move or state == 'done'",
+       "string": "User"
+      },
+      {
+       "name": "order_edit_tracking",
+       "invisible": "1"
+      },
+      {
+       "name": "is_edited",
+       "invisible": "not order_edit_tracking",
+       "readonly": "1"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "account_move",
+       "context": "{'res_partner_search_mode': 'customer'}"
+      },
+      {
+       "name": "fiscal_position_id",
+       "readonly": "state != 'draft'",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "lines",
+       "readonly": "state != 'draft'",
+       "nolabel": "1",
+       "mode": "list,kanban"
+      },
+      {
+       "name": "product_id",
+       "widget": "image",
+       "options": "{'preview_image': 'image_128'}"
+      },
+      {
+       "name": "full_product_name"
+      },
+      {
+       "name": "price_subtotal_incl",
+       "widget": "monetary"
+      },
+      {
+       "name": "qty"
+      },
+      {
+       "name": "product_uom_id",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "price_unit",
+       "widget": "monetary"
+      },
+      {
+       "name": "name",
+       "column_invisible": "True"
+      },
+      {
+       "name": "full_product_name",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "product_id",
+       "widget": "product_label_section_and_note_field"
+      },
+      {
+       "name": "is_edited",
+       "readonly": "1",
+       "column_invisible": "not parent.order_edit_tracking"
+      },
+      {
+       "name": "pack_lot_ids",
+       "widget": "many2many_tags",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "qty"
+      },
+      {
+       "name": "customer_note",
+       "optional": "hide"
+      },
+      {
+       "name": "product_uom_id",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "price_unit",
+       "widget": "monetary"
+      },
+      {
+       "name": "is_total_cost_computed",
+       "column_invisible": "True"
+      },
+      {
+       "name": "total_cost",
+       "widget": "monetary",
+       "invisible": "not is_total_cost_computed",
+       "optional": "hide"
+      },
+      {
+       "name": "margin",
+       "widget": "monetary",
+       "invisible": "not is_total_cost_computed",
+       "optional": "hide"
+      },
+      {
+       "name": "margin_percent",
+       "widget": "percentage",
+       "invisible": "not is_total_cost_computed",
+       "optional": "hide"
+      },
+      {
+       "name": "discount",
+       "string": "Disc.%"
+      },
+      {
+       "name": "tax_ids_after_fiscal_position",
+       "widget": "many2many_tax_tags",
+       "string": "Taxes"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "column_invisible": "True",
+       "force_save": "1"
+      },
+      {
+       "name": "price_subtotal",
+       "widget": "monetary",
+       "force_save": "1"
+      },
+      {
+       "name": "price_subtotal_incl",
+       "widget": "monetary",
+       "force_save": "1"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "refunded_qty",
+       "optional": "hide"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "qty"
+      },
+      {
+       "name": "discount"
+      },
+      {
+       "name": "price_unit",
+       "widget": "monetary"
+      },
+      {
+       "name": "price_subtotal",
+       "widget": "monetary",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "price_subtotal_incl",
+       "widget": "monetary",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "tax_ids_after_fiscal_position",
+       "widget": "many2many_tax_tags",
+       "string": "Taxes"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "pack_lot_ids",
+       "widget": "many2many_tags",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "notice"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "full_product_name",
+       "readonly": "1"
+      },
+      {
+       "name": "amount_tax",
+       "widget": "monetary",
+       "force_save": "1"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary",
+       "force_save": "1"
+      },
+      {
+       "name": "amount_paid",
+       "widget": "monetary",
+       "invisible": "amount_paid == 'amount_total'",
+       "readonly": "state != 'draft'",
+       "nolabel": "1"
+      },
+      {
+       "name": "margin",
+       "invisible": "not is_total_cost_computed"
+      },
+      {
+       "name": "margin_percent",
+       "widget": "percentage",
+       "nolabel": "1"
+      },
+      {
+       "name": "is_total_cost_computed",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "payment_ids",
+       "readonly": "account_move or state == 'done' or nb_print > 0",
+       "nolabel": "1"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "payment_date"
+      },
+      {
+       "name": "payment_method_id",
+       "domain": "[('id', 'in', parent.available_payment_method_ids)]"
+      },
+      {
+       "name": "amount"
+      },
+      {
+       "name": "payment_method_payment_mode",
+       "optional": "hide"
+      },
+      {
+       "name": "card_no",
+       "invisible": "not card_no"
+      },
+      {
+       "name": "card_brand",
+       "invisible": "not card_brand or not card_no",
+       "string": "Card's Brand"
+      },
+      {
+       "name": "cardholder_name",
+       "invisible": "not cardholder_name or not card_no"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary"
+      },
+      {
+       "name": "amount_paid",
+       "widget": "monetary",
+       "readonly": "1"
+      },
+      {
+       "name": "amount_difference",
+       "widget": "monetary",
+       "force_save": "1"
+      },
+      {
+       "name": "session_move_id",
+       "readonly": "1"
+      },
+      {
+       "name": "pos_reference"
+      },
+      {
+       "name": "tracking_number"
+      },
+      {
+       "name": "country_code",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "pricelist_id",
+       "readonly": "state != 'draft'",
+       "groups": "product.group_product_pricelist"
+      },
+      {
+       "name": "preset_id",
+       "readonly": "True"
+      },
+      {
+       "name": "preset_time",
+       "invisible": "not preset_time",
+       "readonly": "True"
+      },
+      {
+       "name": "floating_order_name",
+       "invisible": "not floating_order_name"
+      },
+      {
+       "name": "email"
+      },
+      {
+       "name": "mobile"
+      },
+      {
+       "name": "general_customer_note",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(action_pos_payment)d",
+       "string": "Payment",
+       "type": "action",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_pos_order_invoice",
+       "string": "Invoice",
+       "type": "object",
+       "invisible": "state not in ['paid', 'done'] or account_move"
+      },
+      {
+       "name": "refund",
+       "string": "Return Products",
+       "type": "object",
+       "invisible": "state == 'draft' or not has_refundable_lines"
+      },
+      {
+       "name": "action_stock_picking",
+       "type": "object",
+       "invisible": "picking_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-truck"
+      },
+      {
+       "name": "action_view_invoice",
+       "string": "Invoice",
+       "type": "object",
+       "invisible": "not account_move",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      },
+      {
+       "name": "action_view_refund_orders",
+       "type": "object",
+       "invisible": "refund_orders_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-undo"
+      },
+      {
+       "name": "action_view_refunded_order",
+       "type": "object",
+       "invisible": "not refunded_order_id",
+       "class": "oe_stat_button",
+       "icon": "fa-shopping-cart "
+      },
+      {
+       "name": "action_send_mail",
+       "type": "object",
+       "invisible": "not email",
+       "class": "btn-link",
+       "icon": "fa-envelope fa-lg"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "products",
+       "string": "Products",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "payments",
+       "string": "Payments",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "extra",
+       "string": "Extra Info",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "notes",
+       "string": "Customer Note",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 2,
+      "statinfo": 4,
+      "image": 1,
+      "monetary": 16,
+      "product_label_section_and_note_field": 1,
+      "many2many_tags": 2,
+      "percentage": 2,
+      "many2many_tax_tags": 4
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "%(action_pos_payment)d",
+       "string": "Payment",
+       "class": "oe_highlight",
+       "type": "action",
+       "invisible": "state != 'draft'"
+      },
+      {
+       "name": "action_pos_order_invoice",
+       "string": "Invoice",
+       "type": "object",
+       "invisible": "state not in ['paid', 'done'] or account_move"
+      },
+      {
+       "name": "refund",
+       "string": "Return Products",
+       "type": "object",
+       "invisible": "state == 'draft' or not has_refundable_lines"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,paid,done",
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "action_stock_picking",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-truck",
+       "invisible": "picking_count == 0"
+      },
+      {
+       "name": "action_view_invoice",
+       "string": "Invoice",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o",
+       "invisible": "not account_move"
+      },
+      {
+       "name": "action_view_refund_orders",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-undo",
+       "invisible": "refund_orders_count == 0"
+      },
+      {
+       "name": "action_view_refunded_order",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-shopping-cart ",
+       "invisible": "not refunded_order_id"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_order_kanban",
+    "package": "point_of_sale",
+    "name": "pos.order.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "create": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary"
+      },
+      {
+       "name": "pos_reference"
+      },
+      {
+       "name": "date_order"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "options": "{'classes': {'draft': 'default',                             'done': 'success', 'cancel': 'danger'}}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1,
+      "label_selection": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_order_pivot",
+    "package": "point_of_sale",
+    "name": "pos.order.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "PoS Orders",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date_order"
+      },
+      {
+       "name": "margin"
+      },
+      {
+       "name": "margin_percent",
+       "invisible": "1"
+      },
+      {
+       "name": "amount_total"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date_order",
+       "type": "row"
+      },
+      {
+       "name": "margin"
+      },
+      {
+       "name": "margin_percent",
+       "invisible": "1"
+      },
+      {
+       "name": "amount_total",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_order_tree",
+    "package": "point_of_sale",
+    "name": "pos.order.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "POS Orders",
+      "create": "0",
+      "sample": "1",
+      "decoration-info": "state == 'draft'",
+      "decoration-muted": "state == 'cancel'",
+      "duplicate": "0"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "session_id",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "date_order"
+      },
+      {
+       "name": "config_id"
+      },
+      {
+       "name": "pos_reference"
+      },
+      {
+       "name": "tracking_number",
+       "optional": "hide"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "account_move or state == 'done'"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary",
+       "sum": "Amount total",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state not in ('draft','cancel')",
+       "decoration-info": "state == 'draft'"
+      },
+      {
+       "name": "invoice_status",
+       "widget": "badge",
+       "invisible": "invoice_status == 'to_invoice'",
+       "decoration-success": "invoice_status == 'invoiced'"
+      },
+      {
+       "name": "is_edited",
+       "readonly": "1",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_create_invoices",
+       "string": "Create Invoices",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "monetary": 1,
+      "badge": 2
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state == 'draft'",
+      "decoration-muted": "state == 'cancel'"
+     }
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_order_tree_no_session_id",
+    "package": "point_of_sale",
+    "name": "pos.order.tree_no_session_id",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_order_tree",
+    "mode": "primary",
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='session_id']",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='session_id']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_order_search",
+    "package": "point_of_sale",
+    "name": "pos.order.search.view",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Point of Sale Orders"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "config_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_order_filter",
+    "package": "point_of_sale",
+    "name": "pos.order.list.select",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Sales Order"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "pos_reference"
+      },
+      {
+       "name": "date_order"
+      },
+      {
+       "name": "tracking_number"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "session_id"
+      },
+      {
+       "name": "config_id"
+      },
+      {
+       "name": "lines",
+       "string": "Product",
+       "filter_domain": "[('lines.product_id', 'ilike', self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "invoiced",
+       "string": "Invoiced",
+       "domain": "[('account_move', '!=', False)]"
+      },
+      {
+       "name": "posted",
+       "string": "Posted",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "cancelled",
+       "string": "Cancelled",
+       "domain": "[('state', '=', 'cancel')]"
+      },
+      {
+       "name": "order_date",
+       "string": "Order Date",
+       "date": "date_order"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "session",
+       "string": "Session",
+       "domain": "[]",
+       "context": "{'group_by': 'session_id'}"
+      },
+      {
+       "name": "user_id",
+       "string": "User",
+       "domain": "[]",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "config_id",
+       "string": "Point of Sale",
+       "domain": "[]",
+       "context": "{'group_by': 'config_id'}"
+      },
+      {
+       "name": "customer",
+       "string": "Customer",
+       "domain": "[]",
+       "context": "{'group_by': 'partner_id'}"
+      },
+      {
+       "name": "status",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "order_month",
+       "string": "Order Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date_order'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "pos_event.pos_order_form_view_inherit",
+    "package": "pos_event",
+    "name": "pos.order.form.view.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "print_event_tickets",
+       "type": "object",
+       "invisible": "attendee_count == 0"
+      },
+      {
+       "name": "print_event_badges",
+       "type": "object",
+       "invisible": "attendee_count == 0"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_hr.pos_order_form_inherit",
+    "package": "pos_hr",
+    "name": "pos.order.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='user_id']",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "invisible": "not employee_id or context.get('from_frontend')",
+       "readonly": "1"
+      },
+      {
+       "name": "employee_id",
+       "invisible": "not employee_id or not context.get('from_frontend')",
+       "readonly": "1",
+       "options": "{'no_open': True}"
+      },
+      {
+       "name": "user_id",
+       "invisible": "employee_id",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='user_id']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_hr.pos_order_list_select_inherit",
+    "package": "pos_hr",
+    "name": "pos.order.list.select.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_order_filter",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='user_id']",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "cashier"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='user_id']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_hr.view_pos_order_tree_inherit",
+    "package": "pos_hr",
+    "name": "pos.order.list.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_order_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='user_id']",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "account_move or state == 'done'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='user_id']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_restaurant.view_pos_pos_form",
+    "package": "pos_restaurant",
+    "name": "pos.order.form.view.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='order_fields']",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "table_id"
+      },
+      {
+       "name": "customer_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='order_fields']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_sale.view_pos_order_form_inherit_pos_sale",
+    "package": "pos_sale",
+    "name": "pos.order.form.pos.sale",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_pos_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_view_invoice']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "sale_order_count",
+       "widget": "statinfo",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_sale_order",
+       "type": "object",
+       "invisible": "sale_order_count == 0",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-shopping-basket"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_view_invoice']",
+       "position": "before"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "point_of_sale.action_pos_pos_form",
+    "package": "point_of_sale",
+    "name": "Orders",
+    "view_mode": "list,form,kanban,pivot",
+    "view_id": "False",
+    "search_view_id": null,
+    "domain": "[]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No orders found\n            </p><p>\n                To record new orders, start a new session.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "pos.order"
+   },
+   {
+    "external_identifier": "point_of_sale.action_pos_sale_graph",
+    "package": "point_of_sale",
+    "name": "Orders",
+    "view_mode": "graph,list,form,kanban,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('state', 'not in', ['draft', 'cancel']), ('account_move', '=', False)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No data yet!\n            </p><p>\n                Create a new POS order\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "pos.order"
+   },
+   {
+    "external_identifier": "point_of_sale.action_pos_order_filtered",
+    "package": "point_of_sale",
+    "name": "Orders",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_pos_order_search",
+    "domain": null,
+    "context": "{\n            'search_default_config_id': [active_id],\n            'default_config_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "pos.order"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "point_of_sale.pos_order_set_cancel",
+    "package": "point_of_sale",
+    "name": "Cancel Order",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "point_of_sale.model_pos_order_send_mail",
+    "package": "point_of_sale",
+    "name": "Send Email",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "point_of_sale.email_template_pos_receipt",
+    "package": "point_of_sale",
+    "name": "Point of Sale: Receipt",
+    "subject": "Your {{ object.config_id.name }} receipt"
+   },
+   {
+    "external_identifier": "pos_self_order.takeout_email_template",
+    "package": "pos_self_order",
+    "name": "Takeout: Confirmation order for self",
+    "subject": "Your {{ object.config_id.name }} receipt"
+   },
+   {
+    "external_identifier": "pos_self_order.delivery_email_template",
+    "package": "pos_self_order",
+    "name": "Delivery: Confirmation order for self",
+    "subject": "Your {{ object.config_id.name }} receipt"
+   }
+  ]
+ }
+}

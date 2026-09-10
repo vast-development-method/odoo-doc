@@ -1,0 +1,557 @@
+{
+ "catalog": {
+  "name": "entity:mail.guest",
+  "description": "Complete definition of entity Guest (mail.guest).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.guest",
+  "storage_name": "mail_guest",
+  "full_name": "Guest",
+  "kind": "persistent",
+  "description": "Guest",
+  "defined_by_package": "mail",
+  "extended_by_packages": [],
+  "mixins": [
+   "avatar.mixin",
+   "bus.listener.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_avatar_name_field": "name",
+   "_cookie_name": "dgid",
+   "_cookie_separator": "|"
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "mail",
+    "full_name": "Name"
+   },
+   {
+    "name": "access_token",
+    "type": "Char",
+    "string": "Access Token",
+    "default": {
+     "dynamic": "lambda self: str(uuid.uuid4())"
+    },
+    "groups": "base.group_system",
+    "required": true,
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Access Token"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "string": "Country",
+    "comodel": "res.country",
+    "defined_in_package": "mail",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "defined_in_package": "mail",
+    "string": "Email",
+    "full_name": "Email"
+   },
+   {
+    "name": "lang",
+    "type": "Selection",
+    "string": "Language",
+    "selection": {
+     "expression": "_lang_get"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Language"
+   },
+   {
+    "name": "timezone",
+    "type": "Selection",
+    "string": "Timezone",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "channel_ids",
+    "type": "Many2many",
+    "string": "Channels",
+    "comodel": "discuss.channel",
+    "relation": "discuss_channel_member",
+    "column1": "guest_id",
+    "column2": "channel_id",
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Channels",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "presence_ids",
+    "type": "One2many",
+    "comodel": "mail.presence",
+    "inverse_name": "guest_id",
+    "groups": "base.group_system",
+    "defined_in_package": "mail",
+    "string": "Presence",
+    "full_name": "Presence",
+    "target_entity": "mail.presence"
+   },
+   {
+    "name": "im_status",
+    "type": "Char",
+    "string": "IM Status",
+    "compute": "_compute_im_status",
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "full_name": "IM Status"
+   },
+   {
+    "name": "offline_since",
+    "type": "Datetime",
+    "string": "Offline since",
+    "compute": "_compute_im_status",
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "full_name": "Offline since"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_lang_get",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_im_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "presence_ids.status"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_guest_from_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "token"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Returns the guest record for the given token, if applicable.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_guest_from_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Returns the current guest record from the context, if applicable.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_or_create_guest",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "guest_name",
+     "country_code",
+     "timezone"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_timezone_from_request",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "request"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Guest's name cannot be empty.",
+        "line": 91
+       },
+       {
+        "kind": "UserError",
+        "message": "Guest's name is too long.",
+        "line": 93
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_update_timezone",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "timezone"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_im_status_access_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return a scoped access token for the `im_status` field. The token is used in\n`ir_websocket._prepare_subscribe_data` to grant access to presence channels.\n\n:rtype: str",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_field_store_repr",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_auth_cookie",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Add a cookie to the response to identify the guest. Every route\nthat expects a guest will make use of it to authenticate the guest\nthrough `add_guest_to_context`.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_auth_cookie",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Format the cookie value for the given guest.\n\n:return: formatted cookie value\n:rtype: str",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_update_name",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Guest's name cannot be empty."
+   },
+   {
+    "operation": "_update_name",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Guest's name is too long."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_guest_user",
+    "package": "mail",
+    "name": "mail.guest",
+    "entity": "mail.guest",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_mail_guest_system",
+    "package": "mail",
+    "name": "mail.guest",
+    "entity": "mail.guest",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mail.mail_guest_view_tree",
+    "package": "mail",
+    "name": "mail.guest.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Guests"
+     },
+     "fields": [
+      {
+       "name": "id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "lang"
+      },
+      {
+       "name": "timezone"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_guest_view_form",
+    "package": "mail",
+    "name": "mail.guest.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Guest"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "lang"
+      },
+      {
+       "name": "timezone"
+      },
+      {
+       "name": "channel_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.mail_guest_action",
+    "package": "mail",
+    "name": "Guests",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.guest"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

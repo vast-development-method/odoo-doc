@@ -1,0 +1,833 @@
+{
+ "catalog": {
+  "name": "entity:mail.render.mixin",
+  "description": "Complete definition of entity Mail Render Mixin (mail.render.mixin).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.render.mixin",
+  "storage_name": "mail_render_mixin",
+  "full_name": "Mail Render Mixin",
+  "kind": "abstract",
+  "description": "Mail Render Mixin",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "link_tracker",
+   "mass_mailing"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_unrestricted_rendering": false
+  },
+  "fields": [
+   {
+    "name": "lang",
+    "type": "Char",
+    "string": "Language",
+    "help": "Optional translation language (ISO code) to select when sending out an email. If not set, the main partner's language will be used. This should usually be a placeholder expression that provides the appropriate language, e.g. {{ object.partner_id.lang }}.",
+    "defined_in_package": "mail",
+    "full_name": "Language"
+   },
+   {
+    "name": "render_model",
+    "type": "Char",
+    "string": "Rendering Model",
+    "compute": "_compute_render_model",
+    "store": false,
+    "defined_in_package": "mail",
+    "full_name": "Rendering Model"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Give the target model for rendering. Void by default as models\ninheriting from ``mail.render.mixin`` should define how to find this\nmodel. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_expression",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name",
+     "sub_field_name",
+     "null_value"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a placeholder expression for use in a template field,\nbased on the values provided in the placeholder assistant.\n\n:param field_name: main field name\n:param sub_field_name: sub field name (M2O)\n:param null_value: default value if the target value is empty\n:return: final placeholder expression ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_valid_field_parameter",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "field",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_field_translations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name",
+     "translations",
+     "digest",
+     "source_lang"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_replace_local_links",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "html",
+     "base_url"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Replace local links by absolute links. It is required in various\ncases, for example when sending emails on chatter or sending mass\nmailings. It replaces\n\n * href of links (mailto will not match the regex)\n * src of images/v:fill/v:image (base64 hardcoded data will not match the regex)\n * styling using url like background-image: url or background=\"url\"\n\nIt is done using regex because it is shorter than using an html parser\nto create a potentially complex soupe and hope to have a result that\nhas not been harmed.",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_encapsulate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "layout_xmlid",
+     "html",
+     "add_context",
+     "context_record"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Encapsulate html content (i.e. an email body) in a layout containing\nmore complex html. Used to generate a 'email friendly' content from\nsimple html content.\n\nTypical usage: encapsulate content in email layouts like 'mail_notification_layout'\nor 'mail_notification_light'. Also used for digest layouts. This leads\nto some default rendering values being computed here, often used in those\ntemplates. ",
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepend_preview",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "html",
+     "preview"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Prepare the email body before sending. Add the text preview at the\nbeginning of the mail. The preview text is displayed bellow the mail\nsubject of most mail client (gmail, outlook...).\n\n:param html: html content for which we want to prepend a preview\n:param preview: the preview to add before the html content\n:return: html with preprended preview",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_restricted",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_unsafe_expression",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_unsafe_expression_template_qweb",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_src",
+     "model",
+     "fname"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_unsafe_expression_template_inline_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_txt",
+     "model",
+     "fname"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_access_right_dynamic_template",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders",
+        "line": 302
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_render_eval_context",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Evaluation context used in all rendering engines. Contains\n\n* ``user``: current user browse record;\n* ``ctx```: current context;\n* various formatting tools;",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_template_qweb",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_src",
+     "model",
+     "res_ids",
+     "add_context",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Render a raw QWeb template.\n\nIn addition to the generic evaluation context available, some other\nvariables are added:\n  * ``object``: record based on which the template is rendered;\n\n:param str template_src: raw QWeb template to render;\n:param str model: see ``MailRenderMixin._render_template()``;\n:param list res_ids: see ``MailRenderMixin._render_template()``;\n\n:param dict add_context: additional context to give to renderer. It\n  allows to add or update values to base rendering context generated\n  by ``MailRenderMixin._render_eval_context()``;\n:param dict options: options for rendering propagated to IrQweb render\n  (see docstring for available options);\n\n:returns: {res_id: string of rendered template based on record}\n:rtype: dict",
+      "size_in_lines": 113,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Failed to render QWeb template for %(template_label)s\nTarget Model: %(model_name)s\nLanguage context: %(lang_context)s\nError: %(error_details)s\n\nTemplate Source Snippet:\n%(template_src)s",
+        "line": 434
+       },
+       {
+        "kind": "AccessError",
+        "message": "Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders",
+        "line": 386
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_render_template_qweb_regex",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_src",
+     "model",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Render the template with regex instead of qweb to avoid `eval` call.\n\nSupporting only QWeb allowed expressions, no custom variable in that mode.",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_template_qweb_view",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "view_ref",
+     "model",
+     "res_ids",
+     "add_context",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Render a QWeb template based on an ir.ui.view content.\n\nIn addition to the generic evaluation context available, some other\nvariables are added:\n  * ``object``: record based on which the template is rendered;\n\n:param str/int/record view_ref: source QWeb template. It should be an\n  XmlID allowing to fetch an ``ir.ui.view``, or an ID of a view or\n  an ``ir.ui.view`` record;\n:param str model: see ``MailRenderMixin._render_template()``;\n:param list res_ids: see ``MailRenderMixin._render_template()``;\n\n:param dict add_context: additional context to give to renderer. It\n  allows to add or update values to base rendering context generated\n  by ``MailRenderMixin._render_eval_context()``;\n:param dict options: options for rendering propagated to IrQweb render\n  (see docstring for available options);\n\n:returns: {res_id: string of rendered template based on record}\n:rtype: dict",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Failed to render template: %(view_ref)s",
+        "line": 535
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_render_template_inline_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_txt",
+     "model",
+     "res_ids",
+     "add_context",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Render a string-based template on records given by a model and a list\nof IDs, using inline_template.\n\nIn addition to the generic evaluation context available, some other\nvariables are added:\n  * ``object``: record based on which the template is rendered;\n\n:param str template_txt: template text to render\n:param str model: see ``MailRenderMixin._render_template()``;\n:param list res_ids: see ``MailRenderMixin._render_template()``;\n\n:param dict add_context: additional context to give to renderer. It\n  allows to add or update values to base rendering context generated\n  by ``MailRenderMixin._render_inline_template_eval_context()``;\n:param dict options: options for rendering (no options available\n  currently);\n\n:returns: {res_id: string of rendered template based on record}\n:rtype: dict",
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders",
+        "line": 574
+       },
+       {
+        "kind": "UserError",
+        "message": "Failed to render inline_template template: %(template_txt)s\nError details: %(error)s",
+        "line": 594
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_render_template_inline_template_regex",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_txt",
+     "model",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Render the inline template in static mode, without calling safe eval.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_template_postprocess",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "rendered"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Tool method for post processing. In this method we ensure local\nlinks ('/shop/Basil-1') are replaced by global links ('https://www.\nmygarden.com/shop/Basil-1').\n\n:param rendered: result of ``_render_template``;\n\n:returns: updated version of rendered per record ID;\n:rtype: dict",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_scheduled_date",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "scheduled_date"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_template_get_valid_options",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_src",
+     "model",
+     "res_ids",
+     "engine",
+     "add_context",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Render the given string on records designed by model / res_ids using\nthe given rendering engine. Possible engine are small_web, qweb, or\nqweb_view.\n\n:param str template_src: template text to render or xml id of a qweb view;\n:param str model: model name of records on which we want to perform\n  rendering (aka 'crm.lead');\n:param list res_ids: list of ids of records. All should belong to the\n  the system model given by model;\n:param string engine: inline_template, qweb or qweb_view;\n\n:param dict add_context: additional context to give to renderer. It\n  allows to add or update values to base rendering context generated\n  by ``MailRenderMixin._render_<engine>_eval_context()``;\n:param dict options: options for rendering. Use in this method and also\n  propagated to rendering sub-methods. May contain notably\n\n    boolean post_process: perform a post processing on rendered result\n    (notably html links management). See``_render_template_postprocess``;\n    boolean preserve_comments: if set, comments are preserved. Default\n    behavior is to remove them. It is used notably for browser-specific\n    code implemented like comments;\n\n:returns: ``{res_id: string of rendered template based on record}``\n:rtype: dict",
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_lang",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "engine"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Given some record ids, return the lang for each record based on\nlang field of template or through specific context-based key. Lang is\ncomputed by performing a rendering on res_ids, based on self.render_model.\n\n:param list res_ids: list of ids of records. All should belong to the\n  the system model given by model;\n:param string engine: inline_template or qweb_view;\n\n:return: {res_id: lang code (i.e. en_US)}\n:rtype: dict",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_classify_per_lang",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "engine"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Given some record ids, return for computed each lang a contextualized\ntemplate and its subset of res_ids.\n\n:param list res_ids: list of ids of records (all belonging to same model\n  defined by self.render_model)\n:param string engine: inline_template, qweb, or qweb_view;\n:return: {lang: (template with lang=lang_code if specific lang computed\n  or template, res_ids targeted by that language}\n:rtype: dict",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_field",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field",
+     "res_ids",
+     "engine",
+     "compute_lang",
+     "res_ids_lang",
+     "set_lang",
+     "add_context",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Given some record ids, render a template located on field on all\nrecords. ``field`` should be a field of self (i.e. ``body_html`` on\n``mail.template``). res_ids are record IDs linked to ``model`` field\non self.\n\n:param field: a field name existing on self;\n:param list res_ids: list of ids of records (all belonging to same model\n  defined by ``self.render_model``)\n:param string engine: inline_template, qweb, or qweb_view;\n\n:param boolean compute_lang: compute language to render on translated\n  version of the template instead of default (probably english) one.\n  Language will be computed based on ``self.lang``;\n:param dict res_ids_lang: record id to lang, e.g. already rendered\n  using another way;\n:param string set_lang: force language for rendering. It should be a\n  valid lang code matching an activate res.lang. Checked only if\n  ``compute_lang`` is False;\n\n:param dict add_context: additional context to give to renderer;\n:param dict options: options for rendering. Use in this method and also\n  propagated to rendering sub-methods. Base values come from the field\n  (coming from ``render_options`` parameter) and are updated by this\n  optional dictionary. May contain notably\n\n    boolean post_process: perform a post processing on rendered result\n    (notably html links management). See``_render_template_postprocess``;\n    boolean preserve_comments: if set, comments are preserved. Default\n    behavior is to remove them. It is used notably for browser-specific\n    code implemented like comments;\n\n:return: {res_id: string of rendered template based on record}\n:rtype: dict",
+      "size_in_lines": 79,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_shorten_links",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "html",
+     "link_tracker_vals",
+     "blacklist",
+     "base_url"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Shorten links in an html content. It uses the '/r' short URL routing\nintroduced in this module. Using the standard the system regex local links are\nfound and replaced by global URLs (not including mailto, tel, sms).\n\nTDE FIXME: could be great to have a record to enable website-based URLs\n\n:param link_tracker_vals: values given to the created link.tracker, containing\n  for example: campaign_id, medium_id, source_id, and any other relevant fields\n  like mass_mailing_id in mass_mailing;\n:param list blacklist: list of (local) URLs to not shorten (e.g.\n  '/unsubscribe_from_list')\n:param str base_url: either given, either based on config parameter\n\n:return: updated html",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_shorten_links_text",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "content",
+     "link_tracker_vals",
+     "blacklist",
+     "base_url"
+    ],
+    "definitions": [
+     {
+      "package": "link_tracker",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Shorten links in a string content. Works like ``_shorten_links`` but\ntargeting string content, not html.\n\n:return: updated content",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_access_right_dynamic_template",
+    "package": "mail",
+    "kind": "AccessError",
+    "message": "Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders"
+   },
+   {
+    "operation": "_render_template_qweb",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Failed to render QWeb template for %(template_label)s\nTarget Model: %(model_name)s\nLanguage context: %(lang_context)s\nError: %(error_details)s\n\nTemplate Source Snippet:\n%(template_src)s"
+   },
+   {
+    "operation": "_render_template_qweb",
+    "package": "mail",
+    "kind": "AccessError",
+    "message": "Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders"
+   },
+   {
+    "operation": "_render_template_qweb_view",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Failed to render template: %(view_ref)s"
+   },
+   {
+    "operation": "_render_template_inline_template",
+    "package": "mail",
+    "kind": "AccessError",
+    "message": "Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders"
+   },
+   {
+    "operation": "_render_template_inline_template",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Failed to render inline_template template: %(template_txt)s\nError details: %(error)s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

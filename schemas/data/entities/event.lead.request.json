@@ -1,0 +1,142 @@
+{
+ "catalog": {
+  "name": "entity:event.lead.request",
+  "description": "Complete definition of entity Event Lead Request (event.lead.request).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.lead.request",
+  "storage_name": "event_lead_request",
+  "full_name": "Event Lead Request",
+  "kind": "persistent",
+  "description": "Event Lead Request",
+  "defined_by_package": "event_crm",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id asc",
+  "display_name_field": "event_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": false,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_REGISTRATIONS_BATCH_SIZE": 200
+  },
+  "fields": [
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "required": true,
+    "string": "Event",
+    "ondelete": "cascade",
+    "defined_in_package": "event_crm",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "event_lead_rule_ids",
+    "type": "Many2many",
+    "comodel": "event.lead.rule",
+    "string": "Lead Rules",
+    "defined_in_package": "event_crm",
+    "full_name": "Lead Rules",
+    "target_entity": "event.lead.rule"
+   },
+   {
+    "name": "processed_registration_id",
+    "type": "Integer",
+    "string": "Processed Registration",
+    "help": "The ID of the last processed event.registration, used to know where to resume.",
+    "defined_in_package": "event_crm",
+    "full_name": "Processed Registration"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_uniq_event",
+    "kind": "Constraint",
+    "definition": "unique(event_id)",
+    "message": "You can only have one generation request per event at a time.",
+    "defined_in_package": "event_crm"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_cron_generate_leads",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "job_limit",
+     "registrations_batch_size"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "See class docstring for details.\n\n:param job_limit: The maximum amount of 'event.lead.request' to process\n  Defaults to 100.\n:param registrations_batch_size: The amount of attendees processed at once.\n  Defaults to event.lead.request._REGISTRATIONS_BATCH_SIZE ",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event_crm.access_event_lead_request_system",
+    "package": "event_crm",
+    "name": "event.lead.request.system",
+    "entity": "event.lead.request",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "event_crm.ir_cron_generate_leads",
+    "package": "event_crm",
+    "name": "Event CRM: Generate Leads based on Rules",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": "True",
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "event.lead.request",
+    "operation": "_cron_generate_leads",
+    "operation_call": "model._cron_generate_leads()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

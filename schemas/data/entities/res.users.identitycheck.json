@@ -1,0 +1,326 @@
+{
+ "catalog": {
+  "name": "entity:res.users.identitycheck",
+  "description": "Complete definition of entity Password Check Wizard (res.users.identitycheck).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "res.users.identitycheck",
+  "storage_name": "res_users_identitycheck",
+  "full_name": "Password Check Wizard",
+  "kind": "transient",
+  "description": "Password Check Wizard",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "auth_passkey"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "request",
+    "type": "Char",
+    "readonly": true,
+    "groups": {
+     "expression": "fields.NO_ACCESS"
+    },
+    "defined_in_package": "base",
+    "string": "Request",
+    "full_name": "Request"
+   },
+   {
+    "name": "auth_method",
+    "type": "Selection",
+    "selection": [
+     [
+      "password",
+      "Password"
+     ],
+     [
+      "webauthn",
+      "Passkey"
+     ]
+    ],
+    "default": {
+     "dynamic": "lambda self: self._get_default_auth_method()"
+    },
+    "defined_in_package": "base",
+    "selection_added_by": [
+     "auth_passkey"
+    ],
+    "extended_in_packages": [
+     "auth_passkey"
+    ],
+    "string": "Auth Method",
+    "full_name": "Auth Method"
+   },
+   {
+    "name": "password",
+    "type": "Char",
+    "store": false,
+    "defined_in_package": "base",
+    "string": "Password",
+    "full_name": "Password"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_auth_method",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "auth_passkey",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_identity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Incorrect Password, try again or click on Forgot Password to reset your password.",
+        "line": 1428
+       }
+      ]
+     },
+     {
+      "package": "auth_passkey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Incorrect Passkey. Please provide a valid passkey or use a different authentication method.",
+        "line": 26
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "run_check",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_use_password",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "auth_passkey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_identity",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Incorrect Password, try again or click on Forgot Password to reset your password."
+   },
+   {
+    "operation": "_check_identity",
+    "package": "auth_passkey",
+    "kind": "UserError",
+    "message": "Incorrect Passkey. Please provide a valid passkey or use a different authentication method."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_res_users_identitycheck_employee",
+    "package": "base",
+    "name": "id check employees",
+    "entity": "res.users.identitycheck",
+    "group": "group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "base.access_res_users_identitycheck_portal",
+    "package": "base",
+    "name": "id check portal",
+    "entity": "res.users.identitycheck",
+    "group": "group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "base.res_users_identity_check",
+    "package": "base",
+    "name": "users can only access their own id check",
+    "entity": "res.users.identitycheck",
+    "domain": "[('create_uid', '=', user.id)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "auth_passkey.res_users_identitycheck_view_form_passkey",
+    "package": "auth_passkey",
+    "name": null,
+    "view_type": "xpath",
+    "inherits_view": "base.res_users_identitycheck_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "base.res_users_identitycheck_view_form",
+    "package": "base",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Password Confirmation"
+     },
+     "fields": [
+      {
+       "name": "password",
+       "required": "auth_method == 'password'",
+       "placeholder": "Enter your password"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "run_check",
+       "string": "Confirm Password",
+       "type": "object",
+       "invisible": "auth_method != 'password'",
+       "class": "btn btn-primary",
+       "context": "{'password': password}",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "z"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

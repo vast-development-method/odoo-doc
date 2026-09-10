@@ -1,0 +1,169 @@
+{
+ "catalog": {
+  "name": "entity:l10n_ar.earnings.scale.line",
+  "description": "Complete definition of entity l10n_ar.earnings.scale.line (l10n_ar.earnings.scale.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_ar.earnings.scale.line",
+  "storage_name": "l10n_ar_earnings_scale_line",
+  "full_name": "l10n_ar.earnings.scale.line",
+  "kind": "persistent",
+  "description": "l10n_ar.earnings.scale.line",
+  "defined_by_package": "l10n_ar_withholding",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "to_amount",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "scale_id",
+    "type": "Many2one",
+    "comodel": "l10n_ar.earnings.scale",
+    "required": true,
+    "ondelete": "cascade",
+    "help": "Calculation of the withholding amount: From the taxable amount (tax base + tax bases applied this month to same tax and partner - non-taxable minimum) subtract the immediately previous amount of the column 'S/ Exceeding $' to detect which row to work with and apply the percentage of said row to the result of the subtraction. Then add to this amount the amount of the '$' column.",
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Scale",
+    "full_name": "Scale",
+    "target_entity": "l10n_ar.earnings.scale"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "default": {
+     "dynamic": "lambda self: self.env.ref('base.ARS')"
+    },
+    "store": false,
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "from_amount",
+    "type": "Monetary",
+    "string": "From $",
+    "currency_field": "currency_id",
+    "compute": "_compute_from_amount",
+    "defined_in_package": "l10n_ar_withholding",
+    "full_name": "From $"
+   },
+   {
+    "name": "to_amount",
+    "type": "Monetary",
+    "string": "To $",
+    "currency_field": "currency_id",
+    "help": "The taxable amount (tax base + tax bases applied this month to same tax and partner - non-taxable minimum) must be between the amount in the 'S/ Exced' column. of $' and the amount of this column.",
+    "defined_in_package": "l10n_ar_withholding",
+    "full_name": "To $"
+   },
+   {
+    "name": "fixed_amount",
+    "type": "Monetary",
+    "string": "$",
+    "currency_field": "currency_id",
+    "help": "To obtain the withholding amount first from the taxable amount (tax base + tax bases applied this month to same tax and partner - non-taxable minimum) subtract the immediately previous amount of 'S/ Exced. of $' column to detect which row to work with and apply the percentage of said row to the result of the subtraction. Then add the amount of this column to the result of applying the percentage.",
+    "defined_in_package": "l10n_ar_withholding",
+    "full_name": "$"
+   },
+   {
+    "name": "percentage",
+    "type": "Monetary",
+    "string": "Add %",
+    "currency_field": "currency_id",
+    "help": "Percentage to apply to the result of the subtraction between the taxable amount (tax base + tax basis of the previous month - non-taxable minimum) and the immediately previous amount of 'S/ Exced. from $' column.",
+    "defined_in_package": "l10n_ar_withholding",
+    "full_name": "Add %"
+   },
+   {
+    "name": "excess_amount",
+    "type": "Monetary",
+    "string": "S/ Exceeding $",
+    "currency_field": "currency_id",
+    "help": "From the taxable amount (tax base + tax bases applied this month to same tax and partner - non-taxable minimum) subtract the immediately previous amount of this column to detect which row to work with and apply the percentage of said row to the result of the subtraction.",
+    "defined_in_package": "l10n_ar_withholding",
+    "full_name": "S/ Exceeding $"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_from_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "to_amount",
+         "scale_id.line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_ar_withholding.access_l10n_ar_earnings_scale_line_manager",
+    "package": "l10n_ar_withholding",
+    "name": "access_l10n_ar_earnings_scale_line_manager",
+    "entity": "l10n_ar.earnings.scale.line",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "l10n_ar_withholding.access_l10n_ar_earnings_scale_line_all",
+    "package": "l10n_ar_withholding",
+    "name": "access_l10n_ar_earnings_scale_line_all",
+    "entity": "l10n_ar.earnings.scale.line",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

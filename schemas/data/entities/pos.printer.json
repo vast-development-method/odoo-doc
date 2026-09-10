@@ -1,0 +1,409 @@
+{
+ "catalog": {
+  "name": "entity:pos.printer",
+  "description": "Complete definition of entity Point of Sale Printer (pos.printer).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "pos.printer",
+  "storage_name": "pos_printer",
+  "full_name": "Point of Sale Printer",
+  "kind": "persistent",
+  "description": "Point of Sale Printer",
+  "defined_by_package": "point_of_sale",
+  "extended_by_packages": [],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Printer Name",
+    "required": true,
+    "default": "Printer",
+    "help": "An internal identification of the printer",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Printer Name"
+   },
+   {
+    "name": "printer_type",
+    "type": "Selection",
+    "string": "Printer Type",
+    "default": "iot",
+    "selection": [
+     [
+      "iot",
+      "Use a printer connected to the IoT Box"
+     ],
+     [
+      "epson_epos",
+      "Use an Epson printer"
+     ]
+    ],
+    "defined_in_package": "point_of_sale",
+    "full_name": "Printer Type"
+   },
+   {
+    "name": "proxy_ip",
+    "type": "Char",
+    "string": "Proxy IP Address",
+    "help": "The IP Address or hostname of the Printer's hardware proxy",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Proxy internet protocol Address"
+   },
+   {
+    "name": "product_categories_ids",
+    "type": "Many2many",
+    "comodel": "pos.category",
+    "relation": "printer_category_rel",
+    "column1": "printer_id",
+    "column2": "category_id",
+    "string": "Printed Product Categories",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Printed Product Categories",
+    "target_entity": "pos.category"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "point_of_sale",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "pos_config_ids",
+    "type": "Many2many",
+    "comodel": "pos.config",
+    "relation": "pos_config_printer_rel",
+    "column1": "printer_id",
+    "column2": "config_id",
+    "defined_in_package": "point_of_sale",
+    "string": "Point of sale Config",
+    "full_name": "Point of sale Config",
+    "target_entity": "pos.config"
+   },
+   {
+    "name": "epson_printer_ip",
+    "type": "Char",
+    "string": "Epson Printer IP Address",
+    "help": "Local IP address of an Epson receipt printer, or its serial number if the 'Automatic Certificate Update' option is enabled in the printer settings.",
+    "default": "0.0.0.0",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Epson Printer internet protocol Address"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "use_local_network_access",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constrains_epson_printer_ip",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "epson_printer_ip"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Epson Printer IP Address cannot be empty.",
+        "line": 75
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_epson_printer_ip",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "epson_printer_ip"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constrains_epson_printer_ip",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "Epson Printer IP Address cannot be empty."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_pos_printer_manager",
+    "package": "point_of_sale",
+    "name": "pos.printer.manager",
+    "entity": "pos.printer",
+    "group": "point_of_sale.group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "point_of_sale.access_pos_printer",
+    "package": "point_of_sale",
+    "name": "pos.printer.user",
+    "entity": "pos.printer",
+    "group": "point_of_sale.group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "point_of_sale.view_pos_printer_form",
+    "package": "point_of_sale",
+    "name": "Preparation Printer",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "POS Printer"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "printer_type",
+       "widget": "radio"
+      },
+      {
+       "name": "epson_printer_ip",
+       "invisible": "printer_type != 'epson_epos'"
+      },
+      {
+       "name": "proxy_ip",
+       "invisible": "printer_type != 'iot'"
+      },
+      {
+       "name": "product_categories_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_printer",
+    "package": "point_of_sale",
+    "name": "Preparation Printers",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Preparation Printers"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "product_categories_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "proxy_ip",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "point_of_sale.action_pos_printer_form",
+    "package": "point_of_sale",
+    "name": "Preparation Printers",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n            Add a new preparation printer\n            </p><p>\n            Preparation printers are typically used by restaurants and bars to print the\n            orders at the kitchen/bar when the waiter updates an order.\n            </p><p>\n            Each printer can be configured to print products from a specific category.\n            The printer will then only print updates for products belonging to one of\n            its linked categories.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "pos.printer"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

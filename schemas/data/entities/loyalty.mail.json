@@ -1,0 +1,262 @@
+{
+ "catalog": {
+  "name": "entity:loyalty.mail",
+  "description": "Complete definition of entity Loyalty Communication (loyalty.mail).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "loyalty.mail",
+  "storage_name": "loyalty_mail",
+  "full_name": "Loyalty Communication",
+  "kind": "persistent",
+  "description": "Loyalty Communication",
+  "defined_by_package": "loyalty",
+  "extended_by_packages": [
+   "pos_loyalty"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "loyalty",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "program_id",
+    "type": "Many2one",
+    "comodel": "loyalty.program",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "loyalty",
+    "string": "Program",
+    "full_name": "Program",
+    "target_entity": "loyalty.program"
+   },
+   {
+    "name": "trigger",
+    "type": "Selection",
+    "string": "When",
+    "selection": [
+     [
+      "create",
+      "At Creation"
+     ],
+     [
+      "points_reach",
+      "When Reaching"
+     ]
+    ],
+    "required": true,
+    "defined_in_package": "loyalty",
+    "full_name": "When"
+   },
+   {
+    "name": "points",
+    "type": "Float",
+    "defined_in_package": "loyalty",
+    "string": "Points",
+    "full_name": "Points"
+   },
+   {
+    "name": "mail_template_id",
+    "type": "Many2one",
+    "string": "Email Template",
+    "comodel": "mail.template",
+    "ondelete": "cascade",
+    "domain": [
+     [
+      "model",
+      "=",
+      "loyalty.card"
+     ]
+    ],
+    "required": true,
+    "defined_in_package": "loyalty",
+    "full_name": "Email Template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "pos_report_print_id",
+    "type": "Many2one",
+    "comodel": "ir.actions.report",
+    "string": "Print Report",
+    "domain": [
+     [
+      "model",
+      "=",
+      "loyalty.card"
+     ]
+    ],
+    "help": "The report action to be executed when creating a coupon/gift card/loyalty card in the PoS.",
+    "defined_in_package": "pos_loyalty",
+    "full_name": "Print Report",
+    "target_entity": "ir.actions.report"
+   }
+  ],
+  "constraints": [],
+  "operations": [],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "loyalty.access_loyalty_mail",
+    "package": "loyalty",
+    "name": "access_loyalty_mail",
+    "entity": "loyalty.mail",
+    "group": "base.group_user",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "pos_loyalty.access_communication_pos_user",
+    "package": "pos_loyalty",
+    "name": "Loyalty Communication (PoS User)",
+    "entity": "loyalty.mail",
+    "group": "point_of_sale.group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "pos_loyalty.access_communication_pos_manager",
+    "package": "pos_loyalty",
+    "name": "Loyalty Communication (PoS Manager)",
+    "entity": "loyalty.mail",
+    "group": "point_of_sale.group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale_loyalty.access_communication_salesman",
+    "package": "sale_loyalty",
+    "name": "Loyalty Communication (Salesperson)",
+    "entity": "loyalty.mail",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_loyalty.access_communication_manager",
+    "package": "sale_loyalty",
+    "name": "Loyalty Communication (Manager)",
+    "entity": "loyalty.mail",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "loyalty.loyalty_mail_view_tree",
+    "package": "loyalty",
+    "name": "loyalty.mail.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "bottom"
+     },
+     "fields": [
+      {
+       "name": "trigger"
+      },
+      {
+       "name": "points",
+       "invisible": "trigger != 'points_reach'",
+       "required": "trigger == 'points_reach'",
+       "string": "Limit"
+      },
+      {
+       "name": "mail_template_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "pos_loyalty.loyalty_mail_view_tree_inherit_pos_loyalty",
+    "package": "pos_loyalty",
+    "name": "loyalty.mail.view.list.inherit.pos.loyalty",
+    "view_type": "field",
+    "inherits_view": "loyalty.loyalty_mail_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "mail_template_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mail_template_id",
+       "position": "after"
+      },
+      {
+       "name": "pos_report_print_id",
+       "invisible": "trigger != 'create'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,418 @@
+{
+ "catalog": {
+  "name": "entity:crm.stage",
+  "description": "Complete definition of entity customer relationship management Stages (crm.stage).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "crm.stage",
+  "storage_name": "crm_stage",
+  "full_name": "customer relationship management Stages",
+  "kind": "persistent",
+  "description": "CRM Stages",
+  "defined_by_package": "crm",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, name, id",
+  "display_name_field": "name",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Stage Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "crm",
+    "full_name": "Stage Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 1,
+    "help": "Used to order stages. Lower is better.",
+    "defined_in_package": "crm",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "is_won",
+    "type": "Boolean",
+    "string": "Is Won Stage?",
+    "defined_in_package": "crm",
+    "full_name": "Is Won Stage?"
+   },
+   {
+    "name": "rotting_threshold_days",
+    "type": "Integer",
+    "string": "Days to rot",
+    "default": 0,
+    "help": "Highlight opportunities that haven't been updated for this many days.         Set to 0 to disable. Changing this parameter will not affect the rotting status/date of resources last updated before this change.",
+    "defined_in_package": "crm",
+    "full_name": "Days to rot"
+   },
+   {
+    "name": "requirements",
+    "type": "Text",
+    "string": "Requirements",
+    "help": "Enter here the internal requirements for this stage (ex: Offer sent to customer). It will appear as a tooltip over the stage's name.",
+    "defined_in_package": "crm",
+    "full_name": "Requirements"
+   },
+   {
+    "name": "team_ids",
+    "type": "Many2many",
+    "comodel": "crm.team",
+    "string": "Sales Teams",
+    "ondelete": "restrict",
+    "defined_in_package": "crm",
+    "full_name": "Sales Teams",
+    "target_entity": "crm.team"
+   },
+   {
+    "name": "fold",
+    "type": "Boolean",
+    "string": "Folded in Pipeline",
+    "help": "This stage is folded in the kanban view when there are no records in that stage to display.",
+    "defined_in_package": "crm",
+    "full_name": "Folded in Pipeline"
+   },
+   {
+    "name": "team_count",
+    "type": "Integer",
+    "string": "team_count",
+    "compute": "_compute_team_count",
+    "defined_in_package": "crm",
+    "full_name": "team_count"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "export_string_translation": false,
+    "defined_in_package": "crm",
+    "full_name": "Color"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_team_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "team_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_is_won",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "is_won"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Since leads that are in a won stage must have their\nprobability = 100%, this override ensures that setting a stage as won\nwill set all the leads in that stage to probability = 100%.\nInversely, if a won stage is not marked as won anymore, the lead\nprobability should be recomputed based on automated probability.\nNote: If a user sets a stage as won and changes his mind right after,\nthe manual probability will be lost in the process.",
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "crm.access_crm_stage",
+    "package": "crm",
+    "name": "crm.stage",
+    "entity": "crm.stage",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "crm.access_crm_stage_manager",
+    "package": "crm",
+    "name": "crm.stage",
+    "entity": "crm.stage",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_crm_partner_assign.partner_access_crm_stage",
+    "package": "website_crm_partner_assign",
+    "name": "crm.stage",
+    "entity": "crm.stage",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "crm.crm_lead_stage_search",
+    "package": "crm",
+    "name": "Stage - Search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Stage Search"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "sequence"
+      },
+      {
+       "name": "is_won"
+      },
+      {
+       "name": "team_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "crm.crm_stage_tree",
+    "package": "crm",
+    "name": "crm.stage.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Stages",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name",
+       "readonly": "1"
+      },
+      {
+       "name": "is_won"
+      },
+      {
+       "name": "team_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "rotting_threshold_days",
+       "optional": "hide"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "crm.crm_stage_form",
+    "package": "crm",
+    "name": "crm.stage.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Stage"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. Negotiation"
+      },
+      {
+       "name": "fold"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "team_ids",
+       "widget": "many2many_tags",
+       "invisible": "team_count <= 1",
+       "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}",
+       "options": "{\"no_open\": True, \"no_create\": True}",
+       "placeholder": "Shared with all teams"
+      },
+      {
+       "name": "is_won"
+      },
+      {
+       "name": "rotting_threshold_days",
+       "invisible": "is_won"
+      },
+      {
+       "name": "team_count",
+       "invisible": "1"
+      },
+      {
+       "name": "requirements",
+       "nolabel": "1",
+       "placeholder": "Give your team the requirements to move an opportunity to this stage."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "crm.crm_stage_action",
+    "package": "crm",
+    "name": "Stages",
+    "view_mode": null,
+    "view_id": "crm.crm_stage_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Set a new stage in your opportunity pipeline\n          </p><p>\n            Stages allow salespersons to easily track how a specific opportunity\n            is positioned in the sales cycle.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "crm.stage"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "crm.menu_crm_lead_stage_act",
+    "package": "crm",
+    "name": "Stages",
+    "parent_id": "menu_crm_config_lead",
+    "action": "crm.crm_stage_action",
+    "sequence": "0",
+    "groups_id": "base.group_no_one",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

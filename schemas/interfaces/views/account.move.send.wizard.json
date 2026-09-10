@@ -1,0 +1,149 @@
+{
+ "catalog": {
+  "name": "views:account.move.send.wizard",
+  "description": "View declarations for entity account.move.send.wizard.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account.account_move_send_wizard_form",
+   "package": "account",
+   "name": "account.move.send.wizard.form",
+   "entity": "account.move.send.wizard",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "class": "o_account_move_send_wizard"
+    },
+    "fields": [
+     {
+      "name": "move_id",
+      "invisible": "1"
+     },
+     {
+      "name": "attachments_not_supported",
+      "invisible": "1"
+     },
+     {
+      "name": "alerts",
+      "widget": "actionable_errors"
+     },
+     {
+      "name": "extra_edi_checkboxes",
+      "widget": "account_json_checkboxes",
+      "invisible": "not extra_edi_checkboxes"
+     },
+     {
+      "name": "sending_method_checkboxes",
+      "widget": "account_json_checkboxes"
+     },
+     {
+      "name": "pdf_report_id",
+      "invisible": "1"
+     },
+     {
+      "name": "pdf_report_id",
+      "options": "{'no_create': True, 'no_edit': True}"
+     },
+     {
+      "name": "model",
+      "invisible": "1"
+     },
+     {
+      "name": "res_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "render_model",
+      "invisible": "1"
+     },
+     {
+      "name": "pdf_report_id",
+      "invisible": "not display_pdf_report_id",
+      "options": "{'no_create': True, 'no_edit': True}"
+     },
+     {
+      "name": "mail_partner_ids",
+      "widget": "many2many_tags_email",
+      "required": "'email' in sending_methods",
+      "context": "{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}",
+      "options": "{'no_quick_create': True}",
+      "placeholder": "Add contacts to notify..."
+     },
+     {
+      "name": "subject",
+      "required": "'email' in sending_methods",
+      "placeholder": "Subject..."
+     },
+     {
+      "name": "body",
+      "widget": "html_mail"
+     },
+     {
+      "name": "mail_attachments_widget",
+      "widget": "mail_attachments",
+      "invisible": "not display_attachments_widget",
+      "string": "Attach a file",
+      "nolabel": "1"
+     },
+     {
+      "name": "mail_attachments_widget",
+      "widget": "mail_attachments_selector",
+      "invisible": "not display_attachments_widget"
+     },
+     {
+      "name": "template_id",
+      "widget": "mail_composer_template_selector"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_send_and_print",
+      "string": "Send",
+      "type": "object",
+      "invisible": "not sending_methods",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "action_send_and_print",
+      "string": "Generate",
+      "type": "object",
+      "invisible": "sending_methods",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Discard",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "actionable_errors": 1,
+     "account_json_checkboxes": 2,
+     "many2many_tags_email": 1,
+     "html_mail": 1,
+     "mail_attachments": 1,
+     "mail_attachments_selector": 1,
+     "mail_composer_template_selector": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form class=\"o_account_move_send_wizard\">\n                <field name=\"move_id\" invisible=\"1\"/>\n                <field name=\"attachments_not_supported\" invisible=\"1\"/>\n\n                \n                <div class=\"m-0\" id=\"alerts\" invisible=\"not alerts\">\n                    <field name=\"alerts\" class=\"o_field_html\" widget=\"actionable_errors\"/>\n                </div>\n\n                \n                <div class=\"m-0\" id=\"extra_edis\">\n                    <field name=\"extra_edi_checkboxes\" widget=\"account_json_checkboxes\" invisible=\"not extra_edi_checkboxes\"/>\n                    <field name=\"sending_method_checkboxes\" widget=\"account_json_checkboxes\"/>\n                </div>\n\n                \n                <field name=\"pdf_report_id\" invisible=\"1\"/>\n                <group invisible=\"not display_pdf_report_id or 'email' in sending_methods\">\n                    <field name=\"pdf_report_id\" options=\"{'no_create': True, 'no_edit': True}\"/>\n                </group>\n\n                \n                <div invisible=\"'email' not in sending_methods\">\n                    <field name=\"model\" invisible=\"1\"/>\n                    <field name=\"res_ids\" invisible=\"1\"/>\n                    <field name=\"render_model\" invisible=\"1\"/>\n\n                    <group>\n                        <field name=\"pdf_report_id\" options=\"{'no_create': True, 'no_edit': True}\" invisible=\"not display_pdf_report_id\"/>\n\n                        <label for=\"mail_partner_ids\" string=\"To\"/>\n                        <div>\n                            <field name=\"mail_partner_ids\" widget=\"many2many_tags_email\" placeholder=\"Add contacts to notify...\" options=\"{'no_quick_create': True}\" required=\"'email' in sending_methods\" context=\"{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}\"/>\n                        </div>\n                        <field name=\"subject\" placeholder=\"Subject...\" required=\"'email' in sending_methods\"/>\n                    </group>\n                    <field name=\"body\" class=\"oe-bordered-editor\" widget=\"html_mail\"/>\n                </div>\n\n                <field name=\"mail_attachments_widget\" widget=\"mail_attachments\" string=\"Attach a file\" nolabel=\"1\" colspan=\"2\" invisible=\"not display_attachments_widget\"/>\n\n                <footer>\n                    <button string=\"Send\" data-hotkey=\"q\" name=\"action_send_and_print\" type=\"object\" class=\"btn-primary\" invisible=\"not sending_methods\"/>\n                    <button string=\"Generate\" data-hotkey=\"q\" name=\"action_send_and_print\" type=\"object\" class=\"btn-primary\" invisible=\"sending_methods\"/>\n                    <button string=\"Discard\" data-hotkey=\"x\" special=\"cancel\" class=\"btn-secondary\"/>\n\n                    <field name=\"mail_attachments_widget\" widget=\"mail_attachments_selector\" invisible=\"not display_attachments_widget\"/>\n                    <field name=\"template_id\" widget=\"mail_composer_template_selector\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  }
+ ]
+}

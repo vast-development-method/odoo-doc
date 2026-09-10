@@ -1,0 +1,2418 @@
+{
+ "catalog": {
+  "name": "entity:forum.post",
+  "description": "Complete definition of entity Forum Post (forum.post).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "forum.post",
+  "storage_name": "forum_post",
+  "full_name": "Forum Post",
+  "kind": "persistent",
+  "description": "Forum Post",
+  "defined_by_package": "website_forum",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread",
+   "website.seo.metadata",
+   "website.searchable.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "is_correct DESC, vote_count DESC, last_activity_date DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_CUSTOMER_HEADERS_LIMIT_COUNT": 0
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Title",
+    "defined_in_package": "website_forum",
+    "full_name": "Title"
+   },
+   {
+    "name": "forum_id",
+    "type": "Many2one",
+    "comodel": "forum.forum",
+    "string": "Forum",
+    "required": true,
+    "index": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Forum",
+    "target_entity": "forum.forum"
+   },
+   {
+    "name": "content",
+    "type": "Html",
+    "string": "Content",
+    "strip_style": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Content"
+   },
+   {
+    "name": "plain_content",
+    "type": "Text",
+    "string": "Plain Content",
+    "compute": "_compute_plain_content",
+    "store": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Plain Content"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "forum.tag",
+    "relation": "forum_tag_rel",
+    "column1": "forum_post_id",
+    "column2": "forum_tag_id",
+    "string": "Tags",
+    "defined_in_package": "website_forum",
+    "full_name": "Tags",
+    "target_entity": "forum.tag"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "active",
+      "Active"
+     ],
+     [
+      "pending",
+      "Waiting Validation"
+     ],
+     [
+      "close",
+      "Closed"
+     ],
+     [
+      "offensive",
+      "Offensive"
+     ],
+     [
+      "flagged",
+      "Flagged"
+     ]
+    ],
+    "string": "Status",
+    "default": "active",
+    "defined_in_package": "website_forum",
+    "full_name": "Status"
+   },
+   {
+    "name": "views",
+    "type": "Integer",
+    "string": "Views",
+    "default": 0,
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Views"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Active"
+   },
+   {
+    "name": "website_message_ids",
+    "type": "One2many",
+    "domain": {
+     "dynamic": "lambda self: [('model', '=', self._name), ('message_type', 'in', ['email', 'comment', 'email_outgoing'])]"
+    },
+    "defined_in_package": "website_forum",
+    "string": "Website Message",
+    "full_name": "Website Message"
+   },
+   {
+    "name": "website_url",
+    "type": "Char",
+    "string": "Website URL",
+    "compute": "_compute_website_url",
+    "defined_in_package": "website_forum",
+    "full_name": "Website uniform resource locator"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "related": "forum_id.website_id",
+    "readonly": true,
+    "defined_in_package": "website_forum",
+    "string": "Website",
+    "full_name": "Website"
+   },
+   {
+    "name": "create_date",
+    "type": "Datetime",
+    "string": "Asked on",
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Asked on"
+   },
+   {
+    "name": "create_uid",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Created by",
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Created by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "write_date",
+    "type": "Datetime",
+    "string": "Updated on",
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Updated on"
+   },
+   {
+    "name": "last_activity_date",
+    "type": "Datetime",
+    "string": "Last activity on",
+    "readonly": true,
+    "required": true,
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "help": "Field to keep track of a post's last activity. Updated whenever it is replied to, or when a comment is added on the post or one of its replies.",
+    "defined_in_package": "website_forum",
+    "full_name": "Last activity on"
+   },
+   {
+    "name": "write_uid",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Updated by",
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Updated by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "relevancy",
+    "type": "Float",
+    "string": "Relevance",
+    "compute": "_compute_relevancy",
+    "store": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Relevance"
+   },
+   {
+    "name": "vote_ids",
+    "type": "One2many",
+    "comodel": "forum.post.vote",
+    "inverse_name": "post_id",
+    "string": "Votes",
+    "defined_in_package": "website_forum",
+    "full_name": "Votes",
+    "target_entity": "forum.post.vote"
+   },
+   {
+    "name": "user_vote",
+    "type": "Integer",
+    "string": "My Vote",
+    "compute": "_compute_user_vote",
+    "defined_in_package": "website_forum",
+    "full_name": "My Vote"
+   },
+   {
+    "name": "vote_count",
+    "type": "Integer",
+    "string": "Total Votes",
+    "compute": "_compute_vote_count",
+    "store": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Total Votes"
+   },
+   {
+    "name": "favourite_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "string": "Favourite",
+    "defined_in_package": "website_forum",
+    "full_name": "Favourite",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "user_favourite",
+    "type": "Boolean",
+    "string": "Is Favourite",
+    "compute": "_compute_user_favourite",
+    "defined_in_package": "website_forum",
+    "full_name": "Is Favourite"
+   },
+   {
+    "name": "favourite_count",
+    "type": "Integer",
+    "string": "Favorite",
+    "compute": "_compute_favorite_count",
+    "store": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Favorite"
+   },
+   {
+    "name": "is_correct",
+    "type": "Boolean",
+    "string": "Correct",
+    "help": "Correct answer or answer accepted",
+    "defined_in_package": "website_forum",
+    "full_name": "Correct"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "comodel": "forum.post",
+    "string": "Question",
+    "ondelete": "cascade",
+    "readonly": true,
+    "index": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Question",
+    "target_entity": "forum.post"
+   },
+   {
+    "name": "self_reply",
+    "type": "Boolean",
+    "string": "Reply to own question",
+    "compute": "_compute_self_reply",
+    "store": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Reply to own question"
+   },
+   {
+    "name": "child_ids",
+    "type": "One2many",
+    "comodel": "forum.post",
+    "inverse_name": "parent_id",
+    "string": "Post Answers",
+    "domain": "[('forum_id', '=', forum_id)]",
+    "defined_in_package": "website_forum",
+    "full_name": "Post Answers",
+    "target_entity": "forum.post"
+   },
+   {
+    "name": "child_count",
+    "type": "Integer",
+    "string": "Answers",
+    "compute": "_compute_child_count",
+    "store": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Answers"
+   },
+   {
+    "name": "uid_has_answered",
+    "type": "Boolean",
+    "string": "Has Answered",
+    "compute": "_compute_uid_has_answered",
+    "defined_in_package": "website_forum",
+    "full_name": "Has Answered"
+   },
+   {
+    "name": "has_validated_answer",
+    "type": "Boolean",
+    "string": "Is answered",
+    "compute": "_compute_has_validated_answer",
+    "store": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Is answered"
+   },
+   {
+    "name": "flag_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Flagged by",
+    "defined_in_package": "website_forum",
+    "full_name": "Flagged by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "moderator_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Reviewed by",
+    "readonly": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Reviewed by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "closed_reason_id",
+    "type": "Many2one",
+    "comodel": "forum.post.reason",
+    "string": "Reason",
+    "copy": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Reason",
+    "target_entity": "forum.post.reason"
+   },
+   {
+    "name": "closed_uid",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Closed by",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Closed by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "closed_date",
+    "type": "Datetime",
+    "string": "Closed on",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Closed on"
+   },
+   {
+    "name": "karma_accept",
+    "type": "Integer",
+    "string": "Convert comment to answer",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Convert comment to answer"
+   },
+   {
+    "name": "karma_edit",
+    "type": "Integer",
+    "string": "Karma to edit",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Karma to edit"
+   },
+   {
+    "name": "karma_close",
+    "type": "Integer",
+    "string": "Karma to close",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Karma to close"
+   },
+   {
+    "name": "karma_unlink",
+    "type": "Integer",
+    "string": "Karma to unlink",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Karma to unlink"
+   },
+   {
+    "name": "karma_comment",
+    "type": "Integer",
+    "string": "Karma to comment",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Karma to comment"
+   },
+   {
+    "name": "karma_comment_convert",
+    "type": "Integer",
+    "string": "Karma to convert comment to answer",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Karma to convert comment to answer"
+   },
+   {
+    "name": "karma_flag",
+    "type": "Integer",
+    "string": "Flag a post as offensive",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Flag a post as offensive"
+   },
+   {
+    "name": "can_ask",
+    "type": "Boolean",
+    "string": "Can Ask",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Ask"
+   },
+   {
+    "name": "can_answer",
+    "type": "Boolean",
+    "string": "Can Answer",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Answer"
+   },
+   {
+    "name": "can_accept",
+    "type": "Boolean",
+    "string": "Can Accept",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Accept"
+   },
+   {
+    "name": "can_edit",
+    "type": "Boolean",
+    "string": "Can Edit",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Edit"
+   },
+   {
+    "name": "can_close",
+    "type": "Boolean",
+    "string": "Can Close",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Close"
+   },
+   {
+    "name": "can_unlink",
+    "type": "Boolean",
+    "string": "Can Unlink",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Unlink"
+   },
+   {
+    "name": "can_upvote",
+    "type": "Boolean",
+    "string": "Can Upvote",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Upvote"
+   },
+   {
+    "name": "can_downvote",
+    "type": "Boolean",
+    "string": "Can Downvote",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Downvote"
+   },
+   {
+    "name": "can_comment",
+    "type": "Boolean",
+    "string": "Can Comment",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Comment"
+   },
+   {
+    "name": "can_comment_convert",
+    "type": "Boolean",
+    "string": "Can Convert to Comment",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Convert to Comment"
+   },
+   {
+    "name": "can_view",
+    "type": "Boolean",
+    "string": "Can View",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "search": "_search_can_view",
+    "defined_in_package": "website_forum",
+    "full_name": "Can View"
+   },
+   {
+    "name": "can_display_biography",
+    "type": "Boolean",
+    "string": "Is the author's biography visible from his post",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Is the author's biography visible from his post"
+   },
+   {
+    "name": "can_post",
+    "type": "Boolean",
+    "string": "Can Automatically be Validated",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Automatically be Validated"
+   },
+   {
+    "name": "can_flag",
+    "type": "Boolean",
+    "string": "Can Flag",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Flag"
+   },
+   {
+    "name": "can_moderate",
+    "type": "Boolean",
+    "string": "Can Moderate",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Moderate"
+   },
+   {
+    "name": "can_use_full_editor",
+    "type": "Boolean",
+    "string": "Can Use Full Editor",
+    "compute": "_compute_post_karma_rights",
+    "compute_sudo": false,
+    "defined_in_package": "website_forum",
+    "full_name": "Can Use Full Editor"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_parent_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot create recursive forum posts.",
+        "line": 168
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_plain_content",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "content"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_relevancy",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "vote_count",
+         "forum_id.relevancy_post_vote",
+         "forum_id.relevancy_time_decay"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_vote",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_vote_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "vote_ids.vote"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_favourite",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_favorite_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "favourite_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_self_reply",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "create_uid",
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_child_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "child_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_uid_has_answered",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_validated_answer",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "child_ids.is_correct"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_post_karma_rights",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_can_view",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_website_meta",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Posting answer on a [Deleted] or [Closed] question is not possible.",
+        "line": 324
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to create a new question.",
+        "line": 327
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to answer a question.",
+        "line": 329
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 58,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to edit a post.",
+        "line": 386
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to delete or reactivate a post.",
+        "line": 371
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to accept or refuse an answer.",
+        "line": 374
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to retag.",
+        "line": 384
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to close or reopen a post.",
+        "line": 363
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to flag a post.",
+        "line": 367
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_access_action",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "access_uid",
+     "force_website"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": "Instead of the classic form view, redirect to the post on the website directly ",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_enough_karma",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to unlink a post.",
+        "line": 423
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_update_content",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "content",
+     "forum_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to post an image or link.",
+        "line": 438
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_notify_state_update",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "reopen",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "close",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "reason_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "validate",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to validate a post.",
+        "line": 532
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_refuse",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to refuse a post.",
+        "line": 551
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_flag",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to flag a post.",
+        "line": 559
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_mark_as_offensive",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reason_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to mark a post as offensive.",
+        "line": 580
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "mark_as_offensive_batch",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "key",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "vote",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "upvote"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "convert_answer_to_comment",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": "Tools to convert an answer (forum.post) to a comment (mail.message).\nThe original post is unlinked and a new comment is posted on the question\nusing the post create_uid as the comment's author. ",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to convert an answer to a comment.",
+        "line": 632
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "convert_comment_to_answer",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "message_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Tool to convert a comment (mail.message) into an answer (forum.post).\nThe original comment is unlinked and a new answer from the comment's author\nis created. Nothing is done if the comment's author already answered the\nquestion. ",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to convert your comment to an answer.",
+        "line": 672
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to convert a comment to an answer.",
+        "line": 674
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink_comment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "message_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to delete a comment.",
+        "line": 715
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_set_viewed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_last_activity",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mail_get_operation_for_mail_message_operation",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message_operation"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_get_recipients_groups",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "model_description",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "message_post",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message_type",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to comment.",
+        "line": 768
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_notify_thread_by_inbox",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "recipients_data",
+     "msg_vals",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_microdata",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": "Generate structured data (microdata) for the post.\n\nReturns:\n    str or None: Microdata in JSON format representing the post, or None\n    if not applicable.",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_structured_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "post_type"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": "Generate structured data (microdata) for an answer or a question.\n\nReturns:\n    dict: microdata.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "go_to_website",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_get_detail",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "website",
+     "order",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 64,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_render_results",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "fetch_fields",
+     "mapping",
+     "icon",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_related_posts",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": "Return at most a list of {limit} posts related to the main post, based on tag\nJaccard similarity. It computes similarity of sets based on ratio of sets\nintersection divided by sets union (and thus varies from 0 to 1, 1 being\nidentical sets).",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_parent_id",
+    "package": "website_forum",
+    "kind": "ValidationError",
+    "message": "You cannot create recursive forum posts."
+   },
+   {
+    "operation": "create",
+    "package": "website_forum",
+    "kind": "UserError",
+    "message": "Posting answer on a [Deleted] or [Closed] question is not possible."
+   },
+   {
+    "operation": "create",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to create a new question."
+   },
+   {
+    "operation": "create",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to answer a question."
+   },
+   {
+    "operation": "write",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to edit a post."
+   },
+   {
+    "operation": "write",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to delete or reactivate a post."
+   },
+   {
+    "operation": "write",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to accept or refuse an answer."
+   },
+   {
+    "operation": "write",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to retag."
+   },
+   {
+    "operation": "write",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to close or reopen a post."
+   },
+   {
+    "operation": "write",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to flag a post."
+   },
+   {
+    "operation": "_unlink_if_enough_karma",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to unlink a post."
+   },
+   {
+    "operation": "_update_content",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to post an image or link."
+   },
+   {
+    "operation": "validate",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to validate a post."
+   },
+   {
+    "operation": "_refuse",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to refuse a post."
+   },
+   {
+    "operation": "_flag",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to flag a post."
+   },
+   {
+    "operation": "_mark_as_offensive",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to mark a post as offensive."
+   },
+   {
+    "operation": "convert_answer_to_comment",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to convert an answer to a comment."
+   },
+   {
+    "operation": "convert_comment_to_answer",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to convert your comment to an answer."
+   },
+   {
+    "operation": "convert_comment_to_answer",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to convert a comment to an answer."
+   },
+   {
+    "operation": "unlink_comment",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to delete a comment."
+   },
+   {
+    "operation": "message_post",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to comment."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "website_forum.access_forum_post_public",
+    "package": "website_forum",
+    "name": "forum.post.public",
+    "entity": "forum.post",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_forum.access_forum_post_portal",
+    "package": "website_forum",
+    "name": "forum.post.portal",
+    "entity": "forum.post",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_forum.access_forum_post_user",
+    "package": "website_forum",
+    "name": "forum.post.user",
+    "entity": "forum.post",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_forum.website_forum_public_post",
+    "package": "website_forum",
+    "name": "Website forum post: Public user can only access to public post",
+    "entity": "forum.post",
+    "domain": "[('forum_id.privacy', '=', 'public')]",
+    "groups": "[(4, ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_forum.website_forum_connected_post",
+    "package": "website_forum",
+    "name": "Website forum post: User can only access to public (or authorized) post",
+    "entity": "forum.post",
+    "domain": "['|', ('forum_id.privacy', 'in', ['public', 'connected']), '&', ('forum_id.privacy', '=', 'private'), ('forum_id.authorized_group_id', 'in', user.all_group_ids.ids)]",
+    "groups": "[(4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_forum.website_forum_private_post",
+    "package": "website_forum",
+    "name": "Website forum post : All access for manager",
+    "entity": "forum.post",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('base.group_erp_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_slides_forum.website_slides_forum_public_post",
+    "package": "website_slides_forum",
+    "name": "Website forum post: User can only access to post linked to forum related to followed courses",
+    "entity": "forum.post",
+    "domain": "[('forum_id.slide_channel_ids.website_published', '=', True), ('forum_id.slide_channel_ids.visibility', '=', 'public')]",
+    "groups": "[(4, ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_slides_forum.website_slides_forum_post_signed_in_user",
+    "package": "website_slides_forum",
+    "name": "Website forum: Signed In user can only access to post linked to forum related to courses",
+    "entity": "forum.post",
+    "domain": "[\n            '&',\n                ('forum_id.slide_channel_ids.website_published', '=', True),\n                '|',\n                    ('forum_id.slide_channel_ids.visibility', 'in', ('public','connected')),\n                    ('forum_id.slide_channel_ids.is_member', '=', True)\n            ]",
+    "groups": "[(4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_slides_forum.website_slides_forum_website_slides_officer_post",
+    "package": "website_slides_forum",
+    "name": "Website forum post: website slides officer can access all post",
+    "entity": "forum.post",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('website_slides.group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "website_forum.forum_post_view_form",
+    "package": "website_forum",
+    "name": "forum.post.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Forum Post"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. When should I plant my tomatoes?"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "forum_id"
+      },
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "parent_id",
+       "invisible": "not parent_id"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "closed_reason_id",
+       "invisible": "not closed_reason_id"
+      },
+      {
+       "name": "closed_uid",
+       "invisible": "not closed_uid"
+      },
+      {
+       "name": "closed_date",
+       "invisible": "not closed_date"
+      },
+      {
+       "name": "create_uid"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "write_uid"
+      },
+      {
+       "name": "write_date"
+      },
+      {
+       "name": "is_correct",
+       "invisible": "not parent_id"
+      },
+      {
+       "name": "views"
+      },
+      {
+       "name": "vote_count"
+      },
+      {
+       "name": "favourite_count"
+      },
+      {
+       "name": "child_count"
+      },
+      {
+       "name": "relevancy"
+      },
+      {
+       "name": "child_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "create_uid",
+       "string": "Answered by"
+      },
+      {
+       "name": "vote_count"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "is_correct"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "go_to_website",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-globe"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": [
+      {
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-globe",
+       "name": "go_to_website"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_forum.forum_post_view_search",
+    "package": "website_forum",
+    "name": "forum.post.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search in Post"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Content",
+       "filter_domain": "['|', ('name', 'ilike', self), ('content', 'ilike', self)]"
+      },
+      {
+       "name": "create_uid"
+      },
+      {
+       "name": "forum_id"
+      },
+      {
+       "name": "tag_ids",
+       "string": "Tag"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "posts",
+       "string": "Posts",
+       "domain": "[('parent_id', '=', False)]"
+      },
+      {
+       "name": "answers",
+       "string": "Answers",
+       "domain": "[('parent_id', '!=', False)]"
+      },
+      {
+       "name": "accepted_answer",
+       "string": "Accepted Answer",
+       "domain": "[('is_correct' , '!=', False), ('parent_id', '!=', False)]"
+      },
+      {
+       "name": "answered_posts",
+       "string": "Answered Posts",
+       "domain": "[('child_count', '!=', 0), ('parent_id', '=', False)]"
+      },
+      {
+       "name": "filter_create_date",
+       "date": "create_date"
+      },
+      {
+       "name": "filter_write_date",
+       "date": "write_date"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "forum",
+       "string": "Forum",
+       "domain": "[]",
+       "context": "{'group_by': 'forum_id'}"
+      },
+      {
+       "name": "author",
+       "string": "Author",
+       "domain": "[]",
+       "context": "{'group_by': 'create_uid'}"
+      },
+      {
+       "name": "post",
+       "string": "Post",
+       "domain": "[]",
+       "context": "{'group_by': 'parent_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_forum.forum_post_view_graph",
+    "package": "website_forum",
+    "name": "forum.post.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Graph of Posts",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "write_date"
+      },
+      {
+       "name": "forum_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "write_date",
+       "interval": "month"
+      },
+      {
+       "name": "forum_id"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_forum.forum_post_view_tree",
+    "package": "website_forum",
+    "name": "forum.post.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "js_class": "website_pages_list",
+      "create": "false",
+      "type": "object",
+      "action": "go_to_website",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "website_url"
+      },
+      {
+       "name": "forum_id",
+       "optional": "show"
+      },
+      {
+       "name": "views",
+       "string": "# Views",
+       "optional": "hide",
+       "sum": "Total Views"
+      },
+      {
+       "name": "child_count",
+       "string": "# Answers",
+       "optional": "hide",
+       "sum": "Total Answers"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "optional": "show",
+       "decoration-danger": "state == 'close'",
+       "decoration-warning": "state not in ('active', 'close')",
+       "decoration-success": "state == 'active'"
+      },
+      {
+       "name": "is_seo_optimized"
+      },
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_forum.forum_post_view_kanban",
+    "package": "website_forum",
+    "name": "Forum Post Pages Kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "js_class": "website_pages_kanban",
+      "create": "false",
+      "action": "go_to_website",
+      "type": "object",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "parent_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "website_id"
+      },
+      {
+       "name": "forum_id"
+      },
+      {
+       "name": "child_count"
+      },
+      {
+       "name": "views"
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "website_slides_forum.forum_post_view_graph_slides",
+    "package": "website_slides_forum",
+    "name": "forum.post.view.graph.slides",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "eLearning Forum Posts",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "forum_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "create_date",
+       "interval": "month"
+      },
+      {
+       "name": "forum_id"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_forum.forum_post_action",
+    "package": "website_forum",
+    "name": "Forum Post Pages",
+    "view_mode": "list,kanban,graph",
+    "view_id": null,
+    "search_view_id": "forum_post_view_search",
+    "domain": null,
+    "context": "{'search_default_posts': 1, 'create_action': 'website_forum.forum_forum_action_add'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n        <p class=\"o_view_nocontent_smiling_face\">\n            Create a new forum post\n        </p>\n    </field>\n",
+    "usage": null,
+    "entity": "forum.post"
+   },
+   {
+    "external_identifier": "website_forum.forum_post_action_favorites",
+    "package": "website_forum",
+    "name": "Users favorite posts",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('forum_id', '=', active_id), ('favourite_count', '>', 0), ('state', 'in', ('active', 'close'))]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "forum.post"
+   },
+   {
+    "external_identifier": "website_forum.forum_post_action_forum_main",
+    "package": "website_forum",
+    "name": "Posts",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('forum_id', '=', active_id), ('parent_id', '=', False), ('state', 'in', ('active', 'close'))]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "forum.post"
+   },
+   {
+    "external_identifier": "website_slides_forum.forum_post_action_channel",
+    "package": "website_slides_forum",
+    "name": "Forum Posts",
+    "view_mode": "list,graph,pivot,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('forum_id.slide_channel_ids', '!=', 'False')]",
+    "context": "{'search_default_questions': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Forum Post yet!\n            </p>\n            <p>Come back later to monitor and moderate what is posted on your Forums.</p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "forum.post"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

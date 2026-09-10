@@ -1,0 +1,235 @@
+{
+ "catalog": {
+  "name": "entity:ir.binary",
+  "description": "Complete definition of entity File streaming helper model for controllers (ir.binary).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.binary",
+  "storage_name": "ir_binary",
+  "full_name": "File streaming helper model for controllers",
+  "kind": "abstract",
+  "description": "File streaming helper model for controllers",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "website"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_find_record",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "xmlid",
+     "res_model",
+     "res_id",
+     "access_token",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Find and return a record either using an xmlid either a model+id\npair. This method is an helper for the ``/web/content`` and\n``/web/image`` controllers and should not be used in other\ncontextes.\n\n:param Optional[str] xmlid: xmlid of the record\n:param Optional[str] res_model: model of the record,\n    ir.attachment by default.\n:param Optional[id] res_id: id of the record\n:param Optional[str] access_token: access token to use instead\n    of the access rights and access rules.\n:param Optional[str] field: image field name to check the access to\n:returns: single record\n:raises MissingError: when no record was found.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "MissingError",
+        "message": "f'No record found for xmlid={xmlid}, res_model={res_model}, id={res_id}'",
+        "line": 49
+       }
+      ]
+     },
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_record_to_stream",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "record",
+     "field_name"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Low level method responsible for the actual conversion from a\nmodel record to a stream. This method is an extensible hook for\nother modules. It is not meant to be directly called from\noutside or the ir.binary model.\n\n:param record: the record where to load the data from.\n:param str field_name: the binary field where to load the data\n    from.\n:rtype: the system.http.Stream",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "MissingError",
+        "message": "The related attachment does not exist.",
+        "line": 82
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_stream_from",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "record",
+     "field_name",
+     "filename",
+     "filename_field",
+     "mimetype",
+     "default_mimetype"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Create a :class:the system.http.Stream: from a record's binary field.\n\n:param record: the record where to load the data from.\n:param str field_name: the binary field where to load the data\n    from.\n:param Optional[str] filename: when the stream is downloaded by\n    a browser, what filename it should have on disk. By default\n    it is ``{model}-{id}-{field}.{extension}``, the extension is\n    determined thanks to mimetype.\n:param Optional[str] filename_field: like ``filename`` but use\n    one of the record's char field as filename.\n:param Optional[str] mimetype: the data mimetype to use instead\n    of the stored one (attachment) or the one determined by\n    magic.\n:param str default_mimetype: the mimetype to use when the\n    mimetype couldn't be determined. By default it is\n    ``application/octet-stream``.\n:rtype: the system.http.Stream",
+      "size_in_lines": 68,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "f'Field {field_def!r} is type {field_def.type!r} but it is only possible to stream Binary or Image fields.'",
+        "line": 119
+       },
+       {
+        "kind": "UserError",
+        "message": "f'Record has no field {field_name!r}.'",
+        "line": 117
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_image_stream_from",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "record",
+     "field_name",
+     "filename",
+     "filename_field",
+     "mimetype",
+     "default_mimetype",
+     "placeholder",
+     "width",
+     "height",
+     "crop",
+     "quality"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Create a :class:the system.http.Stream: from a record's binary field,\nequivalent of :meth:`~get_stream_from` but for images.\n\nIn case the record does not exist or is not accessible, the\nalternative ``placeholder`` path is used instead. If not set,\na path is determined via\n:meth:`~the system.models.BaseModel._get_placeholder_filename` which\nultimately fallbacks on ``web/static/img/placeholder.png``.\n\nIn case the arguments ``width``, ``height``, ``crop`` or\n``quality`` are given, the image will be post-processed and the\nETags (the unique cache http header) will be updated\naccordingly. See also :func:`the system.tools.image.image_process`.\n\n:param record: the record where to load the data from.\n:param str field_name: the binary field where to load the data\n    from.\n:param Optional[str] filename: when the stream is downloaded by\n    a browser, what filename it should have on disk. By default\n    it is ``{table}-{id}-{field}.{extension}``, the extension is\n    determined thanks to mimetype.\n:param Optional[str] filename_field: like ``filename`` but use\n    one of the record's char field as filename.\n:param Optional[str] mimetype: the data mimetype to use instead\n    of the stored one (attachment) or the one determined by\n    magic.\n:param str default_mimetype: the mimetype to use when the\n    mimetype couldn't be determined. By default it is\n    ``image/png``.\n:param Optional[pathlike] placeholder: in case the image is not\n    found or unaccessible, the path of an image to use instead.\n    By default the record ``_get_placeholder_filename`` on the\n    requested field or ``web/static/img/placeholder.png``.\n:param int width: if not zero, the width of the resized image.\n:param int height: if not zero, the height of the resized image.\n:param bool crop: if true, crop the image instead of rezising\n    it.\n:param int quality: if not zero, the quality of the resized\n    image.",
+      "size_in_lines": 95,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_placeholder_stream",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "path"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_placeholder",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "path"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_find_record",
+    "package": "base",
+    "kind": "MissingError",
+    "message": "f'No record found for xmlid={xmlid}, res_model={res_model}, id={res_id}'"
+   },
+   {
+    "operation": "_record_to_stream",
+    "package": "base",
+    "kind": "MissingError",
+    "message": "The related attachment does not exist."
+   },
+   {
+    "operation": "_get_stream_from",
+    "package": "base",
+    "kind": "UserError",
+    "message": "f'Field {field_def!r} is type {field_def.type!r} but it is only possible to stream Binary or Image fields.'"
+   },
+   {
+    "operation": "_get_stream_from",
+    "package": "base",
+    "kind": "UserError",
+    "message": "f'Record has no field {field_name!r}.'"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

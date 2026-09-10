@@ -1,0 +1,601 @@
+{
+ "catalog": {
+  "name": "entity:ir.model.access",
+  "description": "Complete definition of entity Model Access (ir.model.access).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.model.access",
+  "storage_name": "ir_model_access",
+  "full_name": "Model Access",
+  "kind": "persistent",
+  "description": "Model Access",
+  "defined_by_package": "base",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "model_id,group_id,name,id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_allow_sudo_commands": false
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "index": true,
+    "defined_in_package": "base",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "help": "If you uncheck the active field, it will disable the ACL without deleting it (if you delete a native ACL, it will be re-created when you reload the module).",
+    "defined_in_package": "base",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Model",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "base",
+    "full_name": "Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "group_id",
+    "type": "Many2one",
+    "comodel": "res.groups",
+    "string": "Group",
+    "ondelete": "restrict",
+    "index": true,
+    "defined_in_package": "base",
+    "full_name": "Group",
+    "target_entity": "res.groups"
+   },
+   {
+    "name": "perm_read",
+    "type": "Boolean",
+    "string": "Read Access",
+    "defined_in_package": "base",
+    "full_name": "Read Access"
+   },
+   {
+    "name": "perm_write",
+    "type": "Boolean",
+    "string": "Write Access",
+    "defined_in_package": "base",
+    "full_name": "Write Access"
+   },
+   {
+    "name": "perm_create",
+    "type": "Boolean",
+    "string": "Create Access",
+    "defined_in_package": "base",
+    "full_name": "Create Access"
+   },
+   {
+    "name": "perm_unlink",
+    "type": "Boolean",
+    "string": "Delete Access",
+    "defined_in_package": "base",
+    "full_name": "Delete Access"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "group_names_with_access",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "model_name",
+     "access_mode"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the names of visible groups which have been granted\n ``access_mode`` on the model ``model_name``.\n\n:rtype: list",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_access_groups",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "model_name",
+     "access_mode"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "tools.ormcache",
+        "arguments": [
+         "model_name",
+         "access_mode"
+        ],
+        "options": {
+         "cache": "stable"
+        }
+       }
+      ],
+      "documentation": "Return the group expression object that represents the users who\nhave ``access_mode`` to the model ``model_name``.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_allowed_models",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mode"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "tools.ormcache",
+        "arguments": [
+         "self.env.uid",
+         "mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "model",
+     "mode",
+     "raise_exception"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_make_access_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "mode"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return the exception corresponding to an access error. ",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "call_cache_clearing_methods",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_model_access_group_erp_manager",
+    "package": "base",
+    "name": "ir_model_access_group_erp_manager",
+    "entity": "ir.model.access",
+    "group": "group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.ir_access_view_tree",
+    "package": "base",
+    "name": "ir.model.access.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Access Rights",
+      "decoration-warning": "not group_id and                                          (perm_read or perm_write or                                           perm_create or perm_unlink)"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "group_id"
+      },
+      {
+       "name": "perm_read"
+      },
+      {
+       "name": "perm_write"
+      },
+      {
+       "name": "perm_create"
+      },
+      {
+       "name": "perm_unlink"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-warning": "not group_id and                                          (perm_read or perm_write or                                           perm_create or perm_unlink)"
+     }
+    }
+   },
+   {
+    "external_identifier": "base.ir_access_view_tree_edition",
+    "package": "base",
+    "name": "ir.model.access.view.list.edition",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Access Rights",
+      "editable": "top",
+      "decoration-warning": "not group_id and                                          (perm_read or perm_write or                                           perm_create or perm_unlink)"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "group_id"
+      },
+      {
+       "name": "perm_read"
+      },
+      {
+       "name": "perm_write"
+      },
+      {
+       "name": "perm_create"
+      },
+      {
+       "name": "perm_unlink"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-warning": "not group_id and                                          (perm_read or perm_write or                                           perm_create or perm_unlink)"
+     }
+    }
+   },
+   {
+    "external_identifier": "base.ir_access_view_form",
+    "package": "base",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Access Rights"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "group_id"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "perm_read"
+      },
+      {
+       "name": "perm_write"
+      },
+      {
+       "name": "perm_create"
+      },
+      {
+       "name": "perm_unlink"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.ir_access_view_search",
+    "package": "base",
+    "name": null,
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Access Rights"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Access Rights"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "group_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "global",
+       "string": "Global",
+       "domain": "[('group_id', '=', False)]"
+      },
+      {
+       "name": "full_access",
+       "string": "Full Access",
+       "domain": "[('perm_read', '=', True), ('perm_write', '=', True), ('perm_create', '=', True), ('perm_unlink', '=', True)]"
+      },
+      {
+       "name": "read_access",
+       "string": "Read Access",
+       "domain": "[('perm_read', '=', True)]"
+      },
+      {
+       "name": "write_access",
+       "string": "Write Access",
+       "domain": "[('perm_write', '=', True)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group",
+       "string": "Group",
+       "domain": "[]",
+       "context": "{'group_by': 'group_id'}"
+      },
+      {
+       "name": "group_by_object",
+       "string": "Model",
+       "domain": "[]",
+       "context": "{'group_by': 'model_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.ir_access_act",
+    "package": "base",
+    "name": "Access Rights",
+    "view_mode": null,
+    "view_id": "ir_access_view_tree_edition",
+    "search_view_id": "ir_access_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.model.access"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

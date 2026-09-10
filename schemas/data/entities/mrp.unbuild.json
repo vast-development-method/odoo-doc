@@ -1,0 +1,1160 @@
+{
+ "catalog": {
+  "name": "entity:mrp.unbuild",
+  "description": "Complete definition of entity Unbuild Order (mrp.unbuild).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mrp.unbuild",
+  "storage_name": "mrp_unbuild",
+  "full_name": "Unbuild Order",
+  "kind": "persistent",
+  "description": "Unbuild Order",
+  "defined_by_package": "mrp",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Reference",
+    "copy": false,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda s: s.env._('New')"
+    },
+    "defined_in_package": "mrp",
+    "full_name": "Reference"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "check_company": true,
+    "domain": "[('type', '=', 'consu')]",
+    "compute": "_compute_product_id",
+    "store": true,
+    "precompute": true,
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "mrp",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda s: s.env.company"
+    },
+    "required": true,
+    "index": true,
+    "defined_in_package": "mrp",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "product_qty",
+    "type": "Float",
+    "string": "Quantity",
+    "default": 1.0,
+    "digits": "Product Unit",
+    "compute": "_compute_product_qty",
+    "store": true,
+    "precompute": true,
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "mrp",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "compute": "_compute_product_uom_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "required": true,
+    "defined_in_package": "mrp",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "bom_id",
+    "type": "Many2one",
+    "comodel": "mrp.bom",
+    "string": "Bill of Material",
+    "domain": "[\n        '|',\n            ('product_id', '=', product_id),\n            '&',\n                ('product_tmpl_id.product_variant_ids', '=', product_id),\n                ('product_id','=',False),\n        ('type', '=', 'normal'),\n        '|',\n            ('company_id', '=', company_id),\n            ('company_id', '=', False)\n        ]",
+    "compute": "_compute_bom_id",
+    "store": true,
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "Bill of Material",
+    "target_entity": "mrp.bom"
+   },
+   {
+    "name": "mo_id",
+    "type": "Many2one",
+    "comodel": "mrp.production",
+    "string": "Manufacturing Order",
+    "domain": "[('state', '=', 'done'), ('product_id', '=?', product_id), ('bom_id', '=?', bom_id)]",
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "mrp",
+    "full_name": "Manufacturing Order",
+    "target_entity": "mrp.production"
+   },
+   {
+    "name": "mo_bom_id",
+    "type": "Many2one",
+    "comodel": "mrp.bom",
+    "string": "Bill of Material used on the Production Order",
+    "related": "mo_id.bom_id",
+    "defined_in_package": "mrp",
+    "full_name": "Bill of Material used on the Production Order",
+    "target_entity": "mrp.bom"
+   },
+   {
+    "name": "lot_producing_ids",
+    "type": "Many2many",
+    "comodel": "stock.lot",
+    "string": "Lot/Serial Numbers",
+    "related": "mo_id.lot_producing_ids",
+    "defined_in_package": "mrp",
+    "full_name": "Lot/Serial Numbers",
+    "target_entity": "stock.lot"
+   },
+   {
+    "name": "lot_id",
+    "type": "Many2one",
+    "comodel": "stock.lot",
+    "string": "Lot/Serial Number",
+    "domain": "[('product_id', '=', product_id),('id', 'in', lot_producing_ids)]",
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "Lot/Serial Number",
+    "target_entity": "stock.lot"
+   },
+   {
+    "name": "has_tracking",
+    "type": "Selection",
+    "related": "product_id.tracking",
+    "readonly": true,
+    "defined_in_package": "mrp",
+    "string": "Has Tracking",
+    "full_name": "Has Tracking"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Source Location",
+    "domain": "[('usage','=','internal')]",
+    "check_company": true,
+    "compute": "_compute_location_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "required": true,
+    "help": "Location where the product you want to unbuild is.",
+    "defined_in_package": "mrp",
+    "full_name": "Source Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "location_dest_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Destination Location",
+    "domain": "[('usage','=','internal')]",
+    "check_company": true,
+    "compute": "_compute_location_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "required": true,
+    "help": "Location where you want to send the components resulting from the unbuild order.",
+    "defined_in_package": "mrp",
+    "full_name": "Destination Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "consume_line_ids",
+    "type": "One2many",
+    "comodel": "stock.move",
+    "inverse_name": "consume_unbuild_id",
+    "readonly": true,
+    "string": "Consumed Disassembly Lines",
+    "defined_in_package": "mrp",
+    "full_name": "Consumed Disassembly Lines",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "produce_line_ids",
+    "type": "One2many",
+    "comodel": "stock.move",
+    "inverse_name": "unbuild_id",
+    "readonly": true,
+    "string": "Processed Disassembly Lines",
+    "defined_in_package": "mrp",
+    "full_name": "Processed Disassembly Lines",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "done",
+      "Done"
+     ]
+    ],
+    "string": "Status",
+    "default": "draft",
+    "defined_in_package": "mrp",
+    "full_name": "Status"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_qty_positive",
+    "kind": "Constraint",
+    "definition": "check (product_qty > 0)",
+    "message": "The quantity to unbuild must be positive!",
+    "defined_in_package": "mrp"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_product_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mo_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_location_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_bom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mo_id",
+         "product_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mo_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mo_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_done",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete an unbuild order if the state is 'Done'.",
+        "line": 141
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_finished_move_line_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "finished_move"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_move_line_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move",
+     "origin_move_line",
+     "taken_quantity"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_unbuild",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 86,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You should provide a lot number for the final product.",
+        "line": 171
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot unbuild a undone manufacturing order.",
+        "line": 174
+       },
+       {
+        "kind": "UserError",
+        "message": "error_message",
+        "line": 193
+       },
+       {
+        "kind": "UserError",
+        "message": "error_message",
+        "line": 196
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_generate_consume_moves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_produce_moves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_move_from_existing_move",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "move",
+     "factor",
+     "location_id",
+     "location_dest_id"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_move_from_bom_line",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product",
+     "product_uom",
+     "quantity",
+     "bom_line_id",
+     "byproduct_id"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_validate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_except_done",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You cannot delete an unbuild order if the state is 'Done'."
+   },
+   {
+    "operation": "action_unbuild",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You should provide a lot number for the final product."
+   },
+   {
+    "operation": "action_unbuild",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You cannot unbuild a undone manufacturing order."
+   },
+   {
+    "operation": "action_unbuild",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "error_message"
+   },
+   {
+    "operation": "action_unbuild",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "error_message"
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_mrp_unbuild",
+    "package": "mrp",
+    "name": "mrp.unbuild",
+    "entity": "mrp.unbuild",
+    "group": "group_mrp_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mrp.access_mrp_unbuild_manager",
+    "package": "mrp",
+    "name": "mrp.unbuild manager",
+    "entity": "mrp.unbuild",
+    "group": "group_mrp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp.mrp_unbuild_search_view",
+    "package": "mrp",
+    "name": "mrp.unbuild.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search"
+     },
+     "fields": [
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "mo_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "draft",
+       "string": "Draft",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "done",
+       "string": "Done",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "productgroup",
+       "string": "Product",
+       "context": "{'group_by': 'product_id'}"
+      },
+      {
+       "name": "mogroup",
+       "string": "Manufacturing Order",
+       "context": "{'group_by': 'mo_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp.mrp_unbuild_kanban_view",
+    "package": "mrp",
+    "name": "mrp.unbuild.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "product_uom_id",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "readonly": "1",
+       "options": "{'classes': {'draft': 'default', 'done': 'success'}}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "label_selection": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": [
+      {
+       "field": "activity_state",
+       "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.mrp_unbuild_form_view",
+    "package": "mrp",
+    "name": "mrp.unbuild.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Unbuild Orders"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "name",
+       "nolabel": "1",
+       "placeholder": "Unbuild Order"
+      },
+      {
+       "name": "product_id",
+       "readonly": "mo_id or state == 'done'",
+       "force_save": "1"
+      },
+      {
+       "name": "mo_bom_id",
+       "invisible": "1"
+      },
+      {
+       "name": "bom_id",
+       "invisible": "mo_id and not mo_bom_id",
+       "readonly": "mo_id or state == 'done'",
+       "required": "not mo_id",
+       "force_save": "1"
+      },
+      {
+       "name": "product_qty",
+       "readonly": "has_tracking == 'serial' or state == 'done'"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "mo_id or state == 'done'",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "mo_id",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "location_dest_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "has_tracking",
+       "invisible": "1"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "has_tracking == 'none'",
+       "readonly": "state == 'done'",
+       "required": "has_tracking != 'none'",
+       "groups": "stock.group_production_lot",
+       "force_save": "1"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state == 'done'",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_validate",
+       "string": "Unbuild",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "%(action_mrp_unbuild_moves)d",
+       "type": "action",
+       "invisible": "state != 'done'",
+       "class": "oe_stat_button",
+       "icon": "fa-exchange"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_validate",
+       "string": "Unbuild",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight",
+       "data-hotkey": "v"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,done",
+     "chatter": true,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "%(action_mrp_unbuild_moves)d",
+       "type": "action",
+       "icon": "fa-exchange",
+       "invisible": "state != 'done'"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.mrp_unbuild_form_view_simplified",
+    "package": "mrp",
+    "name": "mrp.unbuild.form.simplified",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Unbuild Order"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "state",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "bom_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "product_qty",
+       "readonly": "has_tracking == 'serial'"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "mo_id",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "mo_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "location_dest_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "has_tracking",
+       "invisible": "1"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "has_tracking == 'none'",
+       "required": "has_tracking != 'none'",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_validate",
+       "string": "Unbuild",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mrp.mrp_unbuild_tree_view",
+    "package": "mrp",
+    "name": "mrp.unbuild.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "product_id",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "bom_id",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "mo_id",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "lot_id",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "product_qty",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "state == 'done'",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state == 'done'",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state == 'draft'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1,
+      "activity_exception": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mrp.mrp_unbuild",
+    "package": "mrp",
+    "name": "Unbuild Orders",
+    "view_mode": "list,kanban,form,activity",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            No unbuild order found\n          </p><p>\n            An unbuild order is used to break down a finished product into its components.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mrp.unbuild"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

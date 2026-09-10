@@ -1,0 +1,1414 @@
+{
+ "catalog": {
+  "name": "entity:loyalty.reward",
+  "description": "Complete definition of entity Loyalty Reward (loyalty.reward).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "loyalty.reward",
+  "storage_name": "loyalty_reward",
+  "full_name": "Loyalty Reward",
+  "kind": "persistent",
+  "description": "Loyalty Reward",
+  "defined_by_package": "loyalty",
+  "extended_by_packages": [
+   "pos_loyalty",
+   "sale_loyalty",
+   "sale_loyalty_delivery"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "required_points asc",
+  "display_name_field": "description",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "loyalty",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "program_id",
+    "type": "Many2one",
+    "comodel": "loyalty.program",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "loyalty",
+    "string": "Program",
+    "full_name": "Program",
+    "target_entity": "loyalty.program"
+   },
+   {
+    "name": "program_type",
+    "type": "Selection",
+    "related": "program_id.program_type",
+    "defined_in_package": "loyalty",
+    "string": "Program Type",
+    "full_name": "Program Type"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "program_id.company_id",
+    "store": true,
+    "defined_in_package": "loyalty",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "program_id.currency_id",
+    "defined_in_package": "loyalty",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "description",
+    "type": "Char",
+    "translate": true,
+    "compute": "_compute_description",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "loyalty",
+    "string": "Description",
+    "full_name": "Description"
+   },
+   {
+    "name": "reward_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "product",
+      "Free Product"
+     ],
+     [
+      "discount",
+      "Discount"
+     ],
+     [
+      "shipping",
+      "Free Shipping"
+     ]
+    ],
+    "required": true,
+    "default": "discount",
+    "defined_in_package": "loyalty",
+    "selection_added_by": [
+     "sale_loyalty_delivery"
+    ],
+    "ondelete": {
+     "shipping": "set default"
+    },
+    "extended_in_packages": [
+     "sale_loyalty_delivery"
+    ],
+    "string": "Reward Type",
+    "full_name": "Reward Type"
+   },
+   {
+    "name": "user_has_debug",
+    "type": "Boolean",
+    "compute": "_compute_user_has_debug",
+    "defined_in_package": "loyalty",
+    "string": "User Has Debug",
+    "full_name": "User Has Debug"
+   },
+   {
+    "name": "discount",
+    "type": "Float",
+    "string": "Discount",
+    "default": 10,
+    "defined_in_package": "loyalty",
+    "full_name": "Discount"
+   },
+   {
+    "name": "discount_mode",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_discount_mode_select"
+    },
+    "required": true,
+    "default": "percent",
+    "defined_in_package": "loyalty",
+    "string": "Discount Mode",
+    "full_name": "Discount Mode"
+   },
+   {
+    "name": "discount_applicability",
+    "type": "Selection",
+    "selection": [
+     [
+      "order",
+      "Order"
+     ],
+     [
+      "cheapest",
+      "Cheapest Product"
+     ],
+     [
+      "specific",
+      "Specific Products"
+     ]
+    ],
+    "default": "order",
+    "defined_in_package": "loyalty",
+    "string": "Discount Applicability",
+    "full_name": "Discount Applicability"
+   },
+   {
+    "name": "discount_product_domain",
+    "type": "Char",
+    "default": "[]",
+    "defined_in_package": "loyalty",
+    "string": "Discount Product Domain",
+    "full_name": "Discount Product Domain"
+   },
+   {
+    "name": "discount_product_ids",
+    "type": "Many2many",
+    "string": "Discounted Products",
+    "comodel": "product.product",
+    "defined_in_package": "loyalty",
+    "full_name": "Discounted Products",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "discount_product_category_id",
+    "type": "Many2one",
+    "string": "Discounted Prod. Categories",
+    "comodel": "product.category",
+    "defined_in_package": "loyalty",
+    "full_name": "Discounted Prod. Categories",
+    "target_entity": "product.category"
+   },
+   {
+    "name": "discount_product_tag_id",
+    "type": "Many2one",
+    "string": "Discounted Prod. Tag",
+    "comodel": "product.tag",
+    "defined_in_package": "loyalty",
+    "full_name": "Discounted Prod. Tag",
+    "target_entity": "product.tag"
+   },
+   {
+    "name": "all_discount_product_ids",
+    "type": "Many2many",
+    "comodel": "product.product",
+    "compute": "_compute_all_discount_product_ids",
+    "defined_in_package": "loyalty",
+    "string": "All Discount Product",
+    "full_name": "All Discount Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "reward_product_domain",
+    "type": "Char",
+    "compute": "_compute_reward_product_domain",
+    "store": false,
+    "defined_in_package": "loyalty",
+    "string": "Reward Product Domain",
+    "full_name": "Reward Product Domain"
+   },
+   {
+    "name": "discount_max_amount",
+    "type": "Monetary",
+    "string": "Max Discount",
+    "help": "This is the max amount this reward may discount, leave to 0 for no limit.",
+    "defined_in_package": "loyalty",
+    "full_name": "Max Discount"
+   },
+   {
+    "name": "discount_line_product_id",
+    "type": "Many2one",
+    "help": "Product used in the sales order to apply the discount. Each reward has its own product for reporting purpose",
+    "comodel": "product.product",
+    "ondelete": "restrict",
+    "copy": false,
+    "defined_in_package": "loyalty",
+    "string": "Discount Line Product",
+    "full_name": "Discount Line Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "is_global_discount",
+    "type": "Boolean",
+    "compute": "_compute_is_global_discount",
+    "defined_in_package": "loyalty",
+    "string": "Is Global Discount",
+    "full_name": "Is Global Discount"
+   },
+   {
+    "name": "reward_product_id",
+    "type": "Many2one",
+    "string": "Product",
+    "comodel": "product.product",
+    "domain": [
+     [
+      "type",
+      "!=",
+      "combo"
+     ]
+    ],
+    "defined_in_package": "loyalty",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "reward_product_tag_id",
+    "type": "Many2one",
+    "string": "Product Tag",
+    "comodel": "product.tag",
+    "defined_in_package": "loyalty",
+    "full_name": "Product Tag",
+    "target_entity": "product.tag"
+   },
+   {
+    "name": "multi_product",
+    "type": "Boolean",
+    "compute": "_compute_multi_product",
+    "defined_in_package": "loyalty",
+    "string": "Multi Product",
+    "full_name": "Multi Product"
+   },
+   {
+    "name": "reward_product_ids",
+    "type": "Many2many",
+    "string": "Reward Products",
+    "help": "These are the products that can be claimed with this rule.",
+    "comodel": "product.product",
+    "compute": "_compute_multi_product",
+    "search": "_search_reward_product_ids",
+    "defined_in_package": "loyalty",
+    "full_name": "Reward Products",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "reward_product_qty",
+    "type": "Integer",
+    "default": 1,
+    "defined_in_package": "loyalty",
+    "string": "Reward Product Qty",
+    "full_name": "Reward Product Qty"
+   },
+   {
+    "name": "reward_product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "compute": "_compute_reward_product_uom_id",
+    "defined_in_package": "loyalty",
+    "string": "Reward Product Unit of measure",
+    "full_name": "Reward Product Unit of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "required_points",
+    "type": "Float",
+    "string": "Points needed",
+    "default": 1,
+    "defined_in_package": "loyalty",
+    "full_name": "Points needed"
+   },
+   {
+    "name": "point_name",
+    "type": "Char",
+    "related": "program_id.portal_point_name",
+    "readonly": true,
+    "defined_in_package": "loyalty",
+    "string": "Point Name",
+    "full_name": "Point Name"
+   },
+   {
+    "name": "clear_wallet",
+    "type": "Boolean",
+    "default": false,
+    "defined_in_package": "loyalty",
+    "string": "Clear Wallet",
+    "full_name": "Clear Wallet"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_required_points_positive",
+    "kind": "Constraint",
+    "definition": "CHECK (required_points > 0)",
+    "message": "The required points for a reward must be strictly positive.",
+    "defined_in_package": "loyalty"
+   },
+   {
+    "name": "_product_qty_positive",
+    "kind": "Constraint",
+    "definition": "CHECK (reward_type != 'product' OR reward_product_qty > 0)",
+    "message": "The reward product quantity must be strictly positive.",
+    "defined_in_package": "loyalty"
+   },
+   {
+    "name": "_discount_positive",
+    "kind": "Constraint",
+    "definition": "CHECK (reward_type != 'discount' OR discount > 0)",
+    "message": "The discount must be strictly positive.",
+    "defined_in_package": "loyalty"
+   }
+  ],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_discount_mode_select",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "program_id",
+         "description"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reward_product_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reward_product_id.product_tmpl_id.uom_id",
+         "reward_product_tag_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_all_category_children",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "category_id",
+     "child_ids"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_discount_product_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_active_products_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reward_product_domain",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "discount_product_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_all_discount_product_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "discount_product_ids",
+         "discount_product_category_id",
+         "discount_product_tag_id",
+         "discount_product_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_multi_product",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reward_product_id",
+         "reward_product_tag_id",
+         "reward_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_reward_product_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reward_type",
+         "reward_product_id",
+         "discount_mode",
+         "reward_product_tag_id",
+         "discount",
+         "currency_id",
+         "discount_applicability",
+         "all_discount_product_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty_delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_global_discount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reward_type",
+         "discount_applicability",
+         "discount_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_has_debug",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reward_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_reward_product_id_no_combo",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "reward_product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A reward product can't be of type \"combo\".",
+        "line": 291
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_missing_discount_line_products",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "update_field_translations",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "field_name",
+     "translations",
+     "source_lang"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_discount_product_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_reward_product_domain_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_replace_ilike_with_in",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "domain_str"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_reward_product_id_no_combo",
+    "package": "loyalty",
+    "kind": "ValidationError",
+    "message": "A reward product can't be of type \"combo\"."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "loyalty.access_loyalty_reward",
+    "package": "loyalty",
+    "name": "access_loyalty_reward",
+    "entity": "loyalty.reward",
+    "group": "base.group_user",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "pos_loyalty.access_reward_pos_user",
+    "package": "pos_loyalty",
+    "name": "Loyalty Reward (PoS User)",
+    "entity": "loyalty.reward",
+    "group": "point_of_sale.group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "pos_loyalty.access_reward_pos_manager",
+    "package": "pos_loyalty",
+    "name": "Loyalty Reward (PoS Manager)",
+    "entity": "loyalty.reward",
+    "group": "point_of_sale.group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale_loyalty.access_reward_salesman",
+    "package": "sale_loyalty",
+    "name": "Loyalty Reward (Salesperson)",
+    "entity": "loyalty.reward",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_loyalty.access_reward_manager",
+    "package": "sale_loyalty",
+    "name": "Loyalty Reward (Manager)",
+    "entity": "loyalty.reward",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "loyalty.sale_loyalty_reward_company_rule",
+    "package": "loyalty",
+    "name": "Loyalty reward multi company rule",
+    "entity": "loyalty.reward",
+    "domain": "['|', ('company_id', 'in', company_ids + [False]), ('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "loyalty.loyalty_reward_view_form",
+    "package": "loyalty",
+    "name": "loyalty.reward.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "program_type",
+       "invisible": "1"
+      },
+      {
+       "name": "user_has_debug",
+       "invisible": "1"
+      },
+      {
+       "name": "multi_product",
+       "invisible": "1"
+      },
+      {
+       "name": "reward_product_uom_id",
+       "invisible": "1"
+      },
+      {
+       "name": "reward_product_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "all_discount_product_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "reward_type",
+       "widget": "selection",
+       "readonly": "program_type == 'buy_x_get_y'",
+       "force_save": "1"
+      },
+      {
+       "name": "discount"
+      },
+      {
+       "name": "discount_mode"
+      },
+      {
+       "name": "discount_applicability",
+       "widget": "radio",
+       "invisible": "reward_type != 'discount'",
+       "nolabel": "1"
+      },
+      {
+       "name": "reward_product_qty",
+       "string": "Quantity rewarded"
+      },
+      {
+       "name": "reward_product_id",
+       "required": "reward_type == 'product' and not reward_product_ids"
+      },
+      {
+       "name": "reward_product_tag_id",
+       "required": "reward_type == 'product' and not reward_product_ids"
+      },
+      {
+       "name": "discount_max_amount"
+      },
+      {
+       "name": "discount_product_domain",
+       "widget": "domain",
+       "invisible": "discount_applicability == 'order'",
+       "options": "{'model': 'product.product', 'in_dialog': true}",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "discount_product_ids",
+       "widget": "many2many_tags",
+       "invisible": "discount_applicability == 'order'"
+      },
+      {
+       "name": "discount_product_category_id",
+       "invisible": "discount_applicability == 'order'"
+      },
+      {
+       "name": "discount_product_tag_id",
+       "invisible": "discount_applicability == 'order'"
+      },
+      {
+       "name": "required_points"
+      },
+      {
+       "name": "point_name"
+      },
+      {
+       "name": "clear_wallet"
+      },
+      {
+       "name": "description",
+       "string": "Description on order"
+      },
+      {
+       "name": "discount_line_product_id",
+       "invisible": "1",
+       "string": "Discount product",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "selection": 1,
+      "radio": 1,
+      "domain": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "loyalty.loyalty_reward_view_kanban",
+    "package": "loyalty",
+    "name": "loyalty.reward.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "reward_type"
+      },
+      {
+       "name": "discount_applicability"
+      },
+      {
+       "name": "clear_wallet"
+      },
+      {
+       "name": "program_type"
+      },
+      {
+       "name": "user_has_debug"
+      },
+      {
+       "name": "discount"
+      },
+      {
+       "name": "discount_mode"
+      },
+      {
+       "name": "discount_max_amount"
+      },
+      {
+       "name": "discount_product_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "discount_product_category_id"
+      },
+      {
+       "name": "discount_product_tag_id"
+      },
+      {
+       "name": "discount_product_domain"
+      },
+      {
+       "name": "reward_product_id"
+      },
+      {
+       "name": "reward_product_qty"
+      },
+      {
+       "name": "reward_product_tag_id"
+      },
+      {
+       "name": "point_name"
+      },
+      {
+       "name": "required_points"
+      },
+      {
+       "name": "point_name"
+      },
+      {
+       "name": "required_points"
+      },
+      {
+       "name": "point_name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "sale_loyalty_delivery.loyalty_reward_view_form_inherit_loyalty_delivery",
+    "package": "sale_loyalty_delivery",
+    "name": "loyalty.reward.view.form.inherit.loyalty.delivery",
+    "view_type": "group",
+    "inherits_view": "loyalty.loyalty_reward_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "reward_type_group",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "discount_max_amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "reward_type_group",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_loyalty_delivery.loyalty_reward_view_kanban_inherit_loyalty_delivery",
+    "package": "sale_loyalty_delivery",
+    "name": "loyalty.reward.view.kanban.inherit.loyalty.delivery",
+    "view_type": "div",
+    "inherits_view": "loyalty.loyalty_reward_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "reward_info",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "discount_max_amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "reward_info",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

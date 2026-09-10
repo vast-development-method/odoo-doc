@@ -1,0 +1,333 @@
+{
+ "catalog": {
+  "name": "entity:sale.order.discount",
+  "description": "Complete definition of entity Discount Wizard (sale.order.discount).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sale.order.discount",
+  "storage_name": "sale_order_discount",
+  "full_name": "Discount Wizard",
+  "kind": "transient",
+  "description": "Discount Wizard",
+  "defined_by_package": "sale",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "sale_order_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_id')"
+    },
+    "required": true,
+    "defined_in_package": "sale",
+    "string": "Sale Order",
+    "full_name": "Sale Order",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "sale_order_id.company_id",
+    "defined_in_package": "sale",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "sale_order_id.currency_id",
+    "defined_in_package": "sale",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "discount_amount",
+    "type": "Monetary",
+    "string": "Amount",
+    "defined_in_package": "sale",
+    "full_name": "Amount"
+   },
+   {
+    "name": "discount_percentage",
+    "type": "Float",
+    "string": "Percentage",
+    "defined_in_package": "sale",
+    "full_name": "Percentage"
+   },
+   {
+    "name": "discount_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "sol_discount",
+      "On All Order Lines"
+     ],
+     [
+      "so_discount",
+      "Global Discount"
+     ],
+     [
+      "amount",
+      "Fixed Amount"
+     ]
+    ],
+    "default": "sol_discount",
+    "defined_in_package": "sale",
+    "string": "Discount Type",
+    "full_name": "Discount Type"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_discount_amount",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "discount_type",
+         "discount_percentage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid discount amount",
+        "line": 39
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_discount_product_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_global_discount_so_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "base_lines"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_discount_product",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Return product.product used for discount line",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "There does not seem to be any discount product configured for this company yet. You can either use a per-line discount, or ask an administrator to grant the discount the first time.",
+        "line": 116
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_discount_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_apply_discount",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_discount_amount",
+    "package": "sale",
+    "kind": "ValidationError",
+    "message": "Invalid discount amount"
+   },
+   {
+    "operation": "_get_discount_product",
+    "package": "sale",
+    "kind": "ValidationError",
+    "message": "There does not seem to be any discount product configured for this company yet. You can either use a per-line discount, or ask an administrator to grant the discount the first time."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "sale.access_sale_order_discount",
+    "package": "sale",
+    "name": "access_sale_order_discount",
+    "entity": "sale.order.discount",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "sale.sale_order_line_wizard_form",
+    "package": "sale",
+    "name": "sale.order.discount.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "sale_order_id",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "discount_amount",
+       "invisible": "discount_type != 'amount'",
+       "nolabel": "1"
+      },
+      {
+       "name": "discount_percentage",
+       "widget": "percentage",
+       "invisible": "discount_type not in ('so_discount', 'sol_discount')",
+       "nolabel": "1"
+      },
+      {
+       "name": "discount_type",
+       "widget": "radio"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_apply_discount",
+       "string": "Apply",
+       "type": "object",
+       "class": "btn btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "percentage": 1,
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

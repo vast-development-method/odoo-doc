@@ -1,0 +1,475 @@
+{
+ "catalog": {
+  "name": "views:stock.package",
+  "description": "View declarations for entity stock.package.",
+  "record_count": 7,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "stock.stock_package_view_search",
+   "package": "stock",
+   "name": "stock.package.search",
+   "entity": "stock.package",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Package"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Package Name"
+     },
+     {
+      "name": "location_id",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "package_type_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "internal",
+      "string": "In internal locations",
+      "domain": "['|', ('location_id.usage', '=', 'internal'), ('location_id', '=', False)]",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "main_packages",
+      "string": "Main Packages",
+      "domain": "[('package_dest_id', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "location",
+      "string": "Location",
+      "domain": "[]",
+      "context": "{'group_by' : 'location_id'}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "package_type",
+      "string": "Package Type",
+      "domain": "[]",
+      "context": "{'group_by' : 'package_type_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Package\">\n                <field name=\"name\" string=\"Package Name\"/>\n                <field name=\"location_id\" groups=\"stock.group_stock_multi_locations\"/>\n                <field name=\"package_type_id\"/>\n                <filter string=\"In internal locations\" name=\"internal\" domain=\"['|', ('location_id.usage', '=', 'internal'), ('location_id', '=', False)]\" groups=\"stock.group_stock_multi_locations\"/>\n                <filter string=\"Main Packages\" name=\"main_packages\" domain=\"[('package_dest_id', '=', False)]\"/>\n                <group>\n                   <filter string=\"Location\" name=\"location\" domain=\"[]\" context=\"{'group_by' : 'location_id'}\" groups=\"stock.group_stock_multi_locations\"/>\n                   <filter string=\"Package Type\" name=\"package_type\" domain=\"[]\" context=\"{'group_by' : 'package_type_id'}\"/>\n               </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.stock_package_view_form",
+   "package": "stock",
+   "name": "stock.package.form",
+   "entity": "stock.package",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Package"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "required": "0",
+      "placeholder": "e.g. PACK0000007"
+     },
+     {
+      "name": "package_type_id"
+     },
+     {
+      "name": "owner_id",
+      "groups": "stock.group_tracking_owner"
+     },
+     {
+      "name": "location_id",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "parent_package_id",
+      "widget": "package_m2o",
+      "domain": "[('id', '!=', id), '|', ('location_id', '=', location_id), ('location_id', '=', False)]",
+      "context": "{'show_src_package': 1}"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "pack_date"
+     },
+     {
+      "name": "contained_quant_ids"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "package_id",
+      "widget": "package_m2o",
+      "context": "{'show_src_package': 1}"
+     },
+     {
+      "name": "lot_id",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "lot_id"
+     },
+     {
+      "name": "quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "groups": "uom.group_uom"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "unpack",
+      "string": "Unpack",
+      "type": "object"
+     },
+     {
+      "name": "action_view_picking",
+      "string": "Package Transfers",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "oi-arrows-v"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "package_m2o": 2
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "unpack",
+      "string": "Unpack",
+      "type": "object"
+     }
+    ],
+    "chatter": false,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "name": "action_view_picking",
+      "string": "Package Transfers",
+      "type": "object",
+      "widget": "statinfo",
+      "icon": "oi-arrows-v"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Package\">\n                <header>\n                    <button name=\"unpack\" string=\"Unpack\" type=\"object\"/>\n                </header>\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button class=\"oe_stat_button\" name=\"action_view_picking\" string=\"Package Transfers\" type=\"object\" widget=\"statinfo\" icon=\"oi-arrows-v\"/>\n                    </div>\n                    <div class=\"oe_title\">\n                        <label for=\"name\" string=\"Package Reference\"/>\n                        <h1><field name=\"name\" class=\"oe_inline\" required=\"0\" placeholder=\"e.g. PACK0000007\"/></h1>\n                    </div>\n                    <group>\n                        <group>\n                            <field name=\"package_type_id\"/>\n                            <field name=\"owner_id\" groups=\"stock.group_tracking_owner\"/>\n                            <field name=\"location_id\" options=\"{'no_create': True}\"/>\n                            <field name=\"parent_package_id\" domain=\"[('id', '!=', id), '|', ('location_id', '=', location_id), ('location_id', '=', False)]\" widget=\"package_m2o\" context=\"{'show_src_package': 1}\"/>\n                        </group>\n                        <group>\n                            <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n                            <field name=\"pack_date\"/>\n                        </group>\n                    </group>\n                    <separator string=\"Content\"/>\n                    <field name=\"contained_quant_ids\">\n                        <list>\n                            <field name=\"product_id\"/>\n                            <field name=\"package_id\" widget=\"package_m2o\" context=\"{'show_src_package': 1}\"/>\n                            <field name=\"lot_id\" groups=\"stock.group_production_lot\"/>\n                            <field name=\"quantity\"/>\n                            <field name=\"product_uom_id\" groups=\"uom.group_uom\"/>\n                        </list>\n                        <kanban class=\"o_kanban_mobile\">\n                            <templates>\n                                <t t-name=\"card\">\n                                    <field name=\"product_id\" class=\"fw-bold\"/>\n                                    <field name=\"lot_id\"/>\n                                    <div class=\"d-flex\">\n                                        <field name=\"quantity\"/>\n                                        <field class=\"mx-2\" name=\"product_uom_id\" groups=\"uom.group_uom\"/>\n                                    </div>\n                                </t>\n                            </templates>\n                        </kanban>\n                    </field>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.stock_package_view_list",
+   "package": "stock",
+   "name": "stock.package.list",
+   "entity": "stock.package",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Package",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Package Name"
+     },
+     {
+      "name": "parent_package_id",
+      "widget": "package_m2o",
+      "string": "Container",
+      "context": "{'show_src_package': 1}"
+     },
+     {
+      "name": "package_type_id"
+     },
+     {
+      "name": "location_id",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "company_id",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "package_m2o": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Package\" sample=\"1\">\n                <field name=\"name\" string=\"Package Name\"/>\n                <field name=\"parent_package_id\" string=\"Container\" widget=\"package_m2o\" context=\"{'show_src_package': 1}\"/>\n                <field name=\"package_type_id\"/>\n                <field name=\"location_id\" options=\"{'no_create': True}\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"hide\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.stock_package_view_list_editable",
+   "package": "stock",
+   "name": "stock.package.list.editable",
+   "entity": "stock.package",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "create": "0",
+     "editable": "bottom",
+     "js_class": "stock_add_package_list_view",
+     "open_form_view": "1"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Package"
+     },
+     {
+      "name": "package_type_id"
+     },
+     {
+      "name": "json_popover",
+      "widget": "popover_widget",
+      "invisible": "not json_popover",
+      "nolabel": "1"
+     },
+     {
+      "name": "location_dest_id",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "parent_package_id",
+      "readonly": "1",
+      "string": "Origin Container"
+     },
+     {
+      "name": "package_dest_id",
+      "domain": "[('id', '!=', id), '|', '|', '|', ('location_id', '=', False), ('location_id', '=', location_dest_id), ('id', '=', parent_package_id), ('location_dest_id', '=', location_dest_id)]"
+     },
+     {
+      "name": "company_id",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_put_in_pack",
+      "string": "Put in Pack",
+      "type": "object",
+      "class": "btn-primary"
+     },
+     {
+      "name": "action_remove_package",
+      "string": "Remove",
+      "type": "object",
+      "class": "btn-secondary"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "popover_widget": 1
+    },
+    "inheritance_operations": [],
+    "editable": "bottom",
+    "create": "0",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list create=\"0\" editable=\"bottom\" js_class=\"stock_add_package_list_view\" open_form_view=\"1\">\n                <header>\n                    <button class=\"btn-primary\" name=\"action_put_in_pack\" type=\"object\" string=\"Put in Pack\"/>\n                    <button class=\"btn-secondary\" name=\"action_remove_package\" type=\"object\" string=\"Remove\"/>\n                </header>\n                <field name=\"name\" string=\"Package\"/>\n                <field name=\"package_type_id\"/>\n                <field name=\"json_popover\" widget=\"popover_widget\" nolabel=\"1\" invisible=\"not json_popover\" width=\"18px\"/>\n                <field name=\"location_dest_id\" options=\"{'no_create': True}\"/>\n                <field name=\"parent_package_id\" string=\"Origin Container\" readonly=\"1\"/>\n                <field name=\"package_dest_id\" domain=\"[('id', '!=', id), '|', '|', '|', ('location_id', '=', False), ('location_id', '=', location_dest_id), ('id', '=', parent_package_id), ('location_dest_id', '=', location_dest_id)]\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"hide\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.stock_package_view_add_list",
+   "package": "stock",
+   "name": "stock.package.add.package.list",
+   "entity": "stock.package",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "create": "0"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Package"
+     },
+     {
+      "name": "parent_package_id",
+      "widget": "package_m2o",
+      "string": "Container",
+      "context": "{'show_src_package': 1}"
+     },
+     {
+      "name": "package_type_id",
+      "string": "Type",
+      "optional": "hide"
+     },
+     {
+      "name": "location_id",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "content_description"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "package_m2o": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "0",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list create=\"0\">\n                <field name=\"name\" string=\"Package\"/>\n                <field name=\"parent_package_id\" string=\"Container\" context=\"{'show_src_package': 1}\" widget=\"package_m2o\"/>\n                <field name=\"package_type_id\" string=\"Type\" optional=\"hide\"/>\n                <field name=\"location_id\" groups=\"stock.group_stock_multi_locations\"/>\n                <field name=\"content_description\" width=\"500px\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.stock_package_view_kanban",
+   "package": "stock",
+   "name": "stock.package.kanban",
+   "entity": "stock.package",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "sample": "1",
+     "group_create": "0"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "package_type_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban sample=\"1\" group_create=\"0\">\n                <templates>\n                    <t t-name=\"card\" class=\"row g-0\">\n                        <field name=\"name\" class=\"col-6 fw-bold fs-5\"/>\n                        <field name=\"package_type_id\" class=\"col-6\"/>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_delivery.stock_package_view_form",
+   "package": "stock_delivery",
+   "name": "stock.package.weight.form",
+   "entity": "stock.package",
+   "view_type": "field",
+   "inherits_view": "stock.stock_package_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "company_id",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "position": "before"
+     },
+     {
+      "name": "shipping_weight"
+     },
+     {
+      "name": "weight_uom_name"
+     },
+     {
+      "name": "weight",
+      "nolabel": "1"
+     },
+     {
+      "name": "weight_uom_name",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"company_id\" position=\"before\">\n                    <label for=\"shipping_weight\"/>\n                    <div class=\"o_row\" name=\"Shipping Weight\">\n                        <field name=\"shipping_weight\" class=\"oe_inline\"/>\n                        <span><field name=\"weight_uom_name\"/></span>\n                        <span class=\"text-muted\">(computed: <field name=\"weight\" class=\"oe_inline\" nolabel=\"1\"/></span><span class=\"text-muted\"><field name=\"weight_uom_name\" nolabel=\"1\" class=\"oe_inline\"/>)</span>\n                    </div>\n                </field>\n            </field>\n        "
+  }
+ ]
+}

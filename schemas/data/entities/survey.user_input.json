@@ -1,0 +1,1881 @@
+{
+ "catalog": {
+  "name": "entity:survey.user_input",
+  "description": "Complete definition of entity Survey User Input (survey.user_input).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "survey.user_input",
+  "storage_name": "survey_user_input",
+  "full_name": "Survey User Input",
+  "kind": "persistent",
+  "description": "Survey User Input",
+  "defined_by_package": "survey",
+  "extended_by_packages": [
+   "hr_recruitment_survey",
+   "hr_skills_survey",
+   "survey_crm",
+   "website_slides_survey"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "create_date desc",
+  "display_name_field": "survey_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "survey_id",
+    "type": "Many2one",
+    "comodel": "survey.survey",
+    "string": "Survey",
+    "required": true,
+    "readonly": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "survey",
+    "full_name": "Survey",
+    "target_entity": "survey.survey"
+   },
+   {
+    "name": "scoring_type",
+    "type": "Selection",
+    "string": "Scoring",
+    "related": "survey_id.scoring_type",
+    "defined_in_package": "survey",
+    "full_name": "Scoring"
+   },
+   {
+    "name": "start_datetime",
+    "type": "Datetime",
+    "string": "Start date and time",
+    "readonly": true,
+    "defined_in_package": "survey",
+    "full_name": "Start date and time"
+   },
+   {
+    "name": "end_datetime",
+    "type": "Datetime",
+    "string": "End date and time",
+    "readonly": true,
+    "defined_in_package": "survey",
+    "full_name": "End date and time"
+   },
+   {
+    "name": "deadline",
+    "type": "Datetime",
+    "string": "Deadline",
+    "help": "Datetime until customer can open the survey and submit answers",
+    "defined_in_package": "survey",
+    "full_name": "Deadline"
+   },
+   {
+    "name": "lang_id",
+    "type": "Many2one",
+    "comodel": "res.lang",
+    "string": "Language",
+    "defined_in_package": "survey",
+    "full_name": "Language",
+    "target_entity": "res.lang"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "new",
+      "New"
+     ],
+     [
+      "in_progress",
+      "In Progress"
+     ],
+     [
+      "done",
+      "Completed"
+     ]
+    ],
+    "string": "Status",
+    "default": "new",
+    "readonly": true,
+    "defined_in_package": "survey",
+    "full_name": "Status"
+   },
+   {
+    "name": "test_entry",
+    "type": "Boolean",
+    "readonly": true,
+    "defined_in_package": "survey",
+    "string": "Test Entry",
+    "full_name": "Test Entry"
+   },
+   {
+    "name": "last_displayed_page_id",
+    "type": "Many2one",
+    "comodel": "survey.question",
+    "string": "Last displayed question/page",
+    "defined_in_package": "survey",
+    "full_name": "Last displayed question/page",
+    "target_entity": "survey.question"
+   },
+   {
+    "name": "is_attempts_limited",
+    "type": "Boolean",
+    "string": "Limited number of attempts",
+    "related": "survey_id.is_attempts_limited",
+    "defined_in_package": "survey",
+    "full_name": "Limited number of attempts"
+   },
+   {
+    "name": "attempts_limit",
+    "type": "Integer",
+    "string": "Number of attempts",
+    "related": "survey_id.attempts_limit",
+    "defined_in_package": "survey",
+    "full_name": "Number of attempts"
+   },
+   {
+    "name": "attempts_count",
+    "type": "Integer",
+    "string": "Attempts Count",
+    "compute": "_compute_attempts_info",
+    "defined_in_package": "survey",
+    "full_name": "Attempts Count"
+   },
+   {
+    "name": "attempts_number",
+    "type": "Integer",
+    "string": "Attempt n°",
+    "compute": "_compute_attempts_info",
+    "defined_in_package": "survey",
+    "full_name": "Attempt n°"
+   },
+   {
+    "name": "survey_time_limit_reached",
+    "type": "Boolean",
+    "string": "Survey Time Limit Reached",
+    "compute": "_compute_survey_time_limit_reached",
+    "defined_in_package": "survey",
+    "full_name": "Survey Time Limit Reached"
+   },
+   {
+    "name": "access_token",
+    "type": "Char",
+    "string": "Identification token",
+    "default": {
+     "dynamic": "lambda self: str(uuid.uuid4())"
+    },
+    "readonly": true,
+    "required": true,
+    "copy": false,
+    "defined_in_package": "survey",
+    "full_name": "Identification token"
+   },
+   {
+    "name": "invite_token",
+    "type": "Char",
+    "string": "Invite token",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "survey",
+    "full_name": "Invite token"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Contact",
+    "readonly": true,
+    "index": "btree_not_null",
+    "defined_in_package": "survey",
+    "full_name": "Contact",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "string": "Email",
+    "readonly": true,
+    "defined_in_package": "survey",
+    "full_name": "Email"
+   },
+   {
+    "name": "nickname",
+    "type": "Char",
+    "string": "Nickname",
+    "help": "Attendee nickname, mainly used to identify them in the survey session leaderboard.",
+    "defined_in_package": "survey",
+    "full_name": "Nickname"
+   },
+   {
+    "name": "user_input_line_ids",
+    "type": "One2many",
+    "comodel": "survey.user_input.line",
+    "inverse_name": "user_input_id",
+    "string": "Answers",
+    "copy": true,
+    "defined_in_package": "survey",
+    "full_name": "Answers",
+    "target_entity": "survey.user_input.line"
+   },
+   {
+    "name": "predefined_question_ids",
+    "type": "Many2many",
+    "comodel": "survey.question",
+    "string": "Predefined Questions",
+    "readonly": true,
+    "defined_in_package": "survey",
+    "full_name": "Predefined Questions",
+    "target_entity": "survey.question"
+   },
+   {
+    "name": "scoring_percentage",
+    "type": "Float",
+    "string": "Score (%)",
+    "compute": "_compute_scoring_values",
+    "store": true,
+    "compute_sudo": true,
+    "defined_in_package": "survey",
+    "full_name": "Score (%)"
+   },
+   {
+    "name": "scoring_total",
+    "type": "Float",
+    "string": "Total Score",
+    "compute": "_compute_scoring_values",
+    "store": true,
+    "compute_sudo": true,
+    "digits": [
+     10,
+     2
+    ],
+    "defined_in_package": "survey",
+    "full_name": "Total Score"
+   },
+   {
+    "name": "scoring_success",
+    "type": "Boolean",
+    "string": "Quiz Passed",
+    "compute": "_compute_scoring_success",
+    "store": true,
+    "compute_sudo": true,
+    "defined_in_package": "survey",
+    "full_name": "Quiz Passed"
+   },
+   {
+    "name": "survey_first_submitted",
+    "type": "Boolean",
+    "string": "Survey First Submitted",
+    "defined_in_package": "survey",
+    "full_name": "Survey First Submitted"
+   },
+   {
+    "name": "is_session_answer",
+    "type": "Boolean",
+    "string": "Is in a Session",
+    "help": "Is that user input part of a survey session or not.",
+    "defined_in_package": "survey",
+    "full_name": "Is in a Session"
+   },
+   {
+    "name": "question_time_limit_reached",
+    "type": "Boolean",
+    "string": "Question Time Limit Reached",
+    "compute": "_compute_question_time_limit_reached",
+    "defined_in_package": "survey",
+    "full_name": "Question Time Limit Reached"
+   },
+   {
+    "name": "applicant_id",
+    "type": "Many2one",
+    "comodel": "hr.applicant",
+    "string": "Applicant",
+    "index": "btree_not_null",
+    "defined_in_package": "hr_recruitment_survey",
+    "full_name": "Applicant",
+    "target_entity": "hr.applicant"
+   },
+   {
+    "name": "lead_id",
+    "type": "Many2one",
+    "comodel": "crm.lead",
+    "ondelete": "set null",
+    "defined_in_package": "survey_crm",
+    "string": "Lead",
+    "full_name": "Lead",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "slide_id",
+    "type": "Many2one",
+    "comodel": "slide.slide",
+    "string": "Related course slide",
+    "help": "The related course slide when there is no membership information",
+    "defined_in_package": "website_slides_survey",
+    "full_name": "Related course slide",
+    "target_entity": "slide.slide"
+   },
+   {
+    "name": "slide_partner_id",
+    "type": "Many2one",
+    "comodel": "slide.slide.partner",
+    "string": "Subscriber information",
+    "help": "Slide membership information for the logged in user",
+    "index": "btree_not_null",
+    "defined_in_package": "website_slides_survey",
+    "full_name": "Subscriber information",
+    "target_entity": "slide.slide.partner"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_token",
+    "kind": "Constraint",
+    "definition": "UNIQUE (access_token)",
+    "message": "An access token must be unique!",
+    "defined_in_package": "survey"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_scoring_values",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "user_input_line_ids.answer_score",
+         "user_input_line_ids.question_id",
+         "predefined_question_ids.answer_score"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_scoring_success",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "scoring_percentage",
+         "survey_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_survey_time_limit_reached",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "start_datetime",
+         "survey_id.is_time_limited",
+         "survey_id.time_limit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Checks that the user_input is not exceeding the survey's time limit. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_question_time_limit_reached",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "survey_id.session_question_id.time_limit",
+         "survey_id.session_question_id.is_time_limited",
+         "survey_id.session_question_start_time"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Checks that the user_input is not exceeding the question's time limit.\nOnly used in the context of survey sessions. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_attempts_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "test_entry",
+         "survey_id.is_attempts_limited",
+         "partner_id",
+         "email",
+         "invite_token"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides_survey",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_resend",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_print_answers",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "Open the website page with the survey form ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_redirect_to_attempts",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_invite_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mark_in_progress",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "marks the state as 'in_progress' and updates the start_datetime accordingly. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mark_done",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "This method will:\n1. mark the state as 'done'\n2. send the certification email with attached document if\n- The survey is a certification\n- It has a certification_mail_template_id set\n- The user succeeded the test\n3. Notify survey subtype subscribers of the newly completed input\nWill also run challenge Cron to give the certification badge if any.",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_skills_survey",
+      "decorators": [],
+      "documentation": "Will add certification to employee's resume if\n- The survey is a certification\n- The user is linked to an employee\n- The user succeeded the test ",
+      "size_in_lines": 43,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "survey_crm",
+      "decorators": [],
+      "documentation": "Check if we need to create a lead on answer submission, except for live sessions.\n\n(Note: This method is called when a response has been submitted to a survey.\nIn this case, the filter enables to keep, before the verification, the user\ninputs that could create leads depending on the type of survey carried out.\n\nYet, this method is NOT called when a real live/custom session ends (a live session\nsurvey can be shared without necessarily being live). In this case, please refer\nto the action_end_session function in survey.survey of this module.)",
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_start_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_print_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_save_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "question",
+     "answer",
+     "comment",
+     "overwrite_existing"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "Save answers to questions, depending on question type.\n\n:param bool overwrite_existing: if an answer already exists for question and user_input_id\nit will be overwritten (or deleted for 'choice' questions) in order to maintain data consistency.\n:raises UserError: if line exists and overwrite_existing is False",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This answer cannot be overwritten.",
+        "line": 292
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_save_line_simple_answer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "question",
+     "old_answers",
+     "answer"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_save_line_choice",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "question",
+     "old_answers",
+     "answers",
+     "comment"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_save_line_matrix",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "question",
+     "old_answers",
+     "answers",
+     "comment"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_line_answer_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "question",
+     "answer",
+     "answer_type"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_line_comment_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "question",
+     "comment"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_statistics",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "Prepares survey.user_input's statistics to display various charts on the frontend.\nReturns a structure containing answers statistics \"by section\" and \"totals\" for every input in self.\n\ne.g returned structure:\n{\n    survey.user_input(1,): {\n        'by_section': {\n            'Uncategorized': {\n                'question_count': 2,\n                'correct': 2,\n                'partial': 0,\n                'incorrect': 0,\n                'skipped': 0,\n            },\n            'Mathematics': {\n                'question_count': 3,\n                'correct': 1,\n                'partial': 1,\n                'incorrect': 0,\n                'skipped': 1,\n            },\n            'Geography': {\n                'question_count': 4,\n                'correct': 2,\n                'partial': 0,\n                'incorrect': 2,\n                'skipped': 0,\n            }\n        },\n        'totals' [{\n            'text': 'Correct',\n            'count': 5,\n        }, {\n            'text': 'Partially',\n            'count': 1,\n        }, {\n            'text': 'Incorrect',\n            'count': 2,\n        }, {\n            'text': 'Unanswered',\n            'count': 1,\n        }]\n    }\n}",
+      "size_in_lines": 101,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_multiple_choice_question_answer_result",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user_input_lines",
+     "question_correct_suggested_answers"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_simple_choice_question_answer_result",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user_input_line",
+     "question_correct_suggested_answers",
+     "question_incorrect_scored_answers"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_simple_question_answer_result",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user_input_line"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_conditional_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "For survey containing conditional questions, we need a triggered_questions_by_answer map that contains\n       {key: answer, value: the question that the answer triggers, if selected},\nThe idea is to be able to verify, on every answer check, if this answer is triggering the display\nof another question.\nIf answer is not in the conditional map:\n   - nothing happens.\nIf the answer is in the conditional map:\n   - If we are in ONE PAGE survey : (handled at CLIENT side)\n       -> display immediately the depending question\n   - If we are in PAGE PER SECTION : (handled at CLIENT side)\n       - If related question is on the same page :\n           -> display immediately the depending question\n       - If the related question is not on the same page :\n           -> keep the answers in memory and check at next page load if the depending question is in there and\n              display it, if so.\n   - If we are in PAGE PER QUESTION : (handled at SERVER side)\n       -> During submit, determine which is the next question to display getting the next question\n          that is the next in sequence and that is either not triggered by another question's answer, or that\n          is triggered by an already selected answer.\nTo do all this, we need to return:\n   - triggering_answers_by_question: dict -> for a given question, the answers that triggers it\n       Used mainly to ease template rendering\n   - triggered_questions_by_answer: dict -> for a given answer, list of questions triggered by this answer;\n       Used mainly for dynamic show/hide behaviour at client side\n   - list of all selected answers: [answer_id1, answer_id2, ...] (for survey reloading, otherwise, this list is\n     updated at client side)",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_selected_suggested_answers",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "For now, only simple and multiple choices question type are handled by the conditional questions feature.\nMapping all the suggested answers selected by the user will also include answers from matrix question type,\nThose ones won't be used.\nMaybe someday, conditional questions feature will be extended to work with matrix question.\n:return: all the suggested answer selected by the user.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_clear_inactive_conditional_answers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "Clean eventual answers on conditional questions that should not have been displayed to user.\nThis method is used mainly for page per question survey, a similar method does the same treatment\nat client side for the other survey layouts.\nE.g.: if depending answer was uncheck after answering conditional question, we need to clear answers\n      of that conditional question, for two reasons:\n      - ensure correct scoring\n      - if the selected answer triggers another question later in the survey, if the answer is not cleared,\n        a question that should not be displayed to the user will be.\n\nTODO DBE: Maybe this can be the only cleaning method, even for section_per_page or one_page where\nconditional questions are, for now, cleared in JS directly. But this can be annoying if user typed a long\nanswer, changed their mind unchecking depending answer and changed again their mind by rechecking the depending\nanswer -> For now, the long answer will be lost. If we use this as the master cleaning method,\nlong answer will be cleared only during submit.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_inactive_conditional_questions",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_print_questions",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "Get the questions to display : the ones that should have been answered = active questions\n    In case of session, active questions are based on most voted answers\n:return: active survey.question browse records",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_skipped_page_or_question",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "Get next skipped question or page in case the option 'can_go_back' is set on the survey\nIt loops to the first skipped question or page if 'last_displayed_page_id' is the last\nskipped question or page.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_skipped_questions",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_last_skipped_page_or_question",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "page_or_question"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "In case of a submitted survey tells if the question or page is the last\nskipped page or question.\n\nThis is used to :\n\n- Display a Submit button if the actual question is the last skipped question.\n- Avoid displaying a Submit button on the last survey question if there are\n  still skipped questions before.\n- Avoid displaying the next page if submitting the latest skipped question.\n\n:param page_or_question: page if survey's layout is page_per_section, question if page_per_question.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_new_participation_subscribers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_leads_from_generative_answers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey_crm",
+      "decorators": [],
+      "documentation": "This method filters the user inputs in self to only keep those that create a lead.\nAfter a step of data preparation, create related leads in batch. ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_common_survey_lead_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "survey"
+    ],
+    "definitions": [
+     {
+      "package": "survey_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_user_input_lead_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey_crm",
+      "decorators": [],
+      "documentation": "This method prepares the user values dictionary for creating the lead ",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_lead_values_from_user_input_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey_crm",
+      "decorators": [],
+      "documentation": "This prepares dict-formatted lead values from user input lines. It formats\nlead description and get user's nickname and his email, if they're provided.\nTo write the description (notes in CRM) in HTML format, there are 5 cases:\n    - Suggested answers question: <li>Question — Answer 1, Answer 3</li>\n    - Matrix question:  <li>\n                            Question\n                            <br/>&emsp;Line label 1 — Answer 1\n                            <br/>&emsp;Line label 1 — Answer 3\n                            <br/>&emsp;Line label 4 — Answer 2\n                        </li>\n    - Long text question:   <li>\n                                Question\n                                <br/>&emsp;Text line 1\n                                <br/>&emsp;Text line 2\n                                <br/>&emsp;Text line 3\n                            </li>\n    - Other types: <li>Question — Answer</li>\n    - Skipped question: <li>Question — <i>Skipped</i></li>\n\nNote: '<br/>&emsp;' is used to get a line break with indentation",
+      "size_in_lines": 120,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_redirect_lead",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey_crm",
+      "decorators": [],
+      "documentation": "Shows the lead associated, created from inputs ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_for_failed_attempt",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides_survey",
+      "decorators": [],
+      "documentation": "If the user fails their last attempt at a course certification,\nwe remove them from the members of the course (and they have to enroll again).\nThey receive an email in the process notifying them of their failure and suggesting\nthey enroll to the course again.\n\nThe purpose is to have a 'certification flow' where the user can re-purchase the\ncertification when they have failed it.",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_save_lines",
+    "package": "survey",
+    "kind": "UserError",
+    "message": "This answer cannot be overwritten."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "hr_recruitment_survey.access_survey_user_input_recruitment_manager",
+    "package": "hr_recruitment_survey",
+    "name": "survey.user_input.recruitment.manager",
+    "entity": "survey.user_input",
+    "group": "hr_recruitment.group_hr_recruitment_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.access_survey_user_input_recruitment_user",
+    "package": "hr_recruitment_survey",
+    "name": "survey.user_input.recruitment.user",
+    "entity": "survey.user_input",
+    "group": "hr_recruitment.group_hr_recruitment_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.access_survey_user_input_recruitment_interviewer",
+    "package": "hr_recruitment_survey",
+    "name": "survey.user.input.recruitment.interviewer",
+    "entity": "survey.user_input",
+    "group": "hr_recruitment.group_hr_recruitment_interviewer",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "survey.access_survey_user_input_all",
+    "package": "survey",
+    "name": "survey.user_input.all",
+    "entity": "survey.user_input",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "survey.access_survey_user_input_user",
+    "package": "survey",
+    "name": "survey.user_input.user",
+    "entity": "survey.user_input",
+    "group": "base.group_user",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "survey.access_survey_user_input_survey_user",
+    "package": "survey",
+    "name": "survey.user_input.survey.user",
+    "entity": "survey.user_input",
+    "group": "group_survey_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "survey.access_survey_user_input_survey_manager",
+    "package": "survey",
+    "name": "survey.user_input.survey.manager",
+    "entity": "survey.user_input",
+    "group": "group_survey_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_slides_survey.access_survey_user_input_slides_officer",
+    "package": "website_slides_survey",
+    "name": "access.survey.user.input.slides.officer",
+    "entity": "survey.user_input",
+    "group": "website_slides.group_website_slides_officer",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_recruitment_survey.survey_user_input_rule_recruitment_manager",
+    "package": "hr_recruitment_survey",
+    "name": "Survey user input: recruitment manager: all recruitment",
+    "entity": "survey.user_input",
+    "domain": "[('survey_id.survey_type', '=', 'recruitment')]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.survey_user_input_rule_recruitment_user",
+    "package": "hr_recruitment_survey",
+    "name": "Survey user input: recruitment officer: unrestricted or in restricted users",
+    "entity": "survey.user_input",
+    "domain": "[\n                '&', ('survey_id.survey_type', '=', 'recruitment'),\n                '|',  ('survey_id.restrict_user_ids', 'in', user.id),\n                        ('survey_id.restrict_user_ids', '=', False)]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_user'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.survey_user_input_rule_recruitment_interviewer",
+    "package": "hr_recruitment_survey",
+    "name": "Survey user input: recruitment interviewer: read survey answers for which they are set as interviewer",
+    "entity": "survey.user_input",
+    "domain": "[\n                '|',\n                    ('applicant_id.interviewer_ids', 'in', user.id),\n                    ('applicant_id.job_id.interviewer_ids', 'in', user.id),\n                ]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_interviewer'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "survey.survey_user_input_rule_survey_manager",
+    "package": "survey",
+    "name": "Survey user input: manager: all non specialized surveys",
+    "entity": "survey.user_input",
+    "domain": "[('survey_id.survey_type', 'in', ('assessment', 'custom', 'live_session', 'survey'))]",
+    "groups": "[(4, ref('group_survey_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "survey.survey_user_input_rule_survey_user",
+    "package": "survey",
+    "name": "Survey user input: officer: unrestricted survey or in restricted users",
+    "entity": "survey.user_input",
+    "domain": "[\n                '&', ('survey_id.survey_type', 'in', ('assessment', 'custom', 'live_session', 'survey')),\n                '|', ('survey_id.restrict_user_ids', 'in', user.id),\n                     ('survey_id.restrict_user_ids', '=', False)]",
+    "groups": "[(4, ref('group_survey_user'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "website_slides_survey.survey_user_input_rule_slide_channel_officer",
+    "package": "website_slides_survey",
+    "name": "Survey user input: slide channel officer on certification: read",
+    "entity": "survey.user_input",
+    "domain": "[('survey_id.certification', '=', True),\n            ('survey_id.survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),\n            '|', ('survey_id.restrict_user_ids', '=', False), ('survey_id.restrict_user_ids', 'in', user.id)]",
+    "groups": "[(4, ref('website_slides.group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "survey.survey_user_input_view_search",
+    "package": "survey",
+    "name": "survey.user_input.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Survey User Inputs"
+     },
+     "fields": [
+      {
+       "name": "email",
+       "string": "Participant",
+       "filter_domain": "[                     '|',                     ('partner_id', 'ilike', self),                     ('email', 'ilike', self)]"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "survey_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "new",
+       "string": "New",
+       "domain": "[('state', '=', 'new')]"
+      },
+      {
+       "name": "in_progress",
+       "string": "In Progress",
+       "domain": "[('state', '=', 'in_progress')]"
+      },
+      {
+       "name": "completed",
+       "string": "Completed",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "scoring_success",
+       "string": "Quiz passed",
+       "domain": "[('scoring_success','=', True)]"
+      },
+      {
+       "name": "test",
+       "string": "Tests Only",
+       "domain": "[('test_entry','=', True)]"
+      },
+      {
+       "name": "not_test",
+       "string": "Exclude Tests",
+       "domain": "[('test_entry','=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_survey",
+       "string": "Survey",
+       "domain": "[]",
+       "context": "{'group_by': 'survey_id'}"
+      },
+      {
+       "name": "group_by_email",
+       "string": "Email",
+       "domain": "[]",
+       "context": "{'group_by': 'email'}"
+      },
+      {
+       "name": "group_by_partner",
+       "string": "Partner",
+       "domain": "[]",
+       "context": "{'group_by': 'partner_id'}"
+      },
+      {
+       "name": "group_by_lang",
+       "string": "Language",
+       "domain": "[]",
+       "context": "{'group_by': 'lang_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "survey.survey_user_input_view_form",
+    "package": "survey",
+    "name": "survey.user_input.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Survey User inputs",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "attempts_count",
+       "invisible": "1"
+      },
+      {
+       "name": "attempts_count",
+       "widget": "statinfo",
+       "string": "Attempts"
+      },
+      {
+       "name": "test_entry",
+       "invisible": "1"
+      },
+      {
+       "name": "survey_id"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "deadline",
+       "invisible": "state == 'done' and not deadline"
+      },
+      {
+       "name": "is_attempts_limited",
+       "invisible": "1"
+      },
+      {
+       "name": "attempts_number",
+       "nolabel": "1"
+      },
+      {
+       "name": "attempts_limit",
+       "nolabel": "1"
+      },
+      {
+       "name": "test_entry",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "scoring_type",
+       "invisible": "1"
+      },
+      {
+       "name": "scoring_success",
+       "invisible": "1"
+      },
+      {
+       "name": "scoring_percentage",
+       "nolabel": "1"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "email",
+       "widget": "email"
+      },
+      {
+       "name": "access_token",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "user_input_line_ids",
+       "readonly": "True",
+       "mode": "list"
+      },
+      {
+       "name": "question_sequence",
+       "column_invisible": "True"
+      },
+      {
+       "name": "create_date",
+       "optional": "hidden"
+      },
+      {
+       "name": "page_id",
+       "optional": "hidden"
+      },
+      {
+       "name": "question_id"
+      },
+      {
+       "name": "answer_type",
+       "optional": "hidden"
+      },
+      {
+       "name": "skipped"
+      },
+      {
+       "name": "display_name",
+       "string": "Answer"
+      },
+      {
+       "name": "answer_is_correct"
+      },
+      {
+       "name": "answer_score",
+       "sum": "Score"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_resend",
+       "string": "Resend Invitation",
+       "type": "object",
+       "invisible": "state == 'done' or not partner_id and not email",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_print_answers",
+       "string": "Print",
+       "type": "object",
+       "invisible": "state != 'done'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_redirect_to_attempts",
+       "type": "object",
+       "invisible": "attempts_count == 1",
+       "class": "oe_stat_button",
+       "icon": "fa-files-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_answers",
+       "string": "Answers",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 1,
+      "email": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_resend",
+       "string": "Resend Invitation",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "state == 'done' or not partner_id and not email"
+      },
+      {
+       "name": "action_print_answers",
+       "invisible": "state != 'done'",
+       "string": "Print",
+       "type": "object",
+       "class": "oe_highlight"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "action_redirect_to_attempts",
+       "type": "object",
+       "class": "oe_stat_button",
+       "invisible": "attempts_count == 1",
+       "icon": "fa-files-o"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "survey.survey_user_input_view_tree",
+    "package": "survey",
+    "name": "survey.user_input.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Survey User inputs",
+      "decoration-muted": "test_entry == True",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "survey_id"
+      },
+      {
+       "name": "nickname",
+       "optional": "hide"
+      },
+      {
+       "name": "partner_id",
+       "optional": "show"
+      },
+      {
+       "name": "email",
+       "optional": "show"
+      },
+      {
+       "name": "attempts_number"
+      },
+      {
+       "name": "deadline"
+      },
+      {
+       "name": "test_entry",
+       "column_invisible": "True"
+      },
+      {
+       "name": "scoring_success"
+      },
+      {
+       "name": "scoring_percentage"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-warning": "state == 'in_progress'",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state == 'new'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "test_entry == True"
+     }
+    }
+   },
+   {
+    "external_identifier": "survey.survey_user_input_viuew_kanban",
+    "package": "survey",
+    "name": "survey.user_input.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "create": "false",
+      "group_create": "false"
+     },
+     "fields": [
+      {
+       "name": "survey_id"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "options": "{'classes': {'new': 'default', 'done': 'success', 'in_progress':'warning'}}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "label_selection": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "survey_crm.survey_user_input_view_form",
+    "package": "survey_crm",
+    "name": "survey.user_input.view.form.inherit.survey.crm",
+    "view_type": "xpath",
+    "inherits_view": "survey.survey_user_input_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_redirect_to_attempts']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_redirect_lead",
+       "type": "object",
+       "invisible": "not lead_id",
+       "class": "oe_stat_button",
+       "icon": "fa-star"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_redirect_to_attempts']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "survey.action_survey_user_input",
+    "package": "survey",
+    "name": "Participants",
+    "view_mode": "list,kanban,form",
+    "view_id": "survey_user_input_view_tree",
+    "search_view_id": "survey_user_input_view_search",
+    "domain": "[('survey_id.survey_type', 'in', ('assessment', 'custom', 'live_session', 'survey'))]",
+    "context": "{'search_default_group_by_survey': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No answers yet!\n            </p><p>\n                You can share your links through different means: email, invite shortcut, live presentation, ...\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "survey.user_input"
+   },
+   {
+    "external_identifier": "survey.res_partner_action_certifications",
+    "package": "survey",
+    "name": "Certifications Succeeded",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_scoring_success': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "survey.user_input"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "survey.certification_report",
+    "package": "survey",
+    "name": "Certifications",
+    "report_type": "qweb-pdf",
+    "report_name": "survey.certification_report_view",
+    "report_file": "survey.certification_report_view",
+    "print_report_name": "'Certification - %s' % (object.survey_id.display_name)",
+    "attachment": "'certification.pdf'",
+    "attachment_use": null,
+    "binding_model_id": "model_survey_user_input",
+    "binding_type": "report",
+    "paperformat_id": "paperformat_survey_certification",
+    "groups_id": null,
+    "multi": null,
+    "entity": "survey.user_input"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "hr_recruitment_survey.mail_template_applicant_interview_invite",
+    "package": "hr_recruitment_survey",
+    "name": "Applicant: Interview",
+    "subject": "Participate to {{ object.survey_id.display_name }} interview"
+   },
+   {
+    "external_identifier": "survey.mail_template_user_input_invite",
+    "package": "survey",
+    "name": "Survey: Invite",
+    "subject": "Participate to {{ object.survey_id.display_name }} survey"
+   },
+   {
+    "external_identifier": "survey.mail_template_certification",
+    "package": "survey",
+    "name": "Survey: Certification Success",
+    "subject": "Certification: {{ object.survey_id.display_name }}"
+   },
+   {
+    "external_identifier": "website_slides_survey.mail_template_user_input_certification_failed",
+    "package": "website_slides_survey",
+    "name": "Survey: Certification Failure",
+    "subject": "You have failed the course: {{ object.slide_partner_id.channel_id.name }}"
+   }
+  ]
+ }
+}

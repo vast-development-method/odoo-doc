@@ -1,0 +1,5695 @@
+{
+ "catalog": {
+  "name": "entity:discuss.channel",
+  "description": "Complete definition of entity Discussion Channel (discuss.channel).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "discuss.channel",
+  "storage_name": "discuss_channel",
+  "full_name": "Discussion Channel",
+  "kind": "persistent",
+  "description": "Discussion Channel",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "calendar",
+   "im_livechat",
+   "crm_livechat",
+   "hr",
+   "mail_bot",
+   "website_livechat",
+   "website_crm_livechat"
+  ],
+  "mixins": [
+   "mail.thread",
+   "bus.listener.mixin",
+   "rating.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": "read",
+  "primary_email_field": null,
+  "other_attributes": {
+   "_mail_flat_thread": false
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "mail",
+    "full_name": "Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "help": "Set active to false to hide the channel without removing it.",
+    "defined_in_package": "mail",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "channel_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "chat",
+      "Chat"
+     ],
+     [
+      "channel",
+      "Channel"
+     ],
+     [
+      "group",
+      "Group"
+     ],
+     [
+      "livechat",
+      "Livechat Conversation"
+     ]
+    ],
+    "string": "Channel Type",
+    "required": true,
+    "default": "channel",
+    "readonly": true,
+    "help": "Chat is private and unique between 2 persons. Group is private among invited persons. Channel can be freely joined (depending on its configuration).",
+    "defined_in_package": "mail",
+    "selection_added_by": [
+     "im_livechat"
+    ],
+    "ondelete": {
+     "livechat": "cascade"
+    },
+    "extended_in_packages": [
+     "im_livechat"
+    ],
+    "full_name": "Channel Type"
+   },
+   {
+    "name": "is_editable",
+    "type": "Boolean",
+    "string": "Is Editable",
+    "compute": "_compute_is_editable",
+    "defined_in_package": "mail",
+    "full_name": "Is Editable"
+   },
+   {
+    "name": "default_display_mode",
+    "type": "Selection",
+    "string": "Default Display Mode",
+    "selection": [
+     [
+      "video_full_screen",
+      "Full screen video"
+     ]
+    ],
+    "help": "Determines how the channel will be displayed by default when opening it from its invitation link. No value means display text (no voice/video).",
+    "defined_in_package": "mail",
+    "full_name": "Default Display Mode"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Description",
+    "defined_in_package": "mail",
+    "full_name": "Description"
+   },
+   {
+    "name": "image_128",
+    "type": "Image",
+    "string": "Image",
+    "max_width": 128,
+    "max_height": 128,
+    "defined_in_package": "mail",
+    "full_name": "Image"
+   },
+   {
+    "name": "avatar_128",
+    "type": "Image",
+    "string": "Avatar",
+    "max_width": 128,
+    "max_height": 128,
+    "compute": "_compute_avatar_128",
+    "defined_in_package": "mail",
+    "full_name": "Avatar"
+   },
+   {
+    "name": "avatar_cache_key",
+    "type": "Char",
+    "compute": "_compute_avatar_cache_key",
+    "defined_in_package": "mail",
+    "string": "Avatar Cache Key",
+    "full_name": "Avatar Cache Key"
+   },
+   {
+    "name": "channel_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "string": "Partners",
+    "compute": "_compute_channel_partner_ids",
+    "inverse": "_inverse_channel_partner_ids",
+    "search": "_search_channel_partner_ids",
+    "defined_in_package": "mail",
+    "full_name": "Partners",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "channel_member_ids",
+    "type": "One2many",
+    "comodel": "discuss.channel.member",
+    "inverse_name": "channel_id",
+    "string": "Members",
+    "defined_in_package": "mail",
+    "full_name": "Members",
+    "target_entity": "discuss.channel.member"
+   },
+   {
+    "name": "parent_channel_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel",
+    "help": "Parent channel",
+    "ondelete": "cascade",
+    "index": true,
+    "bypass_search_access": true,
+    "readonly": true,
+    "defined_in_package": "mail",
+    "string": "Parent Channel",
+    "full_name": "Parent Channel",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "sub_channel_ids",
+    "type": "One2many",
+    "comodel": "discuss.channel",
+    "inverse_name": "parent_channel_id",
+    "string": "Sub Channels",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Sub Channels",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "from_message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "help": "The message the channel was created from.",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "string": "From Message",
+    "full_name": "From Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "pinned_message_ids",
+    "type": "One2many",
+    "comodel": "mail.message",
+    "inverse_name": "res_id",
+    "domain": [
+     [
+      "model",
+      "=",
+      "discuss.channel"
+     ],
+     [
+      "pinned_at",
+      "!=",
+      false
+     ]
+    ],
+    "string": "Pinned Messages",
+    "defined_in_package": "mail",
+    "full_name": "Pinned Messages",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "sfu_channel_uuid",
+    "type": "Char",
+    "groups": "base.group_system",
+    "defined_in_package": "mail",
+    "string": "Sfu Channel Uuid",
+    "full_name": "Sfu Channel Uuid"
+   },
+   {
+    "name": "sfu_server_url",
+    "type": "Char",
+    "groups": "base.group_system",
+    "defined_in_package": "mail",
+    "string": "Sfu Server Uniform resource locator",
+    "full_name": "Sfu Server Uniform resource locator"
+   },
+   {
+    "name": "rtc_session_ids",
+    "type": "One2many",
+    "comodel": "discuss.channel.rtc.session",
+    "inverse_name": "channel_id",
+    "groups": "base.group_system",
+    "defined_in_package": "mail",
+    "string": "Rtc Session",
+    "full_name": "Rtc Session",
+    "target_entity": "discuss.channel.rtc.session"
+   },
+   {
+    "name": "call_history_ids",
+    "type": "One2many",
+    "comodel": "discuss.call.history",
+    "inverse_name": "channel_id",
+    "defined_in_package": "mail",
+    "string": "Call History",
+    "full_name": "Call History",
+    "target_entity": "discuss.call.history"
+   },
+   {
+    "name": "is_member",
+    "type": "Boolean",
+    "string": "Is Member",
+    "compute": "_compute_is_member",
+    "search": "_search_is_member",
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "full_name": "Is Member"
+   },
+   {
+    "name": "self_member_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel.member",
+    "compute": "_compute_self_member_id",
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "string": "Self Member",
+    "full_name": "Self Member",
+    "target_entity": "discuss.channel.member"
+   },
+   {
+    "name": "invited_member_ids",
+    "type": "One2many",
+    "comodel": "discuss.channel.member",
+    "compute": "_compute_invited_member_ids",
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "string": "Invited Member",
+    "full_name": "Invited Member",
+    "target_entity": "discuss.channel.member"
+   },
+   {
+    "name": "member_count",
+    "type": "Integer",
+    "string": "Member Count",
+    "compute": "_compute_member_count",
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "full_name": "Member Count"
+   },
+   {
+    "name": "message_count",
+    "type": "Integer",
+    "string": "# Messages",
+    "readonly": true,
+    "compute": "_compute_message_count",
+    "defined_in_package": "mail",
+    "full_name": "# Messages"
+   },
+   {
+    "name": "last_interest_dt",
+    "type": "Datetime",
+    "string": "Last Interest",
+    "default": {
+     "dynamic": "lambda self: fields.Datetime.now() - timedelta(seconds=1)"
+    },
+    "index": true,
+    "help": "Contains the date and time of the last interesting event that happened in this channel. This updates itself when new message posted.",
+    "defined_in_package": "mail",
+    "full_name": "Last Interest"
+   },
+   {
+    "name": "group_ids",
+    "type": "Many2many",
+    "comodel": "res.groups",
+    "string": "Auto Subscription",
+    "help": "Members of those groups will automatically added as followers. Note that they will be able to manage their subscription manually if necessary.",
+    "defined_in_package": "mail",
+    "full_name": "Auto Subscription",
+    "target_entity": "res.groups"
+   },
+   {
+    "name": "uuid",
+    "type": "Char",
+    "string": "UUID",
+    "size": 50,
+    "default": {
+     "dynamic": "_generate_random_token"
+    },
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "UUID"
+   },
+   {
+    "name": "group_public_id",
+    "type": "Many2one",
+    "comodel": "res.groups",
+    "string": "Authorized Group",
+    "compute": "_compute_group_public_id",
+    "recursive": true,
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Authorized Group",
+    "target_entity": "res.groups"
+   },
+   {
+    "name": "invitation_url",
+    "type": "Char",
+    "string": "Invitation URL",
+    "compute": "_compute_invitation_url",
+    "defined_in_package": "mail",
+    "full_name": "Invitation uniform resource locator"
+   },
+   {
+    "name": "channel_name_member_ids",
+    "type": "One2many",
+    "comodel": "discuss.channel.member",
+    "compute": "_compute_channel_name_member_ids",
+    "help": "Members from which the channel name is computed when the name field is empty.",
+    "defined_in_package": "mail",
+    "string": "Channel Name Member",
+    "full_name": "Channel Name Member",
+    "target_entity": "discuss.channel.member"
+   },
+   {
+    "name": "calendar_event_ids",
+    "type": "One2many",
+    "comodel": "calendar.event",
+    "inverse_name": "videocall_channel_id",
+    "defined_in_package": "calendar",
+    "string": "Calendar Event",
+    "full_name": "Calendar Event",
+    "target_entity": "calendar.event"
+   },
+   {
+    "name": "duration",
+    "type": "Float",
+    "string": "Duration",
+    "compute": "_compute_duration",
+    "help": "Duration of the session in hours",
+    "defined_in_package": "im_livechat",
+    "full_name": "Duration"
+   },
+   {
+    "name": "livechat_lang_id",
+    "type": "Many2one",
+    "comodel": "res.lang",
+    "string": "Language",
+    "help": "Lang of the visitor of the channel.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Language",
+    "target_entity": "res.lang"
+   },
+   {
+    "name": "livechat_end_dt",
+    "type": "Datetime",
+    "string": "Session end date",
+    "help": "Session is closed when either the visitor or the last agent leaves the conversation.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Session end date"
+   },
+   {
+    "name": "livechat_channel_id",
+    "type": "Many2one",
+    "comodel": "im_livechat.channel",
+    "string": "Channel",
+    "index": "btree_not_null",
+    "defined_in_package": "im_livechat",
+    "full_name": "Channel",
+    "target_entity": "im_livechat.channel"
+   },
+   {
+    "name": "livechat_operator_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Operator",
+    "index": "btree_not_null",
+    "defined_in_package": "im_livechat",
+    "full_name": "Operator",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "livechat_channel_member_history_ids",
+    "type": "One2many",
+    "comodel": "im_livechat.channel.member.history",
+    "inverse_name": "channel_id",
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Channel Member History",
+    "full_name": "Livechat Channel Member History",
+    "target_entity": "im_livechat.channel.member.history"
+   },
+   {
+    "name": "livechat_expertise_ids",
+    "type": "Many2many",
+    "comodel": "im_livechat.expertise",
+    "relation": "discuss_channel_im_livechat_expertise_rel",
+    "column1": "discuss_channel_id",
+    "column2": "im_livechat_expertise_id",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Expertise",
+    "full_name": "Livechat Expertise",
+    "target_entity": "im_livechat.expertise"
+   },
+   {
+    "name": "livechat_agent_history_ids",
+    "type": "One2many",
+    "comodel": "im_livechat.channel.member.history",
+    "string": "Agents (History)",
+    "compute": "_compute_livechat_agent_history_ids",
+    "search": "_search_livechat_agent_history_ids",
+    "defined_in_package": "im_livechat",
+    "full_name": "Agents (History)",
+    "target_entity": "im_livechat.channel.member.history"
+   },
+   {
+    "name": "livechat_bot_history_ids",
+    "type": "One2many",
+    "comodel": "im_livechat.channel.member.history",
+    "string": "Bots (History)",
+    "compute": "_compute_livechat_bot_history_ids",
+    "search": "_search_livechat_bot_history_ids",
+    "defined_in_package": "im_livechat",
+    "full_name": "Bots (History)",
+    "target_entity": "im_livechat.channel.member.history"
+   },
+   {
+    "name": "livechat_customer_history_ids",
+    "type": "One2many",
+    "comodel": "im_livechat.channel.member.history",
+    "string": "Customers (History)",
+    "compute": "_compute_livechat_customer_history_ids",
+    "search": "_search_livechat_customer_history_ids",
+    "defined_in_package": "im_livechat",
+    "full_name": "Customers (History)",
+    "target_entity": "im_livechat.channel.member.history"
+   },
+   {
+    "name": "livechat_agent_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "im_livechat_channel_member_history_discuss_channel_agent_rel",
+    "string": "Agents",
+    "compute": "_compute_livechat_agent_partner_ids",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Agents",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "livechat_bot_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "im_livechat_channel_member_history_discuss_channel_bot_rel",
+    "string": "Bots",
+    "compute": "_compute_livechat_bot_partner_ids",
+    "context": {
+     "active_test": false
+    },
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Bots",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "livechat_customer_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "im_livechat_channel_member_history_discuss_channel_customer_rel",
+    "string": "Customers (Partners)",
+    "compute": "_compute_livechat_customer_partner_ids",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Customers (Partners)",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "livechat_customer_guest_ids",
+    "type": "Many2many",
+    "comodel": "mail.guest",
+    "string": "Customers (Guests)",
+    "compute": "_compute_livechat_customer_guest_ids",
+    "defined_in_package": "im_livechat",
+    "full_name": "Customers (Guests)",
+    "target_entity": "mail.guest"
+   },
+   {
+    "name": "livechat_agent_requesting_help_history",
+    "type": "Many2one",
+    "comodel": "im_livechat.channel.member.history",
+    "string": "Help Requested (Agent)",
+    "compute": "_compute_livechat_agent_requesting_help_history",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Help Requested (Agent)",
+    "target_entity": "im_livechat.channel.member.history"
+   },
+   {
+    "name": "livechat_agent_providing_help_history",
+    "type": "Many2one",
+    "comodel": "im_livechat.channel.member.history",
+    "string": "Help Provided (Agent)",
+    "compute": "_compute_livechat_agent_providing_help_history",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Help Provided (Agent)",
+    "target_entity": "im_livechat.channel.member.history"
+   },
+   {
+    "name": "livechat_note",
+    "type": "Html",
+    "string": "Live Chat Note",
+    "sanitize_style": true,
+    "groups": "base.group_user",
+    "help": "Note about the session, visible to all internal users having access to the session.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Live Chat Note"
+   },
+   {
+    "name": "livechat_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "in_progress",
+      "In progress"
+     ],
+     [
+      "waiting",
+      "Waiting for customer"
+     ],
+     [
+      "need_help",
+      "Looking for help"
+     ]
+    ],
+    "compute": "_compute_livechat_status",
+    "groups": "base.group_user",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Status",
+    "full_name": "Livechat Status"
+   },
+   {
+    "name": "livechat_outcome",
+    "type": "Selection",
+    "selection": [
+     [
+      "no_answer",
+      "Never Answered"
+     ],
+     [
+      "no_agent",
+      "No one Available"
+     ],
+     [
+      "no_failure",
+      "Success"
+     ],
+     [
+      "escalated",
+      "Escalated"
+     ]
+    ],
+    "compute": "_compute_livechat_outcome",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Outcome",
+    "full_name": "Livechat Outcome"
+   },
+   {
+    "name": "livechat_conversation_tag_ids",
+    "type": "Many2many",
+    "comodel": "im_livechat.conversation.tag",
+    "relation": "livechat_conversation_tag_rel",
+    "groups": "im_livechat.im_livechat_group_user",
+    "string": "Live Chat Conversation Tags",
+    "help": "Tags to qualify the conversation.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Live Chat Conversation Tags",
+    "target_entity": "im_livechat.conversation.tag"
+   },
+   {
+    "name": "livechat_start_hour",
+    "type": "Float",
+    "string": "Session Start Hour",
+    "compute": "_compute_livechat_start_hour",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Session Start Hour"
+   },
+   {
+    "name": "livechat_week_day",
+    "type": "Selection",
+    "selection": [
+     [
+      "0",
+      "Monday"
+     ],
+     [
+      "1",
+      "Tuesday"
+     ],
+     [
+      "2",
+      "Wednesday"
+     ],
+     [
+      "3",
+      "Thursday"
+     ],
+     [
+      "4",
+      "Friday"
+     ],
+     [
+      "5",
+      "Saturday"
+     ],
+     [
+      "6",
+      "Sunday"
+     ]
+    ],
+    "string": "Day of the Week",
+    "compute": "_compute_livechat_week_day",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Day of the Week"
+   },
+   {
+    "name": "livechat_matches_self_lang",
+    "type": "Boolean",
+    "compute": "_compute_livechat_matches_self_lang",
+    "search": "_search_livechat_matches_self_lang",
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Matches Self Lang",
+    "full_name": "Livechat Matches Self Lang"
+   },
+   {
+    "name": "livechat_matches_self_expertise",
+    "type": "Boolean",
+    "compute": "_compute_livechat_matches_self_expertise",
+    "search": "_search_livechat_matches_self_expertise",
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Matches Self Expertise",
+    "full_name": "Livechat Matches Self Expertise"
+   },
+   {
+    "name": "chatbot_current_step_id",
+    "type": "Many2one",
+    "comodel": "chatbot.script.step",
+    "string": "Chatbot Current Step",
+    "defined_in_package": "im_livechat",
+    "full_name": "Chatbot Current Step",
+    "target_entity": "chatbot.script.step"
+   },
+   {
+    "name": "chatbot_message_ids",
+    "type": "One2many",
+    "comodel": "chatbot.message",
+    "inverse_name": "discuss_channel_id",
+    "string": "Chatbot Messages",
+    "groups": "im_livechat.im_livechat_group_manager",
+    "defined_in_package": "im_livechat",
+    "full_name": "Chatbot Messages",
+    "target_entity": "chatbot.message"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Country",
+    "help": "Country of the visitor of the channel",
+    "defined_in_package": "im_livechat",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "livechat_failure",
+    "type": "Selection",
+    "selection": [
+     [
+      "no_answer",
+      "Never Answered"
+     ],
+     [
+      "no_agent",
+      "No one Available"
+     ],
+     [
+      "no_failure",
+      "No Failure"
+     ]
+    ],
+    "string": "Live Chat Session Failure",
+    "defined_in_package": "im_livechat",
+    "full_name": "Live Chat Session Failure"
+   },
+   {
+    "name": "livechat_is_escalated",
+    "type": "Boolean",
+    "string": "Is session escalated",
+    "compute": "_compute_livechat_is_escalated",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Is session escalated"
+   },
+   {
+    "name": "rating_last_text",
+    "type": "Selection",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Rating Last Text",
+    "full_name": "Rating Last Text"
+   },
+   {
+    "name": "lead_ids",
+    "type": "One2many",
+    "comodel": "crm.lead",
+    "inverse_name": "origin_channel_id",
+    "string": "Leads",
+    "groups": "sales_team.group_sale_salesman",
+    "help": "The channel becomes accessible to sales users when leads are set.",
+    "defined_in_package": "crm_livechat",
+    "full_name": "Leads",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "has_crm_lead",
+    "type": "Boolean",
+    "compute": "_compute_has_crm_lead",
+    "store": true,
+    "defined_in_package": "crm_livechat",
+    "string": "Has Customer relationship management Lead",
+    "full_name": "Has Customer relationship management Lead"
+   },
+   {
+    "name": "subscription_department_ids",
+    "type": "Many2many",
+    "comodel": "hr.department",
+    "string": "HR Departments",
+    "help": "Automatically subscribe members of those departments to the channel.",
+    "defined_in_package": "hr",
+    "full_name": "human resources Departments",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "is_pending_chat_request",
+    "type": "Boolean",
+    "string": "When created from an operator, whether the channel is yet to be opened on the visitor side.",
+    "defined_in_package": "website_livechat",
+    "full_name": "When created from an operator, whether the channel is yet to be opened on the visitor side."
+   },
+   {
+    "name": "livechat_visitor_id",
+    "type": "Many2one",
+    "comodel": "website.visitor",
+    "string": "Visitor",
+    "index": "btree_not_null",
+    "defined_in_package": "website_livechat",
+    "full_name": "Visitor",
+    "target_entity": "website.visitor"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_from_message_id_unique",
+    "kind": "Constraint",
+    "definition": "UNIQUE(from_message_id)",
+    "message": "Messages can only be linked to one sub-channel",
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_uuid_unique",
+    "kind": "Constraint",
+    "definition": "UNIQUE(uuid)",
+    "message": "The channel UUID must be unique",
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_group_public_id_check",
+    "kind": "Constraint",
+    "definition": "CHECK (channel_type = 'channel' OR group_public_id IS NULL)",
+    "message": "Group authorization and group auto-subscription are only supported on channels.",
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_livechat_operator_id",
+    "kind": "Constraint",
+    "definition": "CHECK((channel_type = 'livechat' and livechat_operator_id is not null) or (channel_type != 'livechat'))",
+    "message": "Livechat Operator ID is required for a channel of type livechat.",
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_livechat_end_dt_status_constraint",
+    "kind": "Constraint",
+    "definition": "CHECK(livechat_end_dt IS NULL or livechat_status IS NULL)",
+    "message": "Closed Live Chat session should not have a status.",
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_livechat_end_dt_idx",
+    "kind": "Index",
+    "definition": "(livechat_end_dt) WHERE livechat_end_dt IS NULL",
+    "message": null,
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_livechat_failure_idx",
+    "kind": "Index",
+    "definition": "(livechat_failure) WHERE livechat_failure IN ('no_answer', 'no_agent')",
+    "message": null,
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_livechat_is_escalated_idx",
+    "kind": "Index",
+    "definition": "(livechat_is_escalated) WHERE livechat_is_escalated IS TRUE",
+    "message": null,
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_livechat_channel_type_create_date_idx",
+    "kind": "Index",
+    "definition": "(channel_type, create_date) WHERE channel_type = 'livechat'",
+    "message": null,
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_has_crm_lead_index",
+    "kind": "Index",
+    "definition": "(has_crm_lead) WHERE has_crm_lead IS TRUE",
+    "message": null,
+    "defined_in_package": "crm_livechat"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_generate_random_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constraint_from_message_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "from_message_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Cannot create %(channels)s: initial message should belong to parent channel or one of its sub-channels.",
+        "line": 144
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_constraint_parent_channel_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_channel_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Cannot create %(channels)s: parent should not be a sub-channel and should be of type 'channel' or 'group'. The sub-channel should have the same type as the parent.",
+        "line": 162
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_constraint_partners_chat",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "channel_member_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A channel of type 'chat' cannot have more than two users.",
+        "line": 174
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_constraint_group_id_channel",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "group_public_id",
+         "group_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "For %(channels)s, channel_type should be 'channel' to have the group-based authorization or group auto-subscription.",
+        "line": 181
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_name_member_ids",
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_channel_name_member_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_member_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_editable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_type",
+         "is_member",
+         "group_public_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_avatar_128",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_type",
+         "image_128",
+         "uuid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_avatar_cache_key",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "avatar_128"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_avatar",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_channel_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_member_ids.partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_channel_partner_ids",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_channel_partner_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_member",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid",
+         "guest"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_member_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_member",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_self_member_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid",
+         "guest"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_member_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invited_member_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_member_ids.rtc_inviting_session_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_member_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_member_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_message_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "message_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_group_public_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_type",
+         "parent_channel_id.group_public_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invitation_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "uuid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_allowed_channel_member_create_params",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 49,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid value when creating a channel with members, only 4 or 6 are allowed.",
+        "line": 380
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Invalid value when creating a channel with memberships, only 0 is allowed.",
+        "line": 388
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Invalid field “%(field_name)s” when creating a channel with members.",
+        "line": 391
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_all_employee_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete those groups, as the Whole Company group is required by other modules.",
+        "line": 433
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 65,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cannot change initial message nor parent channel of: %(channels)s.",
+        "line": 443
+       },
+       {
+        "kind": "UserError",
+        "message": "Cannot change the channel type of: %(channel_names)s",
+        "line": 441
+       },
+       {
+        "kind": "UserError",
+        "message": "Cannot change authorized group of sub-channel: %(channels)s.",
+        "line": 451
+       }
+      ]
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sync_field_names",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_subscribe_users_automatically",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_subscribe_users_automatically_get_members",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return new members per channel ID ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": "Auto-subscribe members of a department to a channel ",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_unfollow",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_unfollow",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner",
+     "guest",
+     "post_leave_message"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "add_members",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "partner_ids",
+     "guest_ids",
+     "invite_to_rtc_call",
+     "post_joined_message"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Adds the given partner_ids and guest_ids as member of self channels. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_members",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "guests",
+     "partners",
+     "users",
+     "create_member_params",
+     "invite_to_rtc_call",
+     "post_joined_message",
+     "inviting_partner"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 80,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "invite_by_email",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "emails"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Send channel invitation emails to a list of email addresses. Existing members'\nemail addresses are ignored.\n\n:param emails: List of email addresses to invite.\n:type emails: list[str]",
+      "size_in_lines": 77,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You don't have access to invite users to this channel.",
+        "line": 697
+       },
+       {
+        "kind": "UserError",
+        "message": "Inviting by email is not allowed for this channel type (%s).",
+        "line": 699
+       },
+       {
+        "kind": "UserError",
+        "message": "error_msg",
+        "line": 763
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_call_notification_tag",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_rtc_cancel_invitations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "member_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Cancels the invitations of the RTC call from all invited members,\nif member_ids is provided, only the invitations of the specified members are canceled.\n\n:param list member_ids: list of the members ids from which the invitation has to be removed",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_get_recipients",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "msg_vals",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 109,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_get_recipients_groups",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "model_description",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_notify_valid_parameters",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_thread",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "msg_vals",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_by_web_push_prepare_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "msg_vals",
+     "force_record_name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_thread_by_web_push",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "recipients_data",
+     "msg_vals",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_receive_bounce",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "email",
+     "partner"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_allowed_message_params",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_allowed_message_partner_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partner_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Ensure only partners having access to the channel can be mentioned.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "message_post",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message_type",
+     "partner_ids",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": "Override to mark the visitor as still connected.\nIf the message sent is not from the operator (so if it's the visitor or\nthe system bot sending closing chat notification, the visitor last action date is updated.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_post_after_hook",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "This method is called just before _notify_thread() method which is calling the _to_store()\nmethod. We need a 'chatbot.message' record before it happens to correctly display the message.\nIt's created only if the mail channel is linked to a chatbot step. We also need to save the\nuser answer if the current step is a question selection.",
+      "size_in_lines": 76,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mail_bot",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_update_content",
+    "kind": "messaging_hook",
+    "arguments": [
+     "partner_ids",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_can_update_message_content",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only messages type comment can have their content updated on model 'discuss.channel'",
+        "line": 1071
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_attachments_for_post",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values_list",
+     "extra_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_subscribe",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "partner_ids",
+     "subtype_ids",
+     "customer_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Adding followers on channels is not possible. Consider adding members instead.",
+        "line": 1086
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_should_invite_members_to_join_call",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_access_action",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "access_uid",
+     "force_website"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Redirect to Discuss instead of form view. ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_broadcast",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Broadcast the current channel header to the given partner ids\n:param partner_ids : the partner to notify",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_message_pin",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "message_id",
+     "pinned"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "(Un)pin a message on the channel and send a notification to the\nmembers.\n:param message_id: id of the message to be pinned.\n:param pinned: whether the message should be pinned or unpinned.",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_or_create_member_for_self",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_or_create_persona_for_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "guest_name",
+     "timezone",
+     "country_code",
+     "create_member_params",
+     "post_joined_message"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": ":param guest_name: name of the persona\n:param post_joined_message: whether to post a message to the channel\n    to notify that the persona joined\n\n:param dict create_member_params: optional parameters to pass to the\n    channel member create function.\n\n:rtype: tuple[partner, guest]",
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_channels_as_member",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 94,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "store",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Extends the channel header by adding the livechat operator and the 'anonymous' profile",
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_or_create_chat",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partners_to",
+     "pin"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the canonical private channel between some partners, create it if needed.\nTo reuse an old channel (conversation), this one must be private, and contains\nonly the given partners.\n:param partners_to : list of res.partner ids to add to the conversation\n:param pin : True if getting the channel should pin it for the current user\n:returns: channel_info of the created or existing channel\n:rtype: dict",
+      "size_in_lines": 76,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "A chat should not be created with more than 2 persons. Create a group instead.",
+        "line": 1349
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "channel_pin",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "pinned"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": "Override to clean an empty livechat channel.\nThis is typically called when the operator send a chat request to a website.visitor\nbut don't speak to them and closes the chatter.\nThis allows operators to send the visitor a new chat request.\nIf active empty livechat channel,\ndelete discuss_channel as not useful to keep empty chat",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_allow_invite_by_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_types_allowing_seen_infos",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the channel types which allow sending seen infos notification\non the channel ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_types_allowing_unfollow",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the channel types which allow leaving the channel, channel will be unpinned\notherwise ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_member_based_naming_channel_types",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the channel types that use member-based naming,\nspecifically the `channel_name_member_ids` field.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_lazy_load_members_channel_types",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the channel types that load members lazily. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "channel_fetched",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Broadcast the channel_fetched notification to channel members\n        ",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "channel_set_custom_name",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "channel_rename",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "channel_change_description",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "description"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "channel_join",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Shortcut to add the current user as member of self channels.\nPrefer calling add_members() directly when possible.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "name",
+     "group_id"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create a channel and add the current partner, broadcast it (to make the user directly\nlisten to it when polling)\n:param name : the name of the channel to create\n:param group_id : the group allowed to join the channel.\n:return dict : channel header",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_group",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partners_to",
+     "default_display_mode",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Creates a group channel.\n\n:param partners_to : list of res.partner ids to add to the conversation\n:param str default_display_mode: how the channel will be displayed by default\n:param str name: group name. default name is computed client side from the list of members if no name is set\n:returns: channel_info of the created channel\n:rtype: dict",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_sub_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "from_message_id",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_mention_suggestions",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "search",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return 'limit'-first channels' name, channel_type and group_public_id fields such that the\nname matches a 'search' string. Exclude channels of type chat (DM) and group.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_last_messages",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the last message for each of the given channels.",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_clean_empty_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_store_message_update_extra_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "execute_command_help",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail_bot",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_execute_command_help_message_extra",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "execute_command_leave",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "execute_command_who",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_end_dt"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_end_dt"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_is_escalated",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_agent_history_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_agent_history_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_channel_member_history_ids.livechat_member_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_bot_history_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_channel_member_history_ids.livechat_member_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_livechat_bot_history_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_customer_history_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_channel_member_history_ids.livechat_member_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_livechat_customer_history_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_agent_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_agent_history_ids.partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_livechat_agent_history_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_bot_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_bot_history_ids.partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_customer_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_customer_history_ids.partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_customer_guest_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_agent_requesting_help_history",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_agent_history_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_agent_providing_help_history",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_agent_history_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_outcome",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_is_escalated",
+         "livechat_failure"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_matches_self_lang",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "user"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_livechat_matches_self_lang",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_matches_self_expertise",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "user"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_livechat_matches_self_expertise",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_start_hour",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "create_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_week_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "create_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_store_livechat_operator_id_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Return the standard fields to include in Store for livechat_operator_id.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_empty_livechat_sessions",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_bot_only_ongoing_sessions",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Garbage collect bot-only livechat sessions with no activity for over 1 day.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "execute_command_history",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_visitor_leave_message",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "cancel"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_close_livechat_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Set deactivate the livechat channel and notify (the operator) the reason of closing the session.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_rating_get_parent_field_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_email_livechat_transcript",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "email"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_attachment_to_html",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attachment"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_channel_history",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Converting message body back to plaintext for correct data formatting in HTML field.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_livechat_session_fields_to_store",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_chatbot_find_customer_values_in_messages",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "step_type_to_field"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Look for user's input in the channel's messages based on a dictionary\nmapping the step_type to the field name of the model it will be used on.\n\n:param dict step_type_to_field: a dict of step types to customer fields\n    to fill, like : {'question_email': 'email_from', 'question_phone': 'mobile'}",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_chatbot_post_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "chatbot_script",
+     "body"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Small helper to post a message as the chatbot operator\n\n:param record chatbot_script\n:param string body: message HTML body ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_chatbot_validate_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "email_address",
+     "chatbot_script"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_chatbot_restart",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "chatbot_script"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "livechat_join_channel_needing_help",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Join a live chat for which help was requested.\n\n:returns: Whether the live chat was joined. False if the live chat could not\n    be joined because another agent already joined the channel in the meantime.\n:rtype: bool",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_forward_human_operator",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "chatbot_script_step",
+     "users"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Add a human operator to the conversation. The conversation with the chatbot (scripted chatbot or ai agent) is stopped\nthe visitor will continue the conversation with a real person.\n\nIn case we don't find any operator (e.g: no-one is available) we don't post any messages.\nThe chat with the chatbot will continue normally, which allows to add extra steps when it's the case\n(e.g: ask for the visitor's email and create a lead).\n\n:param chatbot_script_step: the forward to operator chatbot script step if the forwarding is done through\na scripted chatbot (not used if the forwarding is done through an AI Agent).\n:param users: recordset of candidate operators, if not provided the currently available\n    users of the livechat channel are used as candidates instead.",
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_human_operator",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "users",
+     "chatbot_script_step"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_current_chatbot_step_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "chatbot_script_step"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_new_members_to_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "create_member_params",
+     "inviting_partner",
+     "users",
+     "partners"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_forwarded_channel_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "livechat_failure",
+     "livechat_operator_id",
+     "operator_name"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_next_step_message_to_store",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "chatbot_script_step"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_crm_lead",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lead_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "execute_command_lead",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_visitor_to_lead",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner",
+     "key"
+    ],
+    "definitions": [
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": "Create a lead from channel /lead command\n:param partner: internal user partner (operator) that created the lead;\n:param key: operator input in chat ('/lead Lead about Product')",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm_livechat",
+      "decorators": [],
+      "documentation": "When website is installed, we can link the created lead from /lead command\nto the current website_visitor. We do not use the lead name as it does not correspond\nto the lead contact name.",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constraint_subscription_department_ids_channel",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "subscription_department_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "For %(channels)s, channel_type should be 'channel' to have the department auto-subscription.",
+        "line": 19
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_visitor_history",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "visitor"
+    ],
+    "definitions": [
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constraint_from_message_id",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Cannot create %(channels)s: initial message should belong to parent channel or one of its sub-channels."
+   },
+   {
+    "operation": "_constraint_parent_channel_id",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Cannot create %(channels)s: parent should not be a sub-channel and should be of type 'channel' or 'group'. The sub-channel should have the same type as the parent."
+   },
+   {
+    "operation": "_constraint_partners_chat",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "A channel of type 'chat' cannot have more than two users."
+   },
+   {
+    "operation": "_constraint_group_id_channel",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "For %(channels)s, channel_type should be 'channel' to have the group-based authorization or group auto-subscription."
+   },
+   {
+    "operation": "create",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Invalid value when creating a channel with members, only 4 or 6 are allowed."
+   },
+   {
+    "operation": "create",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Invalid value when creating a channel with memberships, only 0 is allowed."
+   },
+   {
+    "operation": "create",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Invalid field “%(field_name)s” when creating a channel with members."
+   },
+   {
+    "operation": "_unlink_except_all_employee_channel",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "You cannot delete those groups, as the Whole Company group is required by other modules."
+   },
+   {
+    "operation": "write",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Cannot change initial message nor parent channel of: %(channels)s."
+   },
+   {
+    "operation": "write",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Cannot change the channel type of: %(channel_names)s"
+   },
+   {
+    "operation": "write",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Cannot change authorized group of sub-channel: %(channels)s."
+   },
+   {
+    "operation": "invite_by_email",
+    "package": "mail",
+    "kind": "AccessError",
+    "message": "You don't have access to invite users to this channel."
+   },
+   {
+    "operation": "invite_by_email",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Inviting by email is not allowed for this channel type (%s)."
+   },
+   {
+    "operation": "invite_by_email",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "_check_can_update_message_content",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Only messages type comment can have their content updated on model 'discuss.channel'"
+   },
+   {
+    "operation": "_message_subscribe",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Adding followers on channels is not possible. Consider adding members instead."
+   },
+   {
+    "operation": "_get_or_create_chat",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "A chat should not be created with more than 2 persons. Create a group instead."
+   },
+   {
+    "operation": "_constraint_subscription_department_ids_channel",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "For %(channels)s, channel_type should be 'channel' to have the department auto-subscription."
+   }
+  ],
+  "state_fields": [
+   "livechat_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_discuss_channel_public",
+    "package": "mail",
+    "name": "discuss.channel.public",
+    "entity": "discuss.channel",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_discuss_channel_portal",
+    "package": "mail",
+    "name": "discuss.channel.portal",
+    "entity": "discuss.channel",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_discuss_channel_user",
+    "package": "mail",
+    "name": "discuss.channel.user",
+    "entity": "discuss.channel",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_discuss_channel_system",
+    "package": "mail",
+    "name": "discuss.channel.system",
+    "entity": "discuss.channel",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "crm_livechat.ir_rule_discuss_channel_crm_lead",
+    "package": "crm_livechat",
+    "name": "discuss.channel: sales users can read lead's origin channel",
+    "entity": "discuss.channel",
+    "domain": "[(\"has_crm_lead\", \"=\", True)]",
+    "groups": "[(4, ref('sales_team.group_sale_salesman'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "im_livechat.ir_rule_discuss_channel_im_livechat_group_user",
+    "package": "im_livechat",
+    "name": "discuss.channel: livechat users can read all livechat channels",
+    "entity": "discuss.channel",
+    "domain": "[('channel_type', '=', 'livechat')]",
+    "groups": "[(4, ref('im_livechat_group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_channel_all",
+    "package": "mail",
+    "name": "discuss.channel: can access channels (as member or as group allowed)",
+    "entity": "discuss.channel",
+    "domain": "[\n                    \"|\",\n                        \"&\",\n                            (\"channel_type\", \"!=\", \"channel\"),\n                            \"|\",\n                                (\"is_member\", \"=\", True),\n                                (\"parent_channel_id.is_member\", \"=\", True),\n                        \"&\",\n                            (\"channel_type\", \"=\", \"channel\"),\n                            \"|\",\n                                (\"group_public_id\", \"=\", False),\n                                (\"group_public_id\", \"in\", user.all_group_ids.ids),\n                ]",
+    "groups": "[                     Command.link(ref('base.group_user')),                     Command.link(ref('base.group_portal')),                     Command.link(ref('base.group_public')),                 ]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_channel_group_system",
+    "package": "mail",
+    "name": "discuss.channel: admin full access",
+    "entity": "discuss.channel",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('base.group_system'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "crm_livechat.discuss_channel_view_form",
+    "package": "crm_livechat",
+    "name": "discuss.channel.view.form.inherit.crm.livechat",
+    "view_type": "xpath",
+    "inherits_view": "mail.discuss_channel_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//page[@name='extra_info']/group",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "has_crm_lead"
+      },
+      {
+       "name": "lead_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//page[@name='extra_info']/group",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr.discuss_channel_view_form",
+    "package": "hr",
+    "name": "discuss.channel.view.form.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "mail.discuss_channel_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='group_ids']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "subscription_department_ids",
+       "widget": "many2many_tags",
+       "invisible": "channel_type != 'channel'",
+       "string": "Auto Subscribe Departments"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='group_ids']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_livechat.discuss_channel_view_search",
+    "package": "hr_livechat",
+    "name": "discuss.channel.search.inherit.hr.livechat",
+    "view_type": "xpath",
+    "inherits_view": "im_livechat.discuss_channel_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//*[@name='filter_my_sessions']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_my_team",
+       "string": "My Team",
+       "domain": "['|', ('channel_member_ids.partner_id.user_ids', '=', uid), ('channel_member_ids.partner_id.employee_ids.parent_id.user_id', '=', uid)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//*[@name='filter_my_sessions']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_livechat.discuss_channel_looking_for_help_view_search",
+    "package": "hr_livechat",
+    "name": "discuss.channel.looking.for.help.view.search.inherit.hr.livechat",
+    "view_type": "xpath",
+    "inherits_view": "im_livechat.discuss_channel_looking_for_help_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//*[@name='filter_my_sessions']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_my_team",
+       "string": "My Team",
+       "domain": "[('channel_member_ids.partner_id.user_ids.employee_id.member_of_department', '=', True)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//*[@name='filter_my_sessions']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_view_search",
+    "package": "im_livechat",
+    "name": "discuss.channel.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search history"
+     },
+     "fields": [
+      {
+       "name": "livechat_agent_partner_ids",
+       "string": "Agent"
+      },
+      {
+       "name": "livechat_agent_requesting_help_history"
+      },
+      {
+       "name": "livechat_agent_providing_help_history"
+      },
+      {
+       "name": "country_id",
+       "string": "Country"
+      },
+      {
+       "name": "livechat_customer_partner_ids",
+       "string": "Customer"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_my_sessions",
+       "string": "My Sessions",
+       "domain": "[('livechat_operator_id.user_ids', '=', uid)]"
+      },
+      {
+       "name": "ongoing",
+       "string": "Ongoing",
+       "domain": "[('livechat_end_dt', '=', False)]"
+      },
+      {
+       "name": "filter_session_rating_happy",
+       "string": "Happy",
+       "domain": "[('rating_ids', '!=', False), ('rating_avg', '>=', 3.66)]"
+      },
+      {
+       "name": "filter_session_rating_neutral",
+       "string": "Neutral",
+       "domain": "[('rating_ids', '!=', False), ('rating_avg', '>=', 2.33), ('rating_avg', '<', 3.66)]"
+      },
+      {
+       "name": "fiter_session_rating_unhappy",
+       "string": "Unhappy",
+       "domain": "[('rating_ids', '!=', False), ('rating_avg', '<', 2.33) ]"
+      },
+      {
+       "name": "filter_session_unrated",
+       "string": "Unrated",
+       "domain": "[('rating_ids', '=', False)]"
+      },
+      {
+       "name": "filter_session_date",
+       "string": "Session Date",
+       "date": "create_date"
+      },
+      {
+       "name": "rated_on_last_24_hours",
+       "string": "Last 24 Hours",
+       "domain": "[('create_date', '>', '-1d')]"
+      },
+      {
+       "name": "rated_on_last_7_days",
+       "string": "Last 7 Days",
+       "domain": "[('create_date', '>', 'today -7d +1d')]"
+      },
+      {
+       "name": "rated_on_last_30_days",
+       "string": "Last 30 Days",
+       "domain": "[('create_date', '>', 'today -30d +1d')]"
+      },
+      {
+       "name": "rated_on_last_365_days",
+       "string": "Last 365 Days",
+       "domain": "[('create_date', '>', 'today -365d +1d')]"
+      },
+      {
+       "name": "escalated",
+       "string": "Escalated",
+       "domain": "[('livechat_is_escalated', '=', True)]",
+       "invisible": "1"
+      },
+      {
+       "name": "handled_by_agent",
+       "string": "Handled by Agent",
+       "domain": "[('livechat_agent_history_ids', '!=', False)]",
+       "invisible": "1"
+      },
+      {
+       "name": "handled_by_bot",
+       "string": "Handled by Bot",
+       "domain": "[('livechat_channel_member_history_ids.livechat_member_type', '=', 'bot'), ('livechat_agent_history_ids', '=', False)]",
+       "invisible": "1"
+      },
+      {
+       "name": "in_call",
+       "string": "In Call",
+       "domain": "[('livechat_agent_history_ids.call_history_ids.end_dt', '=', False)]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_channel",
+       "string": "Channel",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_channel_id'}"
+      },
+      {
+       "name": "group_by_agent",
+       "string": "Agent",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_agent_partner_ids'}"
+      },
+      {
+       "name": "group_by_agent_requesting_help",
+       "domain": "[]",
+       "context": "{'group_by': 'livechat_agent_requesting_help_history'}"
+      },
+      {
+       "name": "group_by_agent_providing_help",
+       "domain": "[]",
+       "context": "{'group_by': 'livechat_agent_providing_help_history'}"
+      },
+      {
+       "name": "group_by_rating",
+       "string": "Rating",
+       "domain": "[]",
+       "context": "{'group_by':'rating_last_text'}"
+      },
+      {
+       "name": "group_by_country",
+       "string": "Country",
+       "domain": "[]",
+       "context": "{'group_by':'country_id'}"
+      },
+      {
+       "name": "group_by_customer_partner",
+       "string": "Customer",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_customer_partner_ids'}"
+      },
+      {
+       "name": "group_by_month",
+       "string": "Session Date",
+       "domain": "[]",
+       "context": "{'group_by':'create_date:month'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_view_tree",
+    "package": "im_livechat",
+    "name": "discuss.channel.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "js_class": "im_livechat.discuss_channel_list",
+      "sample": "1",
+      "string": "History",
+      "create": "false",
+      "default_order": "create_date desc, id desc"
+     },
+     "fields": [
+      {
+       "name": "create_date",
+       "string": "Date"
+      },
+      {
+       "name": "livechat_customer_history_ids",
+       "widget": "many2many_tags_avatar",
+       "string": "Customer",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_agent_history_ids",
+       "widget": "many2many_tags_avatar",
+       "string": "Agents",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_agent_requesting_help_history",
+       "widget": "many2one_avatar",
+       "optional": "hide"
+      },
+      {
+       "name": "livechat_agent_providing_help_history",
+       "widget": "many2one_avatar",
+       "optional": "hide"
+      },
+      {
+       "name": "livechat_bot_history_ids",
+       "widget": "many2many_tags_avatar",
+       "string": "Chatbot",
+       "optional": "hide"
+      },
+      {
+       "name": "country_id",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_lang_id",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_expertise_ids",
+       "widget": "many2many_tags",
+       "string": "Expertise",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_conversation_tag_ids",
+       "widget": "many2many_tags",
+       "string": "Tags",
+       "options": "{'color_field': 'color'}",
+       "optional": "hide"
+      },
+      {
+       "name": "livechat_channel_id",
+       "optional": "hide"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}",
+       "optional": "show"
+      },
+      {
+       "name": "message_count",
+       "string": "Messages",
+       "optional": "show"
+      },
+      {
+       "name": "rating_last_text",
+       "widget": "badge",
+       "string": "Rating",
+       "optional": "show",
+       "decoration-danger": "rating_last_text == 'ko'",
+       "decoration-warning": "rating_last_text == 'ok'",
+       "decoration-success": "rating_last_text == 'top'"
+      },
+      {
+       "name": "rating_last_feedback",
+       "string": "Comment",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags_avatar": 3,
+      "many2one_avatar": 2,
+      "many2many_tags": 2,
+      "float_time": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_view_kanban",
+    "package": "im_livechat",
+    "name": "discuss.channel.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "js_class": "im_livechat.discuss_channel_kanban",
+      "class": "o_kanban_mobile",
+      "sample": "1",
+      "quick_create": "false",
+      "create": "False",
+      "default_order": "create_date desc"
+     },
+     "fields": [
+      {
+       "name": "livechat_customer_history_ids",
+       "widget": "im_livechat.one2many_names"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      },
+      {
+       "name": "message_count"
+      },
+      {
+       "name": "livechat_failure",
+       "invisible": "1"
+      },
+      {
+       "name": "livechat_is_escalated",
+       "invisible": "1"
+      },
+      {
+       "name": "rating_last_image",
+       "widget": "image",
+       "invisible": "not rating_last_image",
+       "string": "Rating",
+       "options": "{\"size\": [40, 40], \"img_class\": \"bg-transparent\"}"
+      },
+      {
+       "name": "country_id",
+       "string": "Country"
+      },
+      {
+       "name": "livechat_agent_partner_ids",
+       "widget": "many2many_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "im_livechat.one2many_names": 1,
+      "float_time": 1,
+      "image": 1,
+      "many2many_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": "false",
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_view_form",
+    "package": "im_livechat",
+    "name": "discuss.channel.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Session Form",
+      "create": "false",
+      "edit": "false",
+      "js_class": "livechat_session_form"
+     },
+     "fields": [
+      {
+       "name": "rating_last_image",
+       "widget": "image",
+       "readonly": "1",
+       "options": "{\"img_class\": \"bg-transparent\"}",
+       "nolabel": "1"
+      },
+      {
+       "name": "rating_last_feedback",
+       "nolabel": "1"
+      },
+      {
+       "name": "name",
+       "string": "Participants"
+      },
+      {
+       "name": "create_date",
+       "readonly": "1",
+       "string": "Session Date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_view_pivot",
+    "package": "im_livechat",
+    "name": "discuss.channel.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Sessions",
+      "display_quantity": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "livechat_operator_id"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "rating_last_value",
+       "widget": "im_livechat.rating_percentage",
+       "string": "Rating (%)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "im_livechat.rating_percentage": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "livechat_operator_id",
+       "type": "row"
+      },
+      {
+       "name": "create_date",
+       "interval": "day",
+       "type": "col"
+      },
+      {
+       "name": "rating_last_value",
+       "type": "measure",
+       "string": "Rating (%)",
+       "widget": "im_livechat.rating_percentage"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_view_graph",
+    "package": "im_livechat",
+    "name": "discuss.channel.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Sessions",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "rating_last_value",
+       "widget": "im_livechat.rating_percentage",
+       "string": "Rating (%)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "im_livechat.rating_percentage": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "create_date",
+       "interval": "day"
+      },
+      {
+       "name": "rating_last_value",
+       "type": "measure",
+       "string": "Rating (%)",
+       "widget": "im_livechat.rating_percentage"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_looking_for_help_view_search",
+    "package": "im_livechat",
+    "name": "discuss.channel.looking.for.help.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search history"
+     },
+     "fields": [
+      {
+       "name": "livechat_agent_partner_ids",
+       "string": "Agent"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "livechat_lang_id"
+      },
+      {
+       "name": "livechat_expertise_ids",
+       "string": "Expertise"
+      },
+      {
+       "name": "livechat_conversation_tag_ids",
+       "string": "Tags"
+      },
+      {
+       "name": "livechat_bot_partner_ids",
+       "string": "Chatbot"
+      },
+      {
+       "name": "livechat_customer_partner_ids",
+       "string": "Customer"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_my_sessions",
+       "string": "My Sessions",
+       "domain": "[('livechat_operator_id.user_ids', '=', uid)]"
+      },
+      {
+       "name": "filter_my_languages",
+       "string": "My Languages",
+       "domain": "[('livechat_matches_self_lang', '=', True)]"
+      },
+      {
+       "name": "filter_my_expertise",
+       "string": "My Expertise",
+       "domain": "[('livechat_matches_self_expertise', '=', True)]"
+      },
+      {
+       "name": "filter_session_date",
+       "string": "Session Date",
+       "date": "create_date"
+      },
+      {
+       "name": "created_on_last_24_hours",
+       "string": "Last 24 Hours",
+       "domain": "[('create_date', '>', '-24H')]"
+      },
+      {
+       "name": "created_on_last_7_days",
+       "string": "Last 7 Days",
+       "domain": "[('create_date', '>=', 'today -7d +1d')]"
+      },
+      {
+       "name": "created_on_last_30_days",
+       "string": "Last 30 Days",
+       "domain": "[('create_date', '>=', 'today -30d +1d')]"
+      },
+      {
+       "name": "created_on_last_365_days",
+       "string": "Last 365 Days",
+       "domain": "[('create_date', '>=', 'today -365d +1d')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_channel",
+       "string": "Channel",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_channel_id'}"
+      },
+      {
+       "name": "group_by_agent",
+       "string": "Agent",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_agent_partner_ids'}"
+      },
+      {
+       "name": "group_by_country",
+       "string": "Country",
+       "domain": "[]",
+       "context": "{'group_by':'country_id'}"
+      },
+      {
+       "name": "group_by_lang",
+       "string": "Language",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_lang_id'}"
+      },
+      {
+       "name": "group_by_expertise",
+       "string": "Expertise",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_expertise_ids'}"
+      },
+      {
+       "name": "group_by_tags",
+       "string": "Tags",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_conversation_tag_ids'}"
+      },
+      {
+       "name": "group_by_chatbot",
+       "string": "Chatbot",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_bot_partner_ids'}"
+      },
+      {
+       "name": "group_by_customer_partner",
+       "string": "Customer",
+       "domain": "[]",
+       "context": "{'group_by':'livechat_customer_partner_ids'}"
+      },
+      {
+       "name": "group_by_month",
+       "string": "Session Date",
+       "domain": "[]",
+       "context": "{'group_by':'create_date:month'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_looking_for_help_view_list",
+    "package": "im_livechat",
+    "name": "discuss.channel.looking.for.help.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "js_class": "im_livechat.discuss_channel_looking_for_help_list",
+      "sample": "1",
+      "string": "History",
+      "create": "false",
+      "default_order": "create_date asc"
+     },
+     "fields": [
+      {
+       "name": "create_date",
+       "string": "Date"
+      },
+      {
+       "name": "description",
+       "string": "Description",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_agent_history_ids",
+       "widget": "many2many_tags_avatar",
+       "string": "Agents",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_bot_history_ids",
+       "widget": "many2many_tags_avatar",
+       "string": "Bot",
+       "optional": "hide"
+      },
+      {
+       "name": "livechat_customer_history_ids",
+       "widget": "many2many_tags_avatar",
+       "string": "Customer",
+       "optional": "show"
+      },
+      {
+       "name": "country_id",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_lang_id"
+      },
+      {
+       "name": "livechat_expertise_ids",
+       "widget": "many2many_tags",
+       "string": "Expertise",
+       "optional": "show"
+      },
+      {
+       "name": "livechat_conversation_tag_ids",
+       "widget": "many2many_tags",
+       "string": "Tags",
+       "options": "{'color_field': 'color'}",
+       "optional": "hide"
+      },
+      {
+       "name": "livechat_channel_id",
+       "optional": "hide"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}",
+       "optional": "hide"
+      },
+      {
+       "name": "message_count",
+       "string": "Messages",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags_avatar": 3,
+      "many2many_tags": 2,
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_looking_for_help_view_kanban",
+    "package": "im_livechat",
+    "name": "discuss.channel.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "js_class": "im_livechat.discuss_channel_looking_for_help_kanban",
+      "class": "o_kanban_mobile",
+      "sample": "1",
+      "quick_create": "false",
+      "create": "False",
+      "default_order": "create_date desc"
+     },
+     "fields": [
+      {
+       "name": "livechat_customer_history_ids",
+       "widget": "im_livechat.one2many_names"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "livechat_lang_id"
+      },
+      {
+       "name": "livechat_expertise_ids"
+      },
+      {
+       "name": "livechat_agent_partner_ids",
+       "widget": "many2many_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "im_livechat.one2many_names": 1,
+      "many2many_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": "false",
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "mail.discuss_channel_view_kanban",
+    "package": "mail",
+    "name": "discuss.channel.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "is_member"
+      },
+      {
+       "name": "group_ids"
+      },
+      {
+       "name": "active"
+      },
+      {
+       "name": "avatar_128",
+       "widget": "image",
+       "options": "{'size': [50, 50], 'img_class': 'bg-transparent'}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "channel_type",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "description"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "channel_join",
+       "type": "object",
+       "invisible": "is_member or group_ids",
+       "class": "btn btn-primary ms-auto mt-auto"
+      },
+      {
+       "name": "action_unfollow",
+       "type": "object",
+       "invisible": "not is_member or group_ids",
+       "class": "btn btn-secondary ms-auto mt-auto"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "mail.discuss_channel_view_list",
+    "package": "mail",
+    "name": "discuss.channel.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Channels",
+      "default_order": "name"
+     },
+     "fields": [
+      {
+       "name": "avatar_128",
+       "widget": "image",
+       "invisible": "parent_channel_id",
+       "string": "",
+       "options": "{'size': [24, 24]}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "description"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "channel_join",
+       "string": "Join",
+       "type": "object",
+       "invisible": "is_member or group_ids",
+       "class": "btn btn-primary ms-auto mt-auto"
+      },
+      {
+       "name": "action_unfollow",
+       "string": "Leave",
+       "type": "object",
+       "invisible": "not is_member or group_ids",
+       "class": "btn btn-secondary ms-auto mt-auto"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.discuss_channel_view_form",
+    "package": "mail",
+    "name": "discuss.channel.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Mail Channel Form",
+      "duplicate": "0"
+     },
+     "fields": [
+      {
+       "name": "avatar_128",
+       "invisible": "1"
+      },
+      {
+       "name": "is_editable",
+       "invisible": "1"
+      },
+      {
+       "name": "image_128",
+       "widget": "image",
+       "readonly": "not is_editable",
+       "options": "{'size': [90, 90], 'preview_image':'avatar_128'}"
+      },
+      {
+       "name": "name",
+       "readonly": "not is_editable",
+       "placeholder": "e.g. support"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "description",
+       "readonly": "not is_editable",
+       "placeholder": "Topics discussed in this group..."
+      },
+      {
+       "name": "group_public_id",
+       "invisible": "channel_type != 'channel' or parent_channel_id",
+       "readonly": "not is_editable"
+      },
+      {
+       "name": "group_ids",
+       "widget": "many2many_tags",
+       "invisible": "channel_type != 'channel'",
+       "readonly": "not is_editable",
+       "string": "Auto Subscribe Groups"
+      },
+      {
+       "name": "channel_type",
+       "invisible": "1"
+      },
+      {
+       "name": "channel_member_ids",
+       "readonly": "channel_type == 'chat'",
+       "context": "{'active_test': False}",
+       "mode": "list"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "id or guest_id",
+       "required": "not guest_id"
+      },
+      {
+       "name": "guest_id",
+       "readonly": "id or partner_id",
+       "required": "not partner_id"
+      },
+      {
+       "name": "channel_type"
+      },
+      {
+       "name": "parent_channel_id"
+      },
+      {
+       "name": "sub_channel_ids"
+      },
+      {
+       "name": "from_message_id"
+      },
+      {
+       "name": "sfu_channel_uuid"
+      },
+      {
+       "name": "sfu_server_url"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "privacy",
+       "string": "Privacy",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "members",
+       "string": "Members",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "extra_info",
+       "string": "Extra info",
+       "invisible": null,
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "discuss_channel_integrations",
+       "string": "Integrations",
+       "invisible": "1",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "image": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.discuss_channel_view_tree",
+    "package": "mail",
+    "name": "discuss.channel.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Groups"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.discuss_channel_view_search",
+    "package": "mail",
+    "name": "discuss.channel.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Groups"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "im_livechat.discuss_channel_action",
+    "package": "im_livechat",
+    "name": "Sessions",
+    "view_mode": "kanban,list,pivot,graph,form",
+    "view_id": null,
+    "search_view_id": "im_livechat.discuss_channel_view_search",
+    "domain": "[('livechat_channel_id', '!=', None)]",
+    "context": "{\n                    \"search_default_filter_session_date\": \"custom_rated_on_last_30_days\",\n                    \"im_livechat_hide_partner_company\": True,\n                }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_empty_folder\">\n                    No data yet!\n                </p><p>\n                    Start a conversation to populate your chat history.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_action_from_livechat_channel",
+    "package": "im_livechat",
+    "name": "Sessions",
+    "view_mode": "kanban,list,pivot,graph,form",
+    "view_id": null,
+    "search_view_id": "discuss_channel_view_search",
+    "domain": "[('livechat_channel_id', 'in', [active_id])]",
+    "context": "{\n                'search_default_livechat_channel_id': [active_id],\n                'default_livechat_channel_id': active_id,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_empty_folder\">No data yet!</p>\n                <p>Start a conversation to populate your chat history.</p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "im_livechat.discuss_channel_looking_for_help_action",
+    "package": "im_livechat",
+    "name": "Looking for Help",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "im_livechat.discuss_channel_looking_for_help_view_search",
+    "domain": "[(\"livechat_status\", \"=\", \"need_help\")]",
+    "context": "{\n                    \"search_default_filter_session_date\": \"custom_created_on_last_30_days\",\n                    \"im_livechat_hide_partner_company\": True,\n                }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_empty_folder\">No conversations found</p>\n                <p>Help out by joining requests from teammates, or mark your own conversations as needing help.</p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "mail.discuss_channel_action_view",
+    "package": "mail",
+    "name": "Join a group",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": "discuss_channel_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "mail.discuss_channel_action",
+    "package": "mail",
+    "name": "Channels",
+    "view_mode": "kanban,form",
+    "view_id": null,
+    "search_view_id": "discuss_channel_view_search",
+    "domain": "[(('channel_type', '=', 'channel'))]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "spreadsheet_dashboard_im_livechat.ongoing_sessions_all_action",
+    "package": "spreadsheet_dashboard_im_livechat",
+    "name": "Sessions",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "im_livechat.discuss_channel_view_search",
+    "domain": "[('channel_type', '=', 'livechat')]",
+    "context": "{'search_default_ongoing': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "spreadsheet_dashboard_im_livechat.ongoing_sessions_escalated_action",
+    "package": "spreadsheet_dashboard_im_livechat",
+    "name": "Sessions",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "im_livechat.discuss_channel_view_search",
+    "domain": null,
+    "context": "{'search_default_ongoing': 1, 'search_default_escalated': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "spreadsheet_dashboard_im_livechat.ongoing_sessions_agents_in_call_action",
+    "package": "spreadsheet_dashboard_im_livechat",
+    "name": "Sessions",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "im_livechat.discuss_channel_view_search",
+    "domain": null,
+    "context": "{'search_default_ongoing': 1, 'search_default_in_call': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "spreadsheet_dashboard_im_livechat.ongoing_sessions_handle_by_agent_action",
+    "package": "spreadsheet_dashboard_im_livechat",
+    "name": "Sessions",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "im_livechat.discuss_channel_view_search",
+    "domain": null,
+    "context": "{'search_default_ongoing': 1, 'search_default_handled_by_agent': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "spreadsheet_dashboard_im_livechat.ongoing_sessions_handle_by_bot_action",
+    "package": "spreadsheet_dashboard_im_livechat",
+    "name": "Sessions",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "im_livechat.discuss_channel_view_search",
+    "domain": null,
+    "context": "{'search_default_ongoing': 1, 'search_default_handled_by_bot': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel"
+   },
+   {
+    "external_identifier": "website_livechat.website_visitor_livechat_session_action",
+    "package": "website_livechat",
+    "name": "Visitor's Sessions",
+    "view_mode": "list,form",
+    "view_id": "im_livechat.discuss_channel_view_tree",
+    "search_view_id": null,
+    "domain": "[('livechat_visitor_id', '=', active_id), ('has_message', '=', True)]",
+    "context": "{\n                'search_default_livechat_visitor_id': [active_id],\n                'default_livechat_visitor_id': active_id,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "im_livechat.action_report_livechat_conversation",
+    "package": "im_livechat",
+    "name": "Live Chat Conversation",
+    "report_type": "qweb-pdf",
+    "report_name": "im_livechat.report_livechat_conversation",
+    "report_file": "im_livechat.report_livechat_conversation",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "discuss.channel"
+   }
+  ],
+  "menus": [
+   {
+    "external_identifier": "mail.menu_channel",
+    "package": "mail",
+    "name": "Channels",
+    "parent_id": "mail.menu_root_discuss",
+    "action": "mail.discuss_channel_action",
+    "sequence": "2",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "mail.discuss_channel_menu_settings",
+    "package": "mail",
+    "name": "Channels",
+    "parent_id": "base.menu_email",
+    "action": "mail.discuss_channel_action_view",
+    "sequence": "20",
+    "groups_id": "base.group_no_one",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

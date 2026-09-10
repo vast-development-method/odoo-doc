@@ -1,0 +1,217 @@
+{
+ "catalog": {
+  "name": "entity:stock.return.picking.line",
+  "description": "Complete definition of entity Return Picking Line (stock.return.picking.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.return.picking.line",
+  "storage_name": "stock_return_picking_line",
+  "full_name": "Return Picking Line",
+  "kind": "transient",
+  "description": "Return Picking Line",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "stock_account",
+   "sale_stock",
+   "mrp_subcontracting"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "product_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "move_quantity",
+    "type": "Float",
+    "related": "move_id.quantity",
+    "string": "Move Quantity",
+    "defined_in_package": "stock",
+    "full_name": "Move Quantity"
+   },
+   {
+    "name": "quantity",
+    "type": "Float",
+    "string": "Quantity",
+    "digits": "Product Unit",
+    "default": 1,
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "compute": "_compute_uom_id",
+    "defined_in_package": "stock",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "wizard_id",
+    "type": "Many2one",
+    "comodel": "stock.return.picking",
+    "string": "Wizard",
+    "defined_in_package": "stock",
+    "full_name": "Wizard",
+    "target_entity": "stock.return.picking"
+   },
+   {
+    "name": "move_id",
+    "type": "Many2one",
+    "comodel": "stock.move",
+    "string": "Move",
+    "defined_in_package": "stock",
+    "full_name": "Move",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "to_refund",
+    "type": "Boolean",
+    "string": "Update quantities on SO/PO",
+    "default": true,
+    "help": "Trigger a decrease of the delivered/received quantity in the associated Sale Order/Purchase Order",
+    "defined_in_package": "stock_account",
+    "full_name": "Update quantities on sales order/purchase order"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_id.product_uom",
+         "product_id.uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the UoM based on the move's product UoM or the product's default UoM. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_move_default_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "new_picking"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_line",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "new_picking"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "stock.access_stock_return_picking_line",
+    "package": "stock",
+    "name": "access.stock.return.picking.line",
+    "entity": "stock.return.picking.line",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

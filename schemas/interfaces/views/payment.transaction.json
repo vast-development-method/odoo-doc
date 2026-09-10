@@ -1,0 +1,739 @@
+{
+ "catalog": {
+  "name": "views:payment.transaction",
+  "description": "View declarations for entity payment.transaction.",
+  "record_count": 11,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account_payment.payment_transaction_form",
+   "package": "account_payment",
+   "name": "payment.transaction.form",
+   "entity": "payment.transaction",
+   "view_type": "button",
+   "inherits_view": "payment.payment_transaction_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_refunds",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "invoices_count",
+      "widget": "statinfo",
+      "string": "Invoice(s)"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_refunds",
+      "position": "before"
+     },
+     {
+      "name": "action_view_invoices",
+      "type": "object",
+      "invisible": "invoices_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-money"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_refunds\" position=\"before\">\n                <button name=\"action_view_invoices\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-money\" invisible=\"invoices_count == 0\">\n                    <field name=\"invoices_count\" widget=\"statinfo\" string=\"Invoice(s)\"/>\n                </button>\n            </button>\n            <field name=\"reference\" position=\"after\">\n                <field name=\"payment_id\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_transaction_form",
+   "package": "payment",
+   "name": "payment.transaction.form",
+   "entity": "payment.transaction",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Payment Transactions",
+     "create": "false",
+     "edit": "false"
+    },
+    "fields": [
+     {
+      "name": "state",
+      "widget": "statusbar"
+     },
+     {
+      "name": "refunds_count",
+      "widget": "statinfo",
+      "string": "Refunds"
+     },
+     {
+      "name": "reference"
+     },
+     {
+      "name": "source_transaction_id",
+      "invisible": "not source_transaction_id"
+     },
+     {
+      "name": "amount"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "payment_method_id"
+     },
+     {
+      "name": "provider_id"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "provider_code",
+      "invisible": "1"
+     },
+     {
+      "name": "provider_reference"
+     },
+     {
+      "name": "token_id",
+      "invisible": "not token_id"
+     },
+     {
+      "name": "create_date"
+     },
+     {
+      "name": "last_state_change"
+     },
+     {
+      "name": "is_live"
+     },
+     {
+      "name": "is_post_processed",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "partner_id",
+      "widget": "res_partner_many2one"
+     },
+     {
+      "name": "partner_address",
+      "placeholder": "Address"
+     },
+     {
+      "name": "partner_city",
+      "placeholder": "City"
+     },
+     {
+      "name": "partner_state_id",
+      "options": "{'no_open': True}",
+      "placeholder": "State"
+     },
+     {
+      "name": "partner_zip",
+      "placeholder": "ZIP"
+     },
+     {
+      "name": "partner_country_id",
+      "options": "{'no_open': True}",
+      "placeholder": "Country"
+     },
+     {
+      "name": "partner_email",
+      "widget": "email"
+     },
+     {
+      "name": "partner_phone",
+      "widget": "phone"
+     },
+     {
+      "name": "partner_lang"
+     },
+     {
+      "name": "child_transaction_ids",
+      "invisible": "not child_transaction_ids"
+     },
+     {
+      "name": "state_message",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_capture",
+      "string": "Capture Transaction",
+      "type": "object",
+      "invisible": "state != 'authorized'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_void",
+      "string": "Void Transaction",
+      "type": "object",
+      "invisible": "state != 'authorized'",
+      "confirm": "Are you sure you want to void the authorized transaction? This action can't be undone."
+     },
+     {
+      "name": "action_post_process",
+      "string": "Post-process",
+      "type": "object",
+      "invisible": "is_post_processed",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "action_view_refunds",
+      "type": "object",
+      "invisible": "refunds_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-money"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statusbar": 1,
+     "statinfo": 1,
+     "res_partner_many2one": 1,
+     "email": 1,
+     "phone": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "type": "object",
+      "name": "action_capture",
+      "invisible": "state != 'authorized'",
+      "string": "Capture Transaction",
+      "class": "oe_highlight"
+     },
+     {
+      "type": "object",
+      "name": "action_void",
+      "invisible": "state != 'authorized'",
+      "string": "Void Transaction",
+      "confirm": "Are you sure you want to void the authorized transaction? This action can't be undone."
+     },
+     {
+      "string": "Post-process",
+      "help": "Run the post-processing step for this transaction.",
+      "type": "object",
+      "name": "action_post_process",
+      "invisible": "is_post_processed",
+      "groups": "base.group_no_one"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": null,
+    "chatter": false,
+    "button_box": [
+     {
+      "name": "action_view_refunds",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-money",
+      "invisible": "refunds_count == 0"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Payment Transactions\" create=\"false\" edit=\"false\">\n                <header>\n                    <button type=\"object\" name=\"action_capture\" invisible=\"state != 'authorized'\" string=\"Capture Transaction\" class=\"oe_highlight\"/>\n                    <button type=\"object\" name=\"action_void\" invisible=\"state != 'authorized'\" string=\"Void Transaction\" confirm=\"Are you sure you want to void the authorized transaction? This action can't be undone.\"/>\n                    <button string=\"Post-process\" help=\"Run the post-processing step for this transaction.\" type=\"object\" name=\"action_post_process\" invisible=\"is_post_processed\" groups=\"base.group_no_one\"/>\n                    <field name=\"state\" widget=\"statusbar\"/>\n                </header>\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button name=\"action_view_refunds\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-money\" invisible=\"refunds_count == 0\">\n                            <field name=\"refunds_count\" widget=\"statinfo\" string=\"Refunds\"/>\n                        </button>\n                    </div>\n                    <group>\n                        <group name=\"transaction_details\">\n                            <field name=\"reference\"/>\n                            <field name=\"source_transaction_id\" invisible=\"not source_transaction_id\"/>\n                            <field name=\"amount\"/>\n                            <field name=\"currency_id\" invisible=\"1\"/>\n                            <field name=\"payment_method_id\"/>\n                            <field name=\"provider_id\"/>\n                            <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n                            \n                            <field name=\"provider_code\" invisible=\"1\"/>\n                            <field name=\"provider_reference\"/>\n                            <field name=\"token_id\" invisible=\"not token_id\"/>\n                            <field name=\"create_date\"/>\n                            <field name=\"last_state_change\"/>\n                            <field name=\"is_live\"/>\n                            <field name=\"is_post_processed\" groups=\"base.group_no_one\"/>\n                        </group>\n                        <group name=\"transaction_partner\">\n                            <field name=\"partner_id\" widget=\"res_partner_many2one\"/>\n                            <label for=\"partner_address\" string=\"Address\"/>\n                            <div class=\"o_address_format\">\n                                <field name=\"partner_address\" placeholder=\"Address\" class=\"o_address_street\"/>\n                                <field name=\"partner_city\" placeholder=\"City\" class=\"o_address_city\"/>\n                                <field name=\"partner_state_id\" placeholder=\"State\" class=\"o_address_state\" options=\"{'no_open': True}\"/>\n                                <field name=\"partner_zip\" placeholder=\"ZIP\" class=\"o_address_zip\"/>\n                                <field name=\"partner_country_id\" placeholder=\"Country\" class=\"o_address_country\" options=\"{'no_open': True}\"/>\n                            </div>\n                            <field name=\"partner_email\" widget=\"email\"/>\n                            <field name=\"partner_phone\" widget=\"phone\"/>\n                            <field name=\"partner_lang\"/>\n                        </group>\n                    </group>\n                    <separator string=\"Child transactions\" invisible=\"not child_transaction_ids\"/>\n                    <field name=\"child_transaction_ids\" invisible=\"not child_transaction_ids\"/>\n                    <group string=\"Message\" invisible=\"not state_message\">\n                        <field colspan=\"2\" name=\"state_message\" nolabel=\"1\"/>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_transaction_list",
+   "package": "payment",
+   "name": "payment.transaction.list",
+   "entity": "payment.transaction",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Payment Transactions",
+     "create": "false"
+    },
+    "fields": [
+     {
+      "name": "reference"
+     },
+     {
+      "name": "create_date"
+     },
+     {
+      "name": "payment_method_id"
+     },
+     {
+      "name": "provider_id"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "partner_name"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "amount"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "company_id",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "is_live",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "false",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Payment Transactions\" create=\"false\">\n                <field name=\"reference\"/>\n                <field name=\"create_date\"/>\n                <field name=\"payment_method_id\"/>\n                <field name=\"provider_id\"/>\n                <field name=\"partner_id\"/>\n                <field name=\"partner_name\"/>\n                \n                <field name=\"currency_id\" column_invisible=\"True\"/>\n                <field name=\"amount\"/>\n                <field name=\"state\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"show\"/>\n                <field name=\"is_live\" optional=\"hide\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_transaction_kanban",
+   "package": "payment",
+   "name": "payment.transaction.kanban",
+   "entity": "payment.transaction",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "create": "false"
+    },
+    "fields": [
+     {
+      "name": "currency_id"
+     },
+     {
+      "name": "reference"
+     },
+     {
+      "name": "amount"
+     },
+     {
+      "name": "partner_name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\" create=\"false\">\n                <field name=\"currency_id\"/>\n                <templates>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex\">\n                            <field name=\"reference\" class=\"fw-bolder\"/>\n                            <field name=\"amount\" class=\"ms-auto\"/>\n                        </div>\n                        <field name=\"partner_name\"/>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_transaction_search",
+   "package": "payment",
+   "name": "payment.transaction.search",
+   "entity": "payment.transaction",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "reference"
+     },
+     {
+      "name": "provider_id"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "partner_name"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "live_transactions",
+      "string": "Production Environment",
+      "domain": "[('is_live', '=', True)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "provider_id",
+      "string": "Provider",
+      "context": "{'group_by': 'provider_id'}"
+     },
+     {
+      "name": "partner_id",
+      "string": "Partner",
+      "context": "{'group_by': 'partner_id'}"
+     },
+     {
+      "name": "state",
+      "string": "Status",
+      "context": "{'group_by': 'state'}"
+     },
+     {
+      "name": "is_live",
+      "string": "Production Environment",
+      "context": "{'group_by': 'is_live'}"
+     },
+     {
+      "name": "company",
+      "string": "Company",
+      "context": "{'group_by': 'company_id'}",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search>\n                <field name=\"reference\"/>\n                <field name=\"provider_id\"/>\n                <field name=\"partner_id\"/>\n                <field name=\"partner_name\"/>\n                <filter string=\"Production Environment\" name=\"live_transactions\" domain=\"[('is_live', '=', True)]\"/>\n                <group>\n                    <filter string=\"Provider\" name=\"provider_id\" context=\"{'group_by': 'provider_id'}\"/>\n                    <filter string=\"Partner\" name=\"partner_id\" context=\"{'group_by': 'partner_id'}\"/>\n                    <filter string=\"Status\" name=\"state\" context=\"{'group_by': 'state'}\"/>\n                    <filter string=\"Production Environment\" name=\"is_live\" context=\"{'group_by': 'is_live'}\"/>\n                    <filter string=\"Company\" name=\"company\" context=\"{'group_by': 'company_id'}\" groups=\"base.group_multi_company\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_transaction_graph",
+   "package": "payment",
+   "name": "payment.transaction.graph",
+   "entity": "payment.transaction",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Payment Transactions"
+    },
+    "fields": [
+     {
+      "name": "create_date"
+     },
+     {
+      "name": "state"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "create_date",
+      "interval": "month"
+     },
+     {
+      "name": "state"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Payment Transactions\">\n                <field name=\"create_date\" interval=\"month\"/>\n                <field name=\"state\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_transaction_pivot",
+   "package": "payment",
+   "name": "payment.transaction.pivot",
+   "entity": "payment.transaction",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Payment Transactions",
+     "display_quantity": "1"
+    },
+    "fields": [
+     {
+      "name": "create_date"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "amount"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "create_date",
+      "interval": "month",
+      "type": "row"
+     },
+     {
+      "name": "state",
+      "type": "col"
+     },
+     {
+      "name": "amount",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Payment Transactions\" display_quantity=\"1\">\n                <field name=\"create_date\" interval=\"month\" type=\"row\"/>\n                <field name=\"state\" type=\"col\"/>\n                <field name=\"amount\" type=\"measure\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment_demo.payment_transaction_form",
+   "package": "payment_demo",
+   "name": "Demo Transaction Form",
+   "entity": "payment.transaction",
+   "view_type": "header",
+   "inherits_view": "payment.payment_transaction_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "header",
+    "root_attributes": {
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "capture_manually",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_demo_set_done",
+      "string": "Authorize",
+      "type": "object",
+      "invisible": "provider_code != 'demo' or not capture_manually or state != 'pending'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_demo_set_done",
+      "string": "Confirm",
+      "type": "object",
+      "invisible": "provider_code != 'demo' or capture_manually or state != 'pending'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_demo_set_canceled",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "provider_code != 'demo' or state != 'pending'"
+     },
+     {
+      "name": "action_demo_set_error",
+      "string": "Set to Error",
+      "type": "object",
+      "invisible": "provider_code != 'demo' or state != 'pending'"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "header",
+      "attributes": {
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <header position=\"inside\">\n                <field name=\"capture_manually\" invisible=\"1\"/>\n                <button string=\"Authorize\" type=\"object\" name=\"action_demo_set_done\" class=\"oe_highlight\" invisible=\"provider_code != 'demo' or not capture_manually or state != 'pending'\"/>\n                <button string=\"Confirm\" type=\"object\" name=\"action_demo_set_done\" class=\"oe_highlight\" invisible=\"provider_code != 'demo' or capture_manually or state != 'pending'\"/>\n                <button string=\"Cancel\" type=\"object\" name=\"action_demo_set_canceled\" invisible=\"provider_code != 'demo' or state != 'pending'\"/>\n                <button string=\"Set to Error\" type=\"object\" name=\"action_demo_set_error\" invisible=\"provider_code != 'demo' or state != 'pending'\"/>\n            </header>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment_paypal.payment_transaction_form",
+   "package": "payment_paypal",
+   "name": "PayPal Transaction Form",
+   "entity": "payment.transaction",
+   "view_type": "field",
+   "inherits_view": "payment.payment_transaction_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "provider_reference",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "provider_reference",
+      "position": "after"
+     },
+     {
+      "name": "paypal_type",
+      "invisible": "provider_code != 'paypal'",
+      "readonly": "1",
+      "groups": "base.group_no_one"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"provider_reference\" position=\"after\">\n                <field name=\"paypal_type\" readonly=\"1\" invisible=\"provider_code != 'paypal'\" groups=\"base.group_no_one\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_online_payment.payment_transaction_form",
+   "package": "pos_online_payment",
+   "name": "payment.transaction.form",
+   "entity": "payment.transaction",
+   "view_type": "button",
+   "inherits_view": "payment.payment_transaction_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_refunds",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "pos_order_id",
+      "invisible": "1"
+     },
+     {
+      "name": "pos_order_id",
+      "widget": "statinfo",
+      "string": "POS Order"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_refunds",
+      "position": "before"
+     },
+     {
+      "name": "action_view_pos_order",
+      "type": "object",
+      "invisible": "not pos_order_id",
+      "class": "oe_stat_button",
+      "icon": "fa-shopping-cart"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_refunds\" position=\"before\">\n                <field name=\"pos_order_id\" invisible=\"1\"/>\n                <button name=\"action_view_pos_order\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-shopping-cart\" invisible=\"not pos_order_id\">\n                    <field name=\"pos_order_id\" widget=\"statinfo\" string=\"POS Order\"/>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.transaction_form_inherit_sale",
+   "package": "sale",
+   "name": "payment.transaction.form.inherit.sale.payment",
+   "entity": "payment.transaction",
+   "view_type": "xpath",
+   "inherits_view": "payment.payment_transaction_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[hasclass('oe_button_box')]",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "sale_order_ids_nbr",
+      "widget": "statinfo",
+      "string": "Sales Order(s)"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_sales_orders",
+      "type": "object",
+      "invisible": "sale_order_ids_nbr == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-money"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//div[hasclass('oe_button_box')]",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[hasclass('oe_button_box')]\" position=\"inside\">\n                <button name=\"action_view_sales_orders\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-money\" invisible=\"sale_order_ids_nbr == 0\">\n                    <field name=\"sale_order_ids_nbr\" widget=\"statinfo\" string=\"Sales Order(s)\"/>\n                </button>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

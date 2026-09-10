@@ -1,0 +1,359 @@
+{
+ "catalog": {
+  "name": "entity:event.tag",
+  "description": "Complete definition of entity Event Tag (event.tag).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.tag",
+  "storage_name": "event_tag",
+  "full_name": "Event Tag",
+  "kind": "persistent",
+  "description": "Event Tag",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "website_event"
+  ],
+  "mixins": [
+   "website.published.multi.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "category_sequence, sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "event",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 0,
+    "defined_in_package": "event",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "category_id",
+    "type": "Many2one",
+    "comodel": "event.tag.category",
+    "string": "Category",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "event",
+    "full_name": "Category",
+    "target_entity": "event.tag.category"
+   },
+   {
+    "name": "category_sequence",
+    "type": "Integer",
+    "related": "category_id.sequence",
+    "string": "Category Sequence",
+    "store": true,
+    "defined_in_package": "event",
+    "full_name": "Category Sequence"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color Index",
+    "default": {
+     "dynamic": "lambda self: self._default_color()"
+    },
+    "help": "Tag color. No color means no display in kanban or front-end, to distinguish internal tags from public categorization tags.",
+    "defined_in_package": "event",
+    "full_name": "Color Index"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_color",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_tag",
+    "package": "event",
+    "name": "event.tag",
+    "entity": "event.tag",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_tag_registration",
+    "package": "event",
+    "name": "event.tag.user",
+    "entity": "event.tag",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_tag_user",
+    "package": "event",
+    "name": "event.tag.user",
+    "entity": "event.tag",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_tag_manager",
+    "package": "event",
+    "name": "event.tag.manager",
+    "entity": "event.tag",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_event.access_event_tag_public",
+    "package": "website_event",
+    "name": "event.tag",
+    "entity": "event.tag",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_tag_portal",
+    "package": "website_event",
+    "name": "event.tag",
+    "entity": "event.tag",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_tag_employee",
+    "package": "website_event",
+    "name": "event.tag",
+    "entity": "event.tag",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_event.ir_rule_event_tag_public",
+    "package": "website_event",
+    "name": "Event Tag: public/portal: color = published and category = published",
+    "entity": "event.tag",
+    "domain": "[('category_id.website_published', '=', True), ('color', '!=', False), ('color', '!=', 0)]",
+    "groups": "[(4, ref('base.group_public')), (4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "event.event_tag_view_tree",
+    "package": "event",
+    "name": "event.tag.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Event Tags Categories"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "category_id",
+       "options": "{'no_quick_create':True}"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.event_tag_view_form",
+    "package": "event",
+    "name": "event.tag.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Event Category Tag"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "category_id",
+       "widget": "many2one",
+       "options": "{'no_quick_create':True}"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one": 1,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_event.event_tag_view_form_inherit",
+    "package": "website_event",
+    "name": "event.tag.view.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "event.event_tag_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='category_id']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "website_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='category_id']",
+       "position": "before"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,134 @@
+{
+ "catalog": {
+  "name": "views:applicant.get.refuse.reason",
+  "description": "View declarations for entity applicant.get.refuse.reason.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr_recruitment.applicant_get_refuse_reason_view_form",
+   "package": "hr_recruitment",
+   "name": "applicant.get.refuse.reason.form",
+   "entity": "applicant.get.refuse.reason",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Refuse Reason",
+     "disable_autofocus": "true"
+    },
+    "fields": [
+     {
+      "name": "refuse_reason_id",
+      "widget": "selection_badge",
+      "string": "Reason",
+      "options": "{'horizontal': true, 'no_create': True, 'no_open': True}"
+     },
+     {
+      "name": "duplicates",
+      "widget": "boolean_toggle",
+      "invisible": "duplicates_count == 0",
+      "options": "{'autosave': False}"
+     },
+     {
+      "name": "duplicate_applicant_ids",
+      "widget": "applicant_line_many2many",
+      "invisible": "not duplicates",
+      "domain": "duplicate_applicant_ids_domain"
+     },
+     {
+      "name": "send_mail",
+      "widget": "boolean_toggle",
+      "options": "{'autosave': False}"
+     },
+     {
+      "name": "applicant_ids",
+      "widget": "many2many_tags",
+      "required": "send_mail",
+      "options": "{'no_create': True}",
+      "placeholder": "Specify Refused Applicants..."
+     },
+     {
+      "name": "lang",
+      "invisible": "1"
+     },
+     {
+      "name": "render_model",
+      "invisible": "1"
+     },
+     {
+      "name": "subject",
+      "required": "send_mail",
+      "placeholder": "Subject..."
+     },
+     {
+      "name": "can_edit_body",
+      "invisible": "1"
+     },
+     {
+      "name": "body",
+      "widget": "html_mail",
+      "readonly": "not can_edit_body",
+      "nolabel": "1",
+      "placeholder": "Email Body...",
+      "force_save": "1"
+     },
+     {
+      "name": "attachment_ids",
+      "widget": "many2many_binary",
+      "invisible": "not can_edit_body"
+     },
+     {
+      "name": "applicant_without_email"
+     },
+     {
+      "name": "template_id",
+      "widget": "mail_composer_template_selector"
+     },
+     {
+      "name": "scheduled_date",
+      "widget": "text_scheduled_date"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_refuse_reason_apply",
+      "string": "Refuse",
+      "type": "object",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Cancel",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "selection_badge": 1,
+     "boolean_toggle": 2,
+     "applicant_line_many2many": 1,
+     "many2many_tags": 1,
+     "html_mail": 1,
+     "many2many_binary": 1,
+     "mail_composer_template_selector": 1,
+     "text_scheduled_date": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Refuse Reason\" disable_autofocus=\"true\">\n                    <group col=\"1\">\n                        <field name=\"refuse_reason_id\" string=\"Reason\" widget=\"selection_badge\" options=\"{'horizontal': true, 'no_create': True, 'no_open': True}\"/>\n                        <group invisible=\"not refuse_reason_id\">\n                            <field name=\"duplicates\" widget=\"boolean_toggle\" options=\"{'autosave': False}\" invisible=\"duplicates_count == 0\"/>\n                            <field name=\"duplicate_applicant_ids\" widget=\"applicant_line_many2many\" domain=\"duplicate_applicant_ids_domain\" invisible=\"not duplicates\"/>\n                            <field name=\"send_mail\" widget=\"boolean_toggle\" options=\"{'autosave': False}\"/>\n                        </group>\n                        <group col=\"1\" invisible=\"not send_mail\">\n                            <group col=\"2\">\n                                <field name=\"applicant_ids\" widget=\"many2many_tags\" placeholder=\"Specify Refused Applicants...\" required=\"send_mail\" options=\"{'no_create': True}\"/>\n                            </group>\n                            <group col=\"2\">\n                                <field name=\"lang\" invisible=\"1\"/>\n                                <field name=\"render_model\" invisible=\"1\"/>\n                                <field name=\"subject\" required=\"send_mail\" placeholder=\"Subject...\"/>\n                            </group>\n                            <field name=\"can_edit_body\" invisible=\"1\"/>\n                            <field name=\"body\" nolabel=\"1\" class=\"oe-bordered-editor\" widget=\"html_mail\" readonly=\"not can_edit_body\" placeholder=\"Email Body...\" force_save=\"1\"/>\n                            <field name=\"attachment_ids\" widget=\"many2many_binary\" invisible=\"not can_edit_body\"/>\n                        </group>\n                    </group>\n                    <div class=\"alert alert-danger\" role=\"alert\" invisible=\"not applicant_without_email or not send_mail\">\n                        <field name=\"applicant_without_email\" class=\"mr4\"/>\n                    </div>\n                    <footer>\n                        <button name=\"action_refuse_reason_apply\" string=\"Refuse\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\"/>\n                        <button string=\"Cancel\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                        <div class=\"d-flex\" invisible=\"not send_mail\">\n                            <div invisible=\"not can_edit_body\">\n                                <field name=\"template_id\" widget=\"mail_composer_template_selector\"/>\n                            </div>\n                            <field name=\"scheduled_date\" widget=\"text_scheduled_date\"/>\n                        </div>\n                    </footer>\n                </form>\n            </field>\n        "
+  }
+ ]
+}

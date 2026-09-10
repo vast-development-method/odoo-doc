@@ -1,0 +1,393 @@
+{
+ "catalog": {
+  "name": "entity:l10n_pl.bank.account.verification",
+  "description": "Complete definition of entity PL Bank Account Verification (l10n_pl.bank.account.verification).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_pl.bank.account.verification",
+  "storage_name": "l10n_pl_bank_account_verification",
+  "full_name": "PL Bank Account Verification",
+  "kind": "persistent",
+  "description": "PL Bank Account Verification",
+  "defined_by_package": "l10n_pl_bank_verification",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "verification_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "valid",
+      "Valid"
+     ],
+     [
+      "invalid",
+      "Invalid"
+     ],
+     [
+      "incomplete_partner",
+      "Incomplete partner"
+     ],
+     [
+      "not_found_partner",
+      "Partner not found"
+     ],
+     [
+      "error",
+      "An error occurred during check with Government API"
+     ]
+    ],
+    "string": "Verification Status",
+    "readonly": true,
+    "required": true,
+    "help": "Flag the payment verification status with one of the following:\n- Valid: The partner VAT is linked to the bank account used for this payment.\n- Invalid: The partner VAT is not linked to the bank account used for this payment.\n- Incomplete partner: The partner has no VAT or no bank account.\n- Partner not found: Partner VAT not found in Government files.\n- Error: An error occurred during check with Government API.\n",
+    "defined_in_package": "l10n_pl_bank_verification",
+    "full_name": "Verification Status"
+   },
+   {
+    "name": "verification_timestamp",
+    "type": "Datetime",
+    "string": "Verification Timestamp",
+    "readonly": true,
+    "defined_in_package": "l10n_pl_bank_verification",
+    "full_name": "Verification Timestamp"
+   },
+   {
+    "name": "verification_date",
+    "type": "Date",
+    "compute": "_compute_verification_date",
+    "store": true,
+    "index": false,
+    "defined_in_package": "l10n_pl_bank_verification",
+    "string": "Verification Date",
+    "full_name": "Verification Date"
+   },
+   {
+    "name": "verification_request_id",
+    "type": "Char",
+    "string": "Correlation ID",
+    "readonly": true,
+    "defined_in_package": "l10n_pl_bank_verification",
+    "full_name": "Correlation identifier"
+   },
+   {
+    "name": "partner_bank_id",
+    "type": "Many2one",
+    "comodel": "res.partner.bank",
+    "readonly": true,
+    "string": "Bank Account",
+    "defined_in_package": "l10n_pl_bank_verification",
+    "full_name": "Bank Account",
+    "target_entity": "res.partner.bank"
+   },
+   {
+    "name": "partner_bank_account_number",
+    "type": "Char",
+    "compute": "_compute_partner_bank_account_number",
+    "readonly": true,
+    "store": true,
+    "index": false,
+    "defined_in_package": "l10n_pl_bank_verification",
+    "string": "Partner Bank Account Number",
+    "full_name": "Partner Bank Account Number"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "readonly": true,
+    "string": "Partner",
+    "defined_in_package": "l10n_pl_bank_verification",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_vat",
+    "type": "Char",
+    "compute": "_compute_partner_vat",
+    "readonly": true,
+    "store": true,
+    "index": false,
+    "defined_in_package": "l10n_pl_bank_verification",
+    "string": "Partner Value-added tax",
+    "full_name": "Partner Value-added tax"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_auto_init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_bank_account_verification",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_verification_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "verification_timestamp"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_bank_account_number",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_bank_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_vat",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_pl_get_verification",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner_bank_data",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [],
+      "documentation": ":param partner_bank_data: list(tuple(partner_id, partner_banks)): recordset of partner bank to get verification for by partner id\n:returns: A recordset of l10n_pl.bank.account.verification for all res.partner.bank in param",
+      "size_in_lines": 147,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_make_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "endpoint",
+     "params"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Send request to the government API\n:param endpoint: The endpoint to call in the API\n:param params: Params to include in request\n:return: response",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_handle_response",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "response"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Handle response given by the API\n:param response: The response received by the API\n:return: Response content or raise an error",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_creation_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "status",
+     "partner_banks",
+     "partners",
+     "timestamp",
+     "request_id"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [],
+      "documentation": "partners should be filled only for partners without bank accounts ('incomplete_partner')",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_from_identifier",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "identifier"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_pl_bank_verification",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "verification_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_pl_bank_verification.l10n_pl_bank_verification.access_l10n_pl_bank_account_verification",
+    "package": "l10n_pl_bank_verification",
+    "name": "access_l10n_pl_bank_account_verification",
+    "entity": "l10n_pl.bank.account.verification",
+    "group": "account.group_account_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

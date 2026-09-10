@@ -1,0 +1,576 @@
+{
+ "catalog": {
+  "name": "views:loyalty.program",
+  "description": "View declarations for entity loyalty.program.",
+  "record_count": 9,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "loyalty.loyalty_program_view_form",
+   "package": "loyalty",
+   "name": "loyalty.program.view.form",
+   "entity": "loyalty.program",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Discount & Loyalty"
+    },
+    "fields": [
+     {
+      "name": "coupon_count"
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "applies_on",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. 10% discount on laptops"
+     },
+     {
+      "name": "program_type",
+      "widget": "filterable_selection",
+      "readonly": "coupon_count != 0",
+      "options": "{'blacklisted_values': ['gift_card', 'ewallet']}"
+     },
+     {
+      "name": "trigger_product_ids",
+      "widget": "many2many_tags",
+      "context": "{                                         'loyalty_is_gift_card_product': program_type == 'gift_card'                                     }"
+     },
+     {
+      "name": "payment_program_discount_product_id",
+      "invisible": "program_type not in ('gift_card', 'ewallet')",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "mail_template_id",
+      "invisible": "program_type not in ('gift_card', 'ewallet')"
+     },
+     {
+      "name": "currency_id"
+     },
+     {
+      "name": "currency_symbol",
+      "invisible": "1"
+     },
+     {
+      "name": "pricelist_ids",
+      "widget": "many2many_tags",
+      "invisible": "program_type in ('gift_card', 'ewallet')",
+      "groups": "product.group_product_pricelist"
+     },
+     {
+      "name": "portal_point_name",
+      "invisible": "program_type in ('loyalty', 'gift_card', 'ewallet')",
+      "string": "Points Unit",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "portal_point_name",
+      "invisible": "program_type in ('gift_card', 'ewallet') or program_type != 'loyalty'",
+      "string": "Points Unit"
+     },
+     {
+      "name": "portal_visible",
+      "invisible": "1"
+     },
+     {
+      "name": "portal_visible",
+      "invisible": "program_type in ('gift_card', 'ewallet')",
+      "string": "Show points Unit",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "trigger",
+      "invisible": "1"
+     },
+     {
+      "name": "trigger",
+      "widget": "selection",
+      "readonly": "1",
+      "string": "Program trigger",
+      "groups": "base.group_no_one",
+      "force_save": "1"
+     },
+     {
+      "name": "applies_on",
+      "invisible": "1"
+     },
+     {
+      "name": "applies_on",
+      "widget": "radio",
+      "readonly": "program_type != 'loyalty'",
+      "string": "Use points on",
+      "groups": "base.group_no_one",
+      "force_save": "1"
+     },
+     {
+      "name": "date_from",
+      "invisible": "program_type in ('gift_card', 'ewallet')"
+     },
+     {
+      "name": "date_to",
+      "invisible": "program_type in ('gift_card', 'ewallet')"
+     },
+     {
+      "name": "limit_usage"
+     },
+     {
+      "name": "max_usage"
+     },
+     {
+      "name": "total_order_count",
+      "readonly": "1"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company",
+      "placeholder": "Visible to all"
+     },
+     {
+      "name": "available_on",
+      "invisible": "1"
+     },
+     {
+      "name": "portal_point_name",
+      "invisible": "program_type not in ('gift_card', 'ewallet')",
+      "string": "Displayed as",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "rule_ids",
+      "widget": "loyalty_one2many",
+      "context": "{'currency_symbol': currency_symbol, 'program_type': program_type}",
+      "nolabel": "1",
+      "mode": "kanban"
+     },
+     {
+      "name": "reward_ids",
+      "widget": "loyalty_one2many",
+      "context": "{'currency_symbol': currency_symbol, 'program_type': program_type}",
+      "nolabel": "1",
+      "mode": "kanban"
+     },
+     {
+      "name": "reward_ids",
+      "widget": "loyalty_one2many",
+      "context": "{'currency_symbol': currency_symbol, 'program_type': program_type}",
+      "nolabel": "1",
+      "mode": "kanban"
+     },
+     {
+      "name": "communication_plan_ids",
+      "mode": "list"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(loyalty_generate_wizard_action)d",
+      "string": "Generate Coupons",
+      "type": "action",
+      "invisible": "program_type != 'coupons'",
+      "class": "btn-primary"
+     },
+     {
+      "name": "%(loyalty_generate_wizard_action)d",
+      "string": "Generate Gift Cards",
+      "type": "action",
+      "invisible": "program_type != 'gift_card'",
+      "class": "btn-primary"
+     },
+     {
+      "name": "%(loyalty_generate_wizard_action)d",
+      "string": "Generate eWallet",
+      "type": "action",
+      "invisible": "program_type != 'ewallet'",
+      "class": "btn-primary",
+      "context": "{'default_mode': 'selected'}"
+     },
+     {
+      "name": "action_open_loyalty_cards",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-tags"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "rules_rewards",
+      "string": "Rules & Rewards",
+      "invisible": "program_type in ('gift_card', 'ewallet')",
+      "groups": null
+     },
+     {
+      "name": "rewards",
+      "string": "Rewards",
+      "invisible": "program_type not in ('gift_card', 'ewallet')",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "communications",
+      "string": "Communications",
+      "invisible": "applies_on == 'current' or program_type in ('gift_card', 'ewallet')",
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "filterable_selection": 1,
+     "many2many_tags": 2,
+     "selection": 1,
+     "radio": 1,
+     "loyalty_one2many": 3
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "%(loyalty_generate_wizard_action)d",
+      "string": "Generate Coupons",
+      "class": "btn-primary",
+      "type": "action",
+      "invisible": "program_type != 'coupons'"
+     },
+     {
+      "name": "%(loyalty_generate_wizard_action)d",
+      "string": "Generate Gift Cards",
+      "class": "btn-primary",
+      "type": "action",
+      "invisible": "program_type != 'gift_card'"
+     },
+     {
+      "name": "%(loyalty_generate_wizard_action)d",
+      "string": "Generate eWallet",
+      "class": "btn-primary",
+      "type": "action",
+      "invisible": "program_type != 'ewallet'",
+      "context": "{'default_mode': 'selected'}"
+     }
+    ],
+    "chatter": false,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "type": "object",
+      "name": "action_open_loyalty_cards",
+      "icon": "fa-tags"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Discount &amp; Loyalty\">\n                <header>\n                    <button name=\"%(loyalty_generate_wizard_action)d\" string=\"Generate Coupons\" class=\"btn-primary\" type=\"action\" invisible=\"program_type != 'coupons'\"/>\n                    <button name=\"%(loyalty_generate_wizard_action)d\" string=\"Generate Gift Cards\" class=\"btn-primary\" type=\"action\" invisible=\"program_type != 'gift_card'\"/>\n                    <button name=\"%(loyalty_generate_wizard_action)d\" string=\"Generate eWallet\" class=\"btn-primary\" type=\"action\" invisible=\"program_type != 'ewallet'\" context=\"{'default_mode': 'selected'}\"/>\n                </header>\n                <sheet>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button class=\"oe_stat_button\" type=\"object\" name=\"action_open_loyalty_cards\" icon=\"fa-tags\">\n                            <div class=\"o_form_field o_stat_info\">\n                                <span class=\"o_stat_value\">\n                                    <field name=\"coupon_count\"/>\n                                </span>\n                                <span class=\"o_stat_text\" invisible=\"program_type not in ('coupons', 'next_order_coupons')\">Coupons</span>\n                                <span class=\"o_stat_text\" invisible=\"program_type != 'loyalty'\">Loyalty Cards</span>\n                                <span class=\"o_stat_text\" invisible=\"program_type not in ('promotion', 'buy_x_get_y')\">Promos</span>\n                                <span class=\"o_stat_text\" invisible=\"program_type != 'promo_code'\">Discount</span>\n                                <span class=\"o_stat_text\" invisible=\"program_type != 'gift_card'\">Gift Cards</span>\n                                <span class=\"o_stat_text\" invisible=\"program_type != 'ewallet'\">eWallets</span>\n                            </div>\n                        </button>\n                    </div>\n                    <field name=\"active\" invisible=\"1\"/>\n                    <field name=\"applies_on\" invisible=\"1\"/>\n                    <div class=\"oe_title\">\n                        <label for=\"name\" string=\"Program Name\"/>\n                        <h1>\n                            <field name=\"name\" placeholder=\"e.g. 10% discount on laptops\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <group>\n                            <label for=\"program_type\"/>\n                            <div>\n                                <field name=\"program_type\" widget=\"filterable_selection\" readonly=\"coupon_count != 0\" options=\"{'blacklisted_values': ['gift_card', 'ewallet']}\"/>\n                                <p class=\"text-muted\" invisible=\"program_type != 'coupons'\" colspan=\"2\">\n                                    Generate &amp; share coupon codes manually. It can be used in eCommerce, Point of Sale or regular orders to claim the Reward. You can define constraints on its usage through conditional rule.\n                                    <div groups=\"base.group_no_one\">\n                                        When generating coupon, you can define a specific points value that can be exchanged for rewards.\n                                    </div>\n                                </p>\n                                <p class=\"text-muted\" invisible=\"program_type != 'loyalty'\" colspan=\"2\">\n                                    When customers make an order, they accumulate points they can exchange for rewards on the current order or on a future one.\n                                </p>\n                                <p class=\"text-muted\" invisible=\"program_type != 'promotion'\" colspan=\"2\">\n                                    Set up conditional rules on the order that will give access to rewards for customers\n                                    <div groups=\"base.group_no_one\">\n                                        Each rule can grant points to the customer he will be able to exchange against rewards\n                                    </div>\n                                </p>\n                                <p class=\"text-muted\" invisible=\"program_type != 'promo_code'\" colspan=\"2\">\n                                    Define Discount codes on conditional rules then share it with your customers for rewards.\n                                </p>\n                                <p class=\"text-muted\" invisible=\"program_type != 'buy_x_get_y'\" colspan=\"2\">\n                                    Grant 1 credit for each item bought then reward the customer with Y items in exchange of X credits.\n                                </p>\n                                <p class=\"text-muted\" invisible=\"program_type != 'next_order_coupons'\" colspan=\"2\">\n                                    Drive repeat purchases by sending a unique, single-use coupon code for the next purchase when a customer buys something in your store.\n                                </p>\n                                <p class=\"text-muted\" invisible=\"program_type != 'gift_card'\" colspan=\"2\">\n                                    Gift Cards are created manually or automatically sent by email when the customer orders a gift card product.\n                                    <br/>\n                                    Then, Gift Cards can be used to pay orders.\n                                </p>\n                                <p class=\"text-muted\" invisible=\"program_type != 'ewallet'\" colspan=\"2\">\n                                    eWallets are created manually or automatically when the customer orders a eWallet product.\n                                    <br/>\n                                    Then, eWallets are proposed during the checkout, to pay orders.\n                                </p>\n                            </div>\n                            <label string=\"Gift Card Products\" invisible=\"program_type != 'gift_card'\" for=\"trigger_product_ids\"/>\n                            <label string=\"eWallet Products\" invisible=\"program_type != 'ewallet'\" for=\"trigger_product_ids\"/>\n                            <div id=\"trigger_products\" invisible=\"program_type not in ['gift_card', 'ewallet']\">\n                                <field name=\"trigger_product_ids\" widget=\"many2many_tags\" context=\"{                                         'loyalty_is_gift_card_product': program_type == 'gift_card'                                     }\"/>\n                            </div>\n                            <field name=\"payment_program_discount_product_id\" groups=\"base.group_no_one\" invisible=\"program_type not in ('gift_card', 'ewallet')\"/>\n                            <field name=\"mail_template_id\" invisible=\"program_type not in ('gift_card', 'ewallet')\"/>\n                            <field name=\"currency_id\"/>\n                            <field name=\"currency_symbol\" invisible=\"1\"/>\n                            <field name=\"pricelist_ids\" widget=\"many2many_tags\" invisible=\"program_type in ('gift_card', 'ewallet')\" groups=\"product.group_product_pricelist\"/>\n                            <field name=\"portal_point_name\" invisible=\"program_type in ('loyalty', 'gift_card', 'ewallet')\" string=\"Points Unit\" groups=\"base.group_no_one\"/>\n                            <field name=\"portal_point_name\" invisible=\"program_type in ('gift_card', 'ewallet') or program_type != 'loyalty'\" string=\"Points Unit\"/>\n                            <field name=\"portal_visible\" invisible=\"1\"/>\n                            <field name=\"portal_visible\" groups=\"base.group_no_one\" string=\"Show points Unit\" invisible=\"program_type in ('gift_card', 'ewallet')\"/>\n                            <field name=\"trigger\" invisible=\"1\"/>\n                            <field name=\"trigger\" string=\"Program trigger\" groups=\"base.group_no_one\" widget=\"selection\" readonly=\"1\" force_save=\"1\"/>\n                            <field name=\"applies_on\" invisible=\"1\"/>\n                            <field name=\"applies_on\" string=\"Use points on\" groups=\"base.group_no_one\" widget=\"radio\" force_save=\"1\" readonly=\"program_type != 'loyalty'\"/>\n                        </group>\n                        <group>\n                            <field name=\"date_from\" invisible=\"program_type in ('gift_card', 'ewallet')\"/>\n                            <field name=\"date_to\" invisible=\"program_type in ('gift_card', 'ewallet')\"/>\n                            <label for=\"limit_usage\" invisible=\"program_type in ('gift_card', 'ewallet')\"/>\n                            <span invisible=\"program_type in ('gift_card', 'ewallet')\">\n                                <field name=\"limit_usage\" class=\"oe_inline\"/>\n                                <span invisible=\"not limit_usage\">\n                                    to <field name=\"max_usage\" class=\"oe_inline\"/> usages\n                                    <span class=\"text-muted\">(<field name=\"total_order_count\" class=\"oe_inline\" readonly=\"1\"/> used)</span>\n                                </span>\n                            </span>\n                            <field name=\"company_id\" invisible=\"1\"/>\n                            <field name=\"company_id\" groups=\"base.group_multi_company\" placeholder=\"Visible to all\"/>\n                            <field name=\"available_on\" invisible=\"1\"/>\n                            <label class=\"o_form_label\" for=\"available_on\" string=\"Available On\" invisible=\"1\"/>\n                            <div id=\"o_loyalty_program_availabilities\" invisible=\"1\"/>\n                            <field name=\"portal_point_name\" invisible=\"program_type not in ('gift_card', 'ewallet')\" string=\"Displayed as\" groups=\"base.group_no_one\"/>\n                        </group>\n                    </group>\n                    <notebook>\n                        <page string=\"Rules &amp; Rewards\" name=\"rules_rewards\" invisible=\"program_type in ('gift_card', 'ewallet')\">\n                            <group>\n                                <group>\n                                    <field name=\"rule_ids\" colspan=\"2\" mode=\"kanban\" nolabel=\"1\" add-label=\"Add a rule\" class=\"o_loyalty_kanban_inline\" widget=\"loyalty_one2many\" context=\"{'currency_symbol': currency_symbol, 'program_type': program_type}\"/>\n                                </group>\n                                <group>\n                                    <field name=\"reward_ids\" colspan=\"2\" mode=\"kanban\" nolabel=\"1\" add-label=\"Add a reward\" class=\"o_loyalty_kanban_inline\" widget=\"loyalty_one2many\" context=\"{'currency_symbol': currency_symbol, 'program_type': program_type}\"/>\n                                </group>\n                            </group>\n                        </page>\n                        <page string=\"Rewards\" name=\"rewards\" groups=\"base.group_no_one\" invisible=\"program_type not in ('gift_card', 'ewallet')\">\n                            <group>\n                                <group groups=\"base.group_no_one\">\n                                    <field name=\"reward_ids\" colspan=\"2\" mode=\"kanban\" nolabel=\"1\" add-label=\"Add a reward\" class=\"o_loyalty_kanban_inline\" widget=\"loyalty_one2many\" context=\"{'currency_symbol': currency_symbol, 'program_type': program_type}\"/>\n                                </group>\n                            </group>\n                        </page>\n                        <page string=\"Communications\" name=\"communications\" invisible=\"applies_on == 'current' or program_type in ('gift_card', 'ewallet')\">\n                            <field name=\"communication_plan_ids\" mode=\"list\"/>\n                        </page>\n                    </notebook>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "loyalty.loyalty_program_view_tree",
+   "package": "loyalty",
+   "name": "loyalty.program.view.list",
+   "entity": "loyalty.program",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "js_class": "loyalty_program_list_view"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "program_type"
+     },
+     {
+      "name": "coupon_count_display",
+      "string": "Items"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list js_class=\"loyalty_program_list_view\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\"/>\n                <field name=\"program_type\"/>\n                <field name=\"coupon_count_display\" string=\"Items\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "loyalty.loyalty_program_view_search",
+   "package": "loyalty",
+   "name": "loyalty.program.view.search",
+   "entity": "loyalty.program",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search>\n                <field name=\"name\"/>\n                <separator/>\n                <filter string=\"Archived\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "loyalty.loyalty_program_gift_ewallet_view_form",
+   "package": "loyalty",
+   "name": "loyalty.program.gift.ewallet.view.form",
+   "entity": "loyalty.program",
+   "view_type": "form",
+   "inherits_view": "loyalty_program_view_form",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "form",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form position=\"attributes\">\n                <attribute name=\"string\">Gift &amp; Ewallet</attribute>\n            </form>\n            <field name=\"program_type\" position=\"attributes\">\n                <attribute name=\"options\">{'whitelisted_values': ['gift_card', 'ewallet']}</attribute>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_loyalty.loyalty_program_view_form_inherit_pos_loyalty",
+   "package": "pos_loyalty",
+   "name": "loyalty.program.view.form.inherit.pos.loyalty",
+   "entity": "loyalty.program",
+   "view_type": "field",
+   "inherits_view": "loyalty.loyalty_program_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "mail_template_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "mail_template_id",
+      "position": "after"
+     },
+     {
+      "name": "pos_report_print_id",
+      "invisible": "program_type != 'gift_card'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"mail_template_id\" position=\"after\">\n                <field name=\"pos_report_print_id\" invisible=\"program_type != 'gift_card'\"/>\n            </field>\n            <xpath expr=\"//label[@for='available_on']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n            <xpath expr=\"//div[@id='o_loyalty_program_availabilities']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n            <xpath expr=\"//div[@id='o_loyalty_program_availabilities']\" position=\"inside\">\n                <span class=\"d-inline-flex text-break\">\n                    <field name=\"pos_ok\"/>\n                    <label for=\"pos_ok\"/>\n                </span>\n            </xpath>\n            <xpath expr=\"//div[@id='o_loyalty_program_availabilities']\" position=\"after\">\n                <field name=\"pos_config_ids\" string=\"Point of Sale\" widget=\"many2many_tags\" invisible=\"not pos_ok\" options=\"{'create': False}\" placeholder=\"All PoS\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_loyalty.loyalty_program_view_tree_inherit_pos_loyalty",
+   "package": "pos_loyalty",
+   "name": "loyalty.program.view.list.inherit.pos.loyalty",
+   "entity": "loyalty.program",
+   "view_type": "field",
+   "inherits_view": "loyalty.loyalty_program_view_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "company_id",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "position": "before"
+     },
+     {
+      "name": "pos_config_ids",
+      "widget": "many2many_tags"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tags": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"company_id\" position=\"before\">\n                <field name=\"pos_config_ids\" widget=\"many2many_tags\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_loyalty.loyalty_program_view_form_inherit_sale_loyalty",
+   "package": "sale_loyalty",
+   "name": "loyalty.program.view.form.inherit.sale.loyalty",
+   "entity": "loyalty.program",
+   "view_type": "xpath",
+   "inherits_view": "loyalty.loyalty_program_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//label[@for='available_on']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//label[@for='available_on']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//label[@for='available_on']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n            <xpath expr=\"//div[@id='o_loyalty_program_availabilities']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n            <xpath expr=\"//div[@id='o_loyalty_program_availabilities']\" position=\"inside\">\n                <span class=\"d-inline-flex text-break\">\n                    <field name=\"sale_ok\"/>\n                    <label for=\"sale_ok\"/>\n                </span>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale_loyalty.loyalty_program_view_form_inherit_website_sale_loyalty",
+   "package": "website_sale_loyalty",
+   "name": "loyalty.program.view.form.inherit.website.sale.loyalty",
+   "entity": "loyalty.program",
+   "view_type": "xpath",
+   "inherits_view": "sale_loyalty.loyalty_program_view_form_inherit_sale_loyalty",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//label[@for='available_on']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//label[@for='available_on']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//label[@for='available_on']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n            <xpath expr=\"//div[@id='o_loyalty_program_availabilities']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n            <xpath expr=\"//div[@id='o_loyalty_program_availabilities']\" position=\"inside\">\n                <span class=\"d-inline-flex text-break\">\n                    <field name=\"ecommerce_ok\"/>\n                    <label for=\"ecommerce_ok\" string=\"Website\"/>\n                </span>\n            </xpath>\n            <xpath expr=\"//div[@id='o_loyalty_program_availabilities']\" position=\"after\">\n                <field name=\"website_id\" invisible=\"not ecommerce_ok\" options=\"{'no_create': True}\" groups=\"website.group_multi_website\" placeholder=\"All websites\"/>\n            </xpath>\n            <div id=\"trigger_products\" position=\"inside\">\n                <div invisible=\"not show_non_published_product_warning\" class=\"alert alert-warning mt-1\" role=\"alert\">\n                    To be able to top up eWallet from the portal, eWallet products must be\n                     published.\n                </div>\n            </div>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale_loyalty.loyalty_program_view_tree_inherit_website_sale_loyalty",
+   "package": "website_sale_loyalty",
+   "name": "loyalty.program.view.list.inherit.website.sale.loyalty",
+   "entity": "loyalty.program",
+   "view_type": "field",
+   "inherits_view": "loyalty.loyalty_program_view_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "coupon_count_display",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "coupon_count_display",
+      "position": "after"
+     },
+     {
+      "name": "website_id",
+      "options": "{'no_create': True}",
+      "groups": "website.group_multi_website"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"coupon_count_display\" position=\"after\">\n                <field name=\"website_id\" options=\"{'no_create': True}\" groups=\"website.group_multi_website\"/>\n            </field>\n            <field name=\"company_id\" position=\"after\">\n                <button name=\"action_program_share\" string=\"Share\" type=\"object\" icon=\"fa-share-alt\" invisible=\"program_type != 'promo_code'\"/>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

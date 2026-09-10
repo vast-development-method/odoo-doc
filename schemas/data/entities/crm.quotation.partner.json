@@ -1,0 +1,234 @@
+{
+ "catalog": {
+  "name": "entity:crm.quotation.partner",
+  "description": "Complete definition of entity Create new or use existing Customer on new Quotation (crm.quotation.partner).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "crm.quotation.partner",
+  "storage_name": "crm_quotation_partner",
+  "full_name": "Create new or use existing Customer on new Quotation",
+  "kind": "transient",
+  "description": "Create new or use existing Customer on new Quotation",
+  "defined_by_package": "sale_crm",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "action",
+    "type": "Selection",
+    "selection": [
+     [
+      "create",
+      "Create a new customer"
+     ],
+     [
+      "exist",
+      "Link to an existing customer"
+     ],
+     [
+      "nothing",
+      "Do not link to a customer"
+     ]
+    ],
+    "string": "Quotation Customer",
+    "required": true,
+    "defined_in_package": "sale_crm",
+    "full_name": "Quotation Customer"
+   },
+   {
+    "name": "lead_id",
+    "type": "Many2one",
+    "comodel": "crm.lead",
+    "string": "Associated Lead",
+    "required": true,
+    "defined_in_package": "sale_crm",
+    "full_name": "Associated Lead",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Customer",
+    "defined_in_package": "sale_crm",
+    "full_name": "Customer",
+    "target_entity": "res.partner"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "sale_crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only apply this action from a lead.",
+        "line": 18
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_apply",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_crm",
+      "decorators": [],
+      "documentation": "Convert lead to opportunity or merge lead and opportunity and open\nthe freshly created opportunity view.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "default_get",
+    "package": "sale_crm",
+    "kind": "UserError",
+    "message": "You can only apply this action from a lead."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "sale_crm.access_crm_quotation_partner",
+    "package": "sale_crm",
+    "name": "access.crm.quotation.partner",
+    "entity": "crm.quotation.partner",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "sale_crm.crm_quotation_partner_view_form",
+    "package": "sale_crm",
+    "name": "crm.quotation.partner.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "New Quotation"
+     },
+     "fields": [
+      {
+       "name": "action",
+       "widget": "radio"
+      },
+      {
+       "name": "lead_id",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_id",
+       "invisible": "action != 'exist'",
+       "required": "action == 'exist'",
+       "context": "{'res_partner_search_mode': 'customer'}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_apply",
+       "string": "Confirm",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "sale_crm.crm_quotation_partner_action",
+    "package": "sale_crm",
+    "name": "New Quotation",
+    "view_mode": "form",
+    "view_id": "crm_quotation_partner_view_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "crm.quotation.partner"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,1204 @@
+{
+ "catalog": {
+  "name": "entity:im_livechat.channel.member.history",
+  "description": "Complete definition of entity Keep the channel member history (im_livechat.channel.member.history).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "im_livechat.channel.member.history",
+  "storage_name": "im_livechat_channel_member_history",
+  "full_name": "Keep the channel member history",
+  "kind": "persistent",
+  "description": "Keep the channel member history",
+  "defined_by_package": "im_livechat",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "partner_id",
+   "guest_id"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "member_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel.member",
+    "index": "btree_not_null",
+    "defined_in_package": "im_livechat",
+    "string": "Member",
+    "full_name": "Member",
+    "target_entity": "discuss.channel.member"
+   },
+   {
+    "name": "livechat_member_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "agent",
+      "Agent"
+     ],
+     [
+      "visitor",
+      "Visitor"
+     ],
+     [
+      "bot",
+      "Chatbot"
+     ]
+    ],
+    "compute": "_compute_member_fields",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Member Type",
+    "full_name": "Livechat Member Type"
+   },
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel",
+    "compute": "_compute_member_fields",
+    "index": true,
+    "ondelete": "cascade",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Channel",
+    "full_name": "Channel",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "guest_id",
+    "type": "Many2one",
+    "comodel": "mail.guest",
+    "compute": "_compute_member_fields",
+    "index": "btree_not_null",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Guest",
+    "full_name": "Guest",
+    "target_entity": "mail.guest"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "compute": "_compute_member_fields",
+    "index": "btree_not_null",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Partner",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "chatbot_script_id",
+    "type": "Many2one",
+    "comodel": "chatbot.script",
+    "compute": "_compute_member_fields",
+    "index": "btree_not_null",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Chatbot Script",
+    "full_name": "Chatbot Script",
+    "target_entity": "chatbot.script"
+   },
+   {
+    "name": "agent_expertise_ids",
+    "type": "Many2many",
+    "comodel": "im_livechat.expertise",
+    "compute": "_compute_member_fields",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Agent Expertise",
+    "full_name": "Agent Expertise",
+    "target_entity": "im_livechat.expertise"
+   },
+   {
+    "name": "conversation_tag_ids",
+    "type": "Many2many",
+    "comodel": "im_livechat.conversation.tag",
+    "relation": "im_livechat_channel_member_history_conversation_tag_rel",
+    "related": "channel_id.livechat_conversation_tag_ids",
+    "defined_in_package": "im_livechat",
+    "string": "Conversation Tag",
+    "full_name": "Conversation Tag",
+    "target_entity": "im_livechat.conversation.tag"
+   },
+   {
+    "name": "avatar_128",
+    "type": "Binary",
+    "compute": "_compute_avatar_128",
+    "defined_in_package": "im_livechat",
+    "string": "Avatar 128",
+    "full_name": "Avatar 128"
+   },
+   {
+    "name": "session_country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "related": "channel_id.country_id",
+    "defined_in_package": "im_livechat",
+    "string": "Session Country",
+    "full_name": "Session Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "session_livechat_channel_id",
+    "type": "Many2one",
+    "comodel": "im_livechat.channel",
+    "string": "Live chat channel",
+    "related": "channel_id.livechat_channel_id",
+    "defined_in_package": "im_livechat",
+    "full_name": "Live chat channel",
+    "target_entity": "im_livechat.channel"
+   },
+   {
+    "name": "session_outcome",
+    "type": "Selection",
+    "related": "channel_id.livechat_outcome",
+    "defined_in_package": "im_livechat",
+    "string": "Session Outcome",
+    "full_name": "Session Outcome"
+   },
+   {
+    "name": "session_start_hour",
+    "type": "Float",
+    "related": "channel_id.livechat_start_hour",
+    "defined_in_package": "im_livechat",
+    "string": "Session Start Hour",
+    "full_name": "Session Start Hour"
+   },
+   {
+    "name": "session_week_day",
+    "type": "Selection",
+    "related": "channel_id.livechat_week_day",
+    "defined_in_package": "im_livechat",
+    "string": "Session Week Day",
+    "full_name": "Session Week Day"
+   },
+   {
+    "name": "session_duration_hour",
+    "type": "Float",
+    "string": "Session Duration",
+    "help": "Time spent by the persona in the session in hours",
+    "compute": "_compute_session_duration_hour",
+    "aggregator": "avg",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Session Duration"
+   },
+   {
+    "name": "rating_id",
+    "type": "Many2one",
+    "comodel": "rating.rating",
+    "compute": "_compute_rating_id",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Rating",
+    "full_name": "Rating",
+    "target_entity": "rating.rating"
+   },
+   {
+    "name": "rating",
+    "type": "Float",
+    "related": "rating_id.rating",
+    "defined_in_package": "im_livechat",
+    "string": "Rating",
+    "full_name": "Rating"
+   },
+   {
+    "name": "rating_text",
+    "type": "Selection",
+    "string": "Rating text",
+    "related": "rating_id.rating_text",
+    "defined_in_package": "im_livechat",
+    "full_name": "Rating text"
+   },
+   {
+    "name": "call_history_ids",
+    "type": "Many2many",
+    "comodel": "discuss.call.history",
+    "defined_in_package": "im_livechat",
+    "string": "Call History",
+    "full_name": "Call History",
+    "target_entity": "discuss.call.history"
+   },
+   {
+    "name": "has_call",
+    "type": "Float",
+    "compute": "_compute_has_call",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Has Call",
+    "full_name": "Has Call"
+   },
+   {
+    "name": "call_count",
+    "type": "Float",
+    "string": "# of Sessions with Calls",
+    "related": "has_call",
+    "aggregator": "sum",
+    "defined_in_package": "im_livechat",
+    "full_name": "# of Sessions with Calls"
+   },
+   {
+    "name": "call_percentage",
+    "type": "Float",
+    "string": "Session with Calls (%)",
+    "related": "has_call",
+    "aggregator": "avg",
+    "defined_in_package": "im_livechat",
+    "full_name": "Session with Calls (%)"
+   },
+   {
+    "name": "call_duration_hour",
+    "type": "Float",
+    "string": "Call Duration",
+    "compute": "_compute_call_duration_hour",
+    "aggregator": "sum",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Call Duration"
+   },
+   {
+    "name": "message_count",
+    "type": "Integer",
+    "string": "# of Messages per Session",
+    "aggregator": "avg",
+    "defined_in_package": "im_livechat",
+    "full_name": "# of Messages per Session"
+   },
+   {
+    "name": "help_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "requested",
+      "Help Requested"
+     ],
+     [
+      "provided",
+      "Help Provided"
+     ]
+    ],
+    "compute": "_compute_help_status",
+    "store": true,
+    "defined_in_package": "im_livechat",
+    "string": "Help Status",
+    "full_name": "Help Status"
+   },
+   {
+    "name": "response_time_hour",
+    "type": "Float",
+    "string": "Response Time",
+    "aggregator": "avg",
+    "defined_in_package": "im_livechat",
+    "full_name": "Response Time"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_member_id_unique",
+    "kind": "Constraint",
+    "definition": "UNIQUE(member_id)",
+    "message": "Members can only be linked to one history",
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_channel_id_partner_id_unique",
+    "kind": "UniqueIndex",
+    "definition": "(channel_id, partner_id) WHERE partner_id IS NOT NULL",
+    "message": "One partner can only be linked to one history on a channel",
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_channel_id_guest_id_unique",
+    "kind": "UniqueIndex",
+    "definition": "(channel_id, guest_id) WHERE guest_id IS NOT NULL",
+    "message": "One guest can only be linked to one history on a channel",
+    "defined_in_package": "im_livechat"
+   },
+   {
+    "name": "_partner_id_or_guest_id_constraint",
+    "kind": "Constraint",
+    "definition": "CHECK(partner_id IS NULL OR guest_id IS NULL)",
+    "message": "History should either be linked to a partner or a guest but not both",
+    "defined_in_package": "im_livechat"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_constraint_channel_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "channel_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Cannot create history as it is only available for live chats: %(histories)s.",
+        "line": 102
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_member_fields",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "member_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_member_type",
+         "partner_id.name",
+         "partner_id.display_name",
+         "guest_id.name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_avatar_128",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id.avatar_128",
+         "guest_id.avatar_128"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_call",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "call_history_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_call_duration_hour",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "call_history_ids.duration_hour"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_help_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id.livechat_agent_requesting_help_history",
+         "channel_id.livechat_agent_providing_help_history"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rating_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id.rating_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_session_duration_hour",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "create_date",
+         "channel_id.livechat_end_dt",
+         "channel_id.message_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_discuss_channel_view",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constraint_channel_id",
+    "package": "im_livechat",
+    "kind": "ValidationError",
+    "message": "Cannot create history as it is only available for live chats: %(histories)s."
+   }
+  ],
+  "state_fields": [
+   "help_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "im_livechat.access_im_livechat_channel_member_history_user",
+    "package": "im_livechat",
+    "name": "im_livechat.channel.member.history",
+    "entity": "im_livechat.channel.member.history",
+    "group": "im_livechat_group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_livechat.website_livechat_agent_history_view_search",
+    "package": "hr_livechat",
+    "name": "website_livechat.agent.history.search",
+    "view_type": "xpath",
+    "inherits_view": "im_livechat.im_livechat_agent_history_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//*[@name='my_session']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_team",
+       "string": "My Team",
+       "domain": "['|', ('partner_id.user_ids', '=', uid), ('partner_id.employee_ids.parent_id.user_id', '=', uid)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//*[@name='my_session']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "im_livechat.im_livechat_channel_member_history_view_search",
+    "package": "im_livechat",
+    "name": "im_livechat.channel.member.history.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search History"
+     },
+     "fields": [
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "chatbot_script_id"
+      },
+      {
+       "name": "guest_id"
+      },
+      {
+       "name": "livechat_member_type",
+       "string": "Member Type"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.im_livechat_channel_member_history_view_tree",
+    "package": "im_livechat",
+    "name": "im_livechat.channel.member.history.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "default_order": "create_date desc",
+      "string": "Member History",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "chatbot_script_id"
+      },
+      {
+       "name": "guest_id"
+      },
+      {
+       "name": "session_duration_hour",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      },
+      {
+       "name": "livechat_member_type",
+       "string": "Member Type"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "im_livechat.im_livechat_agent_history_view_search",
+    "package": "im_livechat",
+    "name": "im_livechat.agent.history.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Agent"
+     },
+     "fields": [
+      {
+       "name": "partner_id",
+       "string": "Agent"
+      },
+      {
+       "name": "session_livechat_channel_id"
+      },
+      {
+       "name": "session_country_id"
+      },
+      {
+       "name": "agent_expertise_ids",
+       "string": "Expertise"
+      },
+      {
+       "name": "conversation_tag_ids",
+       "string": "Tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_session",
+       "string": "My Sessions",
+       "domain": "[('partner_id.user_ids', '=', uid)]"
+      },
+      {
+       "name": "escalated",
+       "string": "Escalated",
+       "domain": "[('session_outcome', '=', 'escalated')]"
+      },
+      {
+       "name": "no_answer",
+       "string": "Not Answered",
+       "domain": "[('session_outcome', '=', 'no_answer')]"
+      },
+      {
+       "name": "rating_happy",
+       "string": "Happy",
+       "domain": "[('rating_text','=', 'top')]"
+      },
+      {
+       "name": "rating_neutral",
+       "string": "Neutral",
+       "domain": "[('rating_text','=', 'ok')]"
+      },
+      {
+       "name": "rating_unhappy",
+       "string": "Unhappy",
+       "domain": "[('rating_text','=', 'ko')]"
+      },
+      {
+       "name": "filter_start_date",
+       "string": "Date",
+       "date": "create_date"
+      },
+      {
+       "name": "filter_date_last_month",
+       "string": "Date: Last month",
+       "domain": "[('create_date', '>=', 'today -1m')]",
+       "invisible": "1"
+      },
+      {
+       "name": "filter_date_last_week",
+       "string": "Date: Last week",
+       "domain": "[('create_date', '>=', 'today -1w')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_channel",
+       "string": "Channel",
+       "domain": "[]",
+       "context": "{'group_by':'session_livechat_channel_id'}"
+      },
+      {
+       "name": "group_by_agent",
+       "string": "Agent",
+       "domain": "[]",
+       "context": "{'group_by':'partner_id'}"
+      },
+      {
+       "name": "group_by_help_status",
+       "domain": "[]",
+       "context": "{'group_by': 'help_status'}"
+      },
+      {
+       "name": "group_by_rating_text",
+       "string": "Rating",
+       "domain": "[]",
+       "context": "{'group_by':'rating_text'}"
+      },
+      {
+       "name": "group_by_country",
+       "string": "Country",
+       "domain": "[]",
+       "context": "{'group_by':'session_country_id'}"
+      },
+      {
+       "name": "group_by_outcome",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by':'session_outcome'}"
+      },
+      {
+       "name": "group_by_expertise",
+       "string": "Expertise",
+       "domain": "[]",
+       "context": "{'group_by':'agent_expertise_ids'}"
+      },
+      {
+       "name": "group_by_conversation_tag",
+       "string": "Tags",
+       "domain": "[]",
+       "context": "{'group_by':'conversation_tag_ids'}"
+      },
+      {
+       "name": "group_by_start_hour",
+       "string": "Hour of Day",
+       "domain": "[]",
+       "context": "{'group_by':'session_start_hour'}"
+      },
+      {
+       "name": "group_by_week_day",
+       "string": "Day of Week",
+       "domain": "[]",
+       "context": "{'group_by':'session_week_day'}"
+      },
+      {
+       "name": "group_by_month",
+       "string": "Date",
+       "domain": "[]",
+       "context": "{'group_by':'create_date:month'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.im_livechat_agent_history_view_graph",
+    "package": "im_livechat",
+    "name": "im_livechat.agent.history.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "js_class": "im_livechat.agent_history_graph",
+      "string": "Livechat Support Statistics",
+      "type": "line",
+      "stacked": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "has_call",
+       "invisible": "1"
+      },
+      {
+       "name": "session_start_hour",
+       "invisible": "1"
+      },
+      {
+       "name": "session_week_day",
+       "invisible": "1"
+      },
+      {
+       "name": "call_duration_hour",
+       "widget": "float_time"
+      },
+      {
+       "name": "call_percentage",
+       "widget": "percentage"
+      },
+      {
+       "name": "rating",
+       "widget": "im_livechat.rating_percentage",
+       "string": "Rating (%)"
+      },
+      {
+       "name": "response_time_hour",
+       "widget": "float_time",
+       "string": "Response Time"
+      },
+      {
+       "name": "session_duration_hour",
+       "widget": "float_time"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 3,
+      "percentage": 1,
+      "im_livechat.rating_percentage": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "has_call",
+       "invisible": "1"
+      },
+      {
+       "name": "session_start_hour",
+       "invisible": "1"
+      },
+      {
+       "name": "session_week_day",
+       "invisible": "1"
+      },
+      {
+       "name": "call_duration_hour",
+       "type": "measure",
+       "widget": "float_time"
+      },
+      {
+       "name": "call_percentage",
+       "type": "measure",
+       "widget": "percentage"
+      },
+      {
+       "name": "rating",
+       "string": "Rating (%)",
+       "type": "measure",
+       "widget": "im_livechat.rating_percentage"
+      },
+      {
+       "name": "response_time_hour",
+       "string": "Response Time",
+       "type": "measure",
+       "widget": "float_time"
+      },
+      {
+       "name": "session_duration_hour",
+       "type": "measure",
+       "widget": "float_time"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "im_livechat.im_livechat_agent_history_view_pivot",
+    "package": "im_livechat",
+    "name": "im_livechat.agent.history.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "js_class": "im_livechat.agent_history_pivot",
+      "string": "Livechat Support Statistics",
+      "sample": "1",
+      "display_quantity": "1"
+     },
+     "fields": [
+      {
+       "name": "has_call",
+       "invisible": "1"
+      },
+      {
+       "name": "session_start_hour",
+       "invisible": "1"
+      },
+      {
+       "name": "session_week_day",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "call_duration_hour",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      },
+      {
+       "name": "call_percentage",
+       "widget": "percentage"
+      },
+      {
+       "name": "response_time_hour",
+       "widget": "float_time",
+       "string": "Response Time",
+       "options": "{'displaySeconds': True}"
+      },
+      {
+       "name": "session_duration_hour",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      },
+      {
+       "name": "rating",
+       "widget": "im_livechat.rating_percentage",
+       "string": "Rating (%)"
+      },
+      {
+       "name": "call_count",
+       "widget": "integer"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 3,
+      "percentage": 1,
+      "im_livechat.rating_percentage": 1,
+      "integer": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "has_call",
+       "invisible": "1"
+      },
+      {
+       "name": "session_start_hour",
+       "invisible": "1"
+      },
+      {
+       "name": "session_week_day",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_id",
+       "type": "row"
+      },
+      {
+       "name": "call_duration_hour",
+       "type": "measure",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      },
+      {
+       "name": "call_percentage",
+       "type": "measure",
+       "widget": "percentage"
+      },
+      {
+       "name": "response_time_hour",
+       "string": "Response Time",
+       "type": "measure",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      },
+      {
+       "name": "session_duration_hour",
+       "type": "measure",
+       "widget": "float_time",
+       "options": "{'displaySeconds': True}"
+      },
+      {
+       "name": "rating",
+       "string": "Rating (%)",
+       "type": "measure",
+       "widget": "im_livechat.rating_percentage"
+      },
+      {
+       "name": "call_count",
+       "type": "measure",
+       "widget": "integer"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "im_livechat.im_livechat_channel_member_history_action",
+    "package": "im_livechat",
+    "name": "Member History",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "im_livechat_channel_member_history_view_search",
+    "domain": null,
+    "context": "{\"create\": False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "im_livechat.channel.member.history"
+   },
+   {
+    "external_identifier": "im_livechat.im_livechat_agent_history_action",
+    "package": "im_livechat",
+    "name": "Agents",
+    "view_mode": "pivot,graph",
+    "view_id": null,
+    "search_view_id": "im_livechat_agent_history_view_search",
+    "domain": "[('livechat_member_type', '=', 'agent')]",
+    "context": "{\n                    \"search_default_group_by_agent\": 1,\n                    \"search_default_filter_date_last_month\": 1,\n                    \"graph_measure\": \"__count__\",\n                    \"pivot_measures\": [\"__count\", \"response_time_hour\", \"session_duration_hour\", \"rating\", \"call_count\"],\n                    \"im_livechat_hide_partner_company\": True\n                }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_empty_folder\">No data yet!</p>\n                <p>Track and improve live chat performance with insights on session activity, response times, customer ratings, and call interactions.</p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "im_livechat.channel.member.history"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

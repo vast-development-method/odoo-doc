@@ -1,0 +1,304 @@
+{
+ "catalog": {
+  "name": "entity:mail.group.member",
+  "description": "Complete definition of entity Mailing List Member (mail.group.member).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.group.member",
+  "storage_name": "mail_group_member",
+  "full_name": "Mailing List Member",
+  "kind": "persistent",
+  "description": "Mailing List Member",
+  "defined_by_package": "mail_group",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "email",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "email",
+    "type": "Char",
+    "string": "Email",
+    "compute": "_compute_email",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail_group",
+    "full_name": "Email"
+   },
+   {
+    "name": "email_normalized",
+    "type": "Char",
+    "string": "Normalized Email",
+    "compute": "_compute_email_normalized",
+    "index": true,
+    "store": true,
+    "defined_in_package": "mail_group",
+    "full_name": "Normalized Email"
+   },
+   {
+    "name": "mail_group_id",
+    "type": "Many2one",
+    "comodel": "mail.group",
+    "string": "Group",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "mail_group",
+    "full_name": "Group",
+    "target_entity": "mail.group"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Partner",
+    "ondelete": "cascade",
+    "defined_in_package": "mail_group",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_partner",
+    "kind": "Constraint",
+    "definition": "UNIQUE(partner_id, mail_group_id)",
+    "message": "This partner is already subscribed to the group",
+    "defined_in_package": "mail_group"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail_group",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id.email"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_email_normalized",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail_group",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "email"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail_group.access_mail_group_member",
+    "package": "mail_group",
+    "name": "access_mail_group_member",
+    "entity": "mail.group.member",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mail_group.mail_group_member_rule_user",
+    "package": "mail_group",
+    "name": "Mail Group Member: Members are accessible only by moderators",
+    "entity": "mail.group.member",
+    "domain": "[('mail_group_id.moderator_ids', 'in', user.id)]",
+    "groups": "[(4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "mail_group.mail_group_member_rule_administrator",
+    "package": "mail_group",
+    "name": "Mail Group Member: Administrator have access to all members",
+    "entity": "mail.group.member",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('mail_group.group_mail_group_manager'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mail_group.mail_group_member_view_tree",
+    "package": "mail_group",
+    "name": "mail.group.member.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "top",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "email",
+       "readonly": "partner_id",
+       "required": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "email_normalized",
+       "column_invisible": "True",
+       "force_save": "1"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "mail_group_id"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(mail_group.mail_compose_message_action_mail_group)d",
+       "string": "Email",
+       "type": "action"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail_group.mail_group_member_view_search",
+    "package": "mail_group",
+    "name": "mail.group.member.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Mail Group Member"
+     },
+     "fields": [
+      {
+       "name": "email",
+       "required": "1"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "mail_group_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail_group.mail_group_member_action",
+    "package": "mail_group",
+    "name": "Members",
+    "view_mode": "list",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">No Members in this list yet!</p>\n            <p>Let people subscribe to your list online or manually add them here.</p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mail.group.member"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "mail_group.mail_template_guidelines",
+    "package": "mail_group",
+    "name": "Mail Group: Send Guidelines",
+    "subject": "Guidelines of group {{ object.mail_group_id.name }}"
+   }
+  ]
+ }
+}

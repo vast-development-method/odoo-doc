@@ -1,0 +1,766 @@
+{
+ "catalog": {
+  "name": "entity:product.feed",
+  "description": "Complete definition of entity Product Feed (product.feed).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.feed",
+  "storage_name": "product_feed",
+  "full_name": "Product Feed",
+  "kind": "persistent",
+  "description": "Product Feed",
+  "defined_by_package": "website_sale",
+  "extended_by_packages": [
+   "website_sale_stock"
+  ],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "defined_in_package": "website_sale",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "comodel": "website",
+    "required": true,
+    "defined_in_package": "website_sale",
+    "string": "Website",
+    "full_name": "Website",
+    "target_entity": "website"
+   },
+   {
+    "name": "pricelist_id",
+    "type": "Many2one",
+    "comodel": "product.pricelist",
+    "help": "Specify a pricelist to localize the feed with a specific currency. If not set, the default website pricelist will be used.\nNote that the pricelist must be selectable on the website.",
+    "domain": "[('website_id', 'in', (False, website_id)), ('selectable', '=', True)]",
+    "defined_in_package": "website_sale",
+    "string": "Pricelist",
+    "full_name": "Pricelist",
+    "target_entity": "product.pricelist"
+   },
+   {
+    "name": "lang_id",
+    "type": "Many2one",
+    "comodel": "res.lang",
+    "string": "Language",
+    "help": "Select the language to translate product names, descriptions, and other text in the feed.",
+    "compute": "_compute_lang_id",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "domain": "[('id', 'in', website_lang_ids)]",
+    "defined_in_package": "website_sale",
+    "full_name": "Language",
+    "target_entity": "res.lang"
+   },
+   {
+    "name": "website_lang_ids",
+    "type": "Many2many",
+    "related": "website_id.language_ids",
+    "defined_in_package": "website_sale",
+    "string": "Website Lang",
+    "full_name": "Website Lang"
+   },
+   {
+    "name": "product_category_ids",
+    "type": "Many2many",
+    "comodel": "product.public.category",
+    "string": "Categories",
+    "defined_in_package": "website_sale",
+    "full_name": "Categories",
+    "target_entity": "product.public.category"
+   },
+   {
+    "name": "target",
+    "type": "Selection",
+    "selection": [
+     [
+      "gmc",
+      "Google Merchant Center"
+     ]
+    ],
+    "required": true,
+    "default": "gmc",
+    "defined_in_package": "website_sale",
+    "string": "Target",
+    "full_name": "Target"
+   },
+   {
+    "name": "access_token",
+    "type": "Char",
+    "readonly": true,
+    "required": true,
+    "default": {
+     "dynamic": "lambda _: uuid.uuid4().hex"
+    },
+    "copy": false,
+    "defined_in_package": "website_sale",
+    "string": "Access Token",
+    "full_name": "Access Token"
+   },
+   {
+    "name": "url",
+    "type": "Char",
+    "compute": "_compute_url",
+    "defined_in_package": "website_sale",
+    "string": "Uniform resource locator",
+    "full_name": "Uniform resource locator"
+   },
+   {
+    "name": "last_notification_date",
+    "type": "Date",
+    "defined_in_package": "website_sale",
+    "string": "Last Notification Date",
+    "full_name": "Last Notification Date"
+   },
+   {
+    "name": "feed_cache",
+    "type": "Binary",
+    "compute": "_compute_feed_cache",
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "website_sale",
+    "string": "Feed Cache",
+    "full_name": "Feed Cache"
+   },
+   {
+    "name": "cache_expiry",
+    "type": "Datetime",
+    "readonly": true,
+    "required": true,
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "defined_in_package": "website_sale",
+    "string": "Cache Expiry",
+    "full_name": "Cache Expiry"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "target"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the full feed url.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "re-raise",
+        "message": "NotImplementedError",
+        "line": 76
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_lang_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_feed_cache",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_id",
+         "pricelist_id",
+         "lang_id",
+         "product_category_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Invalidate cache on feed parameter changes.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_product_limit",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "product_category_ids",
+         "website_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Add a soft limit on the number of products a feed can contain.\n\nA strong limit of 6000 is applied during the feed rendering phase.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A single feed cannot contain more than %(limit)s products. Please separate products with Categories.",
+        "line": 106
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_invalidate_cache",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_and_cache_compressed_gmc_feed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Render and cache the Google Merchant Center feed.\n\nThis method ensures that the feed is rendered only once per day and caches the result. If\nthe feed parameters change, the cache is invalidated, and the feed is re-rendered.\n\n:raises LockError: If the feed is already being rendered by another request.\n:return: The rendered feed compressed using gzip.\n:rtype: bytes",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_gmc_feed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Render the Google Merchant Center feed.\n\nSee also https://support.google.com/merchants/answer/7052112 for the XML format.\n\n:return: The rendered XML feed.\n:rtype: str",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_gmc_items",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Prepare Google Merchant Center items' fields.\n\nSee Google's (https://support.google.com/merchants/answer/7052112) documentation for more\ninformation about each field.\n\n:return: a dictionary for each product in this recordset.\n:rtype: list[dict]",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_feed_product_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_feed_products",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_gmc_identifier",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Prepare the product identifiers for Google Merchant Center.\n\n:return: The barcode of the product as GTIN\n:rtype: dict",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_gmc_image_links",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "base_url"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Prepare the product image links for Google Merchant Center.\n\n:return: The main product image link, and the extra images. No videos.\n:rtype: dict",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_gmc_price_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Prepare price-related information for Google Merchant Center.\n\nNote: If the product is flagged to prevent zero price sales, an empty dictionary is\nreturned.\n\n:return: A dictionary containing nothing if the product is \"prevent zero price sale\", or:\n    - List price,\n    - Sale price (if applicable), and\n    - Comparison prices (e.g., $100 / ml) if \"Product Reference Price\" is enabled.\n:rtype: dict",
+      "size_in_lines": 70,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_gmc_stock_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "_product"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Intended to be overridden in stock.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_stock",
+      "decorators": [],
+      "documentation": "Override of `website_sale` to check the stock level if the current product cannot be out\nof stock.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_gmc_additional_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_website_manager",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Send a notification to the website manager using the system bot.\n\nThis method wraps around `message_notify` to notify the manager of the feed's website.\n\n:param dict kwargs: Additional arguments passed to `message_notify`.\n:return: The created `mail.message` record.\n:rtype: mail.message",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_product_limit",
+    "package": "website_sale",
+    "kind": "ValidationError",
+    "message": "A single feed cannot contain more than %(limit)s products. Please separate products with Categories."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_sale.access_product_feed_base_group_system",
+    "package": "website_sale",
+    "name": "access_product_feed base_group_system",
+    "entity": "product.feed",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_sale.access_product_feed_website_group_website_designer",
+    "package": "website_sale",
+    "name": "access_product_feed website_group_website_designer",
+    "entity": "product.feed",
+    "group": "website.group_website_designer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "website_sale.product_feed_search",
+    "package": "website_sale",
+    "name": "product.feed.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "pricelist_id",
+       "groups": "product.group_product_pricelist"
+      },
+      {
+       "name": "lang_id"
+      },
+      {
+       "name": "product_category_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "groupby_website",
+       "string": "Website",
+       "context": "{'group_by': 'website_id'}",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "groupby_pricelist",
+       "string": "Pricelist",
+       "context": "{'group_by': 'pricelist_id'}",
+       "groups": "product.group_product_pricelist"
+      },
+      {
+       "name": "groupby_lang",
+       "string": "Language",
+       "context": "{'group_by': 'lang_id'}"
+      },
+      {
+       "name": "groupby_product_category",
+       "string": "eCommerce Category",
+       "context": "{'group_by': 'product_category_ids'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_sale.product_feed_list",
+    "package": "website_sale",
+    "name": "product.feed.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Product Feeds",
+      "editable": "top",
+      "multi_edit": "True"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "website_id",
+       "options": "{'no_create': True}",
+       "column_invisible": "context.get('hide_website_column')",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "pricelist_id",
+       "options": "{'no_create': True}",
+       "groups": "product.group_product_pricelist",
+       "placeholder": "Default"
+      },
+      {
+       "name": "lang_id",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "product_category_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_create': True}",
+       "placeholder": "All Categories"
+      },
+      {
+       "name": "url",
+       "widget": "CopyClipboardButton",
+       "string": "Copy URL",
+       "options": "{'btn_class': 'primary btn-sm'}",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1,
+      "CopyClipboardButton": 1
+     },
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_sale.product_feed_form",
+    "package": "website_sale",
+    "name": "product.feed.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Product Feed"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "url",
+       "widget": "CopyClipboardButton",
+       "string": "Copy URL"
+      },
+      {
+       "name": "website_id"
+      },
+      {
+       "name": "pricelist_id",
+       "groups": "product.group_product_pricelist",
+       "placeholder": "Default"
+      },
+      {
+       "name": "lang_id",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "product_category_ids",
+       "widget": "many2many_tags",
+       "placeholder": "All Categories"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "CopyClipboardButton": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_sale.action_product_feeds",
+    "package": "website_sale",
+    "name": "Product Feeds",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "product.feed"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "website_sale.action_invalidate_cache",
+    "package": "website_sale",
+    "name": "Reset Cache",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "website_sale.menu_product_feeds",
+    "package": "website_sale",
+    "name": null,
+    "parent_id": null,
+    "action": "website_sale.action_product_feeds",
+    "sequence": "150",
+    "groups_id": "website_sale.group_product_feed",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,1188 @@
+{
+ "catalog": {
+  "name": "entity:fetchmail.server",
+  "description": "Complete definition of entity Incoming Mail Server (fetchmail.server).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "fetchmail.server",
+  "storage_name": "fetchmail_server",
+  "full_name": "Incoming Mail Server",
+  "kind": "persistent",
+  "description": "Incoming Mail Server",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "google_gmail",
+   "microsoft_outlook"
+  ],
+  "mixins": [
+   "google.gmail.mixin",
+   "microsoft.outlook.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "priority",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_email_field": "user",
+   "_OUTLOOK_SCOPE": "https://outlook.office.com/IMAP.AccessAsUser.All"
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "mail",
+    "full_name": "Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "mail",
+    "full_name": "Active"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Not Confirmed"
+     ],
+     [
+      "done",
+      "Confirmed"
+     ]
+    ],
+    "string": "Status",
+    "index": true,
+    "readonly": true,
+    "copy": false,
+    "default": "draft",
+    "defined_in_package": "mail",
+    "full_name": "Status"
+   },
+   {
+    "name": "server",
+    "type": "Char",
+    "string": "Server Name",
+    "readonly": false,
+    "help": "Hostname or IP of the mail server",
+    "defined_in_package": "mail",
+    "full_name": "Server Name"
+   },
+   {
+    "name": "port",
+    "type": "Integer",
+    "defined_in_package": "mail",
+    "string": "Port",
+    "full_name": "Port"
+   },
+   {
+    "name": "server_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "imap",
+      "IMAP Server"
+     ],
+     [
+      "pop",
+      "POP Server"
+     ],
+     [
+      "local",
+      "Local Server"
+     ],
+     [
+      "gmail",
+      "Gmail OAuth Authentication"
+     ],
+     [
+      "outlook",
+      "Outlook OAuth Authentication"
+     ]
+    ],
+    "string": "Server Type",
+    "index": true,
+    "required": true,
+    "default": "imap",
+    "defined_in_package": "mail",
+    "selection_added_by": [
+     "google_gmail",
+     "microsoft_outlook"
+    ],
+    "ondelete": {
+     "outlook": "set default"
+    },
+    "extended_in_packages": [
+     "google_gmail",
+     "microsoft_outlook"
+    ],
+    "full_name": "Server Type"
+   },
+   {
+    "name": "server_type_info",
+    "type": "Text",
+    "string": "Server Type Info",
+    "compute": "_compute_server_type_info",
+    "defined_in_package": "mail",
+    "full_name": "Server Type Info"
+   },
+   {
+    "name": "is_ssl",
+    "type": "Boolean",
+    "string": "SSL/TLS",
+    "help": "Connections are encrypted with SSL/TLS through a dedicated port (default: IMAPS=993, POP3S=995)",
+    "defined_in_package": "mail",
+    "full_name": "SSL/TLS"
+   },
+   {
+    "name": "attach",
+    "type": "Boolean",
+    "string": "Keep Attachments",
+    "help": "Whether attachments should be downloaded. If not enabled, incoming emails will be stripped of any attachments before being processed",
+    "default": true,
+    "defined_in_package": "mail",
+    "full_name": "Keep Attachments"
+   },
+   {
+    "name": "original",
+    "type": "Boolean",
+    "string": "Keep Original",
+    "help": "Whether a full original copy of each email should be kept for reference and attached to each processed message. This will usually double the size of your message database.",
+    "defined_in_package": "mail",
+    "full_name": "Keep Original"
+   },
+   {
+    "name": "date",
+    "type": "Datetime",
+    "string": "Last Fetch Date",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Last Fetch Date"
+   },
+   {
+    "name": "error_date",
+    "type": "Datetime",
+    "string": "Last Error Date",
+    "readonly": true,
+    "help": "Date of last failure, reset on success.",
+    "defined_in_package": "mail",
+    "full_name": "Last Error Date"
+   },
+   {
+    "name": "error_message",
+    "type": "Text",
+    "string": "Last Error Message",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Last Error Message"
+   },
+   {
+    "name": "user",
+    "type": "Char",
+    "string": "Username",
+    "readonly": false,
+    "defined_in_package": "mail",
+    "full_name": "Username"
+   },
+   {
+    "name": "password",
+    "type": "Char",
+    "defined_in_package": "mail",
+    "string": "Password",
+    "full_name": "Password"
+   },
+   {
+    "name": "object_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Create a New Record",
+    "help": "Process each incoming mail as part of a conversation corresponding to this document type. This will create new documents for new conversations, or attach follow-up emails to the existing conversations (documents).",
+    "defined_in_package": "mail",
+    "full_name": "Create a New Record",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "priority",
+    "type": "Integer",
+    "string": "Server Priority",
+    "readonly": false,
+    "help": "Defines the order of processing, lower values mean higher priority",
+    "default": 5,
+    "defined_in_package": "mail",
+    "full_name": "Server Priority"
+   },
+   {
+    "name": "message_ids",
+    "type": "One2many",
+    "comodel": "mail.mail",
+    "inverse_name": "fetchmail_server_id",
+    "string": "Messages",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Messages",
+    "target_entity": "mail.mail"
+   },
+   {
+    "name": "configuration",
+    "type": "Text",
+    "string": "Configuration",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Configuration"
+   },
+   {
+    "name": "script",
+    "type": "Char",
+    "readonly": true,
+    "default": "/mail/static/scripts/the system-mailgate.py",
+    "defined_in_package": "mail",
+    "string": "Script",
+    "full_name": "Script"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_server_type_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "server_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "onchange_server_type",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "server_type",
+         "is_ssl",
+         "object_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_gmail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "server_type",
+         "is_ssl",
+         "object_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Set the default configuration for a IMAP Gmail server.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_outlook",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "server_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Set the default configuration for a IMAP Outlook server.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_draft",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_connect__",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "allow_archived"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": ":param bool allow_archived: by default (False), an exception is raised when calling this method on an\n   archived record. It can be set to True for testing so that the exception is no longer raised.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The server \"%s\" cannot be used because it is archived.",
+        "line": 186
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_imap_login__",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "connection"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Authenticate the IMAP connection.\n\nCan be overridden in other module for different authentication methods.\n\n:param connection: The IMAP connection to authenticate",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Authenticate the IMAP connection.\n\nIf the mail server is Gmail, we use the OAuth2 authentication protocol.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Authenticate the IMAP connection.\n\nIf the mail server is Outlook, we use the OAuth2 authentication protocol.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_confirm_login",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Invalid server name!\n %s",
+        "line": 218
+       },
+       {
+        "kind": "UserError",
+        "message": "No response received. Check server information.\n %s",
+        "line": 220
+       },
+       {
+        "kind": "UserError",
+        "message": "Server replied with following exception:\n %s",
+        "line": 222
+       },
+       {
+        "kind": "UserError",
+        "message": "An SSL exception occurred. Check SSL/TLS configuration on server port.\n %s",
+        "line": 224
+       },
+       {
+        "kind": "UserError",
+        "message": "Connection test failed: %s",
+        "line": 227
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "fetch_mail",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Action to fetch the mail from the current server. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "re-raise",
+        "message": "exception",
+        "line": 242
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_fetch_mails",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "**kw"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Method called by cron to fetch mails from servers ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "batch_limit"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Fetch e-mails from multiple servers.\n\nCommit after each message.",
+      "size_in_lines": 83,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_connection_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return which connection must be used for this mail server (IMAP or POP).\nCan be overridden in sub-module to define which connection to use for a specific\n\"server_type\" (e.g. Gmail server).",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Return which connection must be used for this mail server (IMAP or POP).\nThe Gmail mail server used an IMAP connection.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Return which connection must be used for this mail server (IMAP or POP).\nThe Outlook mail server used an IMAP connection.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_cron",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_use_google_gmail_service",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "server_type",
+         "is_ssl"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "SSL is required for server “%s”.",
+        "line": 26
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_use_microsoft_outlook_service",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "server_type",
+         "is_ssl"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "SSL is required for server “%s”.",
+        "line": 30
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_connect__",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "The server \"%s\" cannot be used because it is archived."
+   },
+   {
+    "operation": "button_confirm_login",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Invalid server name!\n %s"
+   },
+   {
+    "operation": "button_confirm_login",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "No response received. Check server information.\n %s"
+   },
+   {
+    "operation": "button_confirm_login",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Server replied with following exception:\n %s"
+   },
+   {
+    "operation": "button_confirm_login",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "An SSL exception occurred. Check SSL/TLS configuration on server port.\n %s"
+   },
+   {
+    "operation": "button_confirm_login",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Connection test failed: %s"
+   },
+   {
+    "operation": "_check_use_google_gmail_service",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "SSL is required for server “%s”."
+   },
+   {
+    "operation": "_check_use_microsoft_outlook_service",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "SSL is required for server “%s”."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_fetchmail_server",
+    "package": "mail",
+    "name": "fetchmail.server",
+    "entity": "fetchmail.server",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "google_gmail.fetchmail_server_view_form",
+    "package": "google_gmail",
+    "name": "fetchmail.server.view.form.inherit.gmail",
+    "view_type": "field",
+    "inherits_view": "mail.view_email_server_form",
+    "mode": null,
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "user",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "user",
+       "position": "after"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "open_google_gmail_uri",
+       "type": "object",
+       "invisible": "server_type != 'gmail' or google_gmail_refresh_token",
+       "class": "btn-link px-0"
+      },
+      {
+       "name": "open_google_gmail_uri",
+       "type": "object",
+       "invisible": "server_type != 'gmail' or not google_gmail_refresh_token",
+       "class": "btn-link px-0 ms-2"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.view_email_server_tree",
+    "package": "mail",
+    "name": "fetchmail.server.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "POP/IMAP Servers"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "server_type"
+      },
+      {
+       "name": "user",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state == 'draft'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.view_email_server_form",
+    "package": "mail",
+    "name": "fetchmail.server.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Incoming Mail Server"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "server_type",
+       "widget": "radio",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "date",
+       "invisible": "not date"
+      },
+      {
+       "name": "server_type_info"
+      },
+      {
+       "name": "server",
+       "readonly": "state != 'draft'",
+       "required": "server_type != 'local'"
+      },
+      {
+       "name": "port",
+       "readonly": "state != 'draft'",
+       "required": "1",
+       "options": "{'enable_formatting': false}"
+      },
+      {
+       "name": "is_ssl"
+      },
+      {
+       "name": "user",
+       "readonly": "state != 'draft'",
+       "required": "server_type != 'local'"
+      },
+      {
+       "name": "password",
+       "invisible": "server_type not in ('imap', 'pop')",
+       "readonly": "state != 'draft'",
+       "required": "server_type in ('imap', 'pop')"
+      },
+      {
+       "name": "object_id"
+      },
+      {
+       "name": "configuration"
+      },
+      {
+       "name": "script",
+       "widget": "url"
+      },
+      {
+       "name": "priority",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "attach"
+      },
+      {
+       "name": "original"
+      },
+      {
+       "name": "error_date"
+      },
+      {
+       "name": "error_message"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_confirm_login",
+       "string": "Test & Confirm",
+       "type": "object",
+       "invisible": "state != 'draft'"
+      },
+      {
+       "name": "fetch_mail",
+       "string": "Fetch Now",
+       "type": "object",
+       "invisible": "state != 'done'"
+      },
+      {
+       "name": "set_draft",
+       "string": "Reset Confirmation",
+       "type": "object",
+       "invisible": "state != 'done'"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "server_login_details",
+       "string": "Server & Login",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "advanced_options",
+       "string": "Advanced",
+       "invisible": null,
+       "groups": "base.group_no_one"
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "radio": 1,
+      "url": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Test & Confirm",
+       "type": "object",
+       "name": "button_confirm_login",
+       "invisible": "state != 'draft'"
+      },
+      {
+       "string": "Fetch Now",
+       "type": "object",
+       "name": "fetch_mail",
+       "invisible": "state != 'done'"
+      },
+      {
+       "string": "Reset Confirmation",
+       "type": "object",
+       "name": "set_draft",
+       "invisible": "state != 'done'"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": null,
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.view_email_server_search",
+    "package": "mail",
+    "name": "fetchmail.server.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Incoming Mail Servers"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Incoming Mail Server"
+      },
+      {
+       "name": "user"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "imap",
+       "string": "IMAP",
+       "domain": "[('server_type', '=', 'imap')]",
+       "help": "Server type IMAP."
+      },
+      {
+       "name": "pop",
+       "string": "POP",
+       "domain": "[('server_type', '=', 'pop')]",
+       "help": "Server type POP."
+      },
+      {
+       "name": "ssl",
+       "string": "SSL",
+       "domain": "[('is_ssl', '=', True)]",
+       "help": "If SSL required."
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "microsoft_outlook.fetchmail_server_view_form",
+    "package": "microsoft_outlook",
+    "name": "fetchmail.server.view.form.inherit.outlook",
+    "view_type": "field",
+    "inherits_view": "mail.view_email_server_form",
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "user",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "user",
+       "position": "after"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "open_microsoft_outlook_uri",
+       "type": "object",
+       "invisible": "server_type != 'outlook' or microsoft_outlook_refresh_token",
+       "class": "btn-link px-0"
+      },
+      {
+       "name": "open_microsoft_outlook_uri",
+       "type": "object",
+       "invisible": "server_type != 'outlook' or not microsoft_outlook_refresh_token",
+       "class": "btn-link px-0 ms-2"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.action_email_server_tree",
+    "package": "mail",
+    "name": "Incoming Mail Servers",
+    "view_mode": "list,form",
+    "view_id": "view_email_server_tree",
+    "search_view_id": "view_email_server_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <div>\n                    <b class=\"o_view_nocontent_smiling_face\">\n                        No Incoming Servers yet\n                    </b>\n                </div>\n            </field>\n        ",
+    "usage": null,
+    "entity": "fetchmail.server"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "mail.ir_cron_mail_gateway_action",
+    "package": "mail",
+    "name": "Mail: Fetchmail Service",
+    "interval_number": "5",
+    "interval_type": "minutes",
+    "priority": null,
+    "active": "False",
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "fetchmail.server",
+    "operation": "_fetch_mails",
+    "operation_call": "model._fetch_mails()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

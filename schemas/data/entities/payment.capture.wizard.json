@@ -1,0 +1,634 @@
+{
+ "catalog": {
+  "name": "entity:payment.capture.wizard",
+  "description": "Complete definition of entity Payment Capture Wizard (payment.capture.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "payment.capture.wizard",
+  "storage_name": "payment_capture_wizard",
+  "full_name": "Payment Capture Wizard",
+  "kind": "transient",
+  "description": "Payment Capture Wizard",
+  "defined_by_package": "payment",
+  "extended_by_packages": [
+   "payment_adyen"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "transaction_ids",
+    "type": "Many2many",
+    "comodel": "payment.transaction",
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_ids')"
+    },
+    "readonly": true,
+    "defined_in_package": "payment",
+    "string": "Transaction",
+    "full_name": "Transaction",
+    "target_entity": "payment.transaction"
+   },
+   {
+    "name": "authorized_amount",
+    "type": "Monetary",
+    "string": "Authorized Amount",
+    "compute": "_compute_authorized_amount",
+    "defined_in_package": "payment",
+    "full_name": "Authorized Amount"
+   },
+   {
+    "name": "captured_amount",
+    "type": "Monetary",
+    "string": "Already Captured",
+    "compute": "_compute_captured_amount",
+    "defined_in_package": "payment",
+    "full_name": "Already Captured"
+   },
+   {
+    "name": "voided_amount",
+    "type": "Monetary",
+    "string": "Already Voided",
+    "compute": "_compute_voided_amount",
+    "defined_in_package": "payment",
+    "full_name": "Already Voided"
+   },
+   {
+    "name": "available_amount",
+    "type": "Monetary",
+    "string": "Maximum Capture Allowed",
+    "compute": "_compute_available_amount",
+    "defined_in_package": "payment",
+    "full_name": "Maximum Capture Allowed"
+   },
+   {
+    "name": "amount_to_capture",
+    "type": "Monetary",
+    "compute": "_compute_amount_to_capture",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "payment",
+    "string": "Amount To Capture",
+    "full_name": "Amount To Capture"
+   },
+   {
+    "name": "is_amount_to_capture_valid",
+    "type": "Boolean",
+    "compute": "_compute_is_amount_to_capture_valid",
+    "defined_in_package": "payment",
+    "string": "Is Amount To Capture Valid",
+    "full_name": "Is Amount To Capture Valid"
+   },
+   {
+    "name": "void_remaining_amount",
+    "type": "Boolean",
+    "defined_in_package": "payment",
+    "string": "Void Remaining Amount",
+    "full_name": "Void Remaining Amount"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "transaction_ids.currency_id",
+    "defined_in_package": "payment",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "support_partial_capture",
+    "type": "Boolean",
+    "help": "Whether each of the transactions' provider supports the partial capture.",
+    "compute": "_compute_support_partial_capture",
+    "compute_sudo": true,
+    "defined_in_package": "payment",
+    "string": "Support Partial Capture",
+    "full_name": "Support Partial Capture"
+   },
+   {
+    "name": "has_draft_children",
+    "type": "Boolean",
+    "compute": "_compute_has_draft_children",
+    "defined_in_package": "payment",
+    "string": "Has Draft Children",
+    "full_name": "Has Draft Children"
+   },
+   {
+    "name": "has_remaining_amount",
+    "type": "Boolean",
+    "compute": "_compute_has_remaining_amount",
+    "defined_in_package": "payment",
+    "string": "Has Remaining Amount",
+    "full_name": "Has Remaining Amount"
+   },
+   {
+    "name": "has_adyen_tx",
+    "type": "Boolean",
+    "compute": "_compute_has_adyen_tx",
+    "defined_in_package": "payment_adyen",
+    "string": "Has Adyen Tx",
+    "full_name": "Has Adyen Tx"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_authorized_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "transaction_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_captured_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "transaction_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_voided_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "transaction_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "authorized_amount",
+         "captured_amount",
+         "voided_amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount_to_capture",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "available_amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Set the default amount to capture to the amount available for capture. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_amount_to_capture_valid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount_to_capture",
+         "available_amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_support_partial_capture",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "transaction_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_draft_children",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "transaction_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_remaining_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "available_amount",
+         "amount_to_capture"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_amount_to_capture_within_boundaries",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "amount_to_capture"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The amount to capture must be positive and cannot be superior to %s.",
+        "line": 118
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Some of the transactions you intend to capture can only be captured in full. Handle the transactions individually to capture a partial amount.",
+        "line": 124
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_capture",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_adyen_tx",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_adyen",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "transaction_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_amount_to_capture_within_boundaries",
+    "package": "payment",
+    "kind": "ValidationError",
+    "message": "The amount to capture must be positive and cannot be superior to %s."
+   },
+   {
+    "operation": "_check_amount_to_capture_within_boundaries",
+    "package": "payment",
+    "kind": "ValidationError",
+    "message": "Some of the transactions you intend to capture can only be captured in full. Handle the transactions individually to capture a partial amount."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "payment.payment_capture_wizard_user",
+    "package": "payment",
+    "name": "payment.capture.wizard",
+    "entity": "payment.capture.wizard",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "payment.payment_capture_wizard_rule",
+    "package": "payment",
+    "name": "Payment Capture Wizard",
+    "entity": "payment.capture.wizard",
+    "domain": "[('create_uid', '=', user.id)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "payment.payment_capture_wizard_view_form",
+    "package": "payment",
+    "name": "payment.capture.wizard.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Capture"
+     },
+     "fields": [
+      {
+       "name": "transaction_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "is_amount_to_capture_valid",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "support_partial_capture",
+       "invisible": "1"
+      },
+      {
+       "name": "has_draft_children",
+       "invisible": "1"
+      },
+      {
+       "name": "has_remaining_amount",
+       "invisible": "1"
+      },
+      {
+       "name": "authorized_amount"
+      },
+      {
+       "name": "captured_amount",
+       "invisible": "captured_amount <= 0"
+      },
+      {
+       "name": "voided_amount",
+       "invisible": "voided_amount <= 0"
+      },
+      {
+       "name": "amount_to_capture",
+       "readonly": "support_partial_capture == 'full_only'"
+      },
+      {
+       "name": "void_remaining_amount",
+       "readonly": "not has_remaining_amount"
+      },
+      {
+       "name": "available_amount",
+       "widget": "monetary"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_capture",
+       "string": "Capture",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "string": "Close",
+       "class": "btn-secondary",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "payment_adyen.payment_capture_wizard_view_form",
+    "package": "payment_adyen",
+    "name": "payment.adyen.capture.wizard.form",
+    "view_type": "footer",
+    "inherits_view": "payment.payment_capture_wizard_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "footer",
+     "root_attributes": {
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "has_adyen_tx",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "footer",
+       "attributes": {
+        "position": "before"
+       },
+       "position": "before"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

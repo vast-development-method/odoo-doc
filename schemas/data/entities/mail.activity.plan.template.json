@@ -1,0 +1,923 @@
+{
+ "catalog": {
+  "name": "entity:mail.activity.plan.template",
+  "description": "Complete definition of entity Activity plan template (mail.activity.plan.template).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.activity.plan.template",
+  "storage_name": "mail_activity_plan_template",
+  "full_name": "Activity plan template",
+  "kind": "persistent",
+  "description": "Activity plan template",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "hr",
+   "hr_fleet"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": "summary",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "plan_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.plan",
+    "string": "Plan",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "mail",
+    "full_name": "Plan",
+    "target_entity": "mail.activity.plan"
+   },
+   {
+    "name": "res_model",
+    "type": "Selection",
+    "related": "plan_id.res_model",
+    "defined_in_package": "mail",
+    "string": "Resource Model",
+    "full_name": "Resource Model"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "plan_id.company_id",
+    "defined_in_package": "mail",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "mail",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Activity Type",
+    "default": {
+     "dynamic": "lambda self: self.env.ref('mail.mail_activity_data_todo')"
+    },
+    "domain": "['|', ('res_model', '=', False), '&', ('res_model', '!=', False), ('res_model', '=', parent.res_model)]",
+    "ondelete": "restrict",
+    "required": true,
+    "defined_in_package": "mail",
+    "full_name": "Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "delay_count",
+    "type": "Integer",
+    "string": "Interval",
+    "default": 0,
+    "help": "Number of days/week/month before executing the action after or before the scheduled plan date.",
+    "defined_in_package": "mail",
+    "full_name": "Interval"
+   },
+   {
+    "name": "delay_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "days",
+      "days"
+     ],
+     [
+      "weeks",
+      "weeks"
+     ],
+     [
+      "months",
+      "months"
+     ]
+    ],
+    "string": "Delay units",
+    "help": "Unit of delay",
+    "required": true,
+    "default": "days",
+    "defined_in_package": "mail",
+    "full_name": "Delay units"
+   },
+   {
+    "name": "delay_from",
+    "type": "Selection",
+    "selection": [
+     [
+      "before_plan_date",
+      "Before Plan Date"
+     ],
+     [
+      "after_plan_date",
+      "After Plan Date"
+     ]
+    ],
+    "string": "Trigger",
+    "default": "before_plan_date",
+    "required": true,
+    "defined_in_package": "mail",
+    "full_name": "Trigger"
+   },
+   {
+    "name": "icon",
+    "type": "Char",
+    "string": "Icon",
+    "related": "activity_type_id.icon",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Icon"
+   },
+   {
+    "name": "summary",
+    "type": "Char",
+    "string": "Summary",
+    "compute": "_compute_summary",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mail",
+    "full_name": "Summary"
+   },
+   {
+    "name": "responsible_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "on_demand",
+      "Ask at launch"
+     ],
+     [
+      "other",
+      "Default user"
+     ],
+     [
+      "coach",
+      "Coach"
+     ],
+     [
+      "manager",
+      "Manager"
+     ],
+     [
+      "employee",
+      "Employee"
+     ],
+     [
+      "fleet_manager",
+      "Fleet Manager"
+     ]
+    ],
+    "default": "on_demand",
+    "string": "Assignment",
+    "required": true,
+    "compute": "_compute_responsible_type",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mail",
+    "selection_added_by": [
+     "hr",
+     "hr_fleet"
+    ],
+    "ondelete": {
+     "fleet_manager": "set default"
+    },
+    "extended_in_packages": [
+     "hr",
+     "hr_fleet"
+    ],
+    "full_name": "Assignment"
+   },
+   {
+    "name": "responsible_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Assigned to",
+    "check_company": true,
+    "compute": "_compute_responsible_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mail",
+    "full_name": "Assigned to",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Note",
+    "compute": "_compute_note",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mail",
+    "full_name": "Note"
+   },
+   {
+    "name": "next_activity_ids",
+    "type": "Many2many",
+    "comodel": "mail.activity.type",
+    "string": "Next Activities",
+    "compute": "_compute_next_activity_ids",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Next Activities",
+    "target_entity": "mail.activity.type"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_activity_type_res_model",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "activity_type_id",
+         "plan_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check that the plan models are compatible with the template activity\ntype model. Note that it depends also on \"activity_type_id.res_model\" and\n\"plan_id.res_model\". That's why this method is called by those models\nwhen the mentioned fields are updated.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The activity type \"%(activity_type_name)s\" is not compatible with the plan \"%(plan_name)s\" because it is limited to the model \"%(activity_type_model)s\".",
+        "line": 67
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_responsible",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "responsible_id",
+         "responsible_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure that responsible_id is set when responsible is set to \"other\". ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "When selecting \"Default user\" assignment, you must specify a responsible.",
+        "line": 81
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_next_activity_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Update next activities only when changing activity type on template.\nAny change on type configuration should not be propagated. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_note",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_responsible_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id",
+         "responsible_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_responsible_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_summary",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_date_deadline",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "base_date"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the deadline of the activity to be created given the base date. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_determine_responsible",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "on_demand_responsible",
+     "applied_on_record"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Determine the responsible for the activity based on the template\nfor the given record and on demand responsible.\n\nBased on the responsible_type, this method will determine the responsible\nto set on the activity for the given record (applied_on_record).\nFollowing the responsible_type:\n- on_demand: on_demand_responsible is used as responsible (allow to set it\nwhen using the template)\n- other: the responsible field is used (preset user at the template level)\n\nOther module can extend it and base the responsible on the record on which\nthe activity will be set. Ex.: 'coach' on employee record will assign the\ncoach user of the employee.\n\n:param <res.user> on_demand_responsible: on demand responsible\n:param recordset applied_on_record: the record on which the activity\n    will be created\n:returns: {'responsible': <res.user>, error: str|False}\n:rtype: dict",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 55,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_responsible_hr",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "plan_id",
+         "responsible_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure that hr types are used only on employee model ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Those responsible types are limited to Employee plans.",
+        "line": 22
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_closest_parent_user",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "employee",
+     "responsible",
+     "error_message"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_responsible_hr_fleet",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_fleet",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "plan_id",
+         "responsible_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure that hr types are used only on employee model ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Fleet Manager is limited to Employee plans.",
+        "line": 20
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_activity_type_res_model",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "The activity type \"%(activity_type_name)s\" is not compatible with the plan \"%(plan_name)s\" because it is limited to the model \"%(activity_type_model)s\"."
+   },
+   {
+    "operation": "_check_responsible",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "When selecting \"Default user\" assignment, you must specify a responsible."
+   },
+   {
+    "operation": "_check_responsible_hr",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "Those responsible types are limited to Employee plans."
+   },
+   {
+    "operation": "_check_responsible_hr_fleet",
+    "package": "hr_fleet",
+    "kind": "ValidationError",
+    "message": "Fleet Manager is limited to Employee plans."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "crm.access_mail_activity_plan_template_sale_manager",
+    "package": "crm",
+    "name": "mail.activity.plan.template.sale.manager",
+    "entity": "mail.activity.plan.template",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr.access_mail_activity_plan_template_hr_manager",
+    "package": "hr",
+    "name": "mail.activity.plan.template.hr.manager",
+    "entity": "mail.activity.plan.template",
+    "group": "group_hr_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment.access_mail_activity_plan_template_hr_recruitment_manager",
+    "package": "hr_recruitment",
+    "name": "mail.activity.plan.template.hr.recruitment.manager",
+    "entity": "mail.activity.plan.template",
+    "group": "hr_recruitment.group_hr_recruitment_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.access_mail_activity_plan_template_user",
+    "package": "mail",
+    "name": "mail.activity.plan.template.user",
+    "entity": "mail.activity.plan.template",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_mail_activity_plan_template_system",
+    "package": "mail",
+    "name": "mail.activity.plan.template.system",
+    "entity": "mail.activity.plan.template",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "project.access_mail_activity_plan_template_project_manager",
+    "package": "project",
+    "name": "mail.activity.plan.template.project.manager",
+    "entity": "mail.activity.plan.template",
+    "group": "project.group_project_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale.access_mail_activity_plan_template_sale_manager",
+    "package": "sale",
+    "name": "mail.activity.plan.template.sale.manager",
+    "entity": "mail.activity.plan.template",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "crm.mail_plan_templates_rule_group_sale_manager_lead",
+    "package": "crm",
+    "name": "Manager can manage lead plan templates",
+    "entity": "mail.activity.plan.template",
+    "domain": "[('plan_id.res_model', '=', 'crm.lead')]",
+    "groups": "[(4, ref('sales_team.group_sale_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr.mail_plan_templates_rule_group_hr_manager",
+    "package": "hr",
+    "name": "Manager can edit employee plan template",
+    "entity": "mail.activity.plan.template",
+    "domain": "[('plan_id.res_model', '=', 'hr.employee')]",
+    "groups": "[(4, ref('group_hr_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment.mail_plan_templates_rule_group_hr_recruitment_manager_applicant",
+    "package": "hr_recruitment",
+    "name": "Manager can manage applicant plan templates",
+    "entity": "mail.activity.plan.template",
+    "domain": "[('plan_id.res_model', '=', 'hr.applicant')]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_template_rule_admin",
+    "package": "mail",
+    "name": "Administrators can access all activity plan templates.",
+    "entity": "mail.activity.plan.template",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('base.group_system'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "project.mail_plan_templates_rule_group_project_manager_task",
+    "package": "project",
+    "name": "Manager can manage project/task plan templates",
+    "entity": "mail.activity.plan.template",
+    "domain": "[('plan_id.res_model', 'in', ('project.project', 'project.task'))]",
+    "groups": "[(4, ref('group_project_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sale.mail_plan_template_rule_group_sale_manager",
+    "package": "sale",
+    "name": "Manager can manage sale order plan templates",
+    "entity": "mail.activity.plan.template",
+    "domain": "[('plan_id.res_model', '=', 'sale.order')]",
+    "groups": "[(4, ref('sales_team.group_sale_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr.mail_activity_plan_template_view_form",
+    "package": "hr",
+    "name": "mail.activity.plan.template.view.form.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_plan_template_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='responsible_type']",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "responsible_type",
+       "invisible": "res_model != 'hr.employee'"
+      },
+      {
+       "name": "responsible_type",
+       "widget": "filterable_selection",
+       "invisible": "res_model == 'hr.employee'",
+       "options": "{'whitelisted_values': ['on_demand', 'other']}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "filterable_selection": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='responsible_type']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_template_view_tree",
+    "package": "mail",
+    "name": "mail.activity.plan.template.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Activities"
+     },
+     "fields": [
+      {
+       "name": "activity_type_id"
+      },
+      {
+       "name": "summary",
+       "placeholder": "e.g. Discuss Proposal"
+      },
+      {
+       "name": "responsible_type"
+      },
+      {
+       "name": "delay_count"
+      },
+      {
+       "name": "delay_unit"
+      },
+      {
+       "name": "delay_from"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_template_view_form",
+    "package": "mail",
+    "name": "mail.activity.plan.template.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Activity"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "res_model",
+       "invisible": "1"
+      },
+      {
+       "name": "activity_type_id"
+      },
+      {
+       "name": "summary",
+       "placeholder": "e.g. Discuss Proposal"
+      },
+      {
+       "name": "responsible_type"
+      },
+      {
+       "name": "responsible_id",
+       "invisible": "responsible_type != 'other'",
+       "required": "responsible_type == 'other'"
+      },
+      {
+       "name": "delay_count"
+      },
+      {
+       "name": "delay_unit"
+      },
+      {
+       "name": "delay_from"
+      },
+      {
+       "name": "note",
+       "options": "{'embedded_components': false}",
+       "nolabel": "1",
+       "placeholder": "e.g. Log a note"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

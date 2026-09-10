@@ -1,0 +1,1695 @@
+{
+ "catalog": {
+  "name": "entity:lunch.order",
+  "description": "Complete definition of entity Lunch Order (lunch.order).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "lunch.order",
+  "storage_name": "lunch_order",
+  "full_name": "Lunch Order",
+  "kind": "persistent",
+  "description": "Lunch Order",
+  "defined_by_package": "lunch",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_display_name": "product_id"
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "related": "product_id.name",
+    "string": "Product Name",
+    "readonly": true,
+    "defined_in_package": "lunch",
+    "full_name": "Product Name"
+   },
+   {
+    "name": "topping_ids_1",
+    "type": "Many2many",
+    "comodel": "lunch.topping",
+    "relation": "lunch_order_topping",
+    "column1": "order_id",
+    "column2": "topping_id",
+    "string": "Extras 1",
+    "domain": [
+     [
+      "topping_category",
+      "=",
+      1
+     ]
+    ],
+    "defined_in_package": "lunch",
+    "full_name": "Extras 1",
+    "target_entity": "lunch.topping"
+   },
+   {
+    "name": "topping_ids_2",
+    "type": "Many2many",
+    "comodel": "lunch.topping",
+    "relation": "lunch_order_topping",
+    "column1": "order_id",
+    "column2": "topping_id",
+    "string": "Extras 2",
+    "domain": [
+     [
+      "topping_category",
+      "=",
+      2
+     ]
+    ],
+    "defined_in_package": "lunch",
+    "full_name": "Extras 2",
+    "target_entity": "lunch.topping"
+   },
+   {
+    "name": "topping_ids_3",
+    "type": "Many2many",
+    "comodel": "lunch.topping",
+    "relation": "lunch_order_topping",
+    "column1": "order_id",
+    "column2": "topping_id",
+    "string": "Extras 3",
+    "domain": [
+     [
+      "topping_category",
+      "=",
+      3
+     ]
+    ],
+    "defined_in_package": "lunch",
+    "full_name": "Extras 3",
+    "target_entity": "lunch.topping"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "lunch.product",
+    "string": "Product",
+    "required": true,
+    "defined_in_package": "lunch",
+    "full_name": "Product",
+    "target_entity": "lunch.product"
+   },
+   {
+    "name": "category_id",
+    "type": "Many2one",
+    "string": "Product Category",
+    "related": "product_id.category_id",
+    "store": true,
+    "defined_in_package": "lunch",
+    "full_name": "Product Category"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Order Date",
+    "required": true,
+    "readonly": false,
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "lunch",
+    "full_name": "Order Date"
+   },
+   {
+    "name": "supplier_id",
+    "type": "Many2one",
+    "string": "Vendor",
+    "related": "product_id.supplier_id",
+    "store": true,
+    "index": true,
+    "defined_in_package": "lunch",
+    "full_name": "Vendor"
+   },
+   {
+    "name": "available_today",
+    "type": "Boolean",
+    "related": "supplier_id.available_today",
+    "defined_in_package": "lunch",
+    "string": "Available Today",
+    "full_name": "Available Today"
+   },
+   {
+    "name": "available_on_date",
+    "type": "Boolean",
+    "compute": "_compute_available_on_date",
+    "defined_in_package": "lunch",
+    "string": "Available On Date",
+    "full_name": "Available On Date"
+   },
+   {
+    "name": "order_deadline_passed",
+    "type": "Boolean",
+    "compute": "_compute_order_deadline_passed",
+    "defined_in_package": "lunch",
+    "string": "Order Deadline Passed",
+    "full_name": "Order Deadline Passed"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "default": {
+     "dynamic": "lambda self: self.env.uid"
+    },
+    "defined_in_package": "lunch",
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "lunch_location_id",
+    "type": "Many2one",
+    "comodel": "lunch.location",
+    "default": {
+     "dynamic": "lambda self: self.env.user.last_lunch_location_id"
+    },
+    "defined_in_package": "lunch",
+    "string": "Lunch Location",
+    "full_name": "Lunch Location",
+    "target_entity": "lunch.location"
+   },
+   {
+    "name": "note",
+    "type": "Text",
+    "string": "Notes",
+    "defined_in_package": "lunch",
+    "full_name": "Notes"
+   },
+   {
+    "name": "price",
+    "type": "Monetary",
+    "string": "Total Price",
+    "compute": "_compute_total_price",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "lunch",
+    "full_name": "Total Price"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "lunch",
+    "full_name": "Active"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "new",
+      "To Order"
+     ],
+     [
+      "ordered",
+      "Ordered"
+     ],
+     [
+      "sent",
+      "Sent"
+     ],
+     [
+      "confirmed",
+      "Received"
+     ],
+     [
+      "cancelled",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "readonly": true,
+    "index": true,
+    "default": "new",
+    "defined_in_package": "lunch",
+    "full_name": "Status"
+   },
+   {
+    "name": "notified",
+    "type": "Boolean",
+    "default": false,
+    "defined_in_package": "lunch",
+    "string": "Notified",
+    "full_name": "Notified"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "default": {
+     "dynamic": "lambda self: self.env.company.id"
+    },
+    "defined_in_package": "lunch",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "company_id.currency_id",
+    "store": true,
+    "defined_in_package": "lunch",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "quantity",
+    "type": "Float",
+    "string": "Quantity",
+    "required": true,
+    "default": 1,
+    "defined_in_package": "lunch",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "display_toppings",
+    "type": "Text",
+    "string": "Extras",
+    "compute": "_compute_display_toppings",
+    "store": true,
+    "defined_in_package": "lunch",
+    "full_name": "Extras"
+   },
+   {
+    "name": "product_description",
+    "type": "Html",
+    "string": "Description",
+    "related": "product_id.description",
+    "defined_in_package": "lunch",
+    "full_name": "Description"
+   },
+   {
+    "name": "topping_label_1",
+    "type": "Char",
+    "related": "product_id.supplier_id.topping_label_1",
+    "defined_in_package": "lunch",
+    "string": "Topping Label 1",
+    "full_name": "Topping Label 1"
+   },
+   {
+    "name": "topping_label_2",
+    "type": "Char",
+    "related": "product_id.supplier_id.topping_label_2",
+    "defined_in_package": "lunch",
+    "string": "Topping Label 2",
+    "full_name": "Topping Label 2"
+   },
+   {
+    "name": "topping_label_3",
+    "type": "Char",
+    "related": "product_id.supplier_id.topping_label_3",
+    "defined_in_package": "lunch",
+    "string": "Topping Label 3",
+    "full_name": "Topping Label 3"
+   },
+   {
+    "name": "topping_quantity_1",
+    "type": "Selection",
+    "related": "product_id.supplier_id.topping_quantity_1",
+    "defined_in_package": "lunch",
+    "string": "Topping Quantity 1",
+    "full_name": "Topping Quantity 1"
+   },
+   {
+    "name": "topping_quantity_2",
+    "type": "Selection",
+    "related": "product_id.supplier_id.topping_quantity_2",
+    "defined_in_package": "lunch",
+    "string": "Topping Quantity 2",
+    "full_name": "Topping Quantity 2"
+   },
+   {
+    "name": "topping_quantity_3",
+    "type": "Selection",
+    "related": "product_id.supplier_id.topping_quantity_3",
+    "defined_in_package": "lunch",
+    "string": "Topping Quantity 3",
+    "full_name": "Topping Quantity 3"
+   },
+   {
+    "name": "image_1920",
+    "type": "Image",
+    "compute": "_compute_product_images",
+    "defined_in_package": "lunch",
+    "string": "Image 1920",
+    "full_name": "Image 1920"
+   },
+   {
+    "name": "image_128",
+    "type": "Image",
+    "compute": "_compute_product_images",
+    "defined_in_package": "lunch",
+    "string": "Image 128",
+    "full_name": "Image 128"
+   },
+   {
+    "name": "available_toppings_1",
+    "type": "Boolean",
+    "help": "Are extras available for this product",
+    "compute": "_compute_available_toppings",
+    "defined_in_package": "lunch",
+    "string": "Available Toppings 1",
+    "full_name": "Available Toppings 1"
+   },
+   {
+    "name": "available_toppings_2",
+    "type": "Boolean",
+    "help": "Are extras available for this product",
+    "compute": "_compute_available_toppings",
+    "defined_in_package": "lunch",
+    "string": "Available Toppings 2",
+    "full_name": "Available Toppings 2"
+   },
+   {
+    "name": "available_toppings_3",
+    "type": "Boolean",
+    "help": "Are extras available for this product",
+    "compute": "_compute_available_toppings",
+    "defined_in_package": "lunch",
+    "string": "Available Toppings 3",
+    "full_name": "Available Toppings 3"
+   },
+   {
+    "name": "display_reorder_button",
+    "type": "Boolean",
+    "compute": "_compute_display_reorder_button",
+    "defined_in_package": "lunch",
+    "string": "Display Reorder Button",
+    "full_name": "Display Reorder Button"
+   },
+   {
+    "name": "display_add_button",
+    "type": "Boolean",
+    "compute": "_compute_display_add_button",
+    "defined_in_package": "lunch",
+    "string": "Display Add Button",
+    "full_name": "Display Add Button"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_user_product_date",
+    "kind": "Index",
+    "definition": "(user_id, product_id, date)",
+    "message": null,
+    "defined_in_package": "lunch"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_product_images",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_toppings",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "category_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_add_button",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_reorder_button",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "show_reorder_button"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_on_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "supplier_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_order_deadline_passed",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "supplier_id",
+         "date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_topping_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "field",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extract_toppings",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": "If called in api.multi then it will pop topping_ids_1,2,3 from values",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_topping_quantity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "topping_ids_1",
+         "topping_ids_2",
+         "topping_ids_3"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "errors[quantity] % label",
+        "line": 157
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_matching_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_price",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "topping_ids_1",
+         "topping_ids_2",
+         "topping_ids_3",
+         "product_id",
+         "quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_toppings",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "topping_ids_1",
+         "topping_ids_2",
+         "topping_ids_3"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "update_quantity",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "increment"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "add_to_cart",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": "This method currently does nothing, we currently need it in order to\nbe able to reuse this model in place of a wizard",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_wallet",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Oh no! You don’t have enough money in your wallet to order your selected lunch! Contact your lunch manager to add some money to your wallet.",
+        "line": 257
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Product is no longer available.",
+        "line": 264
+       },
+       {
+        "kind": "UserError",
+        "message": "The vendor related to this order is not available at the selected date.",
+        "line": 262
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_reorder",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The vendor related to this order is not available today.",
+        "line": 273
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_confirm",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reset",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_notify",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_topping_quantity",
+    "package": "lunch",
+    "kind": "ValidationError",
+    "message": "errors[quantity] % label"
+   },
+   {
+    "operation": "_check_wallet",
+    "package": "lunch",
+    "kind": "ValidationError",
+    "message": "Oh no! You don’t have enough money in your wallet to order your selected lunch! Contact your lunch manager to add some money to your wallet."
+   },
+   {
+    "operation": "action_order",
+    "package": "lunch",
+    "kind": "ValidationError",
+    "message": "Product is no longer available."
+   },
+   {
+    "operation": "action_order",
+    "package": "lunch",
+    "kind": "UserError",
+    "message": "The vendor related to this order is not available at the selected date."
+   },
+   {
+    "operation": "action_reorder",
+    "package": "lunch",
+    "kind": "UserError",
+    "message": "The vendor related to this order is not available today."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "lunch.order_user",
+    "package": "lunch",
+    "name": "Order Line user",
+    "entity": "lunch.order",
+    "group": "group_lunch_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "lunch.order_manager",
+    "package": "lunch",
+    "name": "Order Line user",
+    "entity": "lunch.order",
+    "group": "group_lunch_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "lunch.lunch_order_rule_delete",
+    "package": "lunch",
+    "name": "lunch.order: Only new and cancelled order lines deleted.",
+    "entity": "lunch.order",
+    "domain": "[('state', 'in', ('new', 'cancelled'))]",
+    "groups": "[(4,ref('lunch.group_lunch_user'))]",
+    "global": false,
+    "applies_to_read": "0",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "lunch.lunch_order_rule_write",
+    "package": "lunch",
+    "name": "lunch.order: Don't change confirmed order",
+    "entity": "lunch.order",
+    "domain": "[('state', '!=', 'confirmed'), ('user_id', '=', user.id)]",
+    "groups": "[(4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "0",
+    "applies_to_write": true,
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "lunch.lunch_order_rule_write_manager",
+    "package": "lunch",
+    "name": "manager can do whatever",
+    "entity": "lunch.order",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('lunch.group_lunch_manager'))]",
+    "global": false,
+    "applies_to_read": "0",
+    "applies_to_write": true,
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "lunch.ir_rule_lunch_order_multi_company",
+    "package": "lunch",
+    "name": "Lunch order: Multi Company",
+    "entity": "lunch.order",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "lunch.lunch_order_view_search",
+    "package": "lunch",
+    "name": "lunch.order.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Product",
+       "filter_domain": "['|', ('name', 'ilike', self), ('note', 'ilike', self)]"
+      },
+      {
+       "name": "user_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "is_mine",
+       "string": "My Orders",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "not_confirmed",
+       "string": "Not Received",
+       "domain": "[('state', '!=', ('confirmed'))]"
+      },
+      {
+       "name": "confirmed",
+       "string": "Received",
+       "domain": "[('state', '=', 'confirmed')]"
+      },
+      {
+       "name": "cancelled",
+       "string": "Cancelled",
+       "domain": "[('state', '=', 'cancelled')]"
+      },
+      {
+       "name": "date_filter",
+       "string": "Today",
+       "domain": "[('date', '=', 'today')]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_user",
+       "string": "User",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "group_by_supplier",
+       "string": "Vendor",
+       "context": "{'group_by': 'supplier_id'}"
+      },
+      {
+       "name": "group_by_date",
+       "string": "Order Date",
+       "context": "{'group_by': 'date:day'}",
+       "help": "Vendor Orders by Date"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_order_view_tree",
+    "package": "lunch",
+    "name": "lunch.order.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Order lines List",
+      "create": "false",
+      "edit": "false",
+      "decoration-muted": "state == 'cancelled'",
+      "expand": "1"
+     },
+     "fields": [
+      {
+       "name": "date",
+       "readonly": "state != 'new'"
+      },
+      {
+       "name": "supplier_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "display_toppings"
+      },
+      {
+       "name": "note"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "state != 'new'"
+      },
+      {
+       "name": "lunch_location_id"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "price",
+       "widget": "monetary",
+       "string": "Price",
+       "sum": "Total"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-danger": "state == 'ordered'",
+       "decoration-warning": "state == 'new'",
+       "decoration-success": "state == 'confirmed'",
+       "decoration-info": "state == 'sent'"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "display_reorder_button",
+       "column_invisible": "True"
+      },
+      {
+       "name": "notified",
+       "column_invisible": "True"
+      },
+      {
+       "name": "show_order_button",
+       "invisible": "1"
+      },
+      {
+       "name": "show_confirm_button",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_confirm",
+       "string": "Receive",
+       "type": "object"
+      },
+      {
+       "name": "action_reorder",
+       "string": "Re-order",
+       "type": "object",
+       "invisible": "not display_reorder_button or not display_add_button",
+       "groups": "lunch.group_lunch_user",
+       "icon": "fa-history"
+      },
+      {
+       "name": "action_confirm",
+       "string": "Confirm",
+       "type": "object",
+       "invisible": "state != 'sent'",
+       "groups": "lunch.group_lunch_manager",
+       "icon": "fa-check"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state in ['cancelled', 'confirmed']",
+       "groups": "lunch.group_lunch_manager",
+       "icon": "fa-times"
+      },
+      {
+       "name": "action_reset",
+       "string": "Reset",
+       "type": "object",
+       "invisible": "state != 'cancelled'",
+       "groups": "lunch.group_lunch_manager",
+       "icon": "fa-undo"
+      },
+      {
+       "name": "action_notify",
+       "string": "Send Notification",
+       "type": "object",
+       "invisible": "state != 'confirmed' or notified",
+       "groups": "lunch.group_lunch_manager",
+       "icon": "fa-envelope"
+      },
+      {
+       "name": "action_send_orders",
+       "string": "Send Orders",
+       "type": "object",
+       "invisible": "not show_order_button"
+      },
+      {
+       "name": "action_confirm_orders",
+       "string": "Confirm Orders",
+       "type": "object",
+       "invisible": "not show_confirm_button"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "monetary": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": "false",
+     "decorations": {
+      "decoration-muted": "state == 'cancelled'"
+     }
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_order_view_kanban",
+    "package": "lunch",
+    "name": "lunch.order.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "create": "false",
+      "edit": "false"
+     },
+     "fields": [
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "notified"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "options": "{'classes': {'new': 'default', 'confirmed': 'success', 'cancelled':'danger'}}"
+      },
+      {
+       "name": "note"
+      },
+      {
+       "name": "price"
+      },
+      {
+       "name": "date",
+       "readonly": "state != 'new'"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "state != 'new'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "label_selection": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_order_view_pivot",
+    "package": "lunch",
+    "name": "lunch.order.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "supplier_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date",
+       "type": "col"
+      },
+      {
+       "name": "supplier_id",
+       "type": "row"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_order_view_graph",
+    "package": "lunch",
+    "name": "lunch.order.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "product_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "product_id"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_order_view_form",
+    "package": "lunch",
+    "name": "lunch.order.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "class": "flex-column"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "date",
+       "invisible": "1",
+       "readonly": "state != 'new'"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "quantity",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "invisible": "1"
+      },
+      {
+       "name": "category_id",
+       "invisible": "1"
+      },
+      {
+       "name": "available_toppings_1",
+       "invisible": "1"
+      },
+      {
+       "name": "available_toppings_2",
+       "invisible": "1"
+      },
+      {
+       "name": "available_toppings_3",
+       "invisible": "1"
+      },
+      {
+       "name": "supplier_id",
+       "invisible": "1"
+      },
+      {
+       "name": "order_deadline_passed",
+       "invisible": "1"
+      },
+      {
+       "name": "available_today",
+       "invisible": "1"
+      },
+      {
+       "name": "image_1920",
+       "widget": "image",
+       "options": "{'image_preview': 'image_128'}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "price"
+      },
+      {
+       "name": "topping_label_1",
+       "invisible": "not available_toppings_1",
+       "nolabel": "1"
+      },
+      {
+       "name": "topping_ids_1",
+       "widget": "many2many_checkboxes",
+       "invisible": "not available_toppings_1",
+       "domain": "[('topping_category', '=', 1), ('supplier_id', '=', supplier_id)]",
+       "nolabel": "1"
+      },
+      {
+       "name": "topping_label_2",
+       "invisible": "not available_toppings_2",
+       "nolabel": "1"
+      },
+      {
+       "name": "topping_ids_2",
+       "widget": "many2many_checkboxes",
+       "invisible": "not available_toppings_2",
+       "domain": "[('topping_category', '=', 2), ('supplier_id', '=', supplier_id)]",
+       "nolabel": "1"
+      },
+      {
+       "name": "topping_label_3",
+       "invisible": "not available_toppings_3",
+       "nolabel": "1"
+      },
+      {
+       "name": "topping_ids_3",
+       "widget": "many2many_checkboxes",
+       "invisible": "not available_toppings_3",
+       "domain": "[('topping_category', '=', 3), ('supplier_id', '=', supplier_id)]",
+       "nolabel": "1"
+      },
+      {
+       "name": "product_description",
+       "nolabel": "1"
+      },
+      {
+       "name": "note",
+       "nolabel": "1",
+       "placeholder": "Information, allergens, ..."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "add_to_cart",
+       "string": "Add To Cart",
+       "type": "object",
+       "invisible": "order_deadline_passed or not display_add_button",
+       "class": "oe_highlight",
+       "data-hotkey": "w"
+      },
+      {
+       "string": "Discard",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "many2many_checkboxes": 3
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "lunch.lunch_order_action",
+    "package": "lunch",
+    "name": "My Orders",
+    "view_mode": "list,kanban,pivot",
+    "view_id": null,
+    "search_view_id": "lunch_order_view_search",
+    "domain": null,
+    "context": "{\"search_default_is_mine\":1, \"search_default_group_by_date\": 1, 'show_reorder_button': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n        <p class=\"o_view_nocontent_empty_folder\">\n            No previous order found\n        </p><p>\n            There is no previous order recorded. Click on \"My Lunch\" and then create a new lunch order.\n        </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "lunch.order"
+   },
+   {
+    "external_identifier": "lunch.lunch_order_action_by_supplier",
+    "package": "lunch",
+    "name": "Today's Orders",
+    "view_mode": "list,kanban",
+    "view_id": null,
+    "search_view_id": "lunch_order_view_search",
+    "domain": null,
+    "context": "{\"search_default_group_by_supplier\":1, \"search_default_date_filter\":1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_empty_folder\">\n            Nothing to order today\n          </p><p>\n            Here you can see today's orders grouped by vendors.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "lunch.order"
+   },
+   {
+    "external_identifier": "lunch.lunch_order_action_control_suppliers",
+    "package": "lunch",
+    "name": "Control Vendors",
+    "view_mode": "list,kanban,pivot",
+    "view_id": null,
+    "search_view_id": "lunch_order_view_search",
+    "domain": null,
+    "context": "{\"search_default_group_by_supplier\":1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_empty_folder\">\n            No lunch order yet\n          </p><p>\n            Summary of all lunch orders, grouped by vendor and by date.\n          </p><p>\n            Click on the <span class=\"fa fa-phone text-success\" role=\"img\" aria-label=\"Order button\" title=\"Order button\"></span> to announce that the order is ordered.<br>\n            Click on the <span class=\"fa fa-check text-success\" role=\"img\" aria-label=\"Receive button\" title=\"Receive button\"></span> to announce that the order is received.<br>\n            Click on the <span class=\"fa fa-times-circle text-danger\" role=\"img\" aria-label=\"Cancel button\" title=\"Cancel button\"></span> red X to announce that the order isn't available.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "lunch.order"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "lunch.lunch_order_action_confirm",
+    "package": "lunch",
+    "name": "Lunch: Receive meals",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "lunch.lunch_order_action_cancel",
+    "package": "lunch",
+    "name": "Lunch: Cancel meals",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "lunch.lunch_order_action_notify",
+    "package": "lunch",
+    "name": "Lunch: Send notifications",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

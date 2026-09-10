@@ -1,0 +1,2329 @@
+{
+ "catalog": {
+  "name": "entity:stock.lot",
+  "description": "Complete definition of entity Lot/Serial (stock.lot).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.lot",
+  "storage_name": "stock_lot",
+  "full_name": "Lot/Serial",
+  "kind": "persistent",
+  "description": "Lot/Serial",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "stock_account",
+   "sale_stock",
+   "repair",
+   "purchase_stock",
+   "mrp",
+   "product_expiry",
+   "stock_dropshipping"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Lot/Serial Number",
+    "required": true,
+    "compute": "_compute_name",
+    "store": true,
+    "readonly": false,
+    "help": "Unique Lot/Serial Number",
+    "index": "trigram",
+    "precompute": true,
+    "defined_in_package": "stock",
+    "full_name": "Lot/Serial Number"
+   },
+   {
+    "name": "ref",
+    "type": "Char",
+    "string": "Internal Reference",
+    "help": "Internal reference number in case it differs from the manufacturer's lot/serial number",
+    "defined_in_package": "stock",
+    "full_name": "Internal Reference"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "index": true,
+    "domain": "[('tracking', '!=', 'none'), ('is_storable', '=', True)] + ([('product_tmpl_id', '=', context['default_product_tmpl_id'])] if context.get('default_product_tmpl_id') else [])",
+    "required": true,
+    "check_company": true,
+    "tracking": true,
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "related": "product_id.uom_id",
+    "defined_in_package": "stock",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "quant_ids",
+    "type": "One2many",
+    "comodel": "stock.quant",
+    "inverse_name": "lot_id",
+    "string": "Quants",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "Quants",
+    "target_entity": "stock.quant"
+   },
+   {
+    "name": "product_qty",
+    "type": "Float",
+    "string": "On Hand Quantity",
+    "compute": "_product_qty",
+    "search": "_search_product_qty",
+    "defined_in_package": "stock",
+    "full_name": "On Hand Quantity"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Description",
+    "defined_in_package": "stock",
+    "full_name": "Description"
+   },
+   {
+    "name": "display_complete",
+    "type": "Boolean",
+    "compute": "_compute_display_complete",
+    "defined_in_package": "stock",
+    "string": "Display Complete",
+    "full_name": "Display Complete"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "index": true,
+    "store": true,
+    "readonly": false,
+    "compute": "_compute_company_id",
+    "defined_in_package": "stock",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "delivery_ids",
+    "type": "Many2many",
+    "comodel": "stock.picking",
+    "compute": "_compute_delivery_ids",
+    "string": "Transfers",
+    "defined_in_package": "stock",
+    "full_name": "Transfers",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "delivery_count",
+    "type": "Integer",
+    "string": "Delivery order count",
+    "compute": "_compute_delivery_ids",
+    "defined_in_package": "stock",
+    "full_name": "Delivery order count"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_partner_ids",
+    "search": "_search_partner_ids",
+    "defined_in_package": "stock",
+    "string": "Partner",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "lot_properties",
+    "type": "Properties",
+    "string": "Properties",
+    "definition": "product_id.lot_properties_definition",
+    "copy": true,
+    "defined_in_package": "stock",
+    "full_name": "Properties"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Location",
+    "compute": "_compute_single_location",
+    "store": true,
+    "readonly": false,
+    "inverse": "_set_single_location",
+    "domain": "[('usage', '!=', 'view')]",
+    "group_expand": "_read_group_location_id",
+    "defined_in_package": "stock",
+    "full_name": "Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "lot_valuated",
+    "type": "Boolean",
+    "related": "product_id.lot_valuated",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "stock_account",
+    "string": "Lot Valuated",
+    "full_name": "Lot Valuated"
+   },
+   {
+    "name": "avg_cost",
+    "type": "Monetary",
+    "string": "Average Cost",
+    "compute": "_compute_value",
+    "compute_sudo": true,
+    "store": false,
+    "readonly": true,
+    "currency_field": "company_currency_id",
+    "defined_in_package": "stock_account",
+    "full_name": "Average Cost"
+   },
+   {
+    "name": "total_value",
+    "type": "Monetary",
+    "string": "Total Value",
+    "compute": "_compute_value",
+    "compute_sudo": true,
+    "currency_field": "company_currency_id",
+    "defined_in_package": "stock_account",
+    "full_name": "Total Value"
+   },
+   {
+    "name": "company_currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Valuation Currency",
+    "compute": "_compute_value",
+    "compute_sudo": true,
+    "defined_in_package": "stock_account",
+    "full_name": "Valuation Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "standard_price",
+    "type": "Float",
+    "string": "Cost",
+    "company_dependent": true,
+    "min_display_digits": "Product Price",
+    "groups": "base.group_user",
+    "help": "Value of the lot (automatically computed in AVCO).\n        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n        Used to compute margins on sale orders.",
+    "defined_in_package": "stock_account",
+    "full_name": "Cost"
+   },
+   {
+    "name": "sale_order_ids",
+    "type": "Many2many",
+    "comodel": "sale.order",
+    "string": "Sales Orders",
+    "compute": "_compute_sale_order_ids",
+    "defined_in_package": "sale_stock",
+    "full_name": "Sales Orders",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "sale_order_count",
+    "type": "Integer",
+    "string": "Sale order count",
+    "compute": "_compute_sale_order_ids",
+    "defined_in_package": "sale_stock",
+    "full_name": "Sale order count"
+   },
+   {
+    "name": "repair_line_ids",
+    "type": "Many2many",
+    "comodel": "repair.order",
+    "string": "Repair Orders",
+    "compute": "_compute_repair_line_ids",
+    "defined_in_package": "repair",
+    "full_name": "Repair Orders",
+    "target_entity": "repair.order"
+   },
+   {
+    "name": "repair_part_count",
+    "type": "Integer",
+    "string": "Repair part count",
+    "compute": "_compute_repair_line_ids",
+    "defined_in_package": "repair",
+    "full_name": "Repair part count"
+   },
+   {
+    "name": "in_repair_count",
+    "type": "Integer",
+    "string": "In repair count",
+    "compute": "_compute_in_repair_count",
+    "defined_in_package": "repair",
+    "full_name": "In repair count"
+   },
+   {
+    "name": "repaired_count",
+    "type": "Integer",
+    "string": "Repaired count",
+    "compute": "_compute_repaired_count",
+    "defined_in_package": "repair",
+    "full_name": "Repaired count"
+   },
+   {
+    "name": "purchase_order_ids",
+    "type": "Many2many",
+    "comodel": "purchase.order",
+    "string": "Purchase Orders",
+    "compute": "_compute_purchase_order_ids",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "purchase_stock",
+    "full_name": "Purchase Orders",
+    "target_entity": "purchase.order"
+   },
+   {
+    "name": "purchase_order_count",
+    "type": "Integer",
+    "string": "Purchase order count",
+    "compute": "_compute_purchase_order_ids",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Purchase order count"
+   },
+   {
+    "name": "use_expiration_date",
+    "type": "Boolean",
+    "string": "Use Expiration Date",
+    "related": "product_id.use_expiration_date",
+    "defined_in_package": "product_expiry",
+    "full_name": "Use Expiration Date"
+   },
+   {
+    "name": "expiration_date",
+    "type": "Datetime",
+    "string": "Expiration Date",
+    "compute": "_compute_expiration_date",
+    "store": true,
+    "readonly": false,
+    "help": "This is the date on which the goods with this Serial Number may become dangerous and must not be consumed.",
+    "defined_in_package": "product_expiry",
+    "full_name": "Expiration Date"
+   },
+   {
+    "name": "use_date",
+    "type": "Datetime",
+    "string": "Best before Date",
+    "compute": "_compute_dates",
+    "store": true,
+    "readonly": false,
+    "help": "This is the date on which the goods with this Serial Number start deteriorating, without being dangerous yet.",
+    "defined_in_package": "product_expiry",
+    "full_name": "Best before Date"
+   },
+   {
+    "name": "removal_date",
+    "type": "Datetime",
+    "string": "Removal Date",
+    "compute": "_compute_dates",
+    "store": true,
+    "readonly": false,
+    "help": "This is the date on which the goods with this Serial Number should be removed from the stock and not be counted in the Fresh On Hand Stock anymore. This date will be used in FEFO removal strategy.",
+    "defined_in_package": "product_expiry",
+    "full_name": "Removal Date"
+   },
+   {
+    "name": "alert_date",
+    "type": "Datetime",
+    "string": "Alert Date",
+    "compute": "_compute_dates",
+    "store": true,
+    "readonly": false,
+    "help": "Date to determine the expired lots and serial numbers using the filter \"Expiration Alerts\".",
+    "defined_in_package": "product_expiry",
+    "full_name": "Alert Date"
+   },
+   {
+    "name": "product_expiry_alert",
+    "type": "Boolean",
+    "compute": "_compute_product_expiry_alert",
+    "help": "The Expiration Date has been reached.",
+    "defined_in_package": "product_expiry",
+    "string": "Product Expiry Alert",
+    "full_name": "Product Expiry Alert"
+   },
+   {
+    "name": "product_expiry_reminded",
+    "type": "Boolean",
+    "string": "Expiry has been reminded",
+    "defined_in_package": "product_expiry",
+    "full_name": "Expiry has been reminded"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group_location_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "locations",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "generate_lot_names",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "first_lot",
+     "count"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Generate `lot_names` from a string.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_serial",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the next serial number to be attributed to the product.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_unique_lot",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "name",
+         "product_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The combination of lot/serial number and product must be unique within a company including when no company is defined.\nThe following combinations contain duplicates:\n%(error_lines)s",
+        "line": 121
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_create",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You are not allowed to create a lot or serial number with this operation type. To change this, go on the operation type and tick the box \"Create New Lots/Serial Numbers\".",
+        "line": 133
+       }
+      ]
+     },
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You are not allowed to create a lot or serial number with this operation type. To change this, go on the operation type and tick the box \"Create New Lots/Serial Numbers\".",
+        "line": 80
+       }
+      ]
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You are not allowed to create or edit a lot or serial number for the components with the operation type \"Manufacturing\". To change this, go on the operation type and tick the box \"Create New Lots/Serial Numbers for Components\".",
+        "line": 18
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_complete",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Defines if we want to display all fields in the stock.production.lot form view.\nIt will if the record exists (`id` set) or if we precised it into the context.\nThis compute depends on field `name` because as it has always a default value, it'll be\nalways triggered.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_delivery_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_single_location",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quant_ids",
+         "quant_ids.quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_single_location",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only move a lot/serial to a new location if it exists in a single location.",
+        "line": 179
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You are not allowed to change the product linked to a serial or lot number if some stock moves have already been created with that number. This would lead to inconsistencies in your stock.",
+        "line": 195
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot change the company of a lot/serial number currently in a location belonging to another company.",
+        "line": 191
+       }
+      ]
+     },
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_product_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quant_ids",
+         "quant_ids.quantity"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "owner_id",
+         "package_id",
+         "to_date",
+         "location",
+         "warehouse_id",
+         "allowed_company_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_product_qty",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_partner_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "returns partner_ids that are directly delivered the product of the lot/SN, i.e. not\nlots/SNs that are consumed within a MO. This means this search is NOT symmetric with the\npartner_ids field within the form view since it uses different logic that isn't efficient\nenough for this search due to it being usable within the list view.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_lot_open_quants",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_lot_open_transfers",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_outgoing_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_delivery_ids_by_lot",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "lot_path",
+     "delivery_by_lot"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_delivery_ids_by_lot_iterative",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Retrieve all delivery IDs (outgoing picking) linked to the lots\nin self and all the lots found when parcouring the produce lines.\n:return: A dictionary where keys are the IDs of the original 'stock.lot'\n          records (self) and values are lists of associated 'stock.picking' IDs.\n:rtype: dict",
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_value",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.lot_valuated",
+         "product_id.product_tmpl_id.lot_valuated",
+         "product_id.stock_move_ids.value",
+         "standard_price"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "to_date",
+         "company",
+         "warehouse_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute totals of multiple svl related values",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_avg_cost",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_standard_price",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_change_standard_price",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "old_price"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": "Helper to create the stock valuation layers and the account moves\nafter an update of standard price.\n\n:param new_price: new standard price",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_order_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_so",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_repair_line_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_in_repair_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_repaired_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_lot_open_repairs",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_ro",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_purchase_order_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_po",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "use_expiration_date",
+         "expiration_date",
+         "alert_date"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "formatted_display_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_expiry_alert",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "expiration_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_expiration_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dates",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "expiration_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alert_date_exceeded",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Log an activity on internally stored lots whose alert_date has been reached.\n\nNo further activity will be generated on lots whose alert_date\nhas already been reached (even if the alert_date is changed).",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_unique_lot",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "The combination of lot/serial number and product must be unique within a company including when no company is defined.\nThe following combinations contain duplicates:\n%(error_lines)s"
+   },
+   {
+    "operation": "_check_create",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You are not allowed to create a lot or serial number with this operation type. To change this, go on the operation type and tick the box \"Create New Lots/Serial Numbers\"."
+   },
+   {
+    "operation": "_set_single_location",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You can only move a lot/serial to a new location if it exists in a single location."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You are not allowed to change the product linked to a serial or lot number if some stock moves have already been created with that number. This would lead to inconsistencies in your stock."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You cannot change the company of a lot/serial number currently in a location belonging to another company."
+   },
+   {
+    "operation": "_check_create",
+    "package": "repair",
+    "kind": "UserError",
+    "message": "You are not allowed to create a lot or serial number with this operation type. To change this, go on the operation type and tick the box \"Create New Lots/Serial Numbers\"."
+   },
+   {
+    "operation": "_check_create",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You are not allowed to create or edit a lot or serial number for the components with the operation type \"Manufacturing\". To change this, go on the operation type and tick the box \"Create New Lots/Serial Numbers for Components\"."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp_subcontracting.access_subcontracting_portal_lot",
+    "package": "mrp_subcontracting",
+    "name": "subcontracting.portal.lot",
+    "entity": "stock.lot",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_stock_lot_user",
+    "package": "stock",
+    "name": "stock.lot user",
+    "entity": "stock.lot",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mrp_subcontracting.stock_lot_subcontracting_rule",
+    "package": "mrp_subcontracting",
+    "name": "Stock Lot Subcontractor",
+    "entity": "stock.lot",
+    "domain": "[\n        '|',\n            '|',\n                ('product_id', 'in', user.partner_id.commercial_partner_id.bom_ids.product_id.ids),\n                ('product_id', 'in', user.partner_id.commercial_partner_id.bom_ids.product_tmpl_id.product_variant_ids.ids),\n            ('product_id', 'in', user.partner_id.commercial_partner_id.bom_ids.bom_line_ids.product_id.ids),\n            ]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "product_expiry.view_move_form_expiry",
+    "package": "product_expiry",
+    "name": "stock.production.lot.inherit.form",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_production_lot_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='description']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "use_expiration_date",
+       "invisible": "1"
+      },
+      {
+       "name": "expiration_date",
+       "string": "Expiration"
+      },
+      {
+       "name": "alert_date",
+       "string": "Alert from"
+      },
+      {
+       "name": "use_date",
+       "string": "Best before"
+      },
+      {
+       "name": "removal_date",
+       "string": "Removal Date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='description']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.search_product_lot_filter_inherit_product_expiry",
+    "package": "product_expiry",
+    "name": "stock.production.lot.search.inherit",
+    "view_type": "xpath",
+    "inherits_view": "stock.search_product_lot_filter",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='product_id']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "expiration_alerts",
+       "string": "Expiration Alerts",
+       "domain": "[('alert_date', '<=', 'now')]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='product_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.view_production_lot_view_tree",
+    "package": "product_expiry",
+    "name": "stock.production.lot.list.inherit.product.expiry",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_production_lot_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='create_date']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "product_qty",
+       "column_invisible": "True"
+      },
+      {
+       "name": "alert_date",
+       "widget": "remaining_days",
+       "invisible": "product_qty <= 0",
+       "optional": "hide"
+      },
+      {
+       "name": "use_date",
+       "optional": "hide"
+      },
+      {
+       "name": "removal_date",
+       "optional": "hide"
+      },
+      {
+       "name": "expiration_date",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "remaining_days": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='create_date']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.view_production_lot_view_kanban",
+    "package": "product_expiry",
+    "name": "stock.production.lot.kanban.inherit.product.expiry",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_production_lot_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//templates",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "product_expiry_alert"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//templates",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_stock.stock_production_lot_view_form",
+    "package": "purchase_stock",
+    "name": "stock.production.lot.view.form",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_production_lot_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_button_box')]/button",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "purchase_order_count",
+       "widget": "statinfo",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_po",
+       "type": "object",
+       "invisible": "purchase_order_count == 0 or not display_complete",
+       "class": "oe_stat_button",
+       "icon": "fa-credit-card"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_button_box')]/button",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "repair.stock_production_lot_view_form",
+    "package": "repair",
+    "name": "stock.production.lot.view.form",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_production_lot_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_button_box')]/button",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "repair_part_count",
+       "widget": "statinfo",
+       "nolabel": "1"
+      },
+      {
+       "name": "in_repair_count",
+       "widget": "statinfo",
+       "nolabel": "1"
+      },
+      {
+       "name": "repaired_count",
+       "widget": "statinfo",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_ro",
+       "type": "object",
+       "invisible": "repair_part_count == 0 or not display_complete",
+       "class": "oe_stat_button",
+       "icon": "fa-wrench"
+      },
+      {
+       "name": "action_lot_open_repairs",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-wrench"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 3
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_button_box')]/button",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_stock.stock_production_lot_view_form",
+    "package": "sale_stock",
+    "name": "stock.production.lot.view.form",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_production_lot_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_button_box')]/button",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "sale_order_count",
+       "widget": "statinfo",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_so",
+       "type": "object",
+       "invisible": "sale_order_count == 0 or not display_complete",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_button_box')]/button",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_production_lot_form",
+    "package": "stock",
+    "name": "stock.production.lot.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Lots/Serial Numbers"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "display_complete",
+       "invisible": "1"
+      },
+      {
+       "name": "delivery_count",
+       "widget": "statinfo",
+       "string": "Transfers"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. LOT/0001/20121"
+      },
+      {
+       "name": "product_id",
+       "readonly": "context.get('set_product_readonly', False)",
+       "context": "{'default_is_storable': True, 'default_tracking': 'lot'}",
+       "force_save": "1"
+      },
+      {
+       "name": "ref",
+       "string": "Reference"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags",
+       "invisible": "not partner_ids or not location_id",
+       "string": "Customer",
+       "options": "{'edit_tags': True}",
+       "groups": "stock.group_stock_manager"
+      },
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "options": "{'no_open': True}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "location_id",
+       "invisible": "not location_id",
+       "groups": "stock.group_stock_manager"
+      },
+      {
+       "name": "lot_properties",
+       "nolabel": "1"
+      },
+      {
+       "name": "note",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_lot_open_transfers",
+       "type": "object",
+       "invisible": "delivery_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-truck"
+      },
+      {
+       "name": "action_lot_open_quants",
+       "type": "object",
+       "class": "oe_stat_button",
+       "groups": "stock.group_stock_multi_locations",
+       "icon": "fa-arrows"
+      },
+      {
+       "name": "%(action_stock_report)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "oi-arrow-up"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1,
+      "many2many_tags": 1,
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "action_lot_open_transfers",
+       "type": "object",
+       "icon": "fa-truck",
+       "help": "Transfers",
+       "invisible": "delivery_count == 0"
+      },
+      {
+       "name": "action_lot_open_quants",
+       "groups": "stock.group_stock_multi_locations",
+       "icon": "fa-arrows",
+       "class": "oe_stat_button",
+       "type": "object"
+      },
+      {
+       "name": "%(action_stock_report)d",
+       "icon": "oi-arrow-up",
+       "class": "oe_stat_button",
+       "type": "action"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_production_lot_tree",
+    "package": "stock",
+    "name": "stock.production.lot.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Lots/Serial Numbers",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "product_id",
+       "readonly": "1"
+      },
+      {
+       "name": "ref",
+       "optional": "hide"
+      },
+      {
+       "name": "create_date",
+       "optional": "show"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags",
+       "string": "Transfer to",
+       "optional": "hide"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "list_activity",
+       "optional": "show"
+      },
+      {
+       "name": "lot_properties",
+       "optional": "hide"
+      },
+      {
+       "name": "product_qty",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1,
+      "list_activity": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "stock.view_production_lot_kanban",
+    "package": "stock",
+    "name": "stock.production.lot.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "group_create": "false",
+      "group_delete": "false"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "lot_properties",
+       "widget": "properties"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "kanban_activity"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "properties": 1,
+      "kanban_activity": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "stock.search_product_lot_filter",
+    "package": "stock",
+    "name": "Production Lots Filter",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Product Lots Filter"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Lot/Serial Number",
+       "filter_domain": "['|', ('name', 'ilike', self),('ref', 'ilike', self)]"
+      },
+      {
+       "name": "partner_ids",
+       "string": "Customers"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "lot_properties"
+      },
+      {
+       "name": "create_date"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "at_customer",
+       "string": "At Customer",
+       "domain": "[('quant_ids.location_id.usage','=','customer'), ('quant_ids.quantity', '>', 0)]"
+      },
+      {
+       "name": "on_hand",
+       "string": "On Hand",
+       "domain": "[('product_qty', '>', 0)]"
+      },
+      {
+       "name": "creation_date",
+       "string": "Creation Date",
+       "date": "create_date"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_product",
+       "string": "Product",
+       "domain": "[]",
+       "context": "{'group_by': 'product_id'}"
+      },
+      {
+       "name": "group_by_location",
+       "string": "Location",
+       "domain": "[]",
+       "context": "{'group_by': 'location_id'}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "group_by_creation_date",
+       "string": "Creation date",
+       "domain": "[]",
+       "context": "{'group_by': 'create_date'}"
+      },
+      {
+       "name": "group_by_Company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by': 'company_id'}"
+      },
+      {
+       "name": "group_by_lot_properties",
+       "string": "Properties",
+       "context": "{'group_by': 'lot_properties'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock_account.view_production_lot_form_stock_account",
+    "package": "stock_account",
+    "name": "view.production.lot.form.stock.account",
+    "view_type": "group",
+    "inherits_view": "stock.view_production_lot_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "inventory_group",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "company_currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "total_value",
+       "widget": "monetary",
+       "invisible": "not lot_valuated",
+       "options": "{'currency_field': 'company_currency_id'}"
+      },
+      {
+       "name": "avg_cost",
+       "widget": "monetary",
+       "invisible": "not lot_valuated",
+       "options": "{'currency_field': 'company_currency_id'}"
+      },
+      {
+       "name": "standard_price",
+       "widget": "monetary",
+       "invisible": "not lot_valuated",
+       "options": "{'currency_field': 'company_currency_id'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 3
+     },
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "inventory_group",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock.action_production_lot_form",
+    "package": "stock",
+    "name": "Lots / Serial Numbers",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "search_product_lot_filter",
+    "domain": "['|', ('location_id', '=', False), ('location_id.company_id', 'in', allowed_company_ids + [False])]",
+    "context": "{'search_default_group_by_location': True, 'display_complete': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Add a lot/serial number\n          </p><p>\n            Lots/Serial numbers help you tracking the path followed by your products.\n            From their traceability report you will see the full history of their use, as well as their composition.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "stock.lot"
+   },
+   {
+    "external_identifier": "stock.action_product_production_lot_form",
+    "package": "stock",
+    "name": "Lots/Serial Numbers",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "search_product_lot_filter",
+    "domain": "['|', ('location_id', '=', False), ('location_id.company_id', 'in', allowed_company_ids + [False])]",
+    "context": "{'search_default_group_by_product': 1, 'display_complete': True, 'default_company_id': allowed_company_ids[0]}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Add a lot/serial number\n          </p><p>\n            Lots/Serial numbers help you tracking the path followed by your products.\n            From their traceability report you will see the full history of their use, as well as their composition.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "stock.lot"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "stock.action_report_lot_label",
+    "package": "stock",
+    "name": "Lot/Serial Number (PDF)",
+    "report_type": "qweb-pdf",
+    "report_name": "stock.report_lot_label",
+    "report_file": "stock.report_lot_label",
+    "print_report_name": "'Lot-Serial - %s' % object.name",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_stock_lot",
+    "binding_type": "report",
+    "paperformat_id": "product.paperformat_label_sheet",
+    "groups_id": null,
+    "multi": null,
+    "entity": "stock.lot"
+   },
+   {
+    "external_identifier": "stock.label_lot_template",
+    "package": "stock",
+    "name": "Lot/Serial Number (ZPL)",
+    "report_type": "qweb-text",
+    "report_name": "stock.label_lot_template_view",
+    "report_file": "stock.label_lot_template_view",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_stock_lot",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "stock.lot"
+   }
+  ],
+  "menus": [
+   {
+    "external_identifier": "mrp.menu_mrp_traceability",
+    "package": "mrp",
+    "name": "Lots/Serial Numbers",
+    "parent_id": "menu_mrp_bom",
+    "action": "stock.action_production_lot_form",
+    "sequence": "15",
+    "groups_id": "stock.group_production_lot",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

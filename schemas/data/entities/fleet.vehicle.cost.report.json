@@ -1,0 +1,485 @@
+{
+ "catalog": {
+  "name": "entity:fleet.vehicle.cost.report",
+  "description": "Complete definition of entity Fleet Analysis Report (fleet.vehicle.cost.report).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "fleet.vehicle.cost.report",
+  "storage_name": "fleet_vehicle_cost_report",
+  "full_name": "Fleet Analysis Report",
+  "kind": "persistent",
+  "description": "Fleet Analysis Report",
+  "defined_by_package": "fleet",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "date_start desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "vehicle_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle",
+    "string": "Vehicle",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Vehicle",
+    "target_entity": "fleet.vehicle"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Vehicle Name",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Vehicle Name"
+   },
+   {
+    "name": "driver_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Driver",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Driver",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "fuel_type",
+    "type": "Char",
+    "string": "Fuel",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Fuel"
+   },
+   {
+    "name": "date_start",
+    "type": "Date",
+    "string": "Date",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Date"
+   },
+   {
+    "name": "vehicle_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "car",
+      "Car"
+     ],
+     [
+      "bike",
+      "Bike"
+     ]
+    ],
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "string": "Vehicle Type",
+    "full_name": "Vehicle Type"
+   },
+   {
+    "name": "cost",
+    "type": "Float",
+    "string": "Cost",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Cost"
+   },
+   {
+    "name": "cost_type",
+    "type": "Selection",
+    "string": "Cost Type",
+    "selection": [
+     [
+      "contract",
+      "Contract"
+     ],
+     [
+      "service",
+      "Service"
+     ]
+    ],
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Cost Type"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 124,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "fleet.access_fleet_report_manager",
+    "package": "fleet",
+    "name": "fleet_vehicle_cost_report_access_right",
+    "entity": "fleet.vehicle.cost.report",
+    "group": "fleet_group_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "fleet.ir_rule_fleet_report",
+    "package": "fleet",
+    "name": "Costs Analysis: Multi Company",
+    "entity": "fleet.vehicle.cost.report",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "fleet.fleet_costs_report_view_search",
+    "package": "fleet",
+    "name": "fleet.vehicle.cost.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Fleet Costs Analysis"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "filter_domain": "[('name', 'ilike', self)]"
+      },
+      {
+       "name": "driver_id",
+       "filter_domain": "[('driver_id', 'ilike', self)]"
+      },
+      {
+       "name": "date_start"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "service",
+       "string": "Service",
+       "domain": "[('cost_type', '=', 'service')]"
+      },
+      {
+       "name": "contract",
+       "string": "Contract",
+       "domain": "[('cost_type', '=', 'contract')]"
+      },
+      {
+       "name": "filter_date_start",
+       "date": "date_start",
+       "default_period": "year"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "vehicle",
+       "string": "Vehicle",
+       "context": "{'group_by':'vehicle_id'}"
+      },
+      {
+       "name": "driver",
+       "string": "Driver",
+       "context": "{'group_by':'driver_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_costs_report_view_pivot",
+    "package": "fleet",
+    "name": "fleet.vehicle.cost.view.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "cost_type"
+      },
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "cost"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date_start",
+       "type": "col",
+       "interval": "year"
+      },
+      {
+       "name": "cost_type",
+       "type": "col"
+      },
+      {
+       "name": "vehicle_id",
+       "type": "row"
+      },
+      {
+       "name": "cost",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_costs_report_view_graph",
+    "package": "fleet",
+    "name": "fleet.vehicle.cost.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Fleet Costs Analysis",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "cost_type"
+      },
+      {
+       "name": "cost"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date_start",
+       "interval": "month"
+      },
+      {
+       "name": "cost_type"
+      },
+      {
+       "name": "cost",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vechicle_costs_report_view_tree",
+    "package": "fleet",
+    "name": "fleet.vehicle.cost.report.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Fleet Costs Analysis",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "driver_id",
+       "optional": "show"
+      },
+      {
+       "name": "fuel_type",
+       "optional": "hide"
+      },
+      {
+       "name": "date_start",
+       "optional": "show"
+      },
+      {
+       "name": "cost",
+       "optional": "show",
+       "sum": "Sum of Cost"
+      },
+      {
+       "name": "cost_type",
+       "optional": "show"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vechicle_costs_report_view_form",
+    "package": "fleet",
+    "name": "fleet.vehicle.cost.report.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Fleet Costs Analysis",
+      "create": "0",
+      "edit": "0"
+     },
+     "fields": [
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "driver_id"
+      },
+      {
+       "name": "fuel_type"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "cost"
+      },
+      {
+       "name": "cost_type"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "fleet.fleet_costs_reporting_action",
+    "package": "fleet",
+    "name": "Costs Analysis",
+    "view_mode": "graph,pivot",
+    "view_id": "",
+    "search_view_id": "fleet.fleet_costs_report_view_search",
+    "domain": null,
+    "context": "{'search_default_filter_date_start': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n              No data for analysis\n            </p>\n            <p>\n              Manage efficiently your different effective vehicles Costs with the system.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "fleet.vehicle.cost.report"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

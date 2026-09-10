@@ -1,0 +1,3532 @@
+{
+ "catalog": {
+  "name": "entity:event.registration",
+  "description": "Complete definition of entity Event Registration (event.registration).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.registration",
+  "storage_name": "event_registration",
+  "full_name": "Event Registration",
+  "kind": "persistent",
+  "description": "Event Registration",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "event_product",
+   "event_sale",
+   "event_crm",
+   "event_crm_sale",
+   "mass_mailing_event",
+   "website_event",
+   "pos_event",
+   "pos_event_sale",
+   "website_event_crm"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_mail_defaults_to_email": true,
+   "_mailing_enabled": true
+  },
+  "fields": [
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "required": true,
+    "tracking": true,
+    "index": true,
+    "defined_in_package": "event",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "is_multi_slots",
+    "type": "Boolean",
+    "string": "Is Event Multi Slots",
+    "related": "event_id.is_multi_slots",
+    "defined_in_package": "event",
+    "full_name": "Is Event Multi Slots"
+   },
+   {
+    "name": "event_slot_id",
+    "type": "Many2one",
+    "comodel": "event.slot",
+    "string": "Slot",
+    "ondelete": "restrict",
+    "tracking": true,
+    "index": "btree_not_null",
+    "domain": "[('event_id', '=', event_id)]",
+    "defined_in_package": "event",
+    "full_name": "Slot",
+    "target_entity": "event.slot"
+   },
+   {
+    "name": "event_ticket_id",
+    "type": "Many2one",
+    "comodel": "event.event.ticket",
+    "string": "Ticket Type",
+    "ondelete": "restrict",
+    "tracking": true,
+    "index": "btree_not_null",
+    "defined_in_package": "event",
+    "full_name": "Ticket Type",
+    "target_entity": "event.event.ticket"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "event",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "barcode",
+    "type": "Char",
+    "string": "Barcode",
+    "default": {
+     "dynamic": "lambda self: self._get_random_barcode()"
+    },
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "event",
+    "full_name": "Barcode"
+   },
+   {
+    "name": "utm_campaign_id",
+    "type": "Many2one",
+    "comodel": "utm.campaign",
+    "string": "Campaign",
+    "index": true,
+    "ondelete": "set null",
+    "defined_in_package": "event",
+    "compute": "_compute_utm_campaign_id",
+    "readonly": false,
+    "store": true,
+    "extended_in_packages": [
+     "event_sale"
+    ],
+    "full_name": "Campaign",
+    "target_entity": "utm.campaign"
+   },
+   {
+    "name": "utm_source_id",
+    "type": "Many2one",
+    "comodel": "utm.source",
+    "string": "Source",
+    "index": true,
+    "ondelete": "set null",
+    "defined_in_package": "event",
+    "compute": "_compute_utm_source_id",
+    "readonly": false,
+    "store": true,
+    "extended_in_packages": [
+     "event_sale"
+    ],
+    "full_name": "Source",
+    "target_entity": "utm.source"
+   },
+   {
+    "name": "utm_medium_id",
+    "type": "Many2one",
+    "comodel": "utm.medium",
+    "string": "Medium",
+    "index": true,
+    "ondelete": "set null",
+    "defined_in_package": "event",
+    "compute": "_compute_utm_medium_id",
+    "readonly": false,
+    "store": true,
+    "extended_in_packages": [
+     "event_sale"
+    ],
+    "full_name": "Medium",
+    "target_entity": "utm.medium"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Booked by",
+    "tracking": 1,
+    "index": "btree_not_null",
+    "defined_in_package": "event",
+    "full_name": "Booked by",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Attendee Name",
+    "index": "trigram",
+    "compute": "_compute_name",
+    "readonly": false,
+    "store": true,
+    "tracking": 2,
+    "defined_in_package": "event",
+    "full_name": "Attendee Name"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "string": "Email",
+    "compute": "_compute_email",
+    "readonly": false,
+    "store": true,
+    "tracking": 3,
+    "defined_in_package": "event",
+    "full_name": "Email"
+   },
+   {
+    "name": "phone",
+    "type": "Char",
+    "string": "Phone",
+    "compute": "_compute_phone",
+    "readonly": false,
+    "store": true,
+    "tracking": 4,
+    "defined_in_package": "event",
+    "full_name": "Phone"
+   },
+   {
+    "name": "company_name",
+    "type": "Char",
+    "string": "Company Name",
+    "compute": "_compute_company_name",
+    "readonly": false,
+    "store": true,
+    "tracking": 5,
+    "defined_in_package": "event",
+    "full_name": "Company Name"
+   },
+   {
+    "name": "date_closed",
+    "type": "Datetime",
+    "string": "Attended Date",
+    "compute": "_compute_date_closed",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event",
+    "full_name": "Attended Date"
+   },
+   {
+    "name": "event_begin_date",
+    "type": "Datetime",
+    "string": "Event Start Date",
+    "compute": "_compute_event_begin_date",
+    "search": "_search_event_begin_date",
+    "defined_in_package": "event",
+    "full_name": "Event Start Date"
+   },
+   {
+    "name": "event_end_date",
+    "type": "Datetime",
+    "string": "Event End Date",
+    "compute": "_compute_event_end_date",
+    "search": "_search_event_end_date",
+    "defined_in_package": "event",
+    "full_name": "Event End Date"
+   },
+   {
+    "name": "event_date_range",
+    "type": "Char",
+    "string": "Date Range",
+    "compute": "_compute_date_range",
+    "defined_in_package": "event",
+    "full_name": "Date Range"
+   },
+   {
+    "name": "event_organizer_id",
+    "type": "Many2one",
+    "string": "Event Organizer",
+    "related": "event_id.organizer_id",
+    "readonly": true,
+    "defined_in_package": "event",
+    "full_name": "Event Organizer"
+   },
+   {
+    "name": "event_user_id",
+    "type": "Many2one",
+    "string": "Event Responsible",
+    "related": "event_id.user_id",
+    "readonly": true,
+    "defined_in_package": "event",
+    "full_name": "Event Responsible"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "related": "event_id.company_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "event",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Unconfirmed"
+     ],
+     [
+      "open",
+      "Registered"
+     ],
+     [
+      "done",
+      "Attended"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "default": null,
+    "readonly": false,
+    "copy": false,
+    "tracking": 6,
+    "help": "Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\nRegistered: registrations considered taken by a client\nAttended: registrations for which the attendee attended the event\nCancelled: registrations cancelled manually",
+    "defined_in_package": "event",
+    "compute": "_compute_registration_status",
+    "store": true,
+    "precompute": true,
+    "extended_in_packages": [
+     "event_sale"
+    ],
+    "full_name": "Status"
+   },
+   {
+    "name": "registration_answer_ids",
+    "type": "One2many",
+    "comodel": "event.registration.answer",
+    "inverse_name": "registration_id",
+    "string": "Attendee Answers",
+    "defined_in_package": "event",
+    "full_name": "Attendee Answers",
+    "target_entity": "event.registration.answer"
+   },
+   {
+    "name": "registration_answer_choice_ids",
+    "type": "One2many",
+    "comodel": "event.registration.answer",
+    "inverse_name": "registration_id",
+    "string": "Attendee Selection Answers",
+    "domain": [
+     [
+      "question_type",
+      "=",
+      "simple_choice"
+     ]
+    ],
+    "defined_in_package": "event",
+    "full_name": "Attendee Selection Answers",
+    "target_entity": "event.registration.answer"
+   },
+   {
+    "name": "mail_registration_ids",
+    "type": "One2many",
+    "comodel": "event.mail.registration",
+    "inverse_name": "registration_id",
+    "string": "Scheduler Emails",
+    "readonly": true,
+    "defined_in_package": "event",
+    "full_name": "Scheduler Emails",
+    "target_entity": "event.mail.registration"
+   },
+   {
+    "name": "registration_properties",
+    "type": "Properties",
+    "string": "Properties",
+    "definition": "event_id.registration_properties_definition",
+    "copy": true,
+    "defined_in_package": "event",
+    "full_name": "Properties"
+   },
+   {
+    "name": "sale_status",
+    "type": "Selection",
+    "string": "Sale Status",
+    "selection": [
+     [
+      "to_pay",
+      "Not Sold"
+     ],
+     [
+      "sold",
+      "Sold"
+     ],
+     [
+      "free",
+      "Free"
+     ]
+    ],
+    "compute": "_compute_registration_status",
+    "compute_sudo": true,
+    "store": true,
+    "readonly": true,
+    "precompute": true,
+    "defined_in_package": "event_product",
+    "full_name": "Sale Status"
+   },
+   {
+    "name": "sale_order_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "string": "Sales Order",
+    "ondelete": "cascade",
+    "copy": false,
+    "defined_in_package": "event_sale",
+    "full_name": "Sales Order",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "sale_order_line_id",
+    "type": "Many2one",
+    "comodel": "sale.order.line",
+    "string": "Sales Order Line",
+    "ondelete": "cascade",
+    "copy": false,
+    "index": "btree_not_null",
+    "defined_in_package": "event_sale",
+    "full_name": "Sales Order Line",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "lead_ids",
+    "type": "Many2many",
+    "comodel": "crm.lead",
+    "string": "Leads",
+    "copy": false,
+    "readonly": true,
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "event_crm",
+    "full_name": "Leads",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "lead_count",
+    "type": "Integer",
+    "string": "# Leads",
+    "compute": "_compute_lead_count",
+    "compute_sudo": true,
+    "defined_in_package": "event_crm",
+    "full_name": "# Leads"
+   },
+   {
+    "name": "visitor_id",
+    "type": "Many2one",
+    "comodel": "website.visitor",
+    "string": "Visitor",
+    "ondelete": "set null",
+    "index": "btree_not_null",
+    "defined_in_package": "website_event",
+    "full_name": "Visitor",
+    "target_entity": "website.visitor"
+   },
+   {
+    "name": "pos_order_id",
+    "type": "Many2one",
+    "related": "pos_order_line_id.order_id",
+    "string": "PoS Order",
+    "defined_in_package": "pos_event",
+    "full_name": "PoS Order"
+   },
+   {
+    "name": "pos_order_line_id",
+    "type": "Many2one",
+    "comodel": "pos.order.line",
+    "string": "PoS Order Line",
+    "ondelete": "cascade",
+    "copy": false,
+    "index": "btree_not_null",
+    "defined_in_package": "pos_event",
+    "full_name": "PoS Order Line",
+    "target_entity": "pos.order.line"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_barcode_event_uniq",
+    "kind": "Constraint",
+    "definition": "unique(barcode)",
+    "message": "Barcode should be unique",
+    "defined_in_package": "event"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_get_random_barcode",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Generate a string representation of a pseudo-random 8-byte number for barcode\ngeneration.\n\nA decimal serialisation is longer than a hexadecimal one *but* it\ngenerates a more compact barcode (Code128C rather than Code128A).\n\nGenerate 8 bytes (64 bits) barcodes as 16 bytes barcodes are not\ncompatible with all scanners.\n ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_seats_availability",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "active",
+         "state",
+         "event_id",
+         "event_slot_id",
+         "event_ticket_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_phone",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_closed",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_range",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_id",
+         "event_slot_id",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_begin_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_id",
+         "event_slot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_event_begin_date",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_end_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_id",
+         "event_slot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_event_end_date",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_event_slot",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "event_id",
+         "event_slot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid event / slot choice",
+        "line": 203
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Slot choice is mandatory on multi-slots events.",
+        "line": 205
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_event_ticket",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "event_id",
+         "event_ticket_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid event / ticket choice",
+        "line": 210
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_synchronize_partner_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner",
+     "fnames"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_event",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_phone_validation",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "phone",
+         "event_id",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "register_attendee",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "barcode",
+     "event_id"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_crm",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Trigger rules based on registration creation, and check state for\nrules based on confirmed / done attendees. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Update the lead values depending on fields updated in registrations.\nThere are 2 main use cases\n\n  * first is when we update the partner_id of multiple registrations. It\n    happens when a public user fill its information when they register to\n    an event;\n  * second is when we update specific values of one registration like\n    updating question answers or a contact information (email, phone);\n\nAlso trigger rules based on confirmed and done attendees (state written\nto open and done).",
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Custom display_name in case a registration is nott linked to an attendee\n        ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_draft",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_confirm",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Close Registration ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_badge_email",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Open a window to compose an email, with the template - 'event_badge'\nmessage loaded by default",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_mail_schedulers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Update schedulers to set them as running again, and cron to be called\nas soon as possible. ",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mail_template_default_values",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_compute_subject",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_add_default_recipients",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_post_after_hook",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_registration_summary",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_registration_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_id.state",
+         "sale_order_id.currency_id",
+         "sale_order_id.amount_total"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pos_order_id.state",
+         "pos_order_id.currency_id",
+         "pos_order_id.amount_total"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pos_order_id.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_utm_campaign_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_utm_source_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_utm_medium_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_sale_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_synchronize_so_line_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "so_line"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sale_order_registration_data_change_notify",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "new_record_field",
+     "new_record"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_field_value",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_event_registration_ids_from_order",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lead_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lead_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_records_create",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "In import mode: do not run rules those are intended to run when customers\nbuy tickets, not when bootstrapping a database. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_records_write",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "In import mode: do not run rules those are intended to run when customers\nbuy tickets, not when bootstrapping a database. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_apply_lead_generation_rules",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "event_lead_rules"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_leads",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "new_vals",
+     "lead_tracked_vals"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Update leads linked to some registrations. Update is based depending\non updated fields, see ``_get_lead_contact_fields()`` and ``_get_lead_\ndescription_fields()``. Main heuristic is\n\n  * check attendee-based leads, for each registration recompute contact\n    information if necessary (changing partner triggers the whole contact\n    computation); update description if necessary;\n  * check order-based leads, for each existing group-based lead, only\n    partner change triggers a contact and description update. We consider\n    that group-based rule works mainly with the main contact and less\n    with further details of registrations. Those can be found in stat\n    button if necessary.\n\n:param new_vals: values given to write. Used to determine updated fields;\n:param lead_tracked_vals: dict(registration_id, registration previous values)\n  based on new_vals;",
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "rule"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Get lead values from registrations. Self can contain multiple records\nin which case first found non void value is taken. Note that all\nregistrations should belong to the same event.\n\n:returns: values used for create / write on a lead\n:rtype: dict",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_crm",
+      "decorators": [],
+      "documentation": "Update lead values from Lead Generation rules to include the visitor and their language",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_contact_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Specific management of contact values. Rule creation basis has some\neffect on contact management\n\n  * in attendee mode: keep registration partner only if partner phone and\n    email match. Indeed lead are synchronized with their contact and it\n    would imply rewriting on partner, and therefore on other documents;\n  * in batch mode: if a customer is found use it as main contact. Registrations\n    details are included in lead description;\n\n:returns: values used for create / write on a lead\n:rtype: dict",
+      "size_in_lines": 62,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "prefix",
+     "line_counter",
+     "line_suffix"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Build the description for the lead using a prefix for all generated\nlines. For example to enumerate participants or inform of an update in\nthe information of a participant.\n\n:returns: complete description for a lead taking into\n  account all registrations contained in self\n:rtype: str",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_description_registration",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "line_suffix"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Build the description line specific to a given registration. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_crm",
+      "decorators": [],
+      "documentation": "Add the questions and answers linked to the registrations into the description of the lead.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_tracked_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Tracked values are based on two subset of fields to track in order\nto fill or update leads. Two main use cases are\n\n  * description fields: registration contact fields: email, phone, ...\n    on registration. Other fields are added by inheritance like\n    question answers;\n  * contact fields: registration contact fields + partner_id field as\n    contact of a lead is managed specifically. Indeed email and phone\n    synchronization of lead / partner_id implies paying attention to\n    not rewrite partner values from registration values.\n\nTracked values are therefore the union of those two field sets. ",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_grouping",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "rules",
+     "rule_to_new_regs"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Perform grouping of registrations in order to enable order-based\nlead creation and update existing groups with new registrations.\n\nHeuristic in event is the following. Registrations created in multi-mode\nare grouped by event and creation_date. Customer use case: website_event\nflow creates several registrations in a create-multi. Cron use case:\nwhen running a rule on existing registrations, grouping on event only\nis not sufficient, create_date is a safe bet for registration groups.\n\nUpdate is not supported as there is no way to determine if a registration\nis part of an existing batch.\n\n:param rules: lead creation rules to run on registrations given by self;\n:param rule_to_new_regs: dict: for each rule, subset of self matching\n  rule conditions. Used to speedup batch computation;\n\n:returns: for each rule, rule (key of dict) gives a list of groups.\n  Each group is a tuple (\n    existing_lead: existing lead to update;\n    group_record: record used to group;\n    registrations: sub record set of self, containing registrations\n                   belonging to the same group;\n  )\n:rtype: dict",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_crm_sale",
+      "decorators": [],
+      "documentation": "Override to support sale-order based grouping and update.\n\nWhen checking for groups for rules, we search for existing leads linked\nto same group (based on sale_order_id) and rule. Each rule can therefore\nupdate an existing lead or create a new one, for each sale order that\nmakes the group. ",
+      "size_in_lines": 38,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_contact_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get registration fields linked to lead contact. Those are used notably\nto see if an update of lead is necessary or to fill contact values\nin ``_get_lead_contact_values())`` ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_description_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get registration fields linked to lead description. Those are used\nnotably to see if an update of lead is necessary or to fill description\nin ``_get_lead_description())`` ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_first_notnull",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Small tool to extract the first not nullvalue of a field: its value\nor the ids if this is a relational field. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_value",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "value",
+     "field_name"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Small tool because convert_to_write is touchy ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mailing_get_default_domain",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "mailing"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_website_registration_allowed_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_base_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_populate_creation_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_available_seat",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_pos_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_event_slot",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "Invalid event / slot choice"
+   },
+   {
+    "operation": "_check_event_slot",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "Slot choice is mandatory on multi-slots events."
+   },
+   {
+    "operation": "_check_event_ticket",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "Invalid event / ticket choice"
+   }
+  ],
+  "state_fields": [
+   "state",
+   "sale_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_registration",
+    "package": "event",
+    "name": "event.registration",
+    "entity": "event.registration",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_registration_registration",
+    "package": "event",
+    "name": "event.registration.registration",
+    "entity": "event.registration",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_registration_manager",
+    "package": "event",
+    "name": "event.registration.manager",
+    "entity": "event.registration",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "pos_event.access_event_registration",
+    "package": "pos_event",
+    "name": "event.registration",
+    "entity": "event.registration",
+    "group": "point_of_sale.group_pos_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "event.event_registration_company_rule",
+    "package": "event",
+    "name": "Event/Registration: multi-company",
+    "entity": "event.registration",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "event.view_event_registration_tree",
+    "package": "event",
+    "name": "event.registration.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Registration",
+      "multi_edit": "1",
+      "sample": "1",
+      "expand": "1",
+      "default_order": "create_date desc",
+      "class": "o_event_registration_view_tree",
+      "js_class": "registration_summary_dialog_list"
+     },
+     "fields": [
+      {
+       "name": "barcode",
+       "column_invisible": "True"
+      },
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "create_date",
+       "string": "Registration Date",
+       "optional": "show"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "partner_id",
+       "optional": "hide"
+      },
+      {
+       "name": "email",
+       "optional": "show"
+      },
+      {
+       "name": "phone",
+       "optional": "show"
+      },
+      {
+       "name": "company_name",
+       "optional": "hide"
+      },
+      {
+       "name": "event_id",
+       "column_invisible": "context.get('default_event_id')"
+      },
+      {
+       "name": "event_slot_id",
+       "domain": "[('event_id', '=', event_id)]"
+      },
+      {
+       "name": "event_ticket_id",
+       "domain": "[('event_id', '=', event_id)]"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "list_activity"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state in ('draft', 'open')",
+       "decoration-muted": "state == 'cancel'"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state != 'draft'",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "message_needaction",
+       "column_invisible": "True"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_confirm",
+       "string": "Registered",
+       "type": "object",
+       "invisible": "not active or state != 'draft'",
+       "icon": "fa-check"
+      },
+      {
+       "name": "action_set_done",
+       "string": "Mark as Attending",
+       "type": "object",
+       "invisible": "not active or state != 'open'",
+       "icon": "fa-level-down"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "not active or (state != 'open' and state != 'draft')",
+       "class": "o_btn_cancel_registration",
+       "icon": "fa-times"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "list_activity": 1,
+      "badge": 1,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.view_event_registration_form",
+    "package": "event",
+    "name": "event.registration.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Event Registration"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "readonly": "False",
+       "options": "{'clickable': '1'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "email"
+      },
+      {
+       "name": "phone",
+       "widget": "phone",
+       "options": "{'enable_sms': true}"
+      },
+      {
+       "name": "company_name",
+       "placeholder": "e.g. \"Azure Interior\""
+      },
+      {
+       "name": "event_id",
+       "context": "{'name_with_seats_availability': True}",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "event_slot_id",
+       "invisible": "not is_multi_slots",
+       "required": "is_multi_slots",
+       "domain": "[('event_id', '=', event_id)]",
+       "context": "{'name_with_seats_availability': True}",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "event_ticket_id",
+       "invisible": "not event_id",
+       "domain": "[('event_id', '=', event_id)]",
+       "context": "{'name_with_seats_availability': True, 'is_event_multi_slots': is_multi_slots}",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "barcode",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "create_date",
+       "string": "Registration Date",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "date_closed",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "utm_campaign_id"
+      },
+      {
+       "name": "utm_medium_id"
+      },
+      {
+       "name": "utm_source_id"
+      },
+      {
+       "name": "registration_properties"
+      },
+      {
+       "name": "registration_answer_ids",
+       "widget": "one2many"
+      },
+      {
+       "name": "event_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "question_id",
+       "domain": "[('event_ids', 'in', event_id)]",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "question_type",
+       "string": "Type"
+      },
+      {
+       "name": "value_answer_id",
+       "invisible": "question_type != 'simple_choice'",
+       "domain": "[('question_id', '=', question_id)]",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "value_text_box",
+       "invisible": "question_type == 'simple_choice'"
+      },
+      {
+       "name": "event_id"
+      },
+      {
+       "name": "question_type"
+      },
+      {
+       "name": "question_id",
+       "domain": "[('event_ids', 'in', event_id)]"
+      },
+      {
+       "name": "value_answer_id",
+       "invisible": "question_type != 'simple_choice'",
+       "domain": "[('question_id', '=', question_id)]",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "value_text_box",
+       "invisible": "question_type == 'simple_choice'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send_badge_email",
+       "string": "Send by Email",
+       "type": "object",
+       "invisible": "not active or state != 'open' and state != 'done'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_confirm",
+       "string": "Registered",
+       "type": "object",
+       "invisible": "not active or state != 'draft'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_set_done",
+       "string": "Attended",
+       "type": "object",
+       "invisible": "not active or state != 'open'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Cancel Registration",
+       "type": "object",
+       "invisible": "not active or state == 'cancel'"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "questions",
+       "string": "Questions",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "phone": 1,
+      "one2many": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_send_badge_email",
+       "string": "Send by Email",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "not active or state != 'open' and state != 'done'"
+      },
+      {
+       "name": "action_confirm",
+       "string": "Registered",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "not active or state != 'draft'"
+      },
+      {
+       "name": "action_set_done",
+       "string": "Attended",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "not active or state != 'open'"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Cancel Registration",
+       "type": "object",
+       "invisible": "not active or state == 'cancel'"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "open,done",
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event.event_registration_view_kanban",
+    "package": "event",
+    "name": "event.registration.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_event_attendee_kanban_view",
+      "default_order": "name, create_date desc",
+      "sample": "1",
+      "js_class": "registration_summary_dialog_kanban"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "active"
+      },
+      {
+       "name": "barcode"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state == 'done'"
+      },
+      {
+       "name": "event_id",
+       "invisible": "context.get('default_event_id')"
+      },
+      {
+       "name": "company_name"
+      },
+      {
+       "name": "registration_properties"
+      },
+      {
+       "name": "event_slot_id"
+      },
+      {
+       "name": "event_ticket_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "event.view_event_registration_calendar",
+    "package": "event",
+    "name": "event.registration.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "date_start": "event_begin_date",
+      "date_stop": "event_end_date",
+      "string": "Event Registration",
+      "color": "event_id",
+      "event_limit": "5"
+     },
+     "fields": [
+      {
+       "name": "event_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "registration_properties"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "event_begin_date",
+      "date_stop": "event_end_date",
+      "date_delay": null,
+      "color": "event_id",
+      "mode": null,
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "event.view_event_registration_pivot",
+    "package": "event",
+    "name": "event.registration.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Registration",
+      "display_quantity": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "event_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "event_id",
+       "type": "row"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event.view_event_registration_graph",
+    "package": "event",
+    "name": "event.registration.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Registration",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "event_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "event_id"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event.view_registration_search",
+    "package": "event",
+    "name": "event.registration.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Event Registration"
+     },
+     "fields": [
+      {
+       "name": "id",
+       "string": "Registration ID"
+      },
+      {
+       "name": "name",
+       "string": "Participant",
+       "filter_domain": "['|', '|', ('name', 'ilike', self), ('email', 'ilike', self), ('company_name', 'ilike', self)]"
+      },
+      {
+       "name": "company_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "event_ticket_id",
+       "string": "Ticket"
+      },
+      {
+       "name": "event_id"
+      },
+      {
+       "name": "event_user_id",
+       "invisible": "1",
+       "string": "Responsible"
+      },
+      {
+       "name": "event_organizer_id",
+       "invisible": "1",
+       "string": "Organizer"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_is_ongoing",
+       "string": "Ongoing Events",
+       "domain": "[('event_id.is_ongoing', '=', True)]"
+      },
+      {
+       "name": "taken",
+       "string": "Taken",
+       "domain": "[('state', 'in', ['open', 'done'])]"
+      },
+      {
+       "name": "unconfirmed",
+       "string": "Unconfirmed",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "confirmed",
+       "string": "Registered",
+       "domain": "[('state', '=', 'open')]"
+      },
+      {
+       "name": "attended",
+       "string": "Attended",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "filter_create_date",
+       "string": "Registration Date",
+       "date": "create_date"
+      },
+      {
+       "name": "filter_event_begin_date",
+       "string": "Event Start Date",
+       "date": "event_begin_date"
+      },
+      {
+       "name": "filter_date_closed",
+       "string": "Attended Date",
+       "date": "date_closed"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "filter_last_month_creation",
+       "string": "Last 30 days",
+       "domain": "[('create_date','>', 'today -30d')]"
+      },
+      {
+       "name": "filter_inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "partner",
+       "string": "Partner",
+       "domain": "[]",
+       "context": "{'group_by':'partner_id'}"
+      },
+      {
+       "name": "group_event",
+       "string": "Event",
+       "domain": "[]",
+       "context": "{'group_by':'event_id'}"
+      },
+      {
+       "name": "group_by_event_slot_id",
+       "string": "Slot",
+       "context": "{'group_by': 'event_slot_id'}"
+      },
+      {
+       "name": "group_event_ticket_id",
+       "string": "Ticket Type",
+       "domain": "[]",
+       "context": "{'group_by': 'event_ticket_id'}"
+      },
+      {
+       "name": "status",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by':'state'}"
+      },
+      {
+       "name": "group_by_create_date_week",
+       "string": "Registration Date",
+       "domain": "[]",
+       "context": "{'group_by': 'create_date:week'}",
+       "invisible": "context.get('registration_view_hide_group_by_create_date_week')"
+      },
+      {
+       "name": "group_by_create_date_day",
+       "string": "Registration Date",
+       "domain": "[]",
+       "context": "{'group_by': 'create_date:day'}",
+       "invisible": "not context.get('registration_view_hide_group_by_create_date_week')"
+      },
+      {
+       "name": "group_by_utm_campaign_id",
+       "string": "Campaign",
+       "domain": "[]",
+       "context": "{'group_by': 'utm_campaign_id'}"
+      },
+      {
+       "name": "group_by_utm_medium_id",
+       "string": "Medium",
+       "domain": "[]",
+       "context": "{'group_by': 'utm_medium_id'}"
+      },
+      {
+       "name": "group_by_utm_source_id",
+       "string": "Source",
+       "domain": "[]",
+       "context": "{'group_by': 'utm_source_id'}"
+      },
+      {
+       "name": "group_by_registration_properties",
+       "string": "Properties",
+       "context": "{'group_by': 'registration_properties'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event.event_registration_view_search_event_specific",
+    "package": "event",
+    "name": "event.registration.view.search.event.specific",
+    "view_type": "xpath",
+    "inherits_view": "view_registration_search",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//search/field[@name='event_id']",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//search/field[@name='event_id']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_crm.event_registration_view_form",
+    "package": "event_crm",
+    "name": "event.registration.form.inherit.event.crm",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_registration_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "lead_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(crm_lead_action_from_registration)d",
+       "type": "action",
+       "invisible": "lead_count == 0",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-star"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_product.view_event_registration_ticket_tree",
+    "package": "event_product",
+    "name": "event.registration.list.inherit",
+    "view_type": "field",
+    "inherits_view": "event.view_event_registration_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "state",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "position": "after"
+      },
+      {
+       "name": "sale_status",
+       "widget": "badge",
+       "invisible": "not sale_status",
+       "optional": "show",
+       "decoration-danger": "sale_status == 'to_pay'",
+       "decoration-success": "sale_status == 'sold'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_product.event_registration_view_graph",
+    "package": "event_product",
+    "name": "event.registration.graph.inherit.event.sale",
+    "view_type": "field",
+    "inherits_view": "event.view_event_registration_graph",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "event_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "event_id",
+       "position": "after"
+      },
+      {
+       "name": "sale_status"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_product.event_registration_ticket_view_form",
+    "package": "event_product",
+    "name": "event.registration.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_registration_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group",
+      "position": "before"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_sale.view_event_registration_ticket_tree",
+    "package": "event_sale",
+    "name": "event.registration.list.inherit",
+    "view_type": "field",
+    "inherits_view": "event.view_event_registration_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "event_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "event_id",
+       "position": "after"
+      },
+      {
+       "name": "sale_order_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_sale.event_registration_ticket_view_form",
+    "package": "event_sale",
+    "name": "event.registration.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "event_product.event_registration_ticket_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_view_sale_order",
+       "type": "object",
+       "invisible": "not sale_order_id",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-usd"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_event.event_registration_ticket_view_form",
+    "package": "pos_event",
+    "name": "event.registration.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "event_product.event_registration_ticket_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_view_pos_order",
+       "type": "object",
+       "invisible": "not pos_order_id",
+       "class": "oe_stat_button",
+       "groups": "point_of_sale.group_pos_user",
+       "icon": "fa-usd"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_registration_view_form",
+    "package": "website_event",
+    "name": "event.registration.view.form.inherit.online",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_registration_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='phone']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "visitor_id",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='phone']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_registration_view_tree",
+    "package": "website_event",
+    "name": "event.registration.view.list.inherit.online",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_registration_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='partner_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "visitor_id",
+       "optional": "hide",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='partner_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_registration_view_kanban",
+    "package": "website_event",
+    "name": "event.registration.kanban.inherit.online",
+    "view_type": "xpath",
+    "inherits_view": "event.event_registration_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@id='event_ticket_id']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "registration_answer_choice_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[@id='event_ticket_id']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.event_registration_view_search",
+    "package": "website_event",
+    "name": "event.registration.view.search.inherit.online",
+    "view_type": "field",
+    "inherits_view": "event.view_registration_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "partner_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "partner_id",
+       "position": "after"
+      },
+      {
+       "name": "registration_answer_ids",
+       "string": "Selected Answers"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event.act_event_registration_from_event",
+    "package": "event",
+    "name": "Attendees",
+    "view_mode": "list,kanban,form,calendar,graph",
+    "view_id": null,
+    "search_view_id": "event_registration_view_search_event_specific",
+    "domain": "[('event_id', '=', active_id)]",
+    "context": "{\n            'default_event_id': active_id,\n            'name_with_seats_availability': True,\n            'search_default_taken': True,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Attendees yet!\n            </p><p>\n                Wait until Attendees register to your Event or create their registrations manually.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event.event_registration_action_kanban",
+    "package": "event",
+    "name": "Attendees",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('event_id', '=', active_id)]",
+    "context": "{'default_event_id': active_id, 'is_registration_desk_view': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Attendees yet!\n            </p><p>\n                Wait until Attendees register to your Event or create their registrations manually.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event.event_registration_action",
+    "package": "event",
+    "name": "Attendees",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_filter_is_ongoing': True, 'is_registration_desk_view': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Attendees expected yet!\n            </p><p>\n                Wait until Attendees register to your Event or create their registrations manually.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event.event_registration_action_tree",
+    "package": "event",
+    "name": "Event registrations",
+    "view_mode": "list,kanban,form,calendar,graph",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event.action_registration",
+    "package": "event",
+    "name": "Attendees",
+    "view_mode": "graph,pivot,kanban,list,form",
+    "view_id": null,
+    "search_view_id": "view_registration_search",
+    "domain": "",
+    "context": "{\n                'search_default_filter_last_month_creation': 1,\n                'search_default_taken': 1,\n                'search_default_status': 2,\n                'search_default_group_by_create_date_day': 3,\n                'search_default_group_event': 1,\n                'registration_view_hide_group_by_create_date_week': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Attendees yet!\n            </p><p>\n                From this dashboard you can report, analyze and detect trends regarding your event registrations.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event.event_registration_action_stats_from_event",
+    "package": "event",
+    "name": "Registration statistics",
+    "view_mode": "graph,pivot,kanban,list,form",
+    "view_id": null,
+    "search_view_id": "event_registration_view_search_event_specific",
+    "domain": "[('event_id', '=', active_id)]",
+    "context": "{\n                'default_event_id': active_id,\n                'search_default_group_by_create_date_day': 1,\n                'search_default_status': 2,\n                'registration_view_hide_group_by_create_date_week': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Attendees yet!\n            </p><p>\n                From this dashboard you can report, analyze and detect trends regarding your event registrations.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event_crm.event_registration_action_from_lead",
+    "package": "event_crm",
+    "name": "Event registrations",
+    "view_mode": "list,kanban,form,calendar,graph",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('lead_ids', '=', active_id)]",
+    "context": "{'create': False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No registration found\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "website_event.event_registration_action_from_visitor",
+    "package": "website_event",
+    "name": "Registrations",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('visitor_id', 'in', [active_id])]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No registration linked to this visitor\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.registration"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "event.action_report_event_registration_full_page_ticket",
+    "package": "event",
+    "name": "Full Page Ticket",
+    "report_type": "qweb-pdf",
+    "report_name": "event.event_registration_report_template_full_page_ticket",
+    "report_file": "event.event_registration_report_template_full_page_ticket",
+    "print_report_name": "'Full Page Ticket - %s - %s' % ((object.event_id.name or 'Event').replace('/',''), (object.name or '').replace('/',''))",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_event_registration",
+    "binding_type": "report",
+    "paperformat_id": "paperformat_event_full_page_ticket",
+    "groups_id": null,
+    "multi": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event.action_report_event_registration_badge",
+    "package": "event",
+    "name": "Badge",
+    "report_type": "qweb-pdf",
+    "report_name": "event.event_registration_report_template_badge",
+    "report_file": "event.event_registration_report_template_badge",
+    "print_report_name": "'Badge - %s - %s' % ((object.event_id.name or 'Event').replace('/',''), (object.name or '').replace('/',''))",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_event_registration",
+    "binding_type": "report",
+    "paperformat_id": "paperformat_event_badge",
+    "groups_id": null,
+    "multi": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event.action_report_event_registration_responsive_html_ticket",
+    "package": "event",
+    "name": "Responsive Html Full Page Ticket",
+    "report_type": "qweb-pdf",
+    "report_name": "event.event_registration_report_template_responsive_html_ticket",
+    "report_file": "event.event_registration_report_template_responsive_html_ticket",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "event.registration"
+   },
+   {
+    "external_identifier": "event.action_report_event_registration_attendee_list",
+    "package": "event",
+    "name": "Attendee List",
+    "report_type": "qweb-pdf",
+    "report_name": "event.event_registration_attendee_list",
+    "report_file": "event.event_registration_attendee_list",
+    "print_report_name": "'Attendee List'",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "event.model_event_registration",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "event.registration"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "event.event_registration_mail_template_badge",
+    "package": "event",
+    "name": "Event: Registration Badge",
+    "subject": "Your badge for {{ object.event_id.name }}"
+   },
+   {
+    "external_identifier": "event.event_subscription",
+    "package": "event",
+    "name": "Event: Registration Confirmation",
+    "subject": "Your registration at {{ object.event_id.name }}"
+   },
+   {
+    "external_identifier": "event.event_reminder",
+    "package": "event",
+    "name": "Event: Reminder",
+    "subject": "{{ object.event_id.name }}: {{ object.event_date_range }}"
+   }
+  ]
+ }
+}

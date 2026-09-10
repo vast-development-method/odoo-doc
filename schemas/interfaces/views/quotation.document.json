@@ -1,0 +1,268 @@
+{
+ "catalog": {
+  "name": "views:quotation.document",
+  "description": "View declarations for entity quotation.document.",
+  "record_count": 4,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "sale_pdf_quote_builder.quotation_document_form",
+   "package": "sale_pdf_quote_builder",
+   "name": "quotation.document.form",
+   "entity": "quotation.document",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name",
+      "readonly": "not datas"
+     },
+     {
+      "name": "document_type"
+     },
+     {
+      "name": "datas",
+      "options": "{'accepted_file_extensions': '.pdf', 'allowed_mime_type' : 'application/pdf'}"
+     },
+     {
+      "name": "quotation_template_ids",
+      "widget": "many2many_tags",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "add_by_default"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company",
+      "placeholder": "Visible to all"
+     },
+     {
+      "name": "form_field_ids",
+      "widget": "many2many_tags",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "create_uid",
+      "readonly": "1"
+     },
+     {
+      "name": "create_date",
+      "readonly": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_pdf_form_fields",
+      "string": "Configure dynamic fields",
+      "type": "object",
+      "invisible": "not (datas and form_field_ids)",
+      "class": "btn btn-link",
+      "groups": "base.group_system,base.group_no_one",
+      "icon": "fa-pencil"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tags": 2
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form>\n                <sheet>\n                    <h1>\n                        <field name=\"name\" readonly=\"not datas\"/>\n                    </h1>\n                    <group>\n                        <group>\n                            <field name=\"document_type\"/>\n                            <label for=\"datas\"/>\n                            <div class=\"o_row\">\n                                <field name=\"datas\" filename=\"name\" options=\"{'accepted_file_extensions': '.pdf', 'allowed_mime_type' : 'application/pdf'}\" class=\"oe_inline\"/>\n                                <button name=\"action_open_pdf_form_fields\" type=\"object\" string=\"Configure dynamic fields\" help=\"Mark fields as safe to fill in the quote.\" class=\"btn btn-link\" icon=\"fa-pencil\" colspan=\"2\" groups=\"base.group_system,base.group_no_one\" invisible=\"not (datas and form_field_ids)\"/>\n                            </div>\n                            <field name=\"quotation_template_ids\" options=\"{'no_create': True}\" widget=\"many2many_tags\"/>\n                            <field name=\"add_by_default\"/>\n                        </group>\n                    </group>\n                    <group string=\"Attached To\" groups=\"base.group_multi_company,base.group_no_one\">\n                        <field name=\"company_id\" placeholder=\"Visible to all\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\" class=\"oe_inline\"/>\n                        <field name=\"form_field_ids\" groups=\"base.group_no_one\" widget=\"many2many_tags\"/>\n                    </group>\n                    <group string=\"History\" groups=\"base.group_no_one\" invisible=\"not create_date\">\n                        <label for=\"create_uid\" string=\"Creation\"/>\n                        <div name=\"creation_div\">\n                            <field name=\"create_uid\" readonly=\"1\" class=\"oe_inline\"/> on\n                            <field name=\"create_date\" readonly=\"1\" class=\"oe_inline\"/>\n                        </div>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_pdf_quote_builder.quotation_document_kanban",
+   "package": "sale_pdf_quote_builder",
+   "name": "quotation.document.kanban",
+   "entity": "quotation.document",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "js_class": "quotation_document_kanban"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "ir_attachment_id"
+     },
+     {
+      "name": "mimetype"
+     },
+     {
+      "name": "document_type"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "active"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "document_type",
+      "widget": "selection"
+     },
+     {
+      "name": "quotation_template_ids",
+      "widget": "many2many_tags"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "selection": 1,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban js_class=\"quotation_document_kanban\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"ir_attachment_id\"/>\n                <field name=\"mimetype\"/>\n                <field name=\"document_type\"/>\n                <field name=\"name\"/>\n                <field name=\"active\"/>\n                <templates>\n                    <t t-name=\"menu\">\n                        <a t-if=\"widget.editable\" type=\"open\" class=\"dropdown-item\">Edit</a>\n                        <a t-if=\"widget.deletable\" type=\"delete\" class=\"dropdown-item\">Delete</a>\n                        <a t-attf-href=\"/web/content/#{record.ir_attachment_id.raw_value}?download=true\" download=\"\" class=\"dropdown-item\">Download</a>\n                    </t>\n                    <t t-name=\"card\" class=\"o_kanban_attachment flex-row\">\n                        <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                        <aside>\n                            <div class=\"o_image o_kanban_previewer w-100 h-100\" t-att-data-mimetype=\"record.mimetype.value\"/>\n                        </aside>\n                        <main class=\"ms-2\">\n                            <field name=\"name\" class=\"fw-bolder text-truncate\"/>\n                            <div class=\"d-flex mt-2\">\n                                <span>Document type:</span>\n                                <field name=\"document_type\" class=\"ms-2\" widget=\"selection\"/>\n                            </div>\n                            <div t-if=\"!context.hide_template_ids                                       and !!record.quotation_template_ids.raw_value.length\" class=\"mt-2\">\n                                <span class=\"pe-2\">Templates:</span>\n                                <field name=\"quotation_template_ids\" class=\"d-inline-block\" widget=\"many2many_tags\"/>\n                            </div>\n                        </main>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_pdf_quote_builder.quotation_document_list",
+   "package": "sale_pdf_quote_builder",
+   "name": "quotation.document.list",
+   "entity": "quotation.document",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "editable": "top",
+     "multi_edit": "true"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "document_type"
+     },
+     {
+      "name": "quotation_template_ids",
+      "widget": "many2many_tags"
+     },
+     {
+      "name": "add_by_default",
+      "widget": "boolean_toggle",
+      "optional": "show"
+     },
+     {
+      "name": "company_id",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "many2many_tags": 1,
+     "boolean_toggle": 1
+    },
+    "inheritance_operations": [],
+    "editable": "top",
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list editable=\"top\" multi_edit=\"true\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\"/>\n                <field name=\"document_type\"/>\n                <field name=\"quotation_template_ids\" widget=\"many2many_tags\"/>\n                <field name=\"add_by_default\" widget=\"boolean_toggle\" optional=\"show\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"show\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_pdf_quote_builder.quotation_document_search_view",
+   "package": "sale_pdf_quote_builder",
+   "name": "quotation.document.search",
+   "entity": "quotation.document",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Quotation Document"
+    },
+    "fields": [
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "all",
+      "string": "All"
+     },
+     {
+      "name": "archived",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     },
+     {
+      "name": "add_by_default",
+      "string": "Add By Default",
+      "domain": "[('add_by_default', '=', True)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "doc_type",
+      "string": "Document type",
+      "context": "{'group_by': 'document_type'}"
+     },
+     {
+      "name": "quotation_template",
+      "string": "Quotation Template",
+      "context": "{'group_by': 'quotation_template_ids'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Quotation Document\">\n                <field name=\"name\"/>\n                <separator/>\n                <group>\n                    <filter string=\"Document type\" name=\"doc_type\" context=\"{'group_by': 'document_type'}\"/>\n                    <filter string=\"Quotation Template\" name=\"quotation_template\" context=\"{'group_by': 'quotation_template_ids'}\"/>\n                    <filter name=\"all\" string=\"All\"/>\n                    <filter name=\"archived\" string=\"Archived\" domain=\"[('active', '=', False)]\"/>\n                    <filter name=\"add_by_default\" string=\"Add By Default\" domain=\"[('add_by_default', '=', True)]\"/>\n                </group>\n            </search>\n        </field>\n    "
+  }
+ ]
+}

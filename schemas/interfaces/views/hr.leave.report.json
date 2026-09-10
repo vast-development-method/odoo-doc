@@ -1,0 +1,286 @@
+{
+ "catalog": {
+  "name": "views:hr.leave.report",
+  "description": "View declarations for entity hr.leave.report.",
+  "record_count": 4,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr_holidays.view_hr_holidays_filter_report",
+   "package": "hr_holidays",
+   "name": "hr.holidays.filter",
+   "entity": "hr.leave.report",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Time Off"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "department_id",
+      "operator": "child_of"
+     },
+     {
+      "name": "holiday_status_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "approve",
+      "string": "To Approve",
+      "domain": "[('state','in',('confirm','validate1'))]"
+     },
+     {
+      "name": "validated",
+      "string": "Approved Requests",
+      "domain": "[('state', '=', 'validate')]"
+     },
+     {
+      "name": "leave_type_timeoff",
+      "string": "Time off",
+      "domain": "[('leave_type', '=', 'request')]"
+     },
+     {
+      "name": "leave_type_allocations",
+      "string": "Allocations",
+      "domain": "[('leave_type', '=', 'allocation')]"
+     },
+     {
+      "name": "department",
+      "string": "My Department",
+      "domain": "[('department_id.manager_id.user_id', '=', uid)]",
+      "help": "My Department"
+     },
+     {
+      "name": "year",
+      "string": "Start Date",
+      "date": "date_from",
+      "default_period": "year"
+     },
+     {
+      "name": "my_leaves",
+      "string": "My Requests",
+      "domain": "[('employee_id.user_id', '=', uid)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_employee",
+      "string": "Employee",
+      "context": "{'group_by':'employee_id'}"
+     },
+     {
+      "name": "group_type",
+      "string": "Type",
+      "context": "{'group_by':'holiday_status_id'}"
+     },
+     {
+      "name": "group_company",
+      "string": "Company",
+      "context": "{'group_by':'company_id'}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "group_date_from",
+      "string": "Start Date",
+      "context": "{'group_by':'date_from'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Time Off\">\n                <field name=\"employee_id\"/>\n                <field name=\"name\"/>\n                <filter domain=\"[('state','in',('confirm','validate1'))]\" string=\"To Approve\" name=\"approve\"/>\n                <filter string=\"Approved Requests\" domain=\"[('state', '=', 'validate')]\" name=\"validated\"/>\n                <separator/>\n                <filter string=\"Time off\" domain=\"[('leave_type', '=', 'request')]\" name=\"leave_type_timeoff\"/>\n                <filter string=\"Allocations\" domain=\"[('leave_type', '=', 'allocation')]\" name=\"leave_type_allocations\"/>\n                <separator/>\n                <filter string=\"My Department\" name=\"department\" domain=\"[('department_id.manager_id.user_id', '=', uid)]\" help=\"My Department\"/>\n                <separator/>\n                <filter name=\"year\" date=\"date_from\" default_period=\"year\" string=\"Start Date\"/>\n                <separator/>\n                <filter string=\"My Requests\" name=\"my_leaves\" domain=\"[('employee_id.user_id', '=', uid)]\"/>\n                <field name=\"department_id\" operator=\"child_of\"/>\n                <field name=\"holiday_status_id\"/>\n                <group>\n                    <filter name=\"group_employee\" string=\"Employee\" context=\"{'group_by':'employee_id'}\"/>\n                    <filter name=\"group_type\" string=\"Type\" context=\"{'group_by':'holiday_status_id'}\"/>\n                    <filter name=\"group_company\" string=\"Company\" context=\"{'group_by':'company_id'}\" groups=\"base.group_multi_company\"/>\n                    <separator/>\n                    <filter name=\"group_date_from\" string=\"Start Date\" context=\"{'group_by':'date_from'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_report_tree",
+   "package": "hr_holidays",
+   "name": "report.hr.holidays.report.leave_all.list",
+   "entity": "hr.leave.report",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "create": "0",
+     "edit": "0",
+     "delete": "0",
+     "action": "action_open_record",
+     "type": "object"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "number_of_days",
+      "string": "Number of Days",
+      "sum": "Remaining Days"
+     },
+     {
+      "name": "number_of_hours",
+      "string": "Number of Hours",
+      "sum": "Remaining Hours"
+     },
+     {
+      "name": "leave_type"
+     },
+     {
+      "name": "date_from"
+     },
+     {
+      "name": "date_to"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "0",
+    "delete": "0",
+    "edit": "0",
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list create=\"0\" edit=\"0\" delete=\"0\" action=\"action_open_record\" type=\"object\">\n                <field name=\"employee_id\"/>\n                <field name=\"number_of_days\" string=\"Number of Days\" sum=\"Remaining Days\" width=\"110px\"/>\n                <field name=\"number_of_hours\" string=\"Number of Hours\" sum=\"Remaining Hours\" width=\"120px\"/>\n                <field name=\"leave_type\"/>\n                <field name=\"date_from\"/>\n                <field name=\"date_to\"/>\n                <field name=\"state\"/>\n                <field name=\"name\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_report_graph",
+   "package": "hr_holidays",
+   "name": "report.hr.holidays.report.leave_all.graph",
+   "entity": "hr.leave.report",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Time off Summary",
+     "sample": "1",
+     "stacked": "1",
+     "js_class": "hr_holidays_graph"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "leave_type"
+     },
+     {
+      "name": "number_of_days",
+      "string": "Duration (Days)"
+     },
+     {
+      "name": "number_of_hours",
+      "string": "Duration (Hours)"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "employee_id",
+      "type": "row"
+     },
+     {
+      "name": "leave_type",
+      "type": "col"
+     },
+     {
+      "name": "number_of_days",
+      "string": "Duration (Days)",
+      "type": "measure"
+     },
+     {
+      "name": "number_of_hours",
+      "string": "Duration (Hours)"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Time off Summary\" sample=\"1\" stacked=\"1\" js_class=\"hr_holidays_graph\">\n                <field name=\"employee_id\" type=\"row\"/>\n                <field name=\"leave_type\" type=\"col\"/>\n                <field name=\"number_of_days\" string=\"Duration (Days)\" type=\"measure\"/>\n                <field name=\"number_of_hours\" string=\"Duration (Hours)\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_report_pivot",
+   "package": "hr_holidays",
+   "name": "report.hr.holidays.report.leave_all.pivot",
+   "entity": "hr.leave.report",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Time off Summary",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "number_of_days"
+     },
+     {
+      "name": "number_of_hours"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "number_of_days"
+     },
+     {
+      "name": "number_of_hours",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Time off Summary\" sample=\"1\">\n                <field name=\"employee_id\"/>\n                <field name=\"number_of_days\"/>\n                <field name=\"number_of_hours\" type=\"measure\"/>\n            </pivot>\n        </field>\n    "
+  }
+ ]
+}

@@ -1,0 +1,441 @@
+{
+ "catalog": {
+  "name": "entity:hr.expense.split",
+  "description": "Complete definition of entity Expense Split (hr.expense.split).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.expense.split",
+  "storage_name": "hr_expense_split",
+  "full_name": "Expense Split",
+  "kind": "transient",
+  "description": "Expense Split",
+  "defined_by_package": "hr_expense",
+  "extended_by_packages": [
+   "sale_expense"
+  ],
+  "mixins": [
+   "analytic.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Description",
+    "required": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Description"
+   },
+   {
+    "name": "wizard_id",
+    "type": "Many2one",
+    "comodel": "hr.expense.split.wizard",
+    "defined_in_package": "hr_expense",
+    "string": "Wizard",
+    "full_name": "Wizard",
+    "target_entity": "hr.expense.split.wizard"
+   },
+   {
+    "name": "expense_id",
+    "type": "Many2one",
+    "comodel": "hr.expense",
+    "string": "Expense",
+    "defined_in_package": "hr_expense",
+    "full_name": "Expense",
+    "target_entity": "hr.expense"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "required": true,
+    "check_company": true,
+    "domain": [
+     [
+      "can_be_expensed",
+      "=",
+      true
+     ]
+    ],
+    "defined_in_package": "hr_expense",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "tax_ids",
+    "type": "Many2many",
+    "comodel": "account.tax",
+    "check_company": true,
+    "domain": "[('type_tax_use', '=', 'purchase')]",
+    "defined_in_package": "hr_expense",
+    "string": "Tax",
+    "full_name": "Tax",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "total_amount_currency",
+    "type": "Monetary",
+    "string": "Total In Currency",
+    "required": true,
+    "compute": "_compute_from_product_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "hr_expense",
+    "full_name": "Total In Currency"
+   },
+   {
+    "name": "tax_amount_currency",
+    "type": "Monetary",
+    "string": "Tax amount in Currency",
+    "compute": "_compute_tax_amount_currency",
+    "defined_in_package": "hr_expense",
+    "full_name": "Tax amount in Currency"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "required": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "defined_in_package": "hr_expense",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "defined_in_package": "hr_expense",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "product_has_tax",
+    "type": "Boolean",
+    "string": "Whether tax is defined on a selected product",
+    "compute": "_compute_product_has_tax",
+    "defined_in_package": "hr_expense",
+    "full_name": "Whether tax is defined on a selected product"
+   },
+   {
+    "name": "product_has_cost",
+    "type": "Boolean",
+    "string": "Is product with non zero cost selected",
+    "compute": "_compute_from_product_id",
+    "store": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Is product with non zero cost selected"
+   },
+   {
+    "name": "approval_state",
+    "type": "Selection",
+    "selection": {
+     "expression": "EXPENSE_APPROVAL_STATE"
+    },
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "string": "Approval State",
+    "full_name": "Approval State"
+   },
+   {
+    "name": "approval_date",
+    "type": "Datetime",
+    "string": "Approval Date",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Approval Date"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Manager",
+    "readonly": true,
+    "domain": {
+     "dynamic": "lambda self: [('all_group_ids', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').id)]"
+    },
+    "defined_in_package": "hr_expense",
+    "full_name": "Manager",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "sale_order_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "string": "Customer to Reinvoice",
+    "compute": "_compute_sale_order_id",
+    "readonly": false,
+    "store": true,
+    "domain": "[('state', '=', 'sale'), ('company_id', '=', company_id)]",
+    "defined_in_package": "sale_expense",
+    "full_name": "Customer to Reinvoice",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "can_be_reinvoiced",
+    "type": "Boolean",
+    "string": "Can be reinvoiced",
+    "compute": "_compute_can_be_reinvoiced",
+    "defined_in_package": "sale_expense",
+    "full_name": "Can be reinvoiced"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_amount_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "total_amount_currency",
+         "tax_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_from_product_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "In case we switch to the product without taxes defined on it, taxes should be removed.\nComputed method won't be good for this purpose, as we don't want to recompute and reset taxes in case they are removed on purpose during splitting.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_has_tax",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_be_reinvoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_order_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_be_reinvoiced"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "approval_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "hr_expense.access_hr_expense_split_manager",
+    "package": "hr_expense",
+    "name": "access.hr.expense.split.manager",
+    "entity": "hr.expense.split",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

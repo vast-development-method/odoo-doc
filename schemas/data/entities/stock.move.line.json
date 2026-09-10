@@ -1,0 +1,4231 @@
+{
+ "catalog": {
+  "name": "entity:stock.move.line",
+  "description": "Complete definition of entity Product Moves (Stock Move Line) (stock.move.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.move.line",
+  "storage_name": "stock_move_line",
+  "full_name": "Product Moves (Stock Move Line)",
+  "kind": "persistent",
+  "description": "Product Moves (Stock Move Line)",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "stock_account",
+   "sale_stock",
+   "stock_delivery",
+   "stock_picking_batch",
+   "repair",
+   "mrp",
+   "product_expiry",
+   "mrp_subcontracting",
+   "sale_mrp"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "result_package_id desc, id",
+  "display_name_field": "product_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "picking_id",
+    "type": "Many2one",
+    "comodel": "stock.picking",
+    "string": "Transfer",
+    "bypass_search_access": true,
+    "check_company": true,
+    "index": true,
+    "help": "The stock operation where the packing has been made",
+    "defined_in_package": "stock",
+    "full_name": "Transfer",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "move_id",
+    "type": "Many2one",
+    "comodel": "stock.move",
+    "string": "Stock Operation",
+    "check_company": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "Stock Operation",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "readonly": true,
+    "required": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "ondelete": "cascade",
+    "check_company": true,
+    "domain": "[('type', '!=', 'service')]",
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "allowed_uom_ids",
+    "type": "Many2many",
+    "comodel": "uom.uom",
+    "compute": "_compute_allowed_uom_ids",
+    "defined_in_package": "stock",
+    "string": "Allowed Unit of measure",
+    "full_name": "Allowed Unit of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "required": true,
+    "domain": "[('id', 'in', allowed_uom_ids)]",
+    "compute": "_compute_product_uom_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "defined_in_package": "stock",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "product_category_name",
+    "type": "Char",
+    "related": "product_id.categ_id.complete_name",
+    "string": "Product Category",
+    "defined_in_package": "stock",
+    "full_name": "Product Category"
+   },
+   {
+    "name": "quantity",
+    "type": "Float",
+    "string": "Quantity",
+    "digits": "Product Unit",
+    "copy": false,
+    "store": true,
+    "compute": "_compute_quantity",
+    "readonly": false,
+    "defined_in_package": "stock",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "quantity_product_uom",
+    "type": "Float",
+    "string": "Quantity in Product UoM",
+    "digits": "Product Unit",
+    "copy": false,
+    "compute": "_compute_quantity_product_uom",
+    "store": true,
+    "defined_in_package": "stock",
+    "full_name": "Quantity in Product unit of measure"
+   },
+   {
+    "name": "picked",
+    "type": "Boolean",
+    "string": "Picked",
+    "compute": "_compute_picked",
+    "store": true,
+    "readonly": false,
+    "copy": false,
+    "defined_in_package": "stock",
+    "full_name": "Picked"
+   },
+   {
+    "name": "package_id",
+    "type": "Many2one",
+    "comodel": "stock.package",
+    "string": "Source Package",
+    "ondelete": "restrict",
+    "check_company": true,
+    "domain": "[('location_id', '=', location_id)]",
+    "defined_in_package": "stock",
+    "full_name": "Source Package",
+    "target_entity": "stock.package"
+   },
+   {
+    "name": "lot_id",
+    "type": "Many2one",
+    "comodel": "stock.lot",
+    "string": "Lot/Serial Number",
+    "domain": "[('product_id', '=', product_id)]",
+    "check_company": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "Lot/Serial Number",
+    "target_entity": "stock.lot"
+   },
+   {
+    "name": "lot_name",
+    "type": "Char",
+    "string": "Lot/Serial Number Name",
+    "defined_in_package": "stock",
+    "full_name": "Lot/Serial Number Name"
+   },
+   {
+    "name": "result_package_id",
+    "type": "Many2one",
+    "comodel": "stock.package",
+    "string": "Destination Package",
+    "ondelete": "restrict",
+    "required": false,
+    "check_company": true,
+    "domain": "['|', '|', ('location_id', '=', location_dest_id), ('id', '=', package_id), '&', ('location_id', '=', False), '|', ('move_line_ids', '=', False), ('move_line_ids.location_dest_id', '=', location_dest_id)]",
+    "help": "If set, the operations are packed into this package",
+    "defined_in_package": "stock",
+    "full_name": "Destination Package",
+    "target_entity": "stock.package"
+   },
+   {
+    "name": "result_package_dest_name",
+    "type": "Char",
+    "string": "Destination Package Name",
+    "related": "result_package_id.dest_complete_name",
+    "defined_in_package": "stock",
+    "full_name": "Destination Package Name"
+   },
+   {
+    "name": "package_history_id",
+    "type": "Many2one",
+    "comodel": "stock.package.history",
+    "string": "Package History",
+    "index": "btree_not_null",
+    "defined_in_package": "stock",
+    "full_name": "Package History",
+    "target_entity": "stock.package.history"
+   },
+   {
+    "name": "is_entire_pack",
+    "type": "Boolean",
+    "string": "Is added through entire package",
+    "defined_in_package": "stock",
+    "full_name": "Is added through entire package"
+   },
+   {
+    "name": "date",
+    "type": "Datetime",
+    "string": "Date",
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "required": true,
+    "help": "Creation date of this move line until updated due to: quantity being increased, 'picked' status has updated, or move line is done.",
+    "defined_in_package": "stock",
+    "full_name": "Date"
+   },
+   {
+    "name": "scheduled_date",
+    "type": "Datetime",
+    "string": "Scheduled Date",
+    "related": "move_id.date",
+    "defined_in_package": "stock",
+    "full_name": "Scheduled Date"
+   },
+   {
+    "name": "owner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "From Owner",
+    "check_company": true,
+    "index": "btree_not_null",
+    "help": "When validating the transfer, the products will be taken from this owner.",
+    "defined_in_package": "stock",
+    "full_name": "From Owner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "From",
+    "domain": "[('usage', '!=', 'view')]",
+    "check_company": true,
+    "required": true,
+    "compute": "_compute_location_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "From",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "location_dest_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "To",
+    "domain": "[('usage', '!=', 'view')]",
+    "check_company": true,
+    "required": true,
+    "compute": "_compute_location_id",
+    "store": true,
+    "index": true,
+    "readonly": false,
+    "precompute": true,
+    "defined_in_package": "stock",
+    "full_name": "To",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "location_usage",
+    "type": "Selection",
+    "string": "Source Location Type",
+    "related": "location_id.usage",
+    "defined_in_package": "stock",
+    "full_name": "Source Location Type"
+   },
+   {
+    "name": "location_dest_usage",
+    "type": "Selection",
+    "string": "Destination Location Type",
+    "related": "location_dest_id.usage",
+    "defined_in_package": "stock",
+    "full_name": "Destination Location Type"
+   },
+   {
+    "name": "lots_visible",
+    "type": "Boolean",
+    "compute": "_compute_lots_visible",
+    "defined_in_package": "stock",
+    "string": "Lots Visible",
+    "full_name": "Lots Visible"
+   },
+   {
+    "name": "picking_partner_id",
+    "type": "Many2one",
+    "related": "picking_id.partner_id",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Picking Partner",
+    "full_name": "Picking Partner"
+   },
+   {
+    "name": "move_partner_id",
+    "type": "Many2one",
+    "related": "move_id.partner_id",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Move Partner",
+    "full_name": "Move Partner"
+   },
+   {
+    "name": "picking_code",
+    "type": "Selection",
+    "related": "picking_type_id.code",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Picking Code",
+    "full_name": "Picking Code"
+   },
+   {
+    "name": "picking_type_id",
+    "type": "Many2one",
+    "comodel": "stock.picking.type",
+    "string": "Operation type",
+    "compute": "_compute_picking_type_id",
+    "search": "_search_picking_type_id",
+    "defined_in_package": "stock",
+    "full_name": "Operation type",
+    "target_entity": "stock.picking.type"
+   },
+   {
+    "name": "picking_type_use_create_lots",
+    "type": "Boolean",
+    "related": "picking_type_id.use_create_lots",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Picking Type Use Create Lots",
+    "full_name": "Picking Type Use Create Lots"
+   },
+   {
+    "name": "picking_type_use_existing_lots",
+    "type": "Boolean",
+    "related": "picking_type_id.use_existing_lots",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Picking Type Use Existing Lots",
+    "full_name": "Picking Type Use Existing Lots"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "related": "move_id.state",
+    "store": true,
+    "defined_in_package": "stock",
+    "string": "State",
+    "full_name": "State"
+   },
+   {
+    "name": "scrap_id",
+    "type": "Many2one",
+    "related": "move_id.scrap_id",
+    "defined_in_package": "stock",
+    "string": "Scrap",
+    "full_name": "Scrap"
+   },
+   {
+    "name": "is_inventory",
+    "type": "Boolean",
+    "related": "move_id.is_inventory",
+    "defined_in_package": "stock",
+    "string": "Is Inventory",
+    "full_name": "Is Inventory"
+   },
+   {
+    "name": "is_locked",
+    "type": "Boolean",
+    "related": "move_id.is_locked",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Is Locked",
+    "full_name": "Is Locked"
+   },
+   {
+    "name": "consume_line_ids",
+    "type": "Many2many",
+    "comodel": "stock.move.line",
+    "relation": "stock_move_line_consume_rel",
+    "column1": "consume_line_id",
+    "column2": "produce_line_id",
+    "defined_in_package": "stock",
+    "string": "Consume Line",
+    "full_name": "Consume Line",
+    "target_entity": "stock.move.line"
+   },
+   {
+    "name": "produce_line_ids",
+    "type": "Many2many",
+    "comodel": "stock.move.line",
+    "relation": "stock_move_line_consume_rel",
+    "column1": "produce_line_id",
+    "column2": "consume_line_id",
+    "defined_in_package": "stock",
+    "string": "Produce Line",
+    "full_name": "Produce Line",
+    "target_entity": "stock.move.line"
+   },
+   {
+    "name": "reference",
+    "type": "Char",
+    "related": "move_id.reference",
+    "defined_in_package": "stock",
+    "string": "Reference",
+    "full_name": "Reference"
+   },
+   {
+    "name": "tracking",
+    "type": "Selection",
+    "related": "product_id.tracking",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Tracking",
+    "full_name": "Tracking"
+   },
+   {
+    "name": "origin",
+    "type": "Char",
+    "related": "move_id.origin",
+    "string": "Source",
+    "defined_in_package": "stock",
+    "full_name": "Source"
+   },
+   {
+    "name": "description_picking",
+    "type": "Text",
+    "related": "move_id.description_picking",
+    "defined_in_package": "stock",
+    "string": "Description Picking",
+    "full_name": "Description Picking"
+   },
+   {
+    "name": "quant_id",
+    "type": "Many2one",
+    "comodel": "stock.quant",
+    "string": "Pick From",
+    "store": false,
+    "defined_in_package": "stock",
+    "full_name": "Pick From",
+    "target_entity": "stock.quant"
+   },
+   {
+    "name": "picking_location_id",
+    "type": "Many2one",
+    "related": "picking_id.location_id",
+    "defined_in_package": "stock",
+    "string": "Picking Location",
+    "full_name": "Picking Location"
+   },
+   {
+    "name": "picking_location_dest_id",
+    "type": "Many2one",
+    "related": "picking_id.location_dest_id",
+    "defined_in_package": "stock",
+    "string": "Picking Location Dest",
+    "full_name": "Picking Location Dest"
+   },
+   {
+    "name": "sale_price",
+    "type": "Float",
+    "compute": "_compute_sale_price",
+    "defined_in_package": "stock_delivery",
+    "string": "Sale Price",
+    "full_name": "Sale Price"
+   },
+   {
+    "name": "destination_country_code",
+    "type": "Char",
+    "related": "picking_id.destination_country_code",
+    "defined_in_package": "stock_delivery",
+    "string": "Destination Country Code",
+    "full_name": "Destination Country Code"
+   },
+   {
+    "name": "carrier_id",
+    "type": "Many2one",
+    "related": "picking_id.carrier_id",
+    "defined_in_package": "stock_delivery",
+    "string": "Carrier",
+    "full_name": "Carrier"
+   },
+   {
+    "name": "batch_id",
+    "type": "Many2one",
+    "related": "picking_id.batch_id",
+    "defined_in_package": "stock_picking_batch",
+    "string": "Batch",
+    "full_name": "Batch"
+   },
+   {
+    "name": "workorder_id",
+    "type": "Many2one",
+    "comodel": "mrp.workorder",
+    "string": "Work Order",
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "mrp",
+    "full_name": "Work Order",
+    "target_entity": "mrp.workorder"
+   },
+   {
+    "name": "production_id",
+    "type": "Many2one",
+    "comodel": "mrp.production",
+    "string": "Production Order",
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "Production Order",
+    "target_entity": "mrp.production"
+   },
+   {
+    "name": "expiration_date",
+    "type": "Datetime",
+    "string": "Expiration Date",
+    "compute": "_compute_expiration_date",
+    "store": true,
+    "help": "This is the date on which the goods with this Serial Number may become dangerous and must not be consumed.",
+    "defined_in_package": "product_expiry",
+    "full_name": "Expiration Date"
+   },
+   {
+    "name": "removal_date",
+    "type": "Datetime",
+    "string": "Removal Date",
+    "compute": "_compute_removal_date",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "product_expiry",
+    "full_name": "Removal Date"
+   },
+   {
+    "name": "is_expired",
+    "type": "Boolean",
+    "related": "lot_id.product_expiry_alert",
+    "defined_in_package": "product_expiry",
+    "string": "Is Expired",
+    "full_name": "Is Expired"
+   },
+   {
+    "name": "use_expiration_date",
+    "type": "Boolean",
+    "string": "Use Expiration Date",
+    "related": "product_id.use_expiration_date",
+    "defined_in_package": "product_expiry",
+    "full_name": "Use Expiration Date"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_free_reservation_index",
+    "kind": "Index",
+    "definition": "(id, company_id, product_id, lot_id, location_id, owner_id, package_id)\n        WHERE (state IS NULL OR state NOT IN ('cancel', 'done')) AND quantity_product_uom > 0 AND picked IS NOT TRUE",
+    "message": null,
+    "defined_in_package": "stock"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_allowed_uom_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.uom_id",
+         "product_id.uom_ids",
+         "product_id.seller_ids",
+         "product_id.seller_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_id.product_uom",
+         "product_id.uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lots_visible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_id.picking_type_id",
+         "product_id.tracking"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_picked",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_picking_type_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_location_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_id",
+         "move_id.location_id",
+         "move_id.location_dest_id",
+         "picking_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_picking_type_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_quantity",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quant_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_quantity_product_uom",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quantity",
+         "product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_lot_product",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "lot_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "This lot %(lot_name)s is incompatible with this product %(product_name)s",
+        "line": 176
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_positive_quantity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You can not enter negative quantities.",
+        "line": 185
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id",
+         "product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_quant_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "quant_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_serial_number",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "lot_name",
+         "lot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When the user is encoding a move line for a tracked product, we apply some logic to\nhelp him. This includes:\n    - automatically switch `quantity` to 1.0\n    - warn if he has already encoded `lot_name` in another move line\n    - warn (and update if appropriate) if the SN is in a different source location than selected",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "lot_name",
+         "lot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_quantity",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "quantity",
+         "product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When the user is encoding a move line for a tracked product, we apply some logic to\nhelp him. This onchange will warn him if he set `quantity` to a non-supported value.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only process 1.0 %s of products with unique serial number.",
+        "line": 250
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_putaway_location",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "result_package_id",
+         "product_id",
+         "product_uom_id",
+         "quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_apply_putaway_strategy",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_dest_location",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_putaway_additional_qty",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_move_line_quant_match",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "move_id",
+     "dirty_move_line_ids",
+     "dirty_quant_ids"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 82,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 132,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Changing the product is only allowed in 'Draft' state.",
+        "line": 431
+       },
+       {
+        "kind": "UserError",
+        "message": "Changing the Lot/Serial number for move lines with different products is not allowed.",
+        "line": 434
+       },
+       {
+        "kind": "UserError",
+        "message": "Reserving a negative quantity is not allowed.",
+        "line": 475
+       }
+      ]
+     },
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_done_or_cancel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Deleting product moves after the transfer is done?\n\nThat would be like going back in time to revert all operations triggered after this move. Who knows what the end result would be, So let's not do it.\n\nTry changing the “done” quantity to 0 instead.",
+        "line": 566
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_exclude_requiring_lot",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_done",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "This method is called during a move's `action_done`. It'll actually move a quant from\nthe source location to the destination location, and unreserve if needed in the source\nlocation.\n\nThis method is intended to be called on all the move lines of a move. This method is not\nintended to be called when editing a `done` move (that's what the override of `write` here\nis done.",
+      "size_in_lines": 120,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You need to supply a Lot/Serial Number for product:\n%(products)s",
+        "line": 669
+       },
+       {
+        "kind": "UserError",
+        "message": "The quantity done for the product \"%(product)s\" doesn't respect the rounding precision defined on the unit of measure \"%(unit)s\". Please change the quantity done or the rounding precision of your unit of measure.",
+        "line": 621
+       },
+       {
+        "kind": "UserError",
+        "message": "No negative quantities allowed",
+        "line": 645
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_synchronize_quant",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "quantity",
+     "location",
+     "action",
+     "in_date",
+     "**quants_value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "quantity should be express in product's UoM",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_similar_move_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_new_lot_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "product_expiry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_and_assign_production_lot",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Creates and assign new production lots for move lines.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_log_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "record",
+     "move",
+     "template",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_free_reservation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "location_id",
+     "quantity",
+     "lot_id",
+     "package_id",
+     "owner_id",
+     "ml_ids_to_ignore"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "When editing a done move line or validating one with some forced quantities, it is\npossible to impact quants that were not reserved. It is therefore necessary to edit or\nunlink the move lines that reserved a quantity now unavailable.\n\n:param ml_ids_to_ignore: OrderedSet of `stock.move.line` ids that should NOT be unreserved",
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_aggregated_properties",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move_line",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_aggregated_product_quantities",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Returns a dictionary of products (key = id+name+description+uom) and corresponding values of interest.\n\nAllows aggregation of data across separate move lines for the same product. This is expected to be useful\nin things such as delivery reports. Dict key is made as a combination of values we expect to want to group\nthe products by (i.e. so data is not lost). This function purposely ignores lots/SNs because these are\nexpected to already be properly grouped by line.\n\nreturns: dictionary {product_id+name+description+uom: {product, name, description, quantity, product_uom}, ...}",
+      "size_in_lines": 93,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_delivery",
+      "decorators": [],
+      "documentation": "Returns dictionary of products and corresponding values of interest + hs_code\n\nUnfortunately because we are working with aggregated data, we have to loop through the\naggregation to add more values to each datum. This extension adds on the hs_code value.\n\nreturns: dictionary {same_key_as_super: {same_values_as_super, hs_code}, ...}",
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Returns dictionary of products and corresponding values of interest grouped by optional kit_name\n\nRemoves descriptions where description == kit_name. kit_name is expected to be passed as a\nkwargs value because this is not directly stored in move_line_ids. Unfortunately because we\nare working with aggregated data, we have to loop through the aggregation to do this removal.\n\narguments: kit_name (optional): string value of a kit name passed as a kwarg\nreturns: dictionary {same_key_as_super: {same_values_as_super, ...}",
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_price",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_delivery",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quantity",
+         "product_uom_id",
+         "product_id",
+         "move_id.sale_line_id",
+         "move_id.sale_line_id.price_reduce_taxinc",
+         "move_id.sale_line_id.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_package_history_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_stock_move_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_copy_quant_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_reference",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_pre_put_in_pack_hook",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "all_lines",
+     "package_id",
+     "package_type_id",
+     "package_name",
+     "from_package_wizard"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_destinations",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lines_not_entire_pack",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Checks within self for move lines that should no longer be considered as entire packs.\n        ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_put_in_pack",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "package_id",
+     "package_type_id",
+     "package_name"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_put_in_pack_hook",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "package"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_put_in_pack",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "package_id",
+     "package_type_id",
+     "package_name"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lines_and_packages_to_pack",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "picked_first"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Get all move lines & packages that need to be put in a pack.\n\n:param picked_first: If enabled, will prioritize picked move lines over other move lines.\n:return: move_lines_to_pack: All move lines without a pack that can be packed\n:return: packages_to_pack: All packages that can be packed",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot pack products into the same package when they are from different transfers with different operation types",
+        "line": 1164
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_revert_inventory_move_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_revert_inventory",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_linkable_moves",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Don't linke move lines with kit products to moves with dissimilar locations so that\npost `action_explode()` move lines will have accurate location data.",
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_display_put_in_pack_wizard",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "package_id",
+     "package_type_id",
+     "package_name",
+     "from_package_wizard"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_set_package",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_exclude_for_valuation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Determines if this move line should be excluded from valuation based on its ownership.\n:return: True if the move line's owner is different from the company's partner (indicating\n        it should be excluded from valuation), False otherwise.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_stock_move_value",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "old_qty_by_ml"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_consigned_valued_line",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": "return true if the move line would have been considered in the _get_valued_qty() method except for\nthe _should_exclude_for_valuation criteria (.i.e the line would have been valued if it wasn't consigned)",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_show_lot_in_invoice",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_package_carrier_type_for_pack",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot pack products into the same package when they have different carriers (i.e. check that all of their transfers have a carrier assigned and are using the same carrier).",
+        "line": 122
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_open_add_to_wave",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_to_wave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "wave",
+     "description"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": "Detach lines (and corresponding stock move from a picking to another). If wave is\npassed, attach new picking into it. If not attach line to their original picking.\n\n:param int wave: id of the wave picking on which to put the move lines. ",
+      "size_in_lines": 89,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_auto_waveable",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_auto_wave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": "Try to find compatible waves to attach the move lines to, otherwise create new waves when possible/appropriate. ",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_potential_existing_waves_extra_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "domain_list",
+     "picking_type"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": "Extend extra conditions here",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_potential_new_waves_extra_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "domain_list",
+     "picking_type"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": "Extend extra conditions here",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_potential_existing_wave_extra",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "wave"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": "Extend extra conditions here",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_new_potential_line_extra",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "potential_line"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": "Extend extra conditions here",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_auto_wave_lines_into_existing_waves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "nearest_parent_locations"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": "Try to add move lines to existing waves if possible, return move lines of which no appropriate waves were found to link to\n:param nearest_parent_locations (defaultdict): the key is the move line and the value is the nearest parent location in the wave locations list",
+      "size_in_lines": 93,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_auto_wave_lines_into_new_waves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "nearest_parent_locations"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": "Create new waves for the move lines that could not be added to existing waves. ",
+      "size_in_lines": 113,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_auto_wave_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "nearest_parent_location"
+    ],
+    "definitions": [
+     {
+      "package": "stock_picking_batch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_auto_init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product_expiry",
+      "decorators": [],
+      "documentation": "Create column for 'expiration_date' here to avoid MemoryError when letting\nthe ORM compute it after module installation. Since both 'lot_id.expiration_date'\nand 'product_id.use_expiration_date' are new fields introduced in this module,\nthere is no need for an UPDATE statement here.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_expiration_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "lot_id.expiration_date",
+         "picking_id.scheduled_date",
+         "quant_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_removal_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "expiration_date",
+         "lot_id.removal_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_lot_product",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "This lot %(lot_name)s is incompatible with this product %(product_name)s"
+   },
+   {
+    "operation": "_check_positive_quantity",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "You can not enter negative quantities."
+   },
+   {
+    "operation": "_onchange_quantity",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You can only process 1.0 %s of products with unique serial number."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Changing the product is only allowed in 'Draft' state."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Changing the Lot/Serial number for move lines with different products is not allowed."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Reserving a negative quantity is not allowed."
+   },
+   {
+    "operation": "_unlink_except_done_or_cancel",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Deleting product moves after the transfer is done?\n\nThat would be like going back in time to revert all operations triggered after this move. Who knows what the end result would be, So let's not do it.\n\nTry changing the “done” quantity to 0 instead."
+   },
+   {
+    "operation": "_action_done",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You need to supply a Lot/Serial Number for product:\n%(products)s"
+   },
+   {
+    "operation": "_action_done",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "The quantity done for the product \"%(product)s\" doesn't respect the rounding precision defined on the unit of measure \"%(unit)s\". Please change the quantity done or the rounding precision of your unit of measure."
+   },
+   {
+    "operation": "_action_done",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "No negative quantities allowed"
+   },
+   {
+    "operation": "_get_lines_and_packages_to_pack",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You cannot pack products into the same package when they are from different transfers with different operation types"
+   },
+   {
+    "operation": "_get_package_carrier_type_for_pack",
+    "package": "stock_delivery",
+    "kind": "UserError",
+    "message": "You cannot pack products into the same package when they have different carriers (i.e. check that all of their transfers have a carrier assigned and are using the same carrier)."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mrp_subcontracting.access_subcontracting_portal_stock_move_line",
+    "package": "mrp_subcontracting",
+    "name": "subcontracting.portal.move.line",
+    "entity": "stock.move.line",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "stock.access_stock_move_line_manager",
+    "package": "stock",
+    "name": "stock.move.line manager",
+    "entity": "stock.move.line",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "stock.access_stock_move_line_user",
+    "package": "stock",
+    "name": "stock.move.line user",
+    "entity": "stock.move.line",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "stock.access_stock_move_line_all",
+    "package": "stock",
+    "name": "stock.move.line all users",
+    "entity": "stock.move.line",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mrp_subcontracting.stock_move_line_subcontractor_rule",
+    "package": "mrp_subcontracting",
+    "name": "Stock Move Lines Subcontractor",
+    "entity": "stock.move.line",
+    "domain": "[\n        '|', \n            '|',\n                ('move_id.production_id.subcontractor_id', '=', user.partner_id.commercial_partner_id.id),\n                ('move_id.move_orig_ids.production_id.subcontractor_id', 'in', user.partner_id.commercial_partner_id.ids),\n            ('move_id.raw_material_production_id.subcontractor_id', 'in', user.partner_id.commercial_partner_id.ids),\n        ]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mrp.view_stock_move_line_operation_tree_finished",
+    "package": "mrp",
+    "name": "stock.move.line.operation.list.finished",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_move_line_operation_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lot_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lot_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.stock_move_line_view_search",
+    "package": "mrp",
+    "name": "stock.move.line.search",
+    "view_type": "filter",
+    "inherits_view": "stock.stock_move_line_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "filter",
+     "root_attributes": {
+      "name": "manufacturing",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "manufacturing",
+       "position": "attributes"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp.view_move_line_tree",
+    "package": "mrp",
+    "name": "stock.move.line.list",
+    "view_type": "field",
+    "inherits_view": "stock.view_move_line_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "reference",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "reference",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp_subcontracting.mrp_subcontracting_stock_move_line_tree_view",
+    "package": "mrp_subcontracting",
+    "name": "mrp.subcontracting.stock.move.line.list.view",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "bottom"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "owner_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "tracking",
+       "column_invisible": "True"
+      },
+      {
+       "name": "package_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "result_package_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_dest_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_id",
+       "required": "1",
+       "domain": "[('id', 'in', context.get('bom_product_ids'))] if context.get('is_subcontracting_portal') else []"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "tracking not in ('serial', 'lot')",
+       "required": "tracking in ('serial', 'lot')",
+       "context": "{'default_product_id': product_id}",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "groups": "uom.group_uom"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mrp_subcontracting.mrp_subcontracting_portal_stock_move_line_tree_view",
+    "package": "mrp_subcontracting",
+    "name": "mrp.subcontracting.portal.stock.move.line.list.view",
+    "view_type": "xpath",
+    "inherits_view": "mrp_subcontracting_stock_move_line_tree_view",
+    "mode": "primary",
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lot_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lot_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp_subcontracting.mrp_subcontracting_view_stock_move_line_operation_tree",
+    "package": "mrp_subcontracting",
+    "name": "mrp.subcontracting.stock.move.line.operations.list",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_move_line_operation_tree",
+    "mode": "primary",
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lot_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lot_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.view_stock_move_line_operation_tree_expiry",
+    "package": "product_expiry",
+    "name": "stock.move.line.inherit.list",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_move_line_operation_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lot_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "is_expired",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lot_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.view_stock_move_line_detailed_operation_tree_expiry",
+    "package": "product_expiry",
+    "name": "stock.move.line.operations.inherit.list",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_move_line_detailed_operation_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lot_name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "picking_type_use_existing_lots",
+       "column_invisible": "True"
+      },
+      {
+       "name": "tracking",
+       "column_invisible": "True"
+      },
+      {
+       "name": "expiration_date",
+       "invisible": "tracking == 'none'",
+       "readonly": "picking_type_use_existing_lots",
+       "decoration-danger": "is_expired if state == 'done' else expiration_date < context_today().strftime('%Y-%m-%d')",
+       "decoration-bf": "is_expired if state == 'done' else expiration_date < context_today().strftime('%Y-%m-%d')",
+       "force_save": "1"
+      },
+      {
+       "name": "removal_date",
+       "invisible": "tracking == 'none'",
+       "readonly": "1",
+       "decoration-danger": "removal_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+       "decoration-bf": "removal_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+       "force_save": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lot_name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_move_line_tree",
+    "package": "stock",
+    "name": "stock.move.line.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Move Lines",
+      "create": "0",
+      "default_order": "id desc",
+      "action": "action_open_reference",
+      "type": "object",
+      "duplicate": "0"
+     },
+     "fields": [
+      {
+       "name": "location_usage",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_dest_usage",
+       "column_invisible": "True"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "reference",
+       "string": "Reference",
+       "column_invisible": "context.get('no_reference', False)",
+       "decoration-danger": "scrap_id",
+       "decoration-warning": "is_inventory",
+       "decoration-success": "picking_code == 'incoming'",
+       "decoration-info": "picking_code == 'outgoing'",
+       "decoration-muted": "1"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "lot_id",
+       "optional": "show",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "package_id",
+       "optional": "hide",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "result_package_id",
+       "optional": "hide",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "location_id",
+       "decoration-muted": "location_usage not in ('internal', 'transit')"
+      },
+      {
+       "name": "location_dest_id",
+       "decoration-muted": "location_dest_usage not in ('internal', 'transit')"
+      },
+      {
+       "name": "picking_partner_id",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide",
+       "groups": "base.group_multi_company",
+       "force_save": "1"
+      },
+      {
+       "name": "quantity",
+       "string": "Quantity",
+       "decoration-danger": "(location_usage in ('internal','transit')) and (location_dest_usage not in ('internal','transit'))",
+       "decoration-success": "(location_usage not in ('internal','transit')) and (location_dest_usage in ('internal','transit'))"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "optional": "show",
+       "decoration-danger": "state=='cancel'",
+       "decoration-warning": "state not in ('draft','cancel','done','assigned')",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state== 'assigned'",
+       "decoration-muted": "state == 'draft'"
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user",
+       "string": "Done By",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1,
+      "badge": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "stock.view_move_line_tree_detailed",
+    "package": "stock",
+    "name": "stock.move.line.list.detailed",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "25",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Move Lines",
+      "create": "0",
+      "default_order": "date",
+      "action": "action_open_reference",
+      "type": "object"
+     },
+     "fields": [
+      {
+       "name": "scheduled_date"
+      },
+      {
+       "name": "picking_id"
+      },
+      {
+       "name": "picking_partner_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "lot_id",
+       "optional": "hide",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "location_id",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "location_dest_id",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "package_id",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "quantity",
+       "string": "Quantity",
+       "optional": "show"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "options": "{'no_open': True, 'no_create': True}",
+       "optional": "show",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide",
+       "groups": "base.group_multi_company",
+       "force_save": "1"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "optional": "show",
+       "decoration-danger": "state=='cancel'",
+       "decoration-warning": "state not in ('draft','cancel','done','assigned')",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state== 'assigned'",
+       "decoration-muted": "state == 'draft'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "stock.view_move_line_form",
+    "package": "stock",
+    "name": "stock.move.line.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Move Lines",
+      "create": "0",
+      "edit": "0"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "picking_id",
+       "invisible": "1"
+      },
+      {
+       "name": "location_id",
+       "invisible": "1"
+      },
+      {
+       "name": "location_dest_id",
+       "invisible": "1"
+      },
+      {
+       "name": "package_id",
+       "invisible": "1"
+      },
+      {
+       "name": "tracking",
+       "invisible": "1"
+      },
+      {
+       "name": "picked",
+       "invisible": "1"
+      },
+      {
+       "name": "date",
+       "readonly": "1"
+      },
+      {
+       "name": "reference",
+       "string": "Reference"
+      },
+      {
+       "name": "origin"
+      },
+      {
+       "name": "product_id",
+       "readonly": "context.get('default_product_id')"
+      },
+      {
+       "name": "location_id",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "location_dest_id",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "options": "{'no_create': True}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "tracking == 'none' or not lot_id and lot_name",
+       "context": "{'default_product_id': product_id, 'active_picking_id': picking_id}",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "lot_name",
+       "invisible": "tracking == 'none' or lot_id or not lot_name",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "package_id",
+       "string": "Source Package",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "result_package_id",
+       "string": "Destination Package",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "string": "Owner",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user",
+       "string": "Done By",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "many2one_uom": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,confirmed,partially_available,assigned,done",
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_move_line_mobile_form",
+    "package": "stock",
+    "name": "stock.move.line.mobile.form",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_move_line_form",
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.stock_move_line_view_search",
+    "package": "stock",
+    "name": "stock.move.line.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Stock Moves"
+     },
+     "fields": [
+      {
+       "name": "location_id",
+       "string": "Location",
+       "filter_domain": "['|',('location_id', 'ilike', self),('location_dest_id', 'ilike', self)]",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "picking_id",
+       "string": "Transfer"
+      },
+      {
+       "name": "reference",
+       "string": "Reference"
+      },
+      {
+       "name": "product_category_name",
+       "string": "Category"
+      },
+      {
+       "name": "lot_id",
+       "string": "Lot/Serial Number",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "package_id",
+       "string": "Source Package",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "result_package_id",
+       "string": "Destination Package",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "string": "Owner",
+       "groups": "stock.group_tracking_owner"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "todo",
+       "string": "To Do",
+       "domain": "[('state', 'not in', ['done', 'draft', 'cancel'])]"
+      },
+      {
+       "name": "done",
+       "string": "Done",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "incoming",
+       "string": "Incoming",
+       "domain": "[('picking_id.picking_type_id.code', '=', 'incoming')]"
+      },
+      {
+       "name": "outgoing",
+       "string": "Outgoing",
+       "domain": "[('picking_id.picking_type_id.code', '=', 'outgoing')]"
+      },
+      {
+       "name": "internal",
+       "string": "Internal",
+       "domain": "[('picking_id.picking_type_id.code', '=', 'internal')]"
+      },
+      {
+       "name": "manufacturing",
+       "string": "Manufacturing",
+       "domain": "[('picking_id.picking_type_id.code', '=', 'mrp_operation')]",
+       "invisible": "1"
+      },
+      {
+       "name": "date",
+       "date": "date",
+       "default_period": "month"
+      },
+      {
+       "name": "filter_last_30_days",
+       "string": "Last 30 Days",
+       "domain": "[('date','>=', 'today -30d')]"
+      },
+      {
+       "name": "filter_last_3_months",
+       "string": "Last 3 Months",
+       "domain": "[('date','>=', 'today -3m')]"
+      },
+      {
+       "name": "filter_last_12_months",
+       "string": "Last 12 Months",
+       "domain": "[('date','>=', 'today -12m')]"
+      },
+      {
+       "name": "inventory",
+       "string": "Inventory Adjustments",
+       "domain": "[('is_inventory', '=', True)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_product_id",
+       "string": "Product",
+       "domain": "[]",
+       "context": "{'group_by': 'product_id'}"
+      },
+      {
+       "name": "by_state",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "by_date",
+       "string": "Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date'}"
+      },
+      {
+       "name": "by_picking",
+       "string": "Transfers",
+       "domain": "[]",
+       "context": "{'group_by': 'picking_id'}"
+      },
+      {
+       "name": "by_location",
+       "string": "Location",
+       "domain": "[]",
+       "context": "{'group_by': 'location_id'}"
+      },
+      {
+       "name": "by_category",
+       "string": "Category",
+       "domain": "[]",
+       "context": "{'group_by': 'product_category_name'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_move_line_kanban",
+    "package": "stock",
+    "name": "stock.move.line.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "quant_id",
+       "invisible": "1"
+      },
+      {
+       "name": "reference"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "location_dest_id"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "not lot_id and lot_name"
+      },
+      {
+       "name": "lot_name",
+       "invisible": "lot_id or not lot_name"
+      },
+      {
+       "name": "quantity",
+       "string": "Quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "options": "{'classes': {'draft': 'default', 'cancel': 'danger', 'waiting': 'warning', 'confirmed': 'warning', 'done': 'success'}}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1,
+      "label_selection": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_move_line_pivot",
+    "package": "stock",
+    "name": "stock.move.line.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Moves History"
+     },
+     "fields": [
+      {
+       "name": "product_category_name"
+      },
+      {
+       "name": "date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "product_category_name",
+       "type": "col"
+      },
+      {
+       "name": "date",
+       "interval": "month",
+       "type": "row"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_move_line_operation_tree",
+    "package": "stock",
+    "name": "stock.move.line.operations.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "bottom",
+      "decoration-muted": "state == 'done' and is_locked == True",
+      "default_order": "result_package_id desc, location_id asc, location_dest_id asc, picking_id asc, id"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True",
+       "force_save": "1"
+      },
+      {
+       "name": "picking_id",
+       "column_invisible": "True",
+       "force_save": "1"
+      },
+      {
+       "name": "move_id",
+       "column_invisible": "True",
+       "force_save": "1"
+      },
+      {
+       "name": "product_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_dest_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "package_id",
+       "context": "{'show_src_package': 1}",
+       "column_invisible": "True"
+      },
+      {
+       "name": "result_package_id",
+       "context": "{'show_dest_package': 1}",
+       "column_invisible": "True"
+      },
+      {
+       "name": "tracking",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picking_type_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "quant_id",
+       "widget": "pick_from",
+       "domain": "[('product_id', '=', product_id), ('location_id', 'child_of', parent.location_id)]",
+       "context": "{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': True, 'show_src_package': 1}",
+       "options": "{'no_create': True, 'no_open': True}",
+       "column_invisible": "not parent.show_quant"
+      },
+      {
+       "name": "lot_id",
+       "domain": "[('product_id', '=', parent.product_id), '|', ('company_id', '=', company_id), ('company_id', '=', False)]",
+       "context": "{                             'active_picking_id': picking_id,                             'default_product_id': parent.product_id,                         }",
+       "column_invisible": "parent.show_quant or parent.has_tracking == 'none' or not parent.show_lots_m2o",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "lot_name",
+       "string": "Lot/Serial Number",
+       "column_invisible": "parent.has_tracking == 'none' or not parent.show_lots_text",
+       "groups": "stock.group_production_lot",
+       "placeholder": "e.g. SN000001"
+      },
+      {
+       "name": "location_dest_id",
+       "string": "Store To",
+       "domain": "[('id', 'child_of', parent.location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]",
+       "column_invisible": "parent.show_quant and parent.picking_code != 'internal'",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "package_id",
+       "readonly": "state == 'done' and is_locked",
+       "column_invisible": "1",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "result_package_id",
+       "widget": "package_m2o",
+       "readonly": "state == 'done' and is_locked",
+       "context": "{'picking_id': picking_id, 'show_dest_package': 1}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "column_invisible": "parent.show_quant",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_locked",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picking_code",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picked",
+       "column_invisible": "True"
+      },
+      {
+       "name": "quantity",
+       "readonly": "state == 'done' and is_locked",
+       "string": "Quantity",
+       "sum": "Quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "state == 'done' and id",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "uom.group_uom"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "pick_from": 1,
+      "package_m2o": 1,
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "state == 'done' and is_locked == True"
+     }
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_move_line_detailed_operation_tree",
+    "package": "stock",
+    "name": "stock.move.line.operations.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "bottom",
+      "decoration-muted": "(state == 'done' and is_locked == True)",
+      "multi_edit": "1",
+      "default_order": "result_package_id desc, location_id asc, location_dest_id asc, picking_id asc, id"
+     },
+     "fields": [
+      {
+       "name": "product_id",
+       "readonly": "state == 'done' or move_id",
+       "required": "1",
+       "context": "{'default_is_storable': True}"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "move_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picking_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picking_code",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picking_location_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picking_location_dest_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_dest_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "package_id",
+       "context": "{'show_src_package': 1}",
+       "column_invisible": "True"
+      },
+      {
+       "name": "quant_id",
+       "widget": "pick_from",
+       "readonly": "state in ('done', 'cancel') and is_locked",
+       "domain": "[('product_id', '=', product_id), ('location_id', 'child_of', picking_location_id)]",
+       "context": "{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree_simple', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': False, 'show_src_package': 1}",
+       "options": "{'no_open': True}",
+       "column_invisible": "context.get('picking_code') == 'incoming'"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "not lots_visible",
+       "readonly": "state in ('done', 'cancel') and is_locked",
+       "context": "{'default_product_id': product_id, 'active_picking_id': picking_id}",
+       "column_invisible": "context.get('picking_code') != 'incoming' or context.get('show_lots_text')",
+       "optional": "show",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "lot_name",
+       "invisible": "not lots_visible",
+       "readonly": "state in ('done', 'cancel') and is_locked",
+       "context": "{'default_product_id': product_id}",
+       "column_invisible": "context.get('picking_code') != 'incoming' or not context.get('show_lots_text')",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "location_dest_id",
+       "readonly": "state in ('done', 'cancel') and is_locked",
+       "domain": "[('id', 'child_of', picking_location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]",
+       "options": "{'no_create': True}",
+       "column_invisible": "context.get('picking_code') == 'outgoing'",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "result_package_id",
+       "widget": "package_m2o",
+       "readonly": "state in ('done', 'cancel') and is_locked",
+       "context": "{'show_dest_package': 1}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "lots_visible",
+       "column_invisible": "True"
+      },
+      {
+       "name": "owner_id",
+       "readonly": "state in ('done', 'cancel') and is_locked",
+       "column_invisible": "context.get('picking_code') == 'incoming'",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_locked",
+       "column_invisible": "True"
+      },
+      {
+       "name": "quantity",
+       "readonly": "state in ('done', 'cancel') and is_locked",
+       "force_save": "1"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "state != 'draft' and id",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_put_in_pack",
+       "string": "Put in Pack",
+       "type": "object",
+       "class": "btn-primary",
+       "context": "{'force_move_lines': 1}",
+       "groups": "stock.group_tracking_lot"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "pick_from": 1,
+      "package_m2o": 1,
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "(state == 'done' and is_locked == True)"
+     }
+    }
+   },
+   {
+    "external_identifier": "stock_delivery.view_move_line_tree_detailed_delivery",
+    "package": "stock_delivery",
+    "name": "stock.move.line.list.detailed",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_move_line_tree_detailed",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='picking_partner_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "destination_country_code",
+       "optional": "hide"
+      },
+      {
+       "name": "carrier_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='picking_partner_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_delivery.stock_move_line_view_search_delivery",
+    "package": "stock_delivery",
+    "name": "stock.move.line.search.delivery",
+    "view_type": "xpath",
+    "inherits_view": "stock.stock_move_line_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='owner_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "carrier_id",
+       "invisible": "1",
+       "string": "Carrier name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='owner_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_picking_batch.view_move_line_tree",
+    "package": "stock_picking_batch",
+    "name": "stock_picking_batch.move.line.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "top",
+      "decoration-muted": "state == 'cancel'",
+      "string": "Move Lines",
+      "default_order": "location_id"
+     },
+     "fields": [
+      {
+       "name": "tracking",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_id",
+       "readonly": "id",
+       "required": "1",
+       "context": "{'default_is_storable': True}"
+      },
+      {
+       "name": "picking_id",
+       "readonly": "id",
+       "required": "1",
+       "domain": "[('id', 'in', context.get('picking_ids', []))]",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "lot_id",
+       "readonly": "tracking not in ['lot', 'serial']",
+       "column_invisible": "context.get('picking_code') != 'incoming' or context.get('show_lots_text')",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "lot_name",
+       "readonly": "tracking not in ['lot', 'serial']",
+       "string": "Lot/Serial Number",
+       "column_invisible": "context.get('picking_code') != 'incoming' or not context.get('show_lots_text')",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "package_id",
+       "context": "{'show_src_package': 1}",
+       "column_invisible": "True",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "quant_id",
+       "widget": "pick_from",
+       "readonly": "state in ('done', 'cancel') and is_locked",
+       "domain": "[('product_id', '=', product_id), ('location_id', 'child_of', picking_location_id)]",
+       "context": "{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree_simple', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': False, 'show_src_package': 1}",
+       "options": "{'no_open': True}",
+       "column_invisible": "context.get('picking_code') == 'incoming'"
+      },
+      {
+       "name": "location_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_dest_id"
+      },
+      {
+       "name": "result_package_id",
+       "widget": "package_m2o",
+       "context": "{'show_dest_package': 1}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "1",
+       "options": "{'no_create': True}",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company",
+       "force_save": "1"
+      },
+      {
+       "name": "is_locked",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picking_location_id",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_put_in_pack",
+       "string": "Put in Pack",
+       "type": "object",
+       "class": "btn-primary",
+       "groups": "stock.group_tracking_lot"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "pick_from": 1,
+      "package_m2o": 1,
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "state == 'cancel'"
+     }
+    }
+   },
+   {
+    "external_identifier": "stock_picking_batch.view_move_line_tree_inherit_stock_picking_batch",
+    "package": "stock_picking_batch",
+    "name": "stock.move.line.list.stock_picking_batch",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_move_line_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='state']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "batch_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='state']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_picking_batch.stock_move_line_view_search_inherit_stock_picking_batch",
+    "package": "stock_picking_batch",
+    "name": "stock.move.line.search.stock_picking_batch",
+    "view_type": "xpath",
+    "inherits_view": "stock.stock_move_line_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='groupby']",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "by_batch_id",
+       "string": "Batch Transfer",
+       "context": "{'group_by': 'batch_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='groupby']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_picking_batch.view_move_line_tree_detailed_wave",
+    "package": "stock_picking_batch",
+    "name": "stock_picking_wave.move.line.list.wave",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_move_line_tree_detailed",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_open_add_to_wave",
+       "string": "Add to Wave",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mrp.action_mrp_production_moves",
+    "package": "mrp",
+    "name": "Inventory Moves",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('move_id.raw_material_production_id', '=', active_id), ('move_id.production_id', '=', active_id)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "stock.move.line"
+   },
+   {
+    "external_identifier": "mrp.action_mrp_unbuild_moves",
+    "package": "mrp",
+    "name": "Stock Moves",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('move_id.unbuild_id', '=', active_id), ('move_id.consume_unbuild_id', '=', active_id)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                There's no product move yet\n            </p><p>\n                This menu gives you the full traceability of inventory operations on a specific product.\n                You can filter on the product to see all the past movements for the product.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "stock.move.line"
+   },
+   {
+    "external_identifier": "repair.action_repair_move_lines",
+    "package": "repair",
+    "name": "Inventory Moves",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('move_id.repair_id', '=', active_id)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "stock.move.line"
+   },
+   {
+    "external_identifier": "stock.stock_move_line_action",
+    "package": "stock",
+    "name": "Moves History",
+    "view_mode": "list,kanban,pivot,form",
+    "view_id": "view_move_line_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_done': 1, 'create': 0, 'pivot_measures': ['quantity_product_uom', '__count__']}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_empty_folder\">\n                    There's no product move yet\n                </p><p>\n                    This menu gives you the full traceability of inventory operations on a specific product.\n                    You can filter on the product to see all the past movements for the product.\n                </p>\n            </field>\n    ",
+    "usage": null,
+    "entity": "stock.move.line"
+   },
+   {
+    "external_identifier": "stock.action_get_picking_type_operations",
+    "package": "stock",
+    "name": "Operations",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "stock_move_line_view_search",
+    "domain": "[('picking_type_id', '=', active_id), ('picking_id', '!=', False)]",
+    "context": "{\n                'search_default_todo': '1',\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    No operations found. Let's create a transfer!\n                </p>\n                <p>\n                    Transfers allow you to move products from one location to another.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "stock.move.line"
+   },
+   {
+    "external_identifier": "stock_picking_batch.action_prepare_wave_for_picking_type",
+    "package": "stock_picking_batch",
+    "name": "Prepare Wave",
+    "view_mode": "list",
+    "view_id": "view_move_line_tree_detailed_wave",
+    "search_view_id": null,
+    "domain": "[('state', '!=', 'done'), ('picking_type_id', '=', active_id), ('picking_id', '!=', False)]",
+    "context": "{'active_wave_id': False, 'search_default_by_location': True}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "stock.move.line"
+   },
+   {
+    "external_identifier": "stock_picking_batch.action_prepare_wave",
+    "package": "stock_picking_batch",
+    "name": "Prepare Wave",
+    "view_mode": "list",
+    "view_id": "view_move_line_tree_detailed_wave",
+    "search_view_id": null,
+    "domain": "[('state', '!=', 'done'), ('picking_id', '!=', False)]",
+    "context": "{'active_wave_id': False, 'search_default_by_location': True}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "stock.move.line"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "stock.action_revert_inventory_adjustment",
+    "package": "stock",
+    "name": "Revert Inventory Adjustment",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

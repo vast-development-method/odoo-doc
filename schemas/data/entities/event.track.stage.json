@@ -1,0 +1,461 @@
+{
+ "catalog": {
+  "name": "entity:event.track.stage",
+  "description": "Complete definition of entity Event Track Stage (event.track.stage).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.track.stage",
+  "storage_name": "event_track_stage",
+  "full_name": "Event Track Stage",
+  "kind": "persistent",
+  "description": "Event Track Stage",
+  "defined_by_package": "website_event_track",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Stage Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Stage Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 1,
+    "defined_in_package": "website_event_track",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "mail_template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "string": "Email Template",
+    "domain": [
+     [
+      "model",
+      "=",
+      "event.track"
+     ]
+    ],
+    "help": "If set an email will be sent to the customer when the track reaches this step.",
+    "defined_in_package": "website_event_track",
+    "full_name": "Email Template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "defined_in_package": "website_event_track",
+    "full_name": "Color"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Description",
+    "translate": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Description"
+   },
+   {
+    "name": "legend_blocked",
+    "type": "Char",
+    "string": "Red Kanban Label",
+    "default": {
+     "dynamic": "lambda s: s.env._('Blocked')"
+    },
+    "translate": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Red Kanban Label"
+   },
+   {
+    "name": "legend_done",
+    "type": "Char",
+    "string": "Green Kanban Label",
+    "default": {
+     "dynamic": "lambda s: s.env._('Ready for Next Stage')"
+    },
+    "translate": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Green Kanban Label"
+   },
+   {
+    "name": "legend_normal",
+    "type": "Char",
+    "string": "Grey Kanban Label",
+    "default": {
+     "dynamic": "lambda s: s.env._('In Progress')"
+    },
+    "translate": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Grey Kanban Label"
+   },
+   {
+    "name": "fold",
+    "type": "Boolean",
+    "string": "Folded in Kanban",
+    "help": "This stage is folded in the kanban view when there are no records in that stage to display.",
+    "defined_in_package": "website_event_track",
+    "full_name": "Folded in Kanban"
+   },
+   {
+    "name": "is_visible_in_agenda",
+    "type": "Boolean",
+    "string": "Visible in agenda",
+    "compute": "_compute_is_visible_in_agenda",
+    "store": true,
+    "help": "If checked, the related tracks will be visible in the frontend.",
+    "defined_in_package": "website_event_track",
+    "full_name": "Visible in agenda"
+   },
+   {
+    "name": "is_fully_accessible",
+    "type": "Boolean",
+    "string": "Fully accessible",
+    "compute": "_compute_is_fully_accessible",
+    "store": true,
+    "help": "If checked, automatically publish tracks so that access links to customers are provided.",
+    "defined_in_package": "website_event_track",
+    "full_name": "Fully accessible"
+   },
+   {
+    "name": "is_cancel",
+    "type": "Boolean",
+    "string": "Cancelled Stage",
+    "defined_in_package": "website_event_track",
+    "full_name": "Cancelled Stage"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_is_visible_in_agenda",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_cancel",
+         "is_fully_accessible"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_fully_accessible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_cancel",
+         "is_visible_in_agenda"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_event_track.access_event_track_stage_public",
+    "package": "website_event_track",
+    "name": "event.track.stage",
+    "entity": "event.track.stage",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_track.access_event_track_stage_portal",
+    "package": "website_event_track",
+    "name": "event.track.stage",
+    "entity": "event.track.stage",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_track.access_event_track_stage_employee",
+    "package": "website_event_track",
+    "name": "event.track.stage",
+    "entity": "event.track.stage",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_track.access_event_track_stage_manager",
+    "package": "website_event_track",
+    "name": "event.track.stage.manager",
+    "entity": "event.track.stage",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "website_event_track.event_track_stage_view_search",
+    "package": "website_event_track",
+    "name": "event.track.stage.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Track Stage"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Track Stages"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_track.event_track_stage_view_form",
+    "package": "website_event_track",
+    "name": "event.track.stage.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Track Stage"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "mail_template_id"
+      },
+      {
+       "name": "is_visible_in_agenda",
+       "readonly": "is_cancel"
+      },
+      {
+       "name": "is_fully_accessible",
+       "readonly": "is_cancel"
+      },
+      {
+       "name": "is_cancel"
+      },
+      {
+       "name": "fold"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "legend_normal",
+       "nolabel": "1"
+      },
+      {
+       "name": "legend_blocked",
+       "nolabel": "1"
+      },
+      {
+       "name": "legend_done",
+       "nolabel": "1"
+      },
+      {
+       "name": "description",
+       "nolabel": "1",
+       "placeholder": "Add a description..."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_event_track.event_track_stage_view_tree",
+    "package": "website_event_track",
+    "name": "event.track.stage.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Track Stage"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle",
+       "groups": "event.group_event_manager"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "is_visible_in_agenda"
+      },
+      {
+       "name": "is_fully_accessible"
+      },
+      {
+       "name": "is_cancel"
+      },
+      {
+       "name": "fold"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_event_track.view_event_track_stage_kanban",
+    "package": "website_event_track",
+    "name": "event.track.stage.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_event_track.event_track_stage_action",
+    "package": "website_event_track",
+    "name": "Track Stages",
+    "view_mode": "list,kanban,form",
+    "view_id": "event_track_stage_view_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Add a new stage in the task pipeline\n          </p><p>\n            Define the steps that will be used in the event from the\n            creation of the track, up to the closing of the track.\n            You will use these stages in order to track the progress in\n            solving an event track.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.track.stage"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,835 @@
+{
+ "catalog": {
+  "name": "entity:sale.order.template",
+  "description": "Complete definition of entity Quotation Template (sale.order.template).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sale.order.template",
+  "storage_name": "sale_order_template",
+  "full_name": "Quotation Template",
+  "kind": "persistent",
+  "description": "Quotation Template",
+  "defined_by_package": "sale_management",
+  "extended_by_packages": [
+   "sale_pdf_quote_builder"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "help": "If unchecked, it will allow you to hide the quotation template without removing it.",
+    "defined_in_package": "sale_management",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "sale_management",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Quotation Template",
+    "required": true,
+    "defined_in_package": "sale_management",
+    "full_name": "Quotation Template"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Terms and conditions",
+    "translate": true,
+    "defined_in_package": "sale_management",
+    "full_name": "Terms and conditions"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "sale_management",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "mail_template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "string": "Confirmation Mail",
+    "domain": [
+     [
+      "model",
+      "=",
+      "sale.order"
+     ]
+    ],
+    "help": "This e-mail template will be sent on confirmation. Leave empty to send nothing.",
+    "defined_in_package": "sale_management",
+    "full_name": "Confirmation Mail",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "number_of_days",
+    "type": "Integer",
+    "string": "Quotation Duration",
+    "help": "Number of days for the validity date computation of the quotation",
+    "defined_in_package": "sale_management",
+    "full_name": "Quotation Duration"
+   },
+   {
+    "name": "require_signature",
+    "type": "Boolean",
+    "string": "Online Signature",
+    "compute": "_compute_require_signature",
+    "store": true,
+    "readonly": false,
+    "help": "Request a online signature to the customer in order to confirm orders automatically.",
+    "defined_in_package": "sale_management",
+    "full_name": "Online Signature"
+   },
+   {
+    "name": "require_payment",
+    "type": "Boolean",
+    "string": "Online Payment",
+    "compute": "_compute_require_payment",
+    "store": true,
+    "readonly": false,
+    "help": "Request an online payment to the customer in order to confirm orders automatically.",
+    "defined_in_package": "sale_management",
+    "full_name": "Online Payment"
+   },
+   {
+    "name": "prepayment_percent",
+    "type": "Float",
+    "string": "Prepayment percentage",
+    "compute": "_compute_prepayment_percent",
+    "store": true,
+    "readonly": false,
+    "help": "The percentage of the amount needed to be paid to confirm quotations.",
+    "defined_in_package": "sale_management",
+    "full_name": "Prepayment percentage"
+   },
+   {
+    "name": "sale_order_template_line_ids",
+    "type": "One2many",
+    "comodel": "sale.order.template.line",
+    "inverse_name": "sale_order_template_id",
+    "string": "Lines",
+    "copy": true,
+    "defined_in_package": "sale_management",
+    "full_name": "Lines",
+    "target_entity": "sale.order.template.line"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Invoicing Journal",
+    "domain": [
+     [
+      "type",
+      "=",
+      "sale"
+     ]
+    ],
+    "company_dependent": true,
+    "check_company": true,
+    "help": "If set, SO with this template will invoice in this journal; otherwise the sales journal with the lowest sequence is used.",
+    "defined_in_package": "sale_management",
+    "full_name": "Invoicing Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "quotation_document_ids",
+    "type": "Many2many",
+    "string": "Headers and footers",
+    "comodel": "quotation.document",
+    "relation": "header_footer_quotation_template_rel",
+    "check_company": true,
+    "defined_in_package": "sale_pdf_quote_builder",
+    "full_name": "Headers and footers",
+    "target_entity": "quotation.document"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_require_signature",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_require_payment",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_prepayment_percent",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "require_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_prepayment_percent",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "prepayment_percent"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_company_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id",
+         "sale_order_template_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Your template cannot contain products from specific companies if it's shared between companies. Please restrict the template access, or remove those products.",
+        "line": 96
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Your template belongs to company %(template_company)s but contains products from company (%(product_company)s) that are not accessible to %(template_company)s.\nPlease change the company of your template or remove the products from other companies.",
+        "line": 117
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Your template belongs to company %(template_company)s but contains products from other companies (%(product_company)s) that are not accessible to %(template_company)s.\nPlease change the company of your template or remove the products from other companies.",
+        "line": 108
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_prepayment_percent",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "prepayment_percent"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Prepayment percentage must be a valid percentage.",
+        "line": 130
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_product_translations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_demo_configure_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_company_id",
+    "package": "sale_management",
+    "kind": "ValidationError",
+    "message": "Your template cannot contain products from specific companies if it's shared between companies. Please restrict the template access, or remove those products."
+   },
+   {
+    "operation": "_check_company_id",
+    "package": "sale_management",
+    "kind": "ValidationError",
+    "message": "Your template belongs to company %(template_company)s but contains products from company (%(product_company)s) that are not accessible to %(template_company)s.\nPlease change the company of your template or remove the products from other companies."
+   },
+   {
+    "operation": "_check_company_id",
+    "package": "sale_management",
+    "kind": "ValidationError",
+    "message": "Your template belongs to company %(template_company)s but contains products from other companies (%(product_company)s) that are not accessible to %(template_company)s.\nPlease change the company of your template or remove the products from other companies."
+   },
+   {
+    "operation": "_check_prepayment_percent",
+    "package": "sale_management",
+    "kind": "ValidationError",
+    "message": "Prepayment percentage must be a valid percentage."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "sale_management.access_sale_order_template",
+    "package": "sale_management",
+    "name": "sale.order.template",
+    "entity": "sale.order.template",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_management.access_sale_order_template_manager",
+    "package": "sale_management",
+    "name": "sale.order.template",
+    "entity": "sale.order.template",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale_management.access_sale_order_template_system",
+    "package": "sale_management",
+    "name": "sale.order.template",
+    "entity": "sale.order.template",
+    "group": "base.group_system",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "sale_management.sale_order_template_rule_company",
+    "package": "sale_management",
+    "name": "Quotation Template multi-company",
+    "entity": "sale.order.template",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "sale_management.sale_order_template_view_search",
+    "package": "sale_management",
+    "name": "sale.order.template.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Quotation Template"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "company_id",
+       "string": "Company",
+       "context": "{'group_by': 'company_id'}",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale_management.sale_order_template_view_form",
+    "package": "sale_management",
+    "name": "sale.order.template.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Quotation Template"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. Standard Consultancy Package"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "number_of_days"
+      },
+      {
+       "name": "mail_template_id",
+       "context": "{'default_model': 'sale.order'}"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "journal_id"
+      },
+      {
+       "name": "require_signature"
+      },
+      {
+       "name": "require_payment"
+      },
+      {
+       "name": "prepayment_percent",
+       "widget": "percentage",
+       "invisible": "not require_payment"
+      },
+      {
+       "name": "sale_order_template_line_ids",
+       "widget": "so_template_line_o2m",
+       "options": "{ 'subsections': True }"
+      },
+      {
+       "name": "sequence",
+       "invisible": "1"
+      },
+      {
+       "name": "display_type",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "required": "not display_type"
+      },
+      {
+       "name": "product_uom_qty"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "display_type",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_optional",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "name",
+       "widget": "section_and_note_text"
+      },
+      {
+       "name": "product_uom_qty"
+      },
+      {
+       "name": "product_uom_id",
+       "required": "not display_type",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "note",
+       "nolabel": "1",
+       "placeholder": "The Administrator can set default Terms & Conditions in Sales Settings. Terms set here will show up instead if you select this quotation template."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "order_lines",
+       "string": "Lines",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "order_description",
+       "string": "Description",
+       "invisible": "display_type",
+       "groups": null
+      },
+      {
+       "name": "order_section",
+       "string": "Section",
+       "invisible": "display_type != 'line_section'",
+       "groups": null
+      },
+      {
+       "name": "order_note",
+       "string": "Note",
+       "invisible": "display_type != 'line_note'",
+       "groups": null
+      },
+      {
+       "name": "terms_and_conditions",
+       "string": "Terms & Conditions",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "percentage": 1,
+      "so_template_line_o2m": 1,
+      "handle": 1,
+      "section_and_note_text": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "sale_management.sale_order_template_view_tree",
+    "package": "sale_management",
+    "name": "sale.order.template.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Quotation Template"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "sale_pdf_quote_builder.sale_order_template_form",
+    "package": "sale_pdf_quote_builder",
+    "name": "sale.order.template.form",
+    "view_type": "notebook",
+    "inherits_view": "sale_management.sale_order_template_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "notebook",
+     "root_attributes": {
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "quotation_document_ids",
+       "widget": "quotation_document_many2many",
+       "context": "{                             'kanban_view_ref': 'sale_pdf_quote_builder.quotation_document_kanban',                             'hide_template_ids': True,                         }",
+       "options": "{'create': False}",
+       "nolabel": "1",
+       "mode": "kanban"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "pdf_quote",
+       "string": "Quote Builder",
+       "invisible": "not (id)",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "quotation_document_many2many": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "notebook",
+       "attributes": {
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "sale_management.sale_order_template_action",
+    "package": "sale_management",
+    "name": "Quotation Templates",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create your quotation template\n            </p><p>\n                Use templates to create polished, professional quotes in minutes.\n                Send these quotes by email and let your customers sign online.\n                Use cross-selling and discounts to push and boost your sales.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "sale.order.template"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

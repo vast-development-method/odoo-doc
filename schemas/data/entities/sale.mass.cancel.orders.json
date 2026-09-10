@@ -1,0 +1,245 @@
+{
+ "catalog": {
+  "name": "entity:sale.mass.cancel.orders",
+  "description": "Complete definition of entity Cancel multiple quotations (sale.mass.cancel.orders).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sale.mass.cancel.orders",
+  "storage_name": "sale_mass_cancel_orders",
+  "full_name": "Cancel multiple quotations",
+  "kind": "transient",
+  "description": "Cancel multiple quotations",
+  "defined_by_package": "sale",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "sale_order_ids",
+    "type": "Many2many",
+    "string": "Sale orders to cancel",
+    "comodel": "sale.order",
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_ids')"
+    },
+    "relation": "sale_order_mass_cancel_wizard_rel",
+    "defined_in_package": "sale",
+    "full_name": "Sale orders to cancel",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "sale_orders_count",
+    "type": "Integer",
+    "compute": "_compute_sale_orders_count",
+    "defined_in_package": "sale",
+    "string": "Sale Orders Count",
+    "full_name": "Sale Orders Count"
+   },
+   {
+    "name": "has_confirmed_order",
+    "type": "Boolean",
+    "compute": "_compute_has_confirmed_order",
+    "defined_in_package": "sale",
+    "string": "Has Confirmed Order",
+    "full_name": "Has Confirmed Order"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_sale_orders_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_confirmed_order",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mass_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "sale.access_sale_mass_cancel_orders",
+    "package": "sale",
+    "name": "access.sale.mass.cancel.orders",
+    "entity": "sale.mass.cancel.orders",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "sale.sale_mass_cancel_orders_rule",
+    "package": "sale",
+    "name": "Sales Mass Cancel Orders: access only your own wizard",
+    "entity": "sale.mass.cancel.orders",
+    "domain": "[('create_uid', '=', user.id)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "sale.mass_cancel_orders_view_form",
+    "package": "sale",
+    "name": "sale.mass.cancel.orders.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Cancel quotations"
+     },
+     "fields": [
+      {
+       "name": "sale_order_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "sale_orders_count",
+       "invisible": "1"
+      },
+      {
+       "name": "has_confirmed_order",
+       "invisible": "1"
+      },
+      {
+       "name": "sale_orders_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_mass_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "string": "Discard",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "sale.action_mass_cancel_orders",
+    "package": "sale",
+    "name": "Cancel",
+    "view_mode": "form",
+    "view_id": "mass_cancel_orders_view_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_sale_order",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "sale.mass.cancel.orders"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

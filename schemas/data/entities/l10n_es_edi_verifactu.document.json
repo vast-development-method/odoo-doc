@@ -1,0 +1,1003 @@
+{
+ "catalog": {
+  "name": "entity:l10n_es_edi_verifactu.document",
+  "description": "Complete definition of entity Veri*Factu Document (l10n_es_edi_verifactu.document).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_es_edi_verifactu.document",
+  "storage_name": "l10n_es_edi_verifactu_document",
+  "full_name": "Veri*Factu Document",
+  "kind": "persistent",
+  "description": "Veri*Factu Document",
+  "defined_by_package": "l10n_es_edi_verifactu",
+  "extended_by_packages": [
+   "l10n_es_edi_verifactu_pos"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "create_date DESC, id DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "string": "Company",
+    "comodel": "res.company",
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "move_id",
+    "type": "Many2one",
+    "string": "Journal Entry",
+    "comodel": "account.move",
+    "readonly": true,
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Journal Entry",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "chain_index",
+    "type": "Integer",
+    "string": "Chain Index",
+    "copy": false,
+    "readonly": true,
+    "help": "Index in the chain of Veri*Factu Documents. It is only set if the generation was succesful.",
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Chain Index"
+   },
+   {
+    "name": "document_type",
+    "type": "Selection",
+    "string": "Document Type",
+    "selection": [
+     [
+      "submission",
+      "Submission"
+     ],
+     [
+      "cancellation",
+      "Cancellation"
+     ]
+    ],
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Document Type"
+   },
+   {
+    "name": "json_attachment_id",
+    "type": "Many2one",
+    "string": "JSON Attachment",
+    "comodel": "ir.attachment",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "JavaScript Object Notation Attachment",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "json_attachment_base64",
+    "type": "Binary",
+    "string": "JSON",
+    "related": "json_attachment_id.datas",
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "JavaScript Object Notation"
+   },
+   {
+    "name": "json_attachment_filename",
+    "type": "Char",
+    "string": "JSON Filename",
+    "compute": "_compute_json_attachment_filename",
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "JavaScript Object Notation Filename"
+   },
+   {
+    "name": "errors",
+    "type": "Html",
+    "string": "Errors",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Errors"
+   },
+   {
+    "name": "response_csv",
+    "type": "Char",
+    "string": "Response CSV",
+    "copy": false,
+    "readonly": true,
+    "help": "The CSV of the response from the tax agency. There may not be one in case all documents of the batch were rejected.",
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Response comma-separated values"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "string": "Status",
+    "selection": [
+     [
+      "rejected",
+      "Rejected"
+     ],
+     [
+      "registered_with_errors",
+      "Registered with Errors"
+     ],
+     [
+      "accepted",
+      "Accepted"
+     ]
+    ],
+    "copy": false,
+    "readonly": true,
+    "help": "- Rejected: Successfully sent to the AEAT, but it was rejected during validation\n                - Registered with Errors: Registered at the AEAT, but the AEAT has some issues with the sent record\n                - Accepted: Registered by the AEAT without errors",
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Status"
+   },
+   {
+    "name": "pos_order_id",
+    "type": "Many2one",
+    "string": "PoS Order",
+    "comodel": "pos.order",
+    "readonly": true,
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "PoS Order",
+    "target_entity": "pos.order"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "document_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_json_attachment_filename",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "chain_index",
+         "document_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_never_unlink_chained_documents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete Veri*Factu Documents that are part of the chain of all Veri*Factu Documents.",
+        "line": 183
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_document_dict",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_record_identifier",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extract_record_identifiers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "document_dict"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return a dictionary that includes:\n* the IDFactura fields\n* the fields used for the fingerprint generation of this document and the next one\n  (The fingerprint of this record is part of the fingerprint generation of the next record)\n* the fields used for QR code generation\n* the fields used for ImporteRectificacion (in case of rectification by substitutuion)",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_errors",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "title",
+     "errors"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_tax_details",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "base_lines",
+     "company",
+     "tax_lines"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_waiting",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_last",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "document_type"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_state",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_qr_code_img_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_record_values",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 101,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_for_record",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "record_values"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": "Create Veri*Factu documents for input `record_values`.\nReturn the created document.\nThe documents are also created in case the JSON generation fails; to inspect the errors.\nSuch documents are deleted in case the JSON generation succeeds for a record at a later time.\n(In case we succesfully create a JSON we delete all linked documents that failed the JSON creation.)\n:param list record_values: record values dictionary",
+      "size_in_lines": 84,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_date_type",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_round_format_number_2",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "number"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals",
+     "previous_record_identifier"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_vals_operation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 82,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_vals_previous_submissions",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "See \"Sistemas Informáticos de Facturación y Sistemas VERI*FACTU\" Version 1.1.1 - \"Validaciones\" p. 22 f.\nhttps://www.agenciatributaria.es/static_files/AEAT_Desarrolladores/EEDD/IVA/VERI-FACTU/Validaciones_Errores_Veri-Factu.pdf\nFor submissions (ALTA) we do not support any subsanación cases (update of a previously sent invoice).\n(Instead the user can issue a credit note and possibly a new substituting invoice).\nWith the nomenclature from the Validations document above the following cases are supported (✓) / unsupported (✗):\n  ✓ ALTA (new record)\n  ✓ ALTA POR RECHAZO (new record, previously rejected)\n  ✗ ALTA DE SUBSANACIÓN (update, previously rejected)\n  ✗ ALTA POR RECHAZO DE SUBSANACIÓN (update, previously rejected)\n  ✗ ALTA DE SUBSANACIÓN SIN REGISTRO PREVIO (update, record not known to the AEAT)\n  ✗ ALTA POR RECHAZO DE SUBSANACIÓN SIN REGISTRO PREVIO (update, record not known to the AEAT, previously rejected)\n  ✓ ANULACIÓN (cancellation)\n  ✓ ANULACIÓN POR RECHAZO (cancellation, previously rejected)\n  ✓ ANULACIÓN SIN REGISTRO PREVIO (cancellation, record not known to the AEAT)\n  ✓ ANULACIÓN POR RECHAZO SIN REGISTRO PREVIO  (cancellation, record not known to the AEAT, previously rejected)",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_vals_monetary_amounts",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 119,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_db_identifier",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_vals_SistemaInformatico",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_render_vals_with_chaining_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "render_vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fingerprint",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "render_vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Documentation: \"Detalle de las especificaciones técnicas para generación de la huella o hash de los registros de facturación\"\nhttps://www.agenciatributaria.es/static_files/AEAT_Desarrolladores/EEDD/IVA/VERI-FACTU/Veri-Factu_especificaciones_huella_hash_registros.pdf",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "trigger_next_batch",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "1. Send all waiting documents that we can send\n2. Trigger the cron again at a later date to send the documents we could not send",
+      "size_in_lines": 68,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "batch_dict"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 105,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_as_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 97,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_as_batch_check",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_batch_dict",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "document_dict_list",
+     "incident"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extract_record_key",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "document_dict"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cancel_after_sending",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "info"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_never_unlink_chained_documents",
+    "package": "l10n_es_edi_verifactu",
+    "kind": "UserError",
+    "message": "You cannot delete Veri*Factu Documents that are part of the chain of all Veri*Factu Documents."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_es_edi_verifactu.l10n_es_edi_verifactu.access_l10n_es_edi_verifactu_document_user",
+    "package": "l10n_es_edi_verifactu",
+    "name": "access_l10n_es_edi_verifactu_document_user",
+    "entity": "l10n_es_edi_verifactu.document",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu.l10n_es_edi_verifactu.access_l10n_es_edi_verifactu_document_readonly",
+    "package": "l10n_es_edi_verifactu",
+    "name": "access_l10n_es_edi_verifactu_document_readonly",
+    "entity": "l10n_es_edi_verifactu.document",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu.l10n_es_edi_verifactu.access_l10n_es_edi_verifactu_document_readonly_account_readonly",
+    "package": "l10n_es_edi_verifactu",
+    "name": "access_l10n_es_edi_verifactu_document_readonly_account_readonly",
+    "entity": "l10n_es_edi_verifactu.document",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu_pos.access_l10n_es_edi_verifactu_document",
+    "package": "l10n_es_edi_verifactu_pos",
+    "name": "l10n_es_edi_verifactu.document",
+    "entity": "l10n_es_edi_verifactu.document",
+    "group": "point_of_sale.group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_es_edi_verifactu.view_l10n_es_edi_verifactu_document_form",
+    "package": "l10n_es_edi_verifactu",
+    "name": "l10n_es_edi_verifactu.document.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "document_type"
+      },
+      {
+       "name": "json_attachment_filename",
+       "invisible": "1"
+      },
+      {
+       "name": "json_attachment_base64",
+       "widget": "binary"
+      },
+      {
+       "name": "chain_index"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "response_csv"
+      },
+      {
+       "name": "errors"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "binary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "l10n_es_edi_verifactu.cron_verifactu_batch",
+    "package": "l10n_es_edi_verifactu",
+    "name": "Veri*Factu: Submit / Cancel Records",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": "True",
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "l10n_es_edi_verifactu.document",
+    "operation": "trigger_next_batch",
+    "operation_call": "model.trigger_next_batch()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

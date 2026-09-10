@@ -1,0 +1,5616 @@
+{
+ "catalog": {
+  "name": "entity:pos.payment.method",
+  "description": "Complete definition of entity Point of Sale Payment Methods (pos.payment.method).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "pos.payment.method",
+  "storage_name": "pos_payment_method",
+  "full_name": "Point of Sale Payment Methods",
+  "kind": "persistent",
+  "description": "Point of Sale Payment Methods",
+  "defined_by_package": "point_of_sale",
+  "extended_by_packages": [
+   "l10n_id_pos",
+   "l10n_jo_edi_pos",
+   "pos_adyen",
+   "pos_cashdro",
+   "pos_cashmatic",
+   "pos_dpopay",
+   "pos_glory_cash",
+   "pos_mercado_pago",
+   "pos_mollie",
+   "pos_online_payment",
+   "pos_self_order",
+   "pos_online_payment_self_order",
+   "pos_pine_labs",
+   "pos_qfpay",
+   "pos_razorpay",
+   "pos_restaurant_adyen",
+   "pos_stripe",
+   "pos_safaricom",
+   "pos_self_order_adyen",
+   "pos_self_order_pine_labs",
+   "pos_self_order_qfpay",
+   "pos_self_order_razorpay",
+   "pos_self_order_stripe",
+   "pos_viva_com",
+   "pos_self_order_viva_com"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Method",
+    "required": true,
+    "translate": true,
+    "help": "Defines the name of the payment method that will be displayed in the Point of Sale when the payments are selected.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Method"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "outstanding_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Outstanding Account",
+    "ondelete": "restrict",
+    "help": "Account used as outstanding account when creating accounting payment records for bank payments.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Outstanding Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "receivable_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Intermediary Account",
+    "ondelete": "restrict",
+    "domain": [
+     [
+      "reconcile",
+      "=",
+      true
+     ],
+     [
+      "account_type",
+      "=",
+      "asset_receivable"
+     ]
+    ],
+    "help": "Leave empty to use the default account from the company setting.\nOverrides the company's receivable account (for Point of Sale) used in the journal entries.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Intermediary Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "is_cash_count",
+    "type": "Boolean",
+    "string": "Cash",
+    "compute": "_compute_is_cash_count",
+    "store": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Cash"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Journal",
+    "domain": [
+     "|",
+     "&",
+     [
+      "type",
+      "=",
+      "cash"
+     ],
+     [
+      "pos_payment_method_ids",
+      "=",
+      false
+     ],
+     [
+      "type",
+      "=",
+      "bank"
+     ]
+    ],
+    "ondelete": "restrict",
+    "index": "btree_not_null",
+    "check_company": true,
+    "help": "Leave empty to use the receivable account of customer.\nDefines the journal where to book the accumulated payments (or individual payment if Identify Customer is true) after closing the session.\nFor cash journal, we directly write to the default account in the journal via statement lines.\nFor bank journal, we write to the outstanding account specified in this payment method.\nOnly cash and bank journals are allowed.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "split_transactions",
+    "type": "Boolean",
+    "string": "Identify Customer",
+    "default": false,
+    "help": "Forces to set a customer when using this payment method and splits the journal entries for each customer. It could slow down the closing process.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Identify Customer"
+   },
+   {
+    "name": "open_session_ids",
+    "type": "Many2many",
+    "comodel": "pos.session",
+    "string": "Pos Sessions",
+    "compute": "_compute_open_session_ids",
+    "help": "Open PoS sessions that are using this payment method.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Pos Sessions",
+    "target_entity": "pos.session"
+   },
+   {
+    "name": "config_ids",
+    "type": "Many2many",
+    "comodel": "pos.config",
+    "string": "Point of Sale",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Point of Sale",
+    "target_entity": "pos.config"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "point_of_sale",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "default_pos_receivable_account_name",
+    "type": "Char",
+    "related": "company_id.account_default_pos_receivable_account_id.display_name",
+    "string": "Default Receivable Account Name",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Default Receivable Account Name"
+   },
+   {
+    "name": "use_payment_terminal",
+    "type": "Selection",
+    "selection": {
+     "expression": "lambda self: self._get_payment_terminal_selection()"
+    },
+    "string": "Use a Payment Terminal",
+    "help": "Record payments with a terminal on this journal.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Use a Payment Terminal"
+   },
+   {
+    "name": "hide_use_payment_terminal",
+    "type": "Boolean",
+    "compute": "_compute_hide_use_payment_terminal",
+    "defined_in_package": "point_of_sale",
+    "string": "Hide Use Payment Terminal",
+    "full_name": "Hide Use Payment Terminal"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "point_of_sale",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "type",
+    "type": "Selection",
+    "selection": [
+     [
+      "cash",
+      "Cash"
+     ],
+     [
+      "bank",
+      "Bank"
+     ],
+     [
+      "pay_later",
+      "Customer Account"
+     ],
+     [
+      "online",
+      "Online"
+     ]
+    ],
+    "compute": "_compute_type",
+    "defined_in_package": "point_of_sale",
+    "selection_added_by": [
+     "pos_online_payment"
+    ],
+    "extended_in_packages": [
+     "pos_online_payment"
+    ],
+    "string": "Type",
+    "full_name": "Type"
+   },
+   {
+    "name": "image",
+    "type": "Image",
+    "string": "Image",
+    "max_width": 50,
+    "max_height": 50,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Image"
+   },
+   {
+    "name": "payment_method_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "lambda self: self._get_payment_method_type()"
+    },
+    "string": "Integration",
+    "default": "none",
+    "required": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Integration"
+   },
+   {
+    "name": "default_qr",
+    "type": "Char",
+    "compute": "_compute_qr",
+    "defined_in_package": "point_of_sale",
+    "string": "Default Quick response",
+    "full_name": "Default Quick response"
+   },
+   {
+    "name": "qr_code_method",
+    "type": "Selection",
+    "string": "QR Code Format",
+    "copy": false,
+    "selection": {
+     "expression": "lambda self: self.env['res.partner.bank'].get_available_qr_methods_in_sequence()"
+    },
+    "help": "Type of QR-code to be generated for this payment method.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "quick response Code Format"
+   },
+   {
+    "name": "hide_qr_code_method",
+    "type": "Boolean",
+    "compute": "_compute_hide_qr_code_method",
+    "defined_in_package": "point_of_sale",
+    "string": "Hide Quick response Code Method",
+    "full_name": "Hide Quick response Code Method"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_id.country_id.code",
+    "depends": [
+     "company_id.country_id"
+    ],
+    "defined_in_package": "l10n_jo_edi_pos",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "l10n_jo_edi_pos_is_cash",
+    "type": "Boolean",
+    "string": "JoFotara Cash",
+    "help": "If checked, this payment method will reported as a cash payment method to JoFotara.",
+    "compute": "_compute_l10n_jo_edi_pos_is_cash",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_jo_edi_pos",
+    "full_name": "JoFotara Cash"
+   },
+   {
+    "name": "adyen_api_key",
+    "type": "Char",
+    "string": "Adyen API key",
+    "help": "Used when connecting to Adyen: https://docs.adyen.com/user-management/how-to-get-the-api-key/#description",
+    "copy": false,
+    "groups": "base.group_erp_manager",
+    "defined_in_package": "pos_adyen",
+    "full_name": "Adyen application programming interface key"
+   },
+   {
+    "name": "adyen_terminal_identifier",
+    "type": "Char",
+    "help": "[Terminal model]-[Serial number], for example: P400Plus-123456789",
+    "copy": false,
+    "defined_in_package": "pos_adyen",
+    "string": "Adyen Terminal Identifier",
+    "full_name": "Adyen Terminal Identifier"
+   },
+   {
+    "name": "adyen_test_mode",
+    "type": "Boolean",
+    "help": "Run transactions in the test environment.",
+    "groups": "base.group_erp_manager",
+    "defined_in_package": "pos_adyen",
+    "string": "Adyen Test Mode",
+    "full_name": "Adyen Test Mode"
+   },
+   {
+    "name": "adyen_latest_response",
+    "type": "Char",
+    "copy": false,
+    "groups": "base.group_erp_manager",
+    "defined_in_package": "pos_adyen",
+    "string": "Adyen Latest Response",
+    "full_name": "Adyen Latest Response"
+   },
+   {
+    "name": "adyen_event_url",
+    "type": "Char",
+    "string": "Event URL",
+    "help": "This URL needs to be pasted on Adyen's portal terminal settings.",
+    "readonly": true,
+    "store": false,
+    "default": {
+     "dynamic": "lambda self: f'{self.get_base_url()}/pos_adyen/notification'"
+    },
+    "defined_in_package": "pos_adyen",
+    "full_name": "Event uniform resource locator"
+   },
+   {
+    "name": "cashdro_ip",
+    "type": "Char",
+    "string": "Cashdro IP",
+    "defined_in_package": "pos_cashdro",
+    "full_name": "Cashdro internet protocol"
+   },
+   {
+    "name": "cashdro_username",
+    "type": "Char",
+    "string": "Cashdro Username",
+    "defined_in_package": "pos_cashdro",
+    "full_name": "Cashdro Username"
+   },
+   {
+    "name": "cashdro_password",
+    "type": "Char",
+    "string": "Cashdro Password",
+    "defined_in_package": "pos_cashdro",
+    "full_name": "Cashdro Password"
+   },
+   {
+    "name": "cashdro_use_lna",
+    "type": "Boolean",
+    "string": "Cashdro Local Network Access",
+    "defined_in_package": "pos_cashdro",
+    "full_name": "Cashdro Local Network Access"
+   },
+   {
+    "name": "cashmatic_ip",
+    "type": "Char",
+    "string": "Cashmatic IP",
+    "defined_in_package": "pos_cashmatic",
+    "full_name": "Cashmatic internet protocol"
+   },
+   {
+    "name": "cashmatic_username",
+    "type": "Char",
+    "string": "Cashmatic Username",
+    "defined_in_package": "pos_cashmatic",
+    "full_name": "Cashmatic Username"
+   },
+   {
+    "name": "cashmatic_password",
+    "type": "Char",
+    "string": "Cashmatic Password",
+    "defined_in_package": "pos_cashmatic",
+    "full_name": "Cashmatic Password"
+   },
+   {
+    "name": "cashmatic_use_lna",
+    "type": "Boolean",
+    "string": "Cashmatic Local Network Access",
+    "defined_in_package": "pos_cashmatic",
+    "full_name": "Cashmatic Local Network Access"
+   },
+   {
+    "name": "dpopay_client_id",
+    "type": "Char",
+    "string": "DPO Pay Client ID",
+    "help": "The Client ID provided by DPO Pay for authenticating requests.",
+    "defined_in_package": "pos_dpopay",
+    "full_name": "DPO Pay Client identifier"
+   },
+   {
+    "name": "dpopay_client_secret",
+    "type": "Char",
+    "string": "DPO Pay Client Secret",
+    "help": "The Client Secret provided by DPO Pay for secure access. Keep it confidential.",
+    "defined_in_package": "pos_dpopay",
+    "full_name": "DPO Pay Client Secret"
+   },
+   {
+    "name": "dpopay_mid",
+    "type": "Char",
+    "string": "DPO Pay Merchant ID",
+    "help": "Enter the Merchant ID assigned by DPO Pay (e.g., 123456789012).",
+    "defined_in_package": "pos_dpopay",
+    "full_name": "DPO Pay Merchant identifier"
+   },
+   {
+    "name": "dpopay_tid",
+    "type": "Char",
+    "string": "DPO Pay Terminal ID",
+    "help": "Enter the unique Terminal ID (TID) of your DPO Pay POS terminal (e.g., XXXXXXXX).",
+    "defined_in_package": "pos_dpopay",
+    "full_name": "DPO Pay Terminal identifier"
+   },
+   {
+    "name": "dpopay_payment_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "card",
+      "Card"
+     ],
+     [
+      "momo",
+      "Mobile Money"
+     ]
+    ],
+    "default": "card",
+    "help": "Choose allowed payment mode:\nCard - regular card payments\nMobile Money - M-Pesa / Airtel Mobile Money",
+    "defined_in_package": "pos_dpopay",
+    "string": "Dpopay Payment Mode",
+    "full_name": "Dpopay Payment Mode"
+   },
+   {
+    "name": "dpopay_chain_id",
+    "type": "Char",
+    "string": "DPO Pay Chain-ID",
+    "help": "Enter the Chain-ID header value(e.g., DPO-DTM-Testing)",
+    "defined_in_package": "pos_dpopay",
+    "full_name": "DPO Pay Chain-identifier"
+   },
+   {
+    "name": "dpopay_test_mode",
+    "type": "Boolean",
+    "string": "Enable Test Mode",
+    "help": "Check this to use DPO Pay's sandbox environment for testing purposes.",
+    "defined_in_package": "pos_dpopay",
+    "full_name": "Enable Test Mode"
+   },
+   {
+    "name": "dpopay_bearer_token",
+    "type": "Char",
+    "default": "Token",
+    "help": "Bearer token used for authenticating requests. Automatically refreshed when expired.",
+    "defined_in_package": "pos_dpopay",
+    "string": "Dpopay Bearer Token",
+    "full_name": "Dpopay Bearer Token"
+   },
+   {
+    "name": "glory_websocket_address",
+    "type": "Char",
+    "string": "Cash Machine IP",
+    "defined_in_package": "pos_glory_cash",
+    "full_name": "Cash Machine internet protocol"
+   },
+   {
+    "name": "glory_username",
+    "type": "Char",
+    "string": "Cash Machine Username",
+    "defined_in_package": "pos_glory_cash",
+    "full_name": "Cash Machine Username"
+   },
+   {
+    "name": "glory_password",
+    "type": "Char",
+    "string": "Cash Machine Password",
+    "defined_in_package": "pos_glory_cash",
+    "full_name": "Cash Machine Password"
+   },
+   {
+    "name": "mp_bearer_token",
+    "type": "Char",
+    "string": "Production user token",
+    "help": "Mercado Pago customer production user token: https://www.mercadopago.com.mx/developers/en/reference",
+    "groups": "point_of_sale.group_pos_manager",
+    "defined_in_package": "pos_mercado_pago",
+    "full_name": "Production user token"
+   },
+   {
+    "name": "mp_webhook_secret_key",
+    "type": "Char",
+    "string": "Production secret key",
+    "help": "Mercado Pago production secret key from integration application: https://www.mercadopago.com.mx/developers/panel/app",
+    "groups": "point_of_sale.group_pos_manager",
+    "defined_in_package": "pos_mercado_pago",
+    "full_name": "Production secret key"
+   },
+   {
+    "name": "mp_id_point_smart",
+    "type": "Char",
+    "string": "Terminal S/N",
+    "help": "Enter your Point Smart terminal serial number written on the back of your terminal (after the S/N:)",
+    "defined_in_package": "pos_mercado_pago",
+    "full_name": "Terminal S/N"
+   },
+   {
+    "name": "mp_id_point_smart_complet",
+    "type": "Char",
+    "defined_in_package": "pos_mercado_pago",
+    "string": "Mp Identifier Point Smart Complet",
+    "full_name": "Mp Identifier Point Smart Complet"
+   },
+   {
+    "name": "mollie_terminal_id",
+    "type": "Char",
+    "string": "Mollie Terminal ID",
+    "copy": false,
+    "defined_in_package": "pos_mollie",
+    "full_name": "Mollie Terminal identifier"
+   },
+   {
+    "name": "mollie_payment_provider_id",
+    "type": "Many2one",
+    "comodel": "payment.provider",
+    "domain": [
+     [
+      "code",
+      "=",
+      "mollie"
+     ]
+    ],
+    "defined_in_package": "pos_mollie",
+    "string": "Mollie Payment Provider",
+    "full_name": "Mollie Payment Provider",
+    "target_entity": "payment.provider"
+   },
+   {
+    "name": "is_online_payment",
+    "type": "Boolean",
+    "string": "Online Payment",
+    "help": "Use this payment method for online payments (payments made on a web page with online payment providers)",
+    "default": false,
+    "defined_in_package": "pos_online_payment",
+    "full_name": "Online Payment"
+   },
+   {
+    "name": "online_payment_provider_ids",
+    "type": "Many2many",
+    "comodel": "payment.provider",
+    "string": "Allowed Providers",
+    "domain": "[('is_published', '=', True), ('state', 'in', ['enabled', 'test'])]",
+    "defined_in_package": "pos_online_payment",
+    "full_name": "Allowed Providers",
+    "target_entity": "payment.provider"
+   },
+   {
+    "name": "has_an_online_payment_provider",
+    "type": "Boolean",
+    "compute": "_compute_has_an_online_payment_provider",
+    "readonly": true,
+    "defined_in_package": "pos_online_payment",
+    "string": "Has An Online Payment Provider",
+    "full_name": "Has An Online Payment Provider"
+   },
+   {
+    "name": "pine_labs_merchant",
+    "type": "Char",
+    "string": "Pine Labs Merchant ID",
+    "help": "A merchant id issued directly to the merchant by Pine Labs.",
+    "copy": false,
+    "defined_in_package": "pos_pine_labs",
+    "full_name": "Pine Labs Merchant identifier"
+   },
+   {
+    "name": "pine_labs_store",
+    "type": "Char",
+    "string": "Pine Labs Store ID",
+    "help": "A store id issued directly to the merchant by Pine Labs.",
+    "copy": false,
+    "defined_in_package": "pos_pine_labs",
+    "full_name": "Pine Labs Store identifier"
+   },
+   {
+    "name": "pine_labs_client",
+    "type": "Char",
+    "string": "Pine Labs Client ID",
+    "help": "A client id issued directly to the merchant by Pine Labs.",
+    "copy": false,
+    "defined_in_package": "pos_pine_labs",
+    "full_name": "Pine Labs Client identifier"
+   },
+   {
+    "name": "pine_labs_security_token",
+    "type": "Char",
+    "string": "Pine Labs Security Token",
+    "help": "A security token issued directly to the merchant by Pine Labs.",
+    "defined_in_package": "pos_pine_labs",
+    "full_name": "Pine Labs Security Token"
+   },
+   {
+    "name": "pine_labs_allowed_payment_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "all",
+      "All"
+     ],
+     [
+      "card",
+      "Card"
+     ],
+     [
+      "upi",
+      "Upi"
+     ]
+    ],
+    "string": "Pine Labs Allowed Payment Modes",
+    "help": "Accepted payment modes by Pine Labs for transactions.",
+    "defined_in_package": "pos_pine_labs",
+    "full_name": "Pine Labs Allowed Payment Modes"
+   },
+   {
+    "name": "pine_labs_test_mode",
+    "type": "Boolean",
+    "string": "Pine Labs Test Mode",
+    "help": "Test Pine Labs transaction process.",
+    "defined_in_package": "pos_pine_labs",
+    "full_name": "Pine Labs Test Mode"
+   },
+   {
+    "name": "qfpay_terminal_ip_address",
+    "type": "Char",
+    "string": "QFPay Terminal IP Address",
+    "copy": false,
+    "defined_in_package": "pos_qfpay",
+    "full_name": "QFPay Terminal internet protocol Address"
+   },
+   {
+    "name": "qfpay_pos_key",
+    "type": "Char",
+    "string": "QFPay POS Key",
+    "copy": false,
+    "groups": "point_of_sale.group_pos_manager",
+    "defined_in_package": "pos_qfpay",
+    "full_name": "QFPay point of sale Key"
+   },
+   {
+    "name": "qfpay_notification_key",
+    "type": "Char",
+    "string": "QFPay Notification Key",
+    "copy": false,
+    "groups": "point_of_sale.group_pos_manager",
+    "defined_in_package": "pos_qfpay",
+    "full_name": "QFPay Notification Key"
+   },
+   {
+    "name": "qfpay_latest_response",
+    "type": "Char",
+    "copy": false,
+    "groups": "point_of_sale.group_pos_manager",
+    "defined_in_package": "pos_qfpay",
+    "string": "Qfpay Latest Response",
+    "full_name": "Qfpay Latest Response"
+   },
+   {
+    "name": "qfpay_payment_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "card_payment",
+      "Visa/Mastercard"
+     ],
+     [
+      "wx",
+      "WeChat Pay"
+     ],
+     [
+      "alipay",
+      "Alipay"
+     ],
+     [
+      "payme",
+      "PayMe"
+     ],
+     [
+      "union",
+      "UnionPay QuickPass"
+     ],
+     [
+      "fps",
+      "FPS"
+     ],
+     [
+      "octopus",
+      "Octopus"
+     ],
+     [
+      "unionpay_card",
+      "Unionpay Card"
+     ],
+     [
+      "amex_card",
+      "American Express Card"
+     ]
+    ],
+    "string": "QFPay Payment Type",
+    "copy": false,
+    "defined_in_package": "pos_qfpay",
+    "full_name": "QFPay Payment Type"
+   },
+   {
+    "name": "razorpay_tid",
+    "type": "Char",
+    "string": "Razorpay Device Serial No",
+    "help": "Device Serial No \n ex: 7000012300",
+    "defined_in_package": "pos_razorpay",
+    "full_name": "Razorpay Device Serial No"
+   },
+   {
+    "name": "razorpay_allowed_payment_modes",
+    "type": "Selection",
+    "selection": [
+     [
+      "all",
+      "All"
+     ],
+     [
+      "card",
+      "Card"
+     ],
+     [
+      "upi",
+      "UPI"
+     ],
+     [
+      "bharatqr",
+      "BHARATQR"
+     ]
+    ],
+    "default": "all",
+    "help": "Choose allow payment mode: \n All/Card/UPI or QR",
+    "defined_in_package": "pos_razorpay",
+    "string": "Razorpay Allowed Payment Modes",
+    "full_name": "Razorpay Allowed Payment Modes"
+   },
+   {
+    "name": "razorpay_username",
+    "type": "Char",
+    "string": "Razorpay Username",
+    "help": "Username(Device Login) \n ex: 1234500121",
+    "defined_in_package": "pos_razorpay",
+    "full_name": "Razorpay Username"
+   },
+   {
+    "name": "razorpay_api_key",
+    "type": "Char",
+    "string": "Razorpay API Key",
+    "help": "Used when connecting to Razorpay: https://razorpay.com/docs/payments/dashboard/account-settings/api-keys/",
+    "groups": "point_of_sale.group_pos_manager",
+    "defined_in_package": "pos_razorpay",
+    "full_name": "Razorpay application programming interface Key"
+   },
+   {
+    "name": "razorpay_test_mode",
+    "type": "Boolean",
+    "string": "Razorpay Test Mode",
+    "default": false,
+    "help": "Turn it on when in Test Mode",
+    "defined_in_package": "pos_razorpay",
+    "full_name": "Razorpay Test Mode"
+   },
+   {
+    "name": "adyen_merchant_account",
+    "type": "Char",
+    "help": "The POS merchant account code used in Adyen",
+    "defined_in_package": "pos_restaurant_adyen",
+    "string": "Adyen Merchant Account",
+    "full_name": "Adyen Merchant Account"
+   },
+   {
+    "name": "stripe_serial_number",
+    "type": "Char",
+    "help": "[Serial number of the stripe terminal], for example: WSC513105011295",
+    "copy": false,
+    "defined_in_package": "pos_stripe",
+    "string": "Stripe Serial Number",
+    "full_name": "Stripe Serial Number"
+   },
+   {
+    "name": "consumer_key",
+    "type": "Char",
+    "string": "Consumer Key",
+    "defined_in_package": "pos_safaricom",
+    "full_name": "Consumer Key"
+   },
+   {
+    "name": "consumer_secret",
+    "type": "Char",
+    "string": "Consumer Secret",
+    "defined_in_package": "pos_safaricom",
+    "full_name": "Consumer Secret"
+   },
+   {
+    "name": "business_short_code",
+    "type": "Char",
+    "string": "Business Short Code",
+    "help": "The business short code and till number combination as 'shortcode-tillnumber' (ex: 123456-789012)",
+    "defined_in_package": "pos_safaricom",
+    "full_name": "Business Short Code"
+   },
+   {
+    "name": "passkey",
+    "type": "Char",
+    "string": "Passkey",
+    "help": "The passkey is used to generate the password for the STK Push",
+    "defined_in_package": "pos_safaricom",
+    "full_name": "Passkey"
+   },
+   {
+    "name": "safaricom_test_mode",
+    "type": "Boolean",
+    "string": "Test Mode",
+    "default": true,
+    "help": "Use sandbox environment",
+    "defined_in_package": "pos_safaricom",
+    "full_name": "Test Mode"
+   },
+   {
+    "name": "safaricom_payment_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "mpesa_express",
+      "M-PESA Express"
+     ],
+     [
+      "lipa_na_mpesa",
+      "Lipa na M-PESA"
+     ]
+    ],
+    "string": "Payment Type",
+    "default": "mpesa_express",
+    "defined_in_package": "pos_safaricom",
+    "full_name": "Payment Type"
+   },
+   {
+    "name": "viva_com_merchant_id",
+    "type": "Char",
+    "string": "Merchant ID",
+    "help": "Log into Viva.com then navigate to Settings > API Access > Access credentials",
+    "defined_in_package": "pos_viva_com",
+    "full_name": "Merchant identifier"
+   },
+   {
+    "name": "viva_com_api_key",
+    "type": "Char",
+    "string": "API Key",
+    "help": "Log into Viva.com then navigate to Settings > API Access > Access credentials",
+    "defined_in_package": "pos_viva_com",
+    "full_name": "application programming interface Key"
+   },
+   {
+    "name": "viva_com_client_id",
+    "type": "Char",
+    "string": "Client ID",
+    "help": "Log into Viva.com then navigate to Settings > API Access > POS APIs Credentials",
+    "defined_in_package": "pos_viva_com",
+    "full_name": "Client identifier"
+   },
+   {
+    "name": "viva_com_client_secret",
+    "type": "Char",
+    "string": "Client secret",
+    "help": "Log into Viva.com then navigate to Settings > API Access > POS APIs Credentials",
+    "defined_in_package": "pos_viva_com",
+    "full_name": "Client secret"
+   },
+   {
+    "name": "viva_com_terminal_id",
+    "type": "Char",
+    "string": "Terminal ID",
+    "help": "[ID of the Viva.com terminal], e.g. 16002169",
+    "defined_in_package": "pos_viva_com",
+    "full_name": "Terminal identifier"
+   },
+   {
+    "name": "viva_com_bearer_token",
+    "type": "Char",
+    "default": "Bearer Token",
+    "defined_in_package": "pos_viva_com",
+    "string": "Viva Com Bearer Token",
+    "full_name": "Viva Com Bearer Token"
+   },
+   {
+    "name": "viva_com_webhook_verification_key",
+    "type": "Char",
+    "defined_in_package": "pos_viva_com",
+    "string": "Viva Com Webhook Verification Key",
+    "full_name": "Viva Com Webhook Verification Key"
+   },
+   {
+    "name": "viva_com_latest_response",
+    "type": "Json",
+    "defined_in_package": "pos_viva_com",
+    "string": "Viva Com Latest Response",
+    "full_name": "Viva Com Latest Response"
+   },
+   {
+    "name": "viva_com_test_mode",
+    "type": "Boolean",
+    "string": "Test mode",
+    "help": "Run transactions in the test environment.",
+    "defined_in_package": "pos_viva_com",
+    "full_name": "Test mode"
+   },
+   {
+    "name": "viva_com_webhook_endpoint",
+    "type": "Char",
+    "compute": "_compute_viva_com_webhook_endpoint",
+    "readonly": true,
+    "defined_in_package": "pos_viva_com",
+    "string": "Viva Com Webhook Endpoint",
+    "full_name": "Viva Com Webhook Endpoint"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_payment_terminal_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_dpopay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_mollie",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_pine_labs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_qfpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_razorpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_stripe",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_payment_method_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_cashdro",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_cashmatic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_glory_cash",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_online_payment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_provider_status",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "modules_list"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_adyen",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_cashdro",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_cashmatic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_glory_cash",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_qfpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant_adyen",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_stripe",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_safaricom",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_hide_use_payment_terminal",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "type",
+         "payment_method_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_hide_qr_code_method",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_payment_method_type",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "payment_method_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_use_payment_terminal",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "use_payment_terminal"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Used by inheriting model to unset the value of the field related to the unselected payment terminal.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_open_session_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "config_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "journal_id",
+         "split_transactions"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_online_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_journal_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only journals of type 'Cash' or 'Bank' could be used with payment methods.",
+        "line": 127
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_cash_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_write_forbidden",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_dpopay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_qfpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_safaricom",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override create to automatically register URLs for Lipa na M-PESA payment methods",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_viva_com",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Can't create payment method. Please check the data and update it.",
+        "line": 200
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please close and validate the following open PoS Sessions before modifying this payment method.\nOpen sessions: %s",
+        "line": 152
+       }
+      ]
+     },
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Can't update payment method. Please check the data and update it.",
+        "line": 184
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_force_payment_method_type_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "vals",
+     "payment_method_type",
+     "if_present"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "staticmethod",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_payment_method",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "payment_method_type",
+         "journal_id",
+         "qr_code_method"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "At least one bank account must be defined on the journal to allow registering QR code payments with Bank apps.",
+        "line": 207
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You must select a QR-code method to generate QR-codes for this payment method.",
+        "line": 209
+       },
+       {
+        "kind": "ValidationError",
+        "message": "error_msg",
+        "line": 212
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_company_config",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "config_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The points of sale for the payment method %s must belong to its company.",
+        "line": 218
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_cash_method_single_shop",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "config_ids",
+         "is_cash_count",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Validation Error: You cannot assign the same Cash payment method to multiple POS Shops. Please create a separate Cash payment method for each shop.",
+        "line": 225
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_qr",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_type",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_qr_code",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "amount",
+     "free_communication",
+     "structured_communication",
+     "currency",
+     "debtor_partner"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Generates and returns a QR-code\n        ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This payment method is not configured to generate QR codes.",
+        "line": 247
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "l10n_id_verify_qris_status",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "trx_uuid"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_id_pos",
+      "decorators": [],
+      "documentation": "Verify qris payment status from the provided transaction UUID\n\nFor all qris_invoice_details linked to the transaction, check the payment status",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No QRIS transaction record is found based on this order",
+        "line": 18
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_jo_edi_pos_is_cash",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "journal_id.type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_adyen_terminal_identifier",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "adyen_terminal_identifier"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Terminal %(terminal)s is already used on payment method %(payment_method)s.",
+        "line": 55
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Terminal %(terminal)s is already used in company %(company)s on payment method %(payment_method)s.",
+        "line": 58
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_adyen_endpoints",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_latest_adyen_status",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessDenied",
+        "message": null,
+        "line": 74
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "proxy_adyen_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [],
+      "documentation": "Necessary because Adyen's endpoints don't have CORS enabled ",
+      "size_in_lines": 83,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessDenied",
+        "message": null,
+        "line": 84
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid Adyen request",
+        "line": 86
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid Adyen request",
+        "line": 153
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_is_valid_adyen_request_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "provided_data",
+     "expected_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_expected_message_header",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "expected_message_category"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_expected_payment_request",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "with_acquirer_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_valid_acquirer_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_adyen",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_hmac",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "sale_id",
+     "service_id",
+     "poi_id",
+     "sale_transaction_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_proxy_adyen_request_direct",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_transaction_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_dpopay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send_dpopay_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data",
+     "endpoint"
+    ],
+    "definitions": [
+     {
+      "package": "pos_dpopay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_dpopay_base_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "is_token"
+    ],
+    "definitions": [
+     {
+      "package": "pos_dpopay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_dpopay_headers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "token_expired"
+    ],
+    "definitions": [
+     {
+      "package": "pos_dpopay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_dpopay_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_dpopay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to retrieve DPO Pay bearer token: check Client ID and Client Secret.",
+        "line": 79
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_execute_dpopay_api_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payload",
+     "endpoint"
+    ],
+    "definitions": [
+     {
+      "package": "pos_dpopay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Invalid endpoint",
+        "line": 89
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_special_access",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Do not have access to fetch token from Mercado Pago",
+        "line": 32
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "force_pdv",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": "Triggered in debug mode when the user wants to force the \"PDV\" mode.\nIt calls the Mercado Pago API to set the terminal mode to \"PDV\".",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unexpected Mercado Pago response: %s",
+        "line": 47
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "mp_payment_intent_create",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "infos"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": "Called from frontend for creating a payment intent in Mercado Pago",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mp_payment_intent_get",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "payment_intent_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": "Called from frontend to get the last payment intend from Mercado Pago",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mp_get_payment_status",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "payment_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": "Called from frontend to get the payment status from Mercado Pago",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mp_payment_intent_cancel",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "payment_intent_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": "Called from frontend to cancel a payment intent in Mercado Pago",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_terminal",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "token",
+     "point_smart"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please verify your production user token as it was rejected",
+        "line": 111
+       },
+       {
+        "kind": "UserError",
+        "message": "The terminal serial number is not registered on Mercado Pago",
+        "line": 107
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "mollie_create_payment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "amount",
+     "payment_uuid",
+     "pos_session_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mollie",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please set the API key on the Mollie payment provider before making a payment.",
+        "line": 21
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "mollie_create_refund",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "original_payment_id",
+     "amount",
+     "payment_uuid",
+     "pos_session_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mollie",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mollie_cancel_payment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "payment_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mollie",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mollie_get_payment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "payment_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mollie",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_online_payment_providers",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "pos_config_id",
+     "error_if_invalid"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "All payment providers configured for an online payment method must use the same currency as the Sales Journal, or the company currency if that is not set, of the POS config.",
+        "line": 55
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_an_online_payment_provider",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_online_payment",
+         "online_payment_provider_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_pos_config_online_payment",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "config_ids",
+         "is_online_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check that each POS config has at most one online payment method,",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The %s already has one online payment.",
+        "line": 73
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_force_online_payment_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "vals",
+     "if_present"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "staticmethod",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_or_create_online_payment_method",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "pos_config_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the first online payment method compatible with the provided pos.config.\nIf there isn't any, try to find an existing one in the same company and return it without adding the pos.config to it.\nIf there is not, create a new one for the company and return it without adding the pos.config to it.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Could not create an online payment method (company_id=%(company_id)d, pos_config_id=%(pos_config_id)d)",
+        "line": 148
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_is_online_payment",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "is_online_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Reset method to hide widget `pos_payment_provider_cards` in form view.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_customer_required_providers_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_payment_request_from_kiosk",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_adyen",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_pine_labs",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_razorpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_stripe",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_adyen",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_pine_labs",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_qfpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_razorpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_stripe",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_viva_com",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "pine_labs_make_payment_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_pine_labs",
+      "decorators": [],
+      "documentation": "Sends a payment request to the Pine Labs POS API.\n\n:param dict data: Contains `amount`, `transactionNumber`, and `sequenceNumber`.\n:return: On success, returns `responseCode`, `status`, and `plutusTransactionReferenceID`. \n        On failure, returns an error message.\n:rtype: dict",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "pine_labs_fetch_payment_status",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_pine_labs",
+      "decorators": [],
+      "documentation": "Fetches payment status from the Pine Labs POS API.\n\n:param dict data: Contains `plutusTransactionReferenceID` for the status request.\n:return: On success, returns `responseCode`, `status`, `plutusTransactionReferenceID`, and `data` (formatted transaction details). \n        On failure, returns an error message.\n:rtype: dict",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "pine_labs_cancel_payment_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_pine_labs",
+      "decorators": [],
+      "documentation": "Cancels a payment request via Pine Labs POS API.\n\n:param dict data: Contains `amount` and `plutusTransactionReferenceID`.\n:return: Success response with `responseCode` and `notification` or error with `errorMessage`.\n:rtype: dict",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_pine_labs_terminal",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_pine_labs",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "use_payment_terminal"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This Payment Terminal is only valid for INR Currency",
+        "line": 98
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_qfpay_terminal",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_qfpay",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "use_payment_terminal"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "QFPay is only valid for HKD Currency",
+        "line": 43
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "qfpay_sign_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "payload"
+    ],
+    "definitions": [
+     {
+      "package": "pos_qfpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessDenied",
+        "message": null,
+        "line": 51
+       },
+       {
+        "kind": "UserError",
+        "message": "This method can only be used with QFPay payment terminal.",
+        "line": 54
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_qfpay_handle_webhook",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config",
+     "data",
+     "uuid"
+    ],
+    "definitions": [
+     {
+      "package": "pos_qfpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_qfpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "razorpay_make_refund_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_razorpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "razorpay_make_payment_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_razorpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "razorpay_fetch_payment_status",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_razorpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "razorpay_cancel_payment_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_razorpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_razorpay_terminal",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_razorpay",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "use_payment_terminal"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This Payment Terminal is only valid for INR Currency",
+        "line": 123
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_stripe_serial_number",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_stripe",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "stripe_serial_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Terminal %(terminal)s is already used on payment method %(payment_method)s.",
+        "line": 34
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_stripe_payment_provider",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_stripe",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Stripe payment provider for company %s is missing",
+        "line": 44
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "stripe_connection_token",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_stripe",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Do not have access to fetch token from Stripe",
+        "line": 51
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_stripe_calculate_amount",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "pos_stripe",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "stripe_payment_intent",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "pos_stripe",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Do not have access to fetch token from Stripe",
+        "line": 61
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "stripe_refund",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "payment_intent_id",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "pos_stripe",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Do not have access to refund Stripe payment",
+        "line": 85
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "stripe_capture_payment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "paymentIntentId",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "pos_stripe",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Captures the payment identified by paymentIntentId.\n\n:param paymentIntentId: the id of the payment to capture\n:param amount: without this parameter the entire authorized\n               amount is captured. Specifying a larger amount allows\n               overcapturing to support tips.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Do not have access to fetch token from Stripe",
+        "line": 108
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_stripe_key",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_stripe",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_business_short_code",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "business_short_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "validation_error",
+        "line": 39
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_business_shortcode",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_till_number",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_express_stkpush_endpoint",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "STK Push endpoint",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_oauth_endpoint",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "OAuth endpoint to get access token",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lipa_na_mpesa_register_endpoint",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_qr_code_endpoint",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_bearer_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "Get OAuth access token",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Consumer Key and Consumer Secret are required for Safaricom M-Pesa",
+        "line": 98
+       },
+       {
+        "kind": "UserError",
+        "message": "Failed to retrieve access token from Safaricom",
+        "line": 113
+       },
+       {
+        "kind": "UserError",
+        "message": "Failed to retrieve access token from Safaricom",
+        "line": 118
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_password",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "timestamp"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "Generate password for STK Push",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_phone_number",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "phone"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "Format phone number to Safaricom format (254XXXXXXXXX)",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mpesa_express_send_payment_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "Send STK Push payment request to customer's phone",
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_stk_callback",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "stk_callback"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "Parse an STK Push callback and notify active POS sessions",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "lipa_na_mpesa_register_urls",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "Register C2B URLs for Lipa na M-PESA\nThe ValidationURL is the URL that will be called to validate the payment before charges the customer if business has activated it.\nThe ConfirmationURL is the URL that will be called when the payment is successful or unsuccessful.\nThe ResponseType is set to Completed to charge the customer even if the ValidationURL returns an error or is unreachable.\n\nThis is a one-time API call. URLs should only be registered once unless force_register is True.",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Could not find base url. Please set up web.base.url to a valid https address",
+        "line": 238
+       },
+       {
+        "kind": "UserError",
+        "message": "Failed to register URLs: %s",
+        "line": 269
+       },
+       {
+        "kind": "UserError",
+        "message": "Failed to register URLs. Check your credentials and try again.",
+        "line": 272
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_payment_transaction",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "trans_id",
+     "trans_amount",
+     "msisdn",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "Create a payment transaction for the payment",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mark_transaction_used",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "transaction_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "generate_qr_code",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_safaricom",
+      "decorators": [],
+      "documentation": "Generate QR Code for Lipa na M-PESA with all informations needed to pay",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_viva_com_account_get_endpoint",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_viva_com_api_get_endpoint",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_viva_com_webhook_get_endpoint",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_viva_com_webhook_endpoint",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_bearer_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "session"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to retrieve Viva.com Bearer Token: Please verify that the Client ID and Client Secret are correct",
+        "line": 82
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_call_viva_com",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "endpoint",
+     "action",
+     "data",
+     "should_retry"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_retrieve_session_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data_webhook"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_notification",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "viva_com_send_payment_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only 'group_pos_user' are allowed to send a Viva.com payment request",
+        "line": 146
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "viva_com_send_refund_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only 'group_pos_user' are allowed to send a Viva.com refund request",
+        "line": 153
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "viva_com_send_payment_cancel",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only 'group_pos_user' are allowed to cancel a Viva.com payment",
+        "line": 160
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "viva_com_get_payment_status",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "session_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only 'group_pos_user' are allowed to get the payment status from Viva.com",
+        "line": 169
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "get_latest_viva_com_status",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_viva_com_credentials",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_viva_com",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "use_payment_terminal"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "It is essential to provide API key for the use of Viva.com",
+        "line": 221
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_onchange_journal_id",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Only journals of type 'Cash' or 'Bank' could be used with payment methods."
+   },
+   {
+    "operation": "write",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Please close and validate the following open PoS Sessions before modifying this payment method.\nOpen sessions: %s"
+   },
+   {
+    "operation": "_check_payment_method",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "At least one bank account must be defined on the journal to allow registering QR code payments with Bank apps."
+   },
+   {
+    "operation": "_check_payment_method",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You must select a QR-code method to generate QR-codes for this payment method."
+   },
+   {
+    "operation": "_check_payment_method",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "_check_company_config",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The points of sale for the payment method %s must belong to its company."
+   },
+   {
+    "operation": "_check_cash_method_single_shop",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "Validation Error: You cannot assign the same Cash payment method to multiple POS Shops. Please create a separate Cash payment method for each shop."
+   },
+   {
+    "operation": "get_qr_code",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "This payment method is not configured to generate QR codes."
+   },
+   {
+    "operation": "l10n_id_verify_qris_status",
+    "package": "l10n_id_pos",
+    "kind": "UserError",
+    "message": "No QRIS transaction record is found based on this order"
+   },
+   {
+    "operation": "_check_adyen_terminal_identifier",
+    "package": "pos_adyen",
+    "kind": "ValidationError",
+    "message": "Terminal %(terminal)s is already used on payment method %(payment_method)s."
+   },
+   {
+    "operation": "_check_adyen_terminal_identifier",
+    "package": "pos_adyen",
+    "kind": "ValidationError",
+    "message": "Terminal %(terminal)s is already used in company %(company)s on payment method %(payment_method)s."
+   },
+   {
+    "operation": "proxy_adyen_request",
+    "package": "pos_adyen",
+    "kind": "UserError",
+    "message": "Invalid Adyen request"
+   },
+   {
+    "operation": "proxy_adyen_request",
+    "package": "pos_adyen",
+    "kind": "UserError",
+    "message": "Invalid Adyen request"
+   },
+   {
+    "operation": "_generate_dpopay_token",
+    "package": "pos_dpopay",
+    "kind": "UserError",
+    "message": "Unable to retrieve DPO Pay bearer token: check Client ID and Client Secret."
+   },
+   {
+    "operation": "_execute_dpopay_api_request",
+    "package": "pos_dpopay",
+    "kind": "UserError",
+    "message": "Invalid endpoint"
+   },
+   {
+    "operation": "_check_special_access",
+    "package": "pos_mercado_pago",
+    "kind": "AccessError",
+    "message": "Do not have access to fetch token from Mercado Pago"
+   },
+   {
+    "operation": "force_pdv",
+    "package": "pos_mercado_pago",
+    "kind": "UserError",
+    "message": "Unexpected Mercado Pago response: %s"
+   },
+   {
+    "operation": "_find_terminal",
+    "package": "pos_mercado_pago",
+    "kind": "UserError",
+    "message": "Please verify your production user token as it was rejected"
+   },
+   {
+    "operation": "_find_terminal",
+    "package": "pos_mercado_pago",
+    "kind": "UserError",
+    "message": "The terminal serial number is not registered on Mercado Pago"
+   },
+   {
+    "operation": "mollie_create_payment",
+    "package": "pos_mollie",
+    "kind": "ValidationError",
+    "message": "Please set the API key on the Mollie payment provider before making a payment."
+   },
+   {
+    "operation": "_get_online_payment_providers",
+    "package": "pos_online_payment",
+    "kind": "ValidationError",
+    "message": "All payment providers configured for an online payment method must use the same currency as the Sales Journal, or the company currency if that is not set, of the POS config."
+   },
+   {
+    "operation": "_check_pos_config_online_payment",
+    "package": "pos_online_payment",
+    "kind": "ValidationError",
+    "message": "The %s already has one online payment."
+   },
+   {
+    "operation": "_get_or_create_online_payment_method",
+    "package": "pos_online_payment",
+    "kind": "ValidationError",
+    "message": "Could not create an online payment method (company_id=%(company_id)d, pos_config_id=%(pos_config_id)d)"
+   },
+   {
+    "operation": "_check_pine_labs_terminal",
+    "package": "pos_pine_labs",
+    "kind": "UserError",
+    "message": "This Payment Terminal is only valid for INR Currency"
+   },
+   {
+    "operation": "_check_qfpay_terminal",
+    "package": "pos_qfpay",
+    "kind": "UserError",
+    "message": "QFPay is only valid for HKD Currency"
+   },
+   {
+    "operation": "qfpay_sign_request",
+    "package": "pos_qfpay",
+    "kind": "UserError",
+    "message": "This method can only be used with QFPay payment terminal."
+   },
+   {
+    "operation": "_check_razorpay_terminal",
+    "package": "pos_razorpay",
+    "kind": "UserError",
+    "message": "This Payment Terminal is only valid for INR Currency"
+   },
+   {
+    "operation": "_check_stripe_serial_number",
+    "package": "pos_stripe",
+    "kind": "ValidationError",
+    "message": "Terminal %(terminal)s is already used on payment method %(payment_method)s."
+   },
+   {
+    "operation": "_get_stripe_payment_provider",
+    "package": "pos_stripe",
+    "kind": "UserError",
+    "message": "Stripe payment provider for company %s is missing"
+   },
+   {
+    "operation": "stripe_connection_token",
+    "package": "pos_stripe",
+    "kind": "AccessError",
+    "message": "Do not have access to fetch token from Stripe"
+   },
+   {
+    "operation": "stripe_payment_intent",
+    "package": "pos_stripe",
+    "kind": "AccessError",
+    "message": "Do not have access to fetch token from Stripe"
+   },
+   {
+    "operation": "stripe_refund",
+    "package": "pos_stripe",
+    "kind": "AccessError",
+    "message": "Do not have access to refund Stripe payment"
+   },
+   {
+    "operation": "stripe_capture_payment",
+    "package": "pos_stripe",
+    "kind": "AccessError",
+    "message": "Do not have access to fetch token from Stripe"
+   },
+   {
+    "operation": "_check_business_short_code",
+    "package": "pos_safaricom",
+    "kind": "ValidationError",
+    "message": "validation_error"
+   },
+   {
+    "operation": "_get_bearer_token",
+    "package": "pos_safaricom",
+    "kind": "UserError",
+    "message": "Consumer Key and Consumer Secret are required for Safaricom M-Pesa"
+   },
+   {
+    "operation": "_get_bearer_token",
+    "package": "pos_safaricom",
+    "kind": "UserError",
+    "message": "Failed to retrieve access token from Safaricom"
+   },
+   {
+    "operation": "_get_bearer_token",
+    "package": "pos_safaricom",
+    "kind": "UserError",
+    "message": "Failed to retrieve access token from Safaricom"
+   },
+   {
+    "operation": "lipa_na_mpesa_register_urls",
+    "package": "pos_safaricom",
+    "kind": "UserError",
+    "message": "Could not find base url. Please set up web.base.url to a valid https address"
+   },
+   {
+    "operation": "lipa_na_mpesa_register_urls",
+    "package": "pos_safaricom",
+    "kind": "UserError",
+    "message": "Failed to register URLs: %s"
+   },
+   {
+    "operation": "lipa_na_mpesa_register_urls",
+    "package": "pos_safaricom",
+    "kind": "UserError",
+    "message": "Failed to register URLs. Check your credentials and try again."
+   },
+   {
+    "operation": "_bearer_token",
+    "package": "pos_viva_com",
+    "kind": "UserError",
+    "message": "Unable to retrieve Viva.com Bearer Token: Please verify that the Client ID and Client Secret are correct"
+   },
+   {
+    "operation": "viva_com_send_payment_request",
+    "package": "pos_viva_com",
+    "kind": "AccessError",
+    "message": "Only 'group_pos_user' are allowed to send a Viva.com payment request"
+   },
+   {
+    "operation": "viva_com_send_refund_request",
+    "package": "pos_viva_com",
+    "kind": "AccessError",
+    "message": "Only 'group_pos_user' are allowed to send a Viva.com refund request"
+   },
+   {
+    "operation": "viva_com_send_payment_cancel",
+    "package": "pos_viva_com",
+    "kind": "AccessError",
+    "message": "Only 'group_pos_user' are allowed to cancel a Viva.com payment"
+   },
+   {
+    "operation": "viva_com_get_payment_status",
+    "package": "pos_viva_com",
+    "kind": "AccessError",
+    "message": "Only 'group_pos_user' are allowed to get the payment status from Viva.com"
+   },
+   {
+    "operation": "write",
+    "package": "pos_viva_com",
+    "kind": "UserError",
+    "message": "Can't update payment method. Please check the data and update it."
+   },
+   {
+    "operation": "create",
+    "package": "pos_viva_com",
+    "kind": "UserError",
+    "message": "Can't create payment method. Please check the data and update it."
+   },
+   {
+    "operation": "_check_viva_com_credentials",
+    "package": "pos_viva_com",
+    "kind": "UserError",
+    "message": "It is essential to provide API key for the use of Viva.com"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_pos_payment_method_user",
+    "package": "point_of_sale",
+    "name": "pos.payment.method user",
+    "entity": "pos.payment.method",
+    "group": "group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "point_of_sale.access_pos_payment_method_manager",
+    "package": "point_of_sale",
+    "name": "pos.payment.method manager",
+    "entity": "pos.payment.method",
+    "group": "group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "point_of_sale.rule_pos_payment_method_multi_company",
+    "package": "point_of_sale",
+    "name": "PoS Payment Method",
+    "entity": "pos.payment.method",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "l10n_jo_edi_pos.pos_payment_method_view_form",
+    "package": "l10n_jo_edi_pos",
+    "name": "pos.payment.method.form",
+    "view_type": "field",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "company_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "position": "after"
+      },
+      {
+       "name": "l10n_jo_edi_pos_is_cash",
+       "invisible": "country_code != 'JO'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.pos_payment_method_view_form",
+    "package": "point_of_sale",
+    "name": "pos.payment.method.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Payment Methods"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "type",
+       "invisible": "1"
+      },
+      {
+       "name": "default_pos_receivable_account_name",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Cash"
+      },
+      {
+       "name": "image",
+       "widget": "image"
+      },
+      {
+       "name": "split_transactions"
+      },
+      {
+       "name": "journal_id",
+       "required": "not split_transactions",
+       "placeholder": "Leave empty to use the receivable account of customer"
+      },
+      {
+       "name": "outstanding_account_id",
+       "invisible": "type != 'bank'",
+       "required": "type == 'bank'",
+       "groups": "account.group_account_readonly",
+       "placeholder": "Selection of outstanding account is required"
+      },
+      {
+       "name": "receivable_account_id",
+       "widget": "many2one",
+       "invisible": "split_transactions",
+       "options": "{'placeholder_field': 'default_pos_receivable_account_name'}",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "config_ids",
+       "widget": "many2many_tags",
+       "placeholder": "No Point of Sale"
+      },
+      {
+       "name": "hide_use_payment_terminal",
+       "invisible": "1"
+      },
+      {
+       "name": "hide_qr_code_method",
+       "invisible": "1"
+      },
+      {
+       "name": "payment_method_type"
+      },
+      {
+       "name": "use_payment_terminal",
+       "invisible": "hide_use_payment_terminal",
+       "string": "Integrate with"
+      },
+      {
+       "name": "qr_code_method",
+       "invisible": "hide_qr_code_method",
+       "required": "payment_method_type == 'qr_code'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "many2one": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.pos_payment_method_view_tree",
+    "package": "point_of_sale",
+    "name": "pos.payment.method.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Payment Methods",
+      "create": "1",
+      "delete": "1"
+     },
+     "fields": [
+      {
+       "name": "type",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "split_transactions",
+       "optional": "hide"
+      },
+      {
+       "name": "journal_id",
+       "required": "not split_transactions"
+      },
+      {
+       "name": "outstanding_account_id",
+       "invisible": "type != 'bank'",
+       "optional": "hide",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "receivable_account_id",
+       "invisible": "split_transactions",
+       "optional": "hide",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "config_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "1",
+     "delete": "1",
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.pos_payment_method_view_search",
+    "package": "point_of_sale",
+    "name": "pos.payment.search.view",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Payment Methods"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "receivable_account_id",
+       "groups": "account.group_account_readonly"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "active",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_receivable_account",
+       "string": "Account",
+       "domain": "[]",
+       "context": "{'group_by':'receivable_account_id'}"
+      },
+      {
+       "name": "group_by_pos_config",
+       "string": "Point of Sale",
+       "domain": "[]",
+       "context": "{'group_by':'config_ids'}"
+      },
+      {
+       "name": "group_by_method_name",
+       "string": "Method Name",
+       "domain": "[]",
+       "context": "{'group_by':'name'}"
+      },
+      {
+       "name": "group_by_journal_id",
+       "string": "Journal",
+       "domain": "[]",
+       "context": "{'group_by':'journal_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "pos_adyen.pos_payment_method_view_form_inherit_pos_adyen",
+    "package": "pos_adyen",
+    "name": "pos.payment.method.form.inherit.adyen",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "adyen_api_key",
+       "invisible": "use_payment_terminal != 'adyen'",
+       "required": "use_payment_terminal == 'adyen'"
+      },
+      {
+       "name": "adyen_terminal_identifier",
+       "invisible": "use_payment_terminal != 'adyen'",
+       "required": "use_payment_terminal == 'adyen'"
+      },
+      {
+       "name": "adyen_event_url",
+       "widget": "CopyClipboardChar",
+       "invisible": "use_payment_terminal != 'adyen'"
+      },
+      {
+       "name": "adyen_test_mode",
+       "invisible": "use_payment_terminal != 'adyen'",
+       "required": "use_payment_terminal == 'adyen'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "CopyClipboardChar": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_cashdro.pos_payment_method_view_form_inherit_pos_cashdro",
+    "package": "pos_cashdro",
+    "name": "pos.payment.method.form.inherit.cashdro",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//sheet",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "cashdro_ip",
+       "required": "payment_method_type == 'cashdro'"
+      },
+      {
+       "name": "cashdro_username"
+      },
+      {
+       "name": "cashdro_password"
+      },
+      {
+       "name": "cashdro_use_lna"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "settings",
+       "string": "Cashdro Settings",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//sheet",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_cashmatic.pos_payment_method_view_form_inherit_pos_cashmatic",
+    "package": "pos_cashmatic",
+    "name": "pos.payment.method.form.inherit.cashmatic",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//sheet",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "cashmatic_ip",
+       "required": "payment_method_type == 'cashmatic'"
+      },
+      {
+       "name": "cashmatic_username",
+       "required": "payment_method_type == 'cashmatic'"
+      },
+      {
+       "name": "cashmatic_password",
+       "required": "payment_method_type == 'cashmatic'"
+      },
+      {
+       "name": "cashmatic_use_lna"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "settings",
+       "string": "Cashmatic Settings",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//sheet",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_dpopay.pos_payment_method_view_form_inherit_pos_dpopay",
+    "package": "pos_dpopay",
+    "name": "pos.payment.method.form.inherit.pos.dpopay",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//sheet",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "dpopay_client_id",
+       "required": "use_payment_terminal == 'dpopay'"
+      },
+      {
+       "name": "dpopay_client_secret",
+       "required": "use_payment_terminal == 'dpopay'"
+      },
+      {
+       "name": "dpopay_mid",
+       "required": "use_payment_terminal == 'dpopay'"
+      },
+      {
+       "name": "dpopay_tid",
+       "required": "use_payment_terminal == 'dpopay'"
+      },
+      {
+       "name": "dpopay_chain_id",
+       "required": "use_payment_terminal == 'dpopay'"
+      },
+      {
+       "name": "dpopay_payment_mode",
+       "required": "use_payment_terminal == 'dpopay'"
+      },
+      {
+       "name": "dpopay_test_mode",
+       "required": "use_payment_terminal == 'dpopay'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "settings",
+       "string": "DPO Pay",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//sheet",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_glory_cash.pos_payment_method_view_form_inherit_pos_glory_cash",
+    "package": "pos_glory_cash",
+    "name": "pos.payment.method.form.inherit.glory",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//sheet",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "glory_websocket_address",
+       "required": "payment_method_type == 'glory_cash'"
+      },
+      {
+       "name": "glory_username"
+      },
+      {
+       "name": "glory_password"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "settings",
+       "string": "Glory Settings",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//sheet",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_mercado_pago.pos_payment_method_view_form_inherit_pos_mercado_pago",
+    "package": "pos_mercado_pago",
+    "name": "pos.payment.method.form.inherit.mercado_pago",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mp_bearer_token",
+       "invisible": "use_payment_terminal != 'mercado_pago'",
+       "required": "use_payment_terminal == 'mercado_pago'",
+       "placeholder": "APP_USR-..."
+      },
+      {
+       "name": "mp_webhook_secret_key",
+       "invisible": "use_payment_terminal != 'mercado_pago'",
+       "required": "use_payment_terminal == 'mercado_pago'",
+       "placeholder": "c2f3662..."
+      },
+      {
+       "name": "mp_id_point_smart",
+       "invisible": "use_payment_terminal != 'mercado_pago'",
+       "required": "use_payment_terminal == 'mercado_pago'",
+       "placeholder": "1494126963"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "force_pdv",
+       "string": "Force PDV",
+       "type": "object",
+       "invisible": "use_payment_terminal != 'mercado_pago'",
+       "class": "oe_highlight",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_mollie.pos_payment_method_view_form_inherit_pos_mollie",
+    "package": "pos_mollie",
+    "name": "pos.payment.method.form.inherit.mollie",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mollie_payment_provider_id",
+       "invisible": "use_payment_terminal != 'mollie'",
+       "required": "use_payment_terminal == 'mollie'"
+      },
+      {
+       "name": "mollie_terminal_id",
+       "invisible": "use_payment_terminal != 'mollie'",
+       "required": "use_payment_terminal == 'mollie'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_online_payment.pos_payment_method_view_form_inherit_pos_online_payment",
+    "package": "pos_online_payment",
+    "name": "pos.payment.method.form.inherit.pos_online_payment",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form/sheet",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "has_an_online_payment_provider",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form/sheet",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_online_payment.pos_payment_method_view_tree_inherit_pos_online_payment",
+    "package": "pos_online_payment",
+    "name": "pos.payment.method.list.inherit.pos_online_payment",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_pine_labs.pos_payment_method_view_form_inherit_pos_pine_labs",
+    "package": "pos_pine_labs",
+    "name": "pos.payment.method.form.inherit.pos.pine.labs",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "pine_labs_merchant",
+       "invisible": "use_payment_terminal != 'pine_labs'",
+       "required": "use_payment_terminal == 'pine_labs'"
+      },
+      {
+       "name": "pine_labs_store",
+       "invisible": "use_payment_terminal != 'pine_labs'",
+       "required": "use_payment_terminal == 'pine_labs'"
+      },
+      {
+       "name": "pine_labs_client",
+       "invisible": "use_payment_terminal != 'pine_labs'",
+       "required": "use_payment_terminal == 'pine_labs'"
+      },
+      {
+       "name": "pine_labs_security_token",
+       "invisible": "use_payment_terminal != 'pine_labs'",
+       "required": "use_payment_terminal == 'pine_labs'"
+      },
+      {
+       "name": "pine_labs_allowed_payment_mode",
+       "invisible": "use_payment_terminal != 'pine_labs'",
+       "required": "use_payment_terminal == 'pine_labs'"
+      },
+      {
+       "name": "pine_labs_test_mode",
+       "invisible": "use_payment_terminal != 'pine_labs'",
+       "required": "use_payment_terminal == 'pine_labs'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_qfpay.pos_payment_method_view_form",
+    "package": "pos_qfpay",
+    "name": "pos.payment.method.form.inherit.pos_qfpay",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "qfpay_terminal_ip_address",
+       "invisible": "use_payment_terminal != 'qfpay'",
+       "required": "use_payment_terminal == 'qfpay'"
+      },
+      {
+       "name": "qfpay_pos_key",
+       "invisible": "use_payment_terminal != 'qfpay'",
+       "required": "use_payment_terminal == 'qfpay'"
+      },
+      {
+       "name": "qfpay_payment_type",
+       "invisible": "use_payment_terminal != 'qfpay'",
+       "required": "use_payment_terminal == 'qfpay'"
+      },
+      {
+       "name": "qfpay_notification_key",
+       "invisible": "use_payment_terminal != 'qfpay'",
+       "required": "use_payment_terminal == 'qfpay'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_razorpay.pos_payment_method_view_form_inherit_pos_razorpay",
+    "package": "pos_razorpay",
+    "name": "pos.payment.method.form.inherit.razorpay",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "razorpay_username",
+       "invisible": "use_payment_terminal != 'razorpay'",
+       "required": "use_payment_terminal == 'razorpay'"
+      },
+      {
+       "name": "razorpay_tid",
+       "invisible": "use_payment_terminal != 'razorpay'",
+       "required": "use_payment_terminal == 'razorpay'"
+      },
+      {
+       "name": "razorpay_api_key",
+       "invisible": "use_payment_terminal != 'razorpay'",
+       "required": "use_payment_terminal == 'razorpay'"
+      },
+      {
+       "name": "razorpay_test_mode",
+       "invisible": "use_payment_terminal != 'razorpay'",
+       "required": "use_payment_terminal == 'razorpay'"
+      },
+      {
+       "name": "razorpay_allowed_payment_modes",
+       "invisible": "use_payment_terminal != 'razorpay'",
+       "required": "use_payment_terminal == 'razorpay'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_restaurant_adyen.pos_payment_method_view_form_inherit_pos_restaurant_adyen",
+    "package": "pos_restaurant_adyen",
+    "name": "pos.payment.method.form.inherit.restaurant.adyen",
+    "view_type": "xpath",
+    "inherits_view": "pos_adyen.pos_payment_method_view_form_inherit_pos_adyen",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='adyen_terminal_identifier']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "adyen_merchant_account",
+       "invisible": "use_payment_terminal != 'adyen'",
+       "required": "use_payment_terminal == 'adyen'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='adyen_terminal_identifier']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_safaricom.pos_payment_method_view_form_inherit_pos_safaricom",
+    "package": "pos_safaricom",
+    "name": "pos.payment.method.form.inherit.safaricom",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "safaricom_test_mode",
+       "widget": "boolean_toggle",
+       "invisible": "use_payment_terminal != 'safaricom'"
+      },
+      {
+       "name": "safaricom_payment_type",
+       "invisible": "use_payment_terminal != 'safaricom'",
+       "required": "use_payment_terminal == 'safaricom'"
+      },
+      {
+       "name": "consumer_key",
+       "invisible": "use_payment_terminal != 'safaricom'",
+       "required": "use_payment_terminal == 'safaricom'"
+      },
+      {
+       "name": "consumer_secret",
+       "invisible": "use_payment_terminal != 'safaricom'",
+       "required": "use_payment_terminal == 'safaricom'"
+      },
+      {
+       "name": "business_short_code",
+       "invisible": "use_payment_terminal != 'safaricom'",
+       "required": "use_payment_terminal == 'safaricom'"
+      },
+      {
+       "name": "passkey",
+       "invisible": "use_payment_terminal != 'safaricom' or safaricom_payment_type != 'mpesa_express'",
+       "required": "use_payment_terminal == 'safaricom' and safaricom_payment_type == 'mpesa_express'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "lipa_na_mpesa_register_urls",
+       "string": "Register URLs",
+       "type": "object",
+       "class": "btn-secondary",
+       "icon": "fa-refresh"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_stripe.pos_payment_method_view_form_inherit_pos_stripe",
+    "package": "pos_stripe",
+    "name": "pos.payment.method.form.inherit.stripe",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "stripe_serial_number",
+       "invisible": "use_payment_terminal != 'stripe'",
+       "required": "use_payment_terminal == 'stripe'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_stripe_key",
+       "string": "Don't forget to complete Stripe connect before using this payment method.",
+       "type": "object",
+       "class": "btn-link",
+       "icon": "oi-arrow-right"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_viva_com.pos_payment_method_view_form_inherit_pos_viva_com",
+    "package": "pos_viva_com",
+    "name": "pos.payment.method.form.inherit.viva.com",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_payment_method_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "viva_com_merchant_id",
+       "invisible": "use_payment_terminal != 'viva_com'",
+       "required": "use_payment_terminal == 'viva_com'"
+      },
+      {
+       "name": "viva_com_api_key",
+       "invisible": "use_payment_terminal != 'viva_com'",
+       "required": "use_payment_terminal == 'viva_com'"
+      },
+      {
+       "name": "viva_com_client_id",
+       "invisible": "use_payment_terminal != 'viva_com'",
+       "required": "use_payment_terminal == 'viva_com'"
+      },
+      {
+       "name": "viva_com_client_secret",
+       "invisible": "use_payment_terminal != 'viva_com'",
+       "required": "use_payment_terminal == 'viva_com'"
+      },
+      {
+       "name": "viva_com_test_mode",
+       "invisible": "use_payment_terminal != 'viva_com'",
+       "required": "use_payment_terminal == 'viva_com'"
+      },
+      {
+       "name": "viva_com_terminal_id",
+       "invisible": "use_payment_terminal != 'viva_com'",
+       "required": "use_payment_terminal == 'viva_com'"
+      },
+      {
+       "name": "viva_com_webhook_endpoint",
+       "widget": "CopyClipboardChar",
+       "invisible": "use_payment_terminal != 'viva_com' or not id",
+       "required": "use_payment_terminal == 'viva_com'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "CopyClipboardChar": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='use_payment_terminal']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "point_of_sale.action_pos_payment_method_form",
+    "package": "point_of_sale",
+    "name": "Payment Methods",
+    "view_mode": "list,kanban,form",
+    "view_id": "False",
+    "search_view_id": null,
+    "domain": "[]",
+    "context": "{'search_default_group_by_account': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Add a new payment method\n            </p>\n            <p>\n                Installing chart of accounts from the General Settings of\n                Invocing/Accounting app will create Bank and Cash payment\n                methods automatically.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "pos.payment.method"
+   },
+   {
+    "external_identifier": "point_of_sale.action_payment_methods_tree",
+    "package": "point_of_sale",
+    "name": "Payments Methods",
+    "view_mode": "list,form,kanban",
+    "view_id": "pos_payment_method_view_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "pos.payment.method"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

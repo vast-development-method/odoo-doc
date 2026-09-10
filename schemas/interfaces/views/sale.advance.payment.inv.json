@@ -1,0 +1,137 @@
+{
+ "catalog": {
+  "name": "views:sale.advance.payment.inv",
+  "description": "View declarations for entity sale.advance.payment.inv.",
+  "record_count": 2,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "sale.view_sale_advance_payment_inv",
+   "package": "sale",
+   "name": "Invoice Orders",
+   "entity": "sale.advance.payment.inv",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Invoice Sales Order"
+    },
+    "fields": [
+     {
+      "name": "display_draft_invoice_warning",
+      "invisible": "1"
+     },
+     {
+      "name": "has_down_payments",
+      "invisible": "1"
+     },
+     {
+      "name": "sale_order_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "count",
+      "invisible": "count == 1"
+     },
+     {
+      "name": "consolidated_billing",
+      "invisible": "count == 1"
+     },
+     {
+      "name": "advance_payment_method",
+      "widget": "radio",
+      "invisible": "count > 1"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "fixed_amount",
+      "invisible": "advance_payment_method != 'fixed'",
+      "required": "advance_payment_method == 'fixed'"
+     },
+     {
+      "name": "amount",
+      "invisible": "advance_payment_method != 'percentage'",
+      "required": "advance_payment_method == 'percentage'"
+     },
+     {
+      "name": "amount_invoiced"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "create_invoices",
+      "string": "Create Draft",
+      "type": "object",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Cancel",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "radio": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Invoice Sales Order\">\n                <field name=\"display_draft_invoice_warning\" invisible=\"1\"/>\n                <field name=\"has_down_payments\" invisible=\"1\"/>\n                <div class=\"alert alert-warning pb-1\" role=\"alert\" invisible=\"not display_draft_invoice_warning\">\n                    <p>There are existing <a name=\"view_draft_invoices\" type=\"object\">Draft Invoices</a> for this Sale Order.</p>\n                    <p invisible=\"advance_payment_method != 'delivered'\">\n                        The new invoice will deduct draft invoices linked to this sale order.\n                    </p>\n                </div>\n                <group>\n                    <field name=\"sale_order_ids\" invisible=\"1\"/>\n                    <field name=\"count\" invisible=\"count == 1\"/>\n                    <field name=\"consolidated_billing\" invisible=\"count == 1\"/>\n                    <field name=\"advance_payment_method\" class=\"oe_inline\" widget=\"radio\" invisible=\"count &gt; 1\"/>\n                </group>\n                <group name=\"down_payment_specification\" invisible=\"advance_payment_method not in ('fixed', 'percentage')\">\n                    <field name=\"company_id\" invisible=\"1\"/>\n                    <label for=\"fixed_amount\" invisible=\"advance_payment_method != 'fixed'\"/>\n                    <label for=\"amount\" invisible=\"advance_payment_method != 'percentage'\"/>\n                    <div id=\"payment_method_details\">\n                        <field name=\"currency_id\" invisible=\"1\"/>\n                        <field name=\"fixed_amount\" invisible=\"advance_payment_method != 'fixed'\" required=\"advance_payment_method == 'fixed'\" class=\"oe_inline\"/>\n                        <field name=\"amount\" invisible=\"advance_payment_method != 'percentage'\" required=\"advance_payment_method == 'percentage'\" class=\"oe_inline\"/>\n                        <span invisible=\"advance_payment_method != 'percentage'\" class=\"oe_inline\">% </span>\n                    </div>\n                </group>\n                <group invisible=\"not has_down_payments\">\n                    <field name=\"amount_invoiced\"/>\n                </group>\n                <footer>\n                    <button name=\"create_invoices\" type=\"object\" id=\"create_invoice_open\" string=\"Create Draft\" class=\"btn-primary\" data-hotkey=\"q\"/>\n                    <button string=\"Cancel\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.sale_advance_payment_inv_timesheet_view_form",
+   "package": "sale_timesheet",
+   "name": "sale_timesheet.sale.advance.payment.inv.view.form",
+   "entity": "sale.advance.payment.inv",
+   "view_type": "form",
+   "inherits_view": "sale.view_sale_advance_payment_inv",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "form",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form position=\"attributes\">\n                <attribute name=\"disable_autofocus\">true</attribute>\n            </form>\n            <group name=\"down_payment_specification\" position=\"after\">\n                <field name=\"invoicing_timesheet_enabled\" invisible=\"1\"/>\n                <group name=\"timesheet_invoice_date_range\" invisible=\"not invoicing_timesheet_enabled or advance_payment_method != 'delivered'\">\n                    <field class=\"w-75 w-md-50 w-lg-25\" name=\"date_start_invoice_timesheet\" string=\"Timesheets Period\" widget=\"daterange\" required=\"date_start_invoice_timesheet or date_end_invoice_timesheet\" options=\"{'end_date_field': 'date_end_invoice_timesheet', 'always_range': 'true'}\" title=\"Only timesheets not yet invoiced (and validated, if applicable) from this period will be invoiced. If the period is not indicated, all timesheets not yet invoiced (and validated, if applicable) will be invoiced without distinction.\"/>\n                    <field name=\"date_end_invoice_timesheet\" invisible=\"1\"/>\n                </group>\n            </group>\n        </field>\n    "
+  }
+ ]
+}

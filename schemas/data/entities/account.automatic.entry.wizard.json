@@ -1,0 +1,1086 @@
+{
+ "catalog": {
+  "name": "entity:account.automatic.entry.wizard",
+  "description": "Complete definition of entity Create Automatic Entries (account.automatic.entry.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.automatic.entry.wizard",
+  "storage_name": "account_automatic_entry_wizard",
+  "full_name": "Create Automatic Entries",
+  "kind": "transient",
+  "description": "Create Automatic Entries",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "account_fleet"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "action",
+    "type": "Selection",
+    "selection": [
+     [
+      "change_period",
+      "Change Period"
+     ],
+     [
+      "change_account",
+      "Change Account"
+     ]
+    ],
+    "required": true,
+    "defined_in_package": "account",
+    "string": "Action",
+    "full_name": "Action"
+   },
+   {
+    "name": "move_data",
+    "type": "Text",
+    "compute": "_compute_move_data",
+    "defined_in_package": "account",
+    "string": "Move Data",
+    "full_name": "Move Data"
+   },
+   {
+    "name": "preview_move_data",
+    "type": "Text",
+    "compute": "_compute_preview_move_data",
+    "defined_in_package": "account",
+    "string": "Preview Move Data",
+    "full_name": "Preview Move Data"
+   },
+   {
+    "name": "move_line_ids",
+    "type": "Many2many",
+    "comodel": "account.move.line",
+    "defined_in_package": "account",
+    "string": "Move Line",
+    "full_name": "Move Line",
+    "target_entity": "account.move.line"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: fields.Date.context_today(self)"
+    },
+    "defined_in_package": "account",
+    "string": "Date",
+    "full_name": "Date"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "company_currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "company_id.currency_id",
+    "defined_in_package": "account",
+    "string": "Company Currency",
+    "full_name": "Company Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "percentage",
+    "type": "Float",
+    "string": "Percentage",
+    "compute": "_compute_percentage",
+    "readonly": false,
+    "store": true,
+    "help": "Percentage of each line to execute the action on.",
+    "defined_in_package": "account",
+    "full_name": "Percentage"
+   },
+   {
+    "name": "total_amount",
+    "type": "Monetary",
+    "compute": "_compute_total_amount",
+    "store": true,
+    "readonly": false,
+    "currency_field": "company_currency_id",
+    "help": "Total amount impacted by the automatic entry.",
+    "defined_in_package": "account",
+    "string": "Total Amount",
+    "full_name": "Total Amount"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "required": true,
+    "readonly": false,
+    "string": "Journal",
+    "check_company": true,
+    "domain": "[('type', '=', 'general')]",
+    "compute": "_compute_journal_id",
+    "inverse": "_inverse_journal_id",
+    "help": "Journal where to create the entry.",
+    "defined_in_package": "account",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "account_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "income",
+      "Revenue"
+     ],
+     [
+      "expense",
+      "Expense"
+     ]
+    ],
+    "compute": "_compute_account_type",
+    "store": true,
+    "defined_in_package": "account",
+    "string": "Account Type",
+    "full_name": "Account Type"
+   },
+   {
+    "name": "expense_accrual_account",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "readonly": false,
+    "check_company": true,
+    "domain": "[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]",
+    "compute": "_compute_expense_accrual_account",
+    "inverse": "_inverse_expense_accrual_account",
+    "defined_in_package": "account",
+    "string": "Expense Accrual Account",
+    "full_name": "Expense Accrual Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "revenue_accrual_account",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "readonly": false,
+    "check_company": true,
+    "domain": "[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]",
+    "compute": "_compute_revenue_accrual_account",
+    "inverse": "_inverse_revenue_accrual_account",
+    "defined_in_package": "account",
+    "string": "Revenue Accrual Account",
+    "full_name": "Revenue Accrual Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "lock_date_message",
+    "type": "Char",
+    "string": "Lock Date Message",
+    "compute": "_compute_lock_date_message",
+    "defined_in_package": "account",
+    "full_name": "Lock Date Message"
+   },
+   {
+    "name": "destination_account_id",
+    "type": "Many2one",
+    "string": "To",
+    "comodel": "account.account",
+    "help": "Account to transfer to.",
+    "check_company": true,
+    "defined_in_package": "account",
+    "full_name": "To",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "display_currency_helper",
+    "type": "Boolean",
+    "string": "Currency Conversion Helper",
+    "compute": "_compute_display_currency_helper",
+    "defined_in_package": "account",
+    "full_name": "Currency Conversion Helper"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_expense_accrual_account",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_expense_accrual_account",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_revenue_accrual_account",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_revenue_accrual_account",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_journal_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_journal_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constraint_percentage",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "percentage",
+         "action"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Percentage must be between 0 and 100",
+        "line": 88
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "percentage",
+         "move_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_percentage",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "total_amount",
+         "move_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lock_date_message",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "action",
+         "move_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_currency_helper",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "destination_account_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_date",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date",
+         "move_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The date selected is protected by: %(lock_date_info)s.",
+        "line": 131
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This can only be used on journal items",
+        "line": 143
+       },
+       {
+        "kind": "UserError",
+        "message": "Oops! You can only change the period or account for posted entries! Other ones aren't up for an adventure like that!",
+        "line": 148
+       },
+       {
+        "kind": "UserError",
+        "message": "Oops! You can only change the period or account for items that are not yet reconciled! Other ones aren't up for an adventure like that!",
+        "line": 150
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot use this wizard on journal entries belonging to different companies.",
+        "line": 152
+       },
+       {
+        "kind": "UserError",
+        "message": "No possible action found with the selected lines.",
+        "line": 161
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_cut_off_label_format",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Get the translated format string used in cut-off labels ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_move_dict_vals_change_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 92,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_move_line_dict_vals_change_period",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "aml",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lock_safe_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_move_dict_vals_change_period",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_move_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_line_ids",
+         "journal_id",
+         "revenue_accrual_account",
+         "expense_accrual_account",
+         "percentage",
+         "date",
+         "account_type",
+         "action",
+         "destination_account_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "All accounts on the lines must be of the same type.",
+        "line": 366
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_preview_move_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_data"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "do_action",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_do_action_change_period",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "move_vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_do_action_change_account",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "move_vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_new_transfer_move_log",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "acc_transfer_per_move"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_transfer_source_log",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "balances_per_account",
+     "transfer_move"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_move_link",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_strings",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "string",
+     "move",
+     "amount",
+     "account_source_name"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constraint_percentage",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Percentage must be between 0 and 100"
+   },
+   {
+    "operation": "_check_date",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The date selected is protected by: %(lock_date_info)s."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "This can only be used on journal items"
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Oops! You can only change the period or account for posted entries! Other ones aren't up for an adventure like that!"
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Oops! You can only change the period or account for items that are not yet reconciled! Other ones aren't up for an adventure like that!"
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot use this wizard on journal entries belonging to different companies."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "No possible action found with the selected lines."
+   },
+   {
+    "operation": "_compute_move_data",
+    "package": "account",
+    "kind": "UserError",
+    "message": "All accounts on the lines must be of the same type."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_automatic_entry_wizard",
+    "package": "account",
+    "name": "access.account.automatic.entry.wizard",
+    "entity": "account.automatic.entry.wizard",
+    "group": "account.group_account_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.account_automatic_entry_wizard_form",
+    "package": "account",
+    "name": "account.automatic.entry.wizard.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "account_type",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "move_line_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "display_currency_helper",
+       "invisible": "1"
+      },
+      {
+       "name": "action",
+       "invisible": "1"
+      },
+      {
+       "name": "lock_date_message",
+       "nolabel": "1"
+      },
+      {
+       "name": "date",
+       "string": "Recognition Date"
+      },
+      {
+       "name": "expense_accrual_account",
+       "invisible": "account_type != 'expense'",
+       "required": "account_type == 'expense' and action == 'change_period'",
+       "string": "Accrued Account"
+      },
+      {
+       "name": "revenue_accrual_account",
+       "invisible": "account_type != 'income'",
+       "required": "account_type == 'income' and action == 'change_period'",
+       "string": "Accrued Account"
+      },
+      {
+       "name": "date",
+       "string": "Transfer Date"
+      },
+      {
+       "name": "destination_account_id",
+       "required": "action == 'change_account'"
+      },
+      {
+       "name": "percentage",
+       "readonly": "action != 'change_period'"
+      },
+      {
+       "name": "total_amount"
+      },
+      {
+       "name": "total_amount",
+       "invisible": "action == 'change_period'",
+       "readonly": "1"
+      },
+      {
+       "name": "journal_id"
+      },
+      {
+       "name": "preview_move_data",
+       "widget": "grouped_view_widget"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "do_action",
+       "string": "Create Journal Entries",
+       "type": "object",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "grouped_view_widget": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.account_automatic_entry_wizard_action",
+    "package": "account",
+    "name": "Transfer Journal Items",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.automatic.entry.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

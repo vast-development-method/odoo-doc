@@ -1,0 +1,353 @@
+{
+ "catalog": {
+  "name": "entity:project.task.recurrence",
+  "description": "Complete definition of entity Task Recurrence (project.task.recurrence).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "project.task.recurrence",
+  "storage_name": "project_task_recurrence",
+  "full_name": "Task Recurrence",
+  "kind": "persistent",
+  "description": "Task Recurrence",
+  "defined_by_package": "project",
+  "extended_by_packages": [
+   "sale_project"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "task_ids",
+    "type": "One2many",
+    "comodel": "project.task",
+    "inverse_name": "recurrence_id",
+    "copy": false,
+    "defined_in_package": "project",
+    "string": "Task",
+    "full_name": "Task",
+    "target_entity": "project.task"
+   },
+   {
+    "name": "repeat_interval",
+    "type": "Integer",
+    "string": "Repeat Every",
+    "default": 1,
+    "defined_in_package": "project",
+    "full_name": "Repeat Every"
+   },
+   {
+    "name": "repeat_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "day",
+      "Days"
+     ],
+     [
+      "week",
+      "Weeks"
+     ],
+     [
+      "month",
+      "Months"
+     ],
+     [
+      "year",
+      "Years"
+     ]
+    ],
+    "default": "week",
+    "export_string_translation": false,
+    "defined_in_package": "project",
+    "string": "Repeat Unit",
+    "full_name": "Repeat Unit"
+   },
+   {
+    "name": "repeat_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "forever",
+      "Forever"
+     ],
+     [
+      "until",
+      "Until"
+     ]
+    ],
+    "default": "forever",
+    "string": "Until",
+    "defined_in_package": "project",
+    "full_name": "Until"
+   },
+   {
+    "name": "repeat_until",
+    "type": "Date",
+    "string": "End Date",
+    "defined_in_package": "project",
+    "full_name": "End Date"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_repeat_interval",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "repeat_interval"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The interval should be greater than 0",
+        "line": 32
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_repeat_until_date",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "repeat_type",
+         "repeat_until"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The end date should be in the future",
+        "line": 38
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_recurring_fields_to_copy",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recurring_fields_to_postpone",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_last_task_id_per_recurrence_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recurrence_delta",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_next_occurrences",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "occurrences_from"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_next_occurrences_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "recurrence_by_task"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_repeat_interval",
+    "package": "project",
+    "kind": "ValidationError",
+    "message": "The interval should be greater than 0"
+   },
+   {
+    "operation": "_check_repeat_until_date",
+    "package": "project",
+    "kind": "ValidationError",
+    "message": "The end date should be in the future"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "project.access_project_task_recurrence",
+    "package": "project",
+    "name": "project.task.recurrence",
+    "entity": "project.task.recurrence",
+    "group": "project.group_project_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

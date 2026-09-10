@@ -1,0 +1,393 @@
+{
+ "catalog": {
+  "name": "entity:slide.channel.invite",
+  "description": "Complete definition of entity Channel Invitation Wizard (slide.channel.invite).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "slide.channel.invite",
+  "storage_name": "slide_channel_invite",
+  "full_name": "Channel Invitation Wizard",
+  "kind": "transient",
+  "description": "Channel Invitation Wizard",
+  "defined_by_package": "website_slides",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.composer.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "string": "Attachments",
+    "bypass_search_access": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "send_email",
+    "type": "Boolean",
+    "string": "Send Email",
+    "compute": "_compute_send_email",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Send Email"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "string": "Recipients",
+    "defined_in_package": "website_slides",
+    "full_name": "Recipients",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "slide.channel",
+    "string": "Course",
+    "required": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Course",
+    "target_entity": "slide.channel"
+   },
+   {
+    "name": "channel_invite_url",
+    "type": "Char",
+    "string": "Course Link",
+    "compute": "_compute_channel_invite_url",
+    "defined_in_package": "website_slides",
+    "full_name": "Course Link"
+   },
+   {
+    "name": "channel_visibility",
+    "type": "Selection",
+    "related": "channel_id.visibility",
+    "defined_in_package": "website_slides",
+    "string": "Channel Visibility",
+    "full_name": "Channel Visibility"
+   },
+   {
+    "name": "channel_published",
+    "type": "Boolean",
+    "related": "channel_id.is_published",
+    "defined_in_package": "website_slides",
+    "string": "Channel Published",
+    "full_name": "Channel Published"
+   },
+   {
+    "name": "enroll_mode",
+    "type": "Boolean",
+    "string": "Enroll partners",
+    "readonly": true,
+    "help": "Whether invited partners will be added as enrolled. Otherwise, they will be added as invited.",
+    "defined_in_package": "website_slides",
+    "full_name": "Enroll partners"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_channel_invite_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_send_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id",
+         "enroll_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_invite",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Process the wizard content and proceed with sending the related email(s),\nrendering any template patterns on the fly if needed. This method is used both\nto add members as 'joined' (when adding attendees) and as 'invited' (on invitation),\ndepending on the value of enroll_mode. Archived members can be invited or enrolled.\nThey will become 'invited', or another status if enrolled depending on their progress.\nInvited members can be reinvited, or enrolled depending on enroll_mode. ",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to post message, please configure the sender's email address.",
+        "line": 62
+       },
+       {
+        "kind": "UserError",
+        "message": "Please select at least one recipient.",
+        "line": 64
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mail_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "slide_channel_partner"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Create mail specific for recipient ",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_invite",
+    "package": "website_slides",
+    "kind": "UserError",
+    "message": "Unable to post message, please configure the sender's email address."
+   },
+   {
+    "operation": "action_invite",
+    "package": "website_slides",
+    "kind": "UserError",
+    "message": "Please select at least one recipient."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_slides.access_slide_channel_invite",
+    "package": "website_slides",
+    "name": "access.slide.channel.invite",
+    "entity": "slide.channel.invite",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "website_slides.slide_channel_invite_view_form",
+    "package": "website_slides",
+    "name": "slide.channel.invite.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Compose Email",
+      "class": "o_mail_composer_form"
+     },
+     "fields": [
+      {
+       "name": "channel_id",
+       "invisible": "1"
+      },
+      {
+       "name": "channel_published",
+       "invisible": "1"
+      },
+      {
+       "name": "channel_visibility",
+       "invisible": "1"
+      },
+      {
+       "name": "enroll_mode",
+       "invisible": "1"
+      },
+      {
+       "name": "channel_invite_url",
+       "widget": "CopyClipboardChar",
+       "readonly": "1"
+      },
+      {
+       "name": "send_email",
+       "widget": "boolean_toggle",
+       "options": "{'autosave': False}"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags_email",
+       "required": "send_email",
+       "context": "{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}",
+       "options": "{'no_quick_create': True}",
+       "placeholder": "Add contacts..."
+      },
+      {
+       "name": "lang",
+       "invisible": "1"
+      },
+      {
+       "name": "render_model",
+       "invisible": "1"
+      },
+      {
+       "name": "subject",
+       "placeholder": "Subject..."
+      },
+      {
+       "name": "can_edit_body",
+       "invisible": "1"
+      },
+      {
+       "name": "body",
+       "widget": "html_mail",
+       "invisible": "not send_email",
+       "readonly": "not can_edit_body",
+       "force_save": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "many2many_binary"
+      },
+      {
+       "name": "template_id",
+       "context": "{'default_model': 'slide.channel.partner'}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_invite",
+       "string": "Send",
+       "type": "object",
+       "invisible": "not send_email",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Close",
+       "invisible": "send_email",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      },
+      {
+       "string": "Cancel",
+       "invisible": "not send_email",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "CopyClipboardChar": 1,
+      "boolean_toggle": 1,
+      "many2many_tags_email": 1,
+      "html_mail": 1,
+      "many2many_binary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

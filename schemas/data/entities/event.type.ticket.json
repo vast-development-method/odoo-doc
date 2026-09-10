@@ -1,0 +1,587 @@
+{
+ "catalog": {
+  "name": "entity:event.type.ticket",
+  "description": "Complete definition of entity Event Template Ticket (event.type.ticket).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.type.ticket",
+  "storage_name": "event_type_ticket",
+  "full_name": "Event Template Ticket",
+  "kind": "persistent",
+  "description": "Event Template Ticket",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "event_product"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 10,
+    "defined_in_package": "event",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "default": {
+     "dynamic": "lambda self: _('Registration')"
+    },
+    "required": true,
+    "translate": true,
+    "defined_in_package": "event",
+    "full_name": "Name"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Description",
+    "translate": true,
+    "help": "A description of the ticket that you want to communicate to your customers.",
+    "defined_in_package": "event",
+    "compute": "_compute_description",
+    "readonly": false,
+    "store": true,
+    "extended_in_packages": [
+     "event_product"
+    ],
+    "full_name": "Description"
+   },
+   {
+    "name": "event_type_id",
+    "type": "Many2one",
+    "comodel": "event.type",
+    "string": "Event Category",
+    "ondelete": "cascade",
+    "required": true,
+    "defined_in_package": "event",
+    "full_name": "Event Category",
+    "target_entity": "event.type"
+   },
+   {
+    "name": "seats_limited",
+    "type": "Boolean",
+    "string": "Limit Attendees",
+    "readonly": true,
+    "store": true,
+    "compute": "_compute_seats_limited",
+    "defined_in_package": "event",
+    "full_name": "Limit Attendees"
+   },
+   {
+    "name": "seats_max",
+    "type": "Integer",
+    "string": "Maximum Attendees",
+    "help": "Define the number of available tickets. If you have too many registrations you will not be able to sell tickets anymore. Set 0 to ignore this rule set as unlimited.",
+    "defined_in_package": "event",
+    "full_name": "Maximum Attendees"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "required": true,
+    "index": true,
+    "domain": [
+     [
+      "service_tracking",
+      "=",
+      "event"
+     ]
+    ],
+    "default": {
+     "dynamic": "_default_product_id"
+    },
+    "defined_in_package": "event_product",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "product_id.currency_id",
+    "string": "Currency",
+    "defined_in_package": "event_product",
+    "full_name": "Currency"
+   },
+   {
+    "name": "price",
+    "type": "Float",
+    "string": "Price",
+    "compute": "_compute_price",
+    "min_display_digits": "Product Price",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event_product",
+    "full_name": "Price"
+   },
+   {
+    "name": "price_reduce",
+    "type": "Float",
+    "string": "Price Reduce",
+    "compute": "_compute_price_reduce",
+    "compute_sudo": true,
+    "min_display_digits": "Product Price",
+    "defined_in_package": "event_product",
+    "full_name": "Price Reduce"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_seats_limited",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "seats_max"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_event_ticket_fields_whitelist",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Whitelist of fields that are copied from event_type_ticket_ids to event_ticket_ids when\nchanging the event_type_id field of event.event ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_product",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Add sale specific fields to copy from template to ticket ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_product_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_reduce",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         {
+          "expression": "*PRICE_CONTEXT_KEYS"
+         }
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "price"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_init_column",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "column_name"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_type_ticket_registration",
+    "package": "event",
+    "name": "event.type.ticket.registration",
+    "entity": "event.type.ticket",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_type_ticket_manager",
+    "package": "event",
+    "name": "event.type.ticket.manager",
+    "entity": "event.type.ticket",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "event.event_type_ticket_view_tree_from_type",
+    "package": "event",
+    "name": "event.type.ticket.view.list.from.type",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Event Template Tickets",
+      "editable": "bottom"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "description",
+       "optional": "hide"
+      },
+      {
+       "name": "seats_max"
+      },
+      {
+       "name": "seats_limited"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.event_type_ticket_view_form_from_type",
+    "package": "event",
+    "name": "event.type.ticket.view.form.from.type",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Event Template Ticket"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "seats_limited"
+      },
+      {
+       "name": "seats_max"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event.event_type_ticket_view_tree",
+    "package": "event",
+    "name": "event.type.ticket.view.list",
+    "view_type": "xpath",
+    "inherits_view": "event_type_ticket_view_tree_from_type",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event.event_type_ticket_view_form",
+    "package": "event",
+    "name": "event.type.ticket.view.form",
+    "view_type": "xpath",
+    "inherits_view": "event_type_ticket_view_form_from_type",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "event_type_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_product.event_type_ticket_view_tree_from_type",
+    "package": "event_product",
+    "name": "event.type.ticket.view.list.inherit.event.product",
+    "view_type": "field",
+    "inherits_view": "event.event_type_ticket_view_tree_from_type",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "before"
+      },
+      {
+       "name": "product_id",
+       "context": "{                         'default_type': 'service',                         'default_service_tracking': 'event',                     }"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_product.event_type_ticket_view_form_from_type",
+    "package": "event_product",
+    "name": "event.type.ticket.view.form.inherit.event.product",
+    "view_type": "field",
+    "inherits_view": "event.event_type_ticket_view_form_from_type",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "before"
+      },
+      {
+       "name": "product_id",
+       "context": "{                         'default_type': 'service',                         'default_service_tracking': 'event',                     }"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

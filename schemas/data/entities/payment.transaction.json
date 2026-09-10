@@ -1,0 +1,4837 @@
+{
+ "catalog": {
+  "name": "entity:payment.transaction",
+  "description": "Complete definition of entity Payment Transaction (payment.transaction).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "payment.transaction",
+  "storage_name": "payment_transaction",
+  "full_name": "Payment Transaction",
+  "kind": "persistent",
+  "description": "Payment Transaction",
+  "defined_by_package": "payment",
+  "extended_by_packages": [
+   "account_payment",
+   "sale",
+   "payment_custom",
+   "delivery",
+   "website_payment",
+   "payment_adyen",
+   "payment_aps",
+   "payment_asiapay",
+   "payment_authorize",
+   "payment_buckaroo",
+   "payment_demo",
+   "payment_dpo",
+   "payment_ecpay",
+   "payment_flutterwave",
+   "payment_iyzico",
+   "payment_mercado_pago",
+   "payment_mollie",
+   "payment_nuvei",
+   "payment_paymob",
+   "payment_paypal",
+   "payment_payu",
+   "payment_razorpay",
+   "payment_redsys",
+   "payment_stripe",
+   "payment_toss_payments",
+   "payment_worldline",
+   "payment_xendit",
+   "pos_online_payment",
+   "pos_online_payment_self_order",
+   "website_sale_collect"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": "reference",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "provider_id",
+    "type": "Many2one",
+    "string": "Provider",
+    "comodel": "payment.provider",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "payment",
+    "full_name": "Provider",
+    "target_entity": "payment.provider"
+   },
+   {
+    "name": "provider_code",
+    "type": "Selection",
+    "string": "Provider Code",
+    "related": "provider_id.code",
+    "defined_in_package": "payment",
+    "full_name": "Provider Code"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "provider_id.company_id",
+    "store": true,
+    "index": true,
+    "defined_in_package": "payment",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "payment_method_id",
+    "type": "Many2one",
+    "string": "Payment Method",
+    "comodel": "payment.method",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "payment",
+    "full_name": "Payment Method",
+    "target_entity": "payment.method"
+   },
+   {
+    "name": "payment_method_code",
+    "type": "Char",
+    "string": "Payment Method Code",
+    "related": "payment_method_id.code",
+    "defined_in_package": "payment",
+    "full_name": "Payment Method Code"
+   },
+   {
+    "name": "primary_payment_method_id",
+    "type": "Many2one",
+    "string": "Primary Payment Method",
+    "comodel": "payment.method",
+    "compute": "_compute_primary_payment_method_id",
+    "defined_in_package": "payment",
+    "full_name": "Primary Payment Method",
+    "target_entity": "payment.method"
+   },
+   {
+    "name": "reference",
+    "type": "Char",
+    "string": "Reference",
+    "help": "The internal reference of the transaction",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "payment",
+    "full_name": "Reference"
+   },
+   {
+    "name": "provider_reference",
+    "type": "Char",
+    "string": "Provider Reference",
+    "help": "The provider reference of the transaction",
+    "readonly": true,
+    "defined_in_package": "payment",
+    "full_name": "Provider Reference"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "string": "Amount",
+    "currency_field": "currency_id",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "payment",
+    "full_name": "Amount"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "string": "Currency",
+    "comodel": "res.currency",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "payment",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "token_id",
+    "type": "Many2one",
+    "string": "Payment Token",
+    "comodel": "payment.token",
+    "readonly": true,
+    "index": "btree_not_null",
+    "domain": "[(\"provider_id\", \"=\", \"provider_id\")]",
+    "ondelete": "restrict",
+    "defined_in_package": "payment",
+    "full_name": "Payment Token",
+    "target_entity": "payment.token"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "string": "Status",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "pending",
+      "Pending"
+     ],
+     [
+      "authorized",
+      "Authorized"
+     ],
+     [
+      "done",
+      "Confirmed"
+     ],
+     [
+      "cancel",
+      "Canceled"
+     ],
+     [
+      "error",
+      "Error"
+     ]
+    ],
+    "default": "draft",
+    "readonly": true,
+    "required": true,
+    "copy": false,
+    "index": true,
+    "defined_in_package": "payment",
+    "full_name": "Status"
+   },
+   {
+    "name": "state_message",
+    "type": "Text",
+    "string": "Message",
+    "help": "The complementary information message about the state",
+    "readonly": true,
+    "defined_in_package": "payment",
+    "full_name": "Message"
+   },
+   {
+    "name": "last_state_change",
+    "type": "Datetime",
+    "string": "Last State Change Date",
+    "readonly": true,
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "defined_in_package": "payment",
+    "full_name": "Last State Change Date"
+   },
+   {
+    "name": "operation",
+    "type": "Selection",
+    "string": "Operation",
+    "selection": [
+     [
+      "online_redirect",
+      "Online payment with redirection"
+     ],
+     [
+      "online_direct",
+      "Online direct payment"
+     ],
+     [
+      "online_token",
+      "Online payment by token"
+     ],
+     [
+      "validation",
+      "Validation of the payment method"
+     ],
+     [
+      "offline",
+      "Offline payment by token"
+     ],
+     [
+      "refund",
+      "Refund"
+     ]
+    ],
+    "readonly": true,
+    "index": true,
+    "defined_in_package": "payment",
+    "full_name": "Operation"
+   },
+   {
+    "name": "is_live",
+    "type": "Boolean",
+    "string": "Production Environment",
+    "help": "Whether the transaction happened in a production environment. False for transactions created before this tracking was implemented.",
+    "defined_in_package": "payment",
+    "full_name": "Production Environment"
+   },
+   {
+    "name": "source_transaction_id",
+    "type": "Many2one",
+    "string": "Source Transaction",
+    "comodel": "payment.transaction",
+    "index": "btree_not_null",
+    "help": "The source transaction of the related child transactions",
+    "readonly": true,
+    "defined_in_package": "payment",
+    "full_name": "Source Transaction",
+    "target_entity": "payment.transaction"
+   },
+   {
+    "name": "child_transaction_ids",
+    "type": "One2many",
+    "string": "Child Transactions",
+    "help": "The child transactions of the transaction.",
+    "comodel": "payment.transaction",
+    "inverse_name": "source_transaction_id",
+    "readonly": true,
+    "defined_in_package": "payment",
+    "full_name": "Child Transactions",
+    "target_entity": "payment.transaction"
+   },
+   {
+    "name": "refunds_count",
+    "type": "Integer",
+    "string": "Refunds Count",
+    "compute": "_compute_refunds_count",
+    "defined_in_package": "payment",
+    "full_name": "Refunds Count"
+   },
+   {
+    "name": "is_post_processed",
+    "type": "Boolean",
+    "string": "Is Post-processed",
+    "help": "Has the payment been post-processed",
+    "defined_in_package": "payment",
+    "full_name": "Is Post-processed"
+   },
+   {
+    "name": "tokenize",
+    "type": "Boolean",
+    "string": "Create Token",
+    "help": "Whether a payment token should be created when post-processing the transaction",
+    "defined_in_package": "payment",
+    "full_name": "Create Token"
+   },
+   {
+    "name": "landing_route",
+    "type": "Char",
+    "string": "Landing Route",
+    "help": "The route the user is redirected to after the transaction",
+    "defined_in_package": "payment",
+    "full_name": "Landing Route"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "string": "Customer",
+    "comodel": "res.partner",
+    "readonly": true,
+    "required": true,
+    "ondelete": "restrict",
+    "defined_in_package": "payment",
+    "full_name": "Customer",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_name",
+    "type": "Char",
+    "string": "Partner Name",
+    "defined_in_package": "payment",
+    "full_name": "Partner Name"
+   },
+   {
+    "name": "partner_lang",
+    "type": "Selection",
+    "string": "Language",
+    "selection": {
+     "expression": "_lang_get"
+    },
+    "defined_in_package": "payment",
+    "full_name": "Language"
+   },
+   {
+    "name": "partner_email",
+    "type": "Char",
+    "string": "Email",
+    "defined_in_package": "payment",
+    "full_name": "Email"
+   },
+   {
+    "name": "partner_address",
+    "type": "Char",
+    "string": "Address",
+    "defined_in_package": "payment",
+    "full_name": "Address"
+   },
+   {
+    "name": "partner_zip",
+    "type": "Char",
+    "string": "Zip",
+    "defined_in_package": "payment",
+    "full_name": "Zip"
+   },
+   {
+    "name": "partner_city",
+    "type": "Char",
+    "string": "City",
+    "defined_in_package": "payment",
+    "full_name": "City"
+   },
+   {
+    "name": "partner_state_id",
+    "type": "Many2one",
+    "string": "State",
+    "comodel": "res.country.state",
+    "defined_in_package": "payment",
+    "full_name": "State",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "partner_country_id",
+    "type": "Many2one",
+    "string": "Country",
+    "comodel": "res.country",
+    "defined_in_package": "payment",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "partner_phone",
+    "type": "Char",
+    "string": "Phone",
+    "defined_in_package": "payment",
+    "full_name": "Phone"
+   },
+   {
+    "name": "payment_id",
+    "type": "Many2one",
+    "string": "Payment",
+    "comodel": "account.payment",
+    "readonly": true,
+    "defined_in_package": "account_payment",
+    "full_name": "Payment",
+    "target_entity": "account.payment"
+   },
+   {
+    "name": "invoice_ids",
+    "type": "Many2many",
+    "string": "Invoices",
+    "comodel": "account.move",
+    "relation": "account_invoice_transaction_rel",
+    "column1": "transaction_id",
+    "column2": "invoice_id",
+    "readonly": true,
+    "copy": false,
+    "domain": [
+     [
+      "move_type",
+      "in",
+      [
+       "out_invoice",
+       "out_refund",
+       "in_invoice",
+       "in_refund"
+      ]
+     ]
+    ],
+    "defined_in_package": "account_payment",
+    "full_name": "Invoices",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "invoices_count",
+    "type": "Integer",
+    "string": "Invoices Count",
+    "compute": "_compute_invoices_count",
+    "defined_in_package": "account_payment",
+    "full_name": "Invoices Count"
+   },
+   {
+    "name": "sale_order_ids",
+    "type": "Many2many",
+    "comodel": "sale.order",
+    "relation": "sale_order_transaction_rel",
+    "column1": "transaction_id",
+    "column2": "sale_order_id",
+    "string": "Sales Orders",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "sale",
+    "full_name": "Sales Orders",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "sale_order_ids_nbr",
+    "type": "Integer",
+    "compute": "_compute_sale_order_ids_nbr",
+    "string": "# of Sales Orders",
+    "defined_in_package": "sale",
+    "full_name": "# of Sales Orders"
+   },
+   {
+    "name": "is_donation",
+    "type": "Boolean",
+    "string": "Is donation",
+    "defined_in_package": "website_payment",
+    "full_name": "Is donation"
+   },
+   {
+    "name": "capture_manually",
+    "type": "Boolean",
+    "related": "provider_id.capture_manually",
+    "defined_in_package": "payment_demo",
+    "string": "Capture Manually",
+    "full_name": "Capture Manually"
+   },
+   {
+    "name": "paypal_type",
+    "type": "Char",
+    "string": "PayPal Transaction Type",
+    "defined_in_package": "payment_paypal",
+    "full_name": "PayPal Transaction Type"
+   },
+   {
+    "name": "toss_payments_payment_secret",
+    "type": "Char",
+    "string": "Toss Payments Payment Secret",
+    "groups": "base.group_system",
+    "defined_in_package": "payment_toss_payments",
+    "full_name": "Toss Payments Payment Secret"
+   },
+   {
+    "name": "pos_order_id",
+    "type": "Many2one",
+    "comodel": "pos.order",
+    "string": "POS Order",
+    "help": "The Point of Sale order linked to the payment transaction",
+    "readonly": true,
+    "defined_in_package": "pos_online_payment",
+    "full_name": "point of sale Order",
+    "target_entity": "pos.order"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_reference_uniq",
+    "kind": "Constraint",
+    "definition": "unique(reference)",
+    "message": "Reference must be unique!",
+    "defined_in_package": "payment"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_lang_get",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_primary_payment_method_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_refunds_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_state_authorized_supported",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check that authorization is supported for a transaction in the `authorized` state. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Transaction authorization is not supported by the following payment providers: %s",
+        "line": 165
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_token_is_active",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "token_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check that the token used to create the transaction is active. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Creating a transaction from an archived token is forbidden.",
+        "line": 174
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 43,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_redsys",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to set the Redsys-specific `provider_reference`.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_specific_create_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "provider_code",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Complete the values of the `create` method with provider-specific values.\n\nFor a provider to add its own create values, it must overwrite this method and return a dict\nof values. Provider-specific values take precedence over those of the dict of generic create\nvalues.\n\n:param str provider_code: The code of the provider that handled the transaction.\n:param dict values: The original create values.\n:return: The dict of provider-specific create values.\n:rtype: dict",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_refunds",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Return the windows action to browse the refund transactions linked to the transaction.\n\nNote: `self.ensure_one()`\n\n:return: The window action to browse the refund transactions.\n:rtype: dict",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_capture",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Open the partial capture wizard if it is supported by the related providers, otherwise\ncapture the transactions immediately.\n\n:return: The action to open the partial capture wizard, if supported.\n:rtype: action.act_window|None",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_void",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Check the state of the transaction and request to have them voided.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Only authorized transactions can be voided.",
+        "line": 301
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_refund",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "amount_to_refund"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Check the state of the transactions and request their refund.\n\n:param float amount_to_refund: The amount to be refunded.\n:return: None",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Only confirmed transactions can be refunded.",
+        "line": 322
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_build_action_feedback_notification",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Build a client notification to display the result of an action.\n\n:return: The client notification.\n:rtype: dict",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_post_process",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Trigger the post-processing of the transactions.\n\n:return: A client action to soft-reload the view.\n:rtype: dict",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reference",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "provider_code",
+     "prefix",
+     "separator",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute a unique reference for the transaction.\n\nThe reference corresponds to the prefix if no other transaction with that prefix already\nexists. Otherwise, it follows the pattern `{computed_prefix}{separator}{sequence_number}`\nwhere:\n\n- `{computed_prefix}` is:\n\n  - The provided custom prefix, if any.\n  - The computation result of :meth:`_compute_reference_prefix` if the custom prefix is not\n    filled, but the kwargs are.\n  - `'tx-{datetime}'` if neither the custom prefix nor the kwargs are filled.\n\n- `{separator}` is the string that separates the prefix from the sequence number.\n- `{sequence_number}` is the next integer in the sequence of references sharing the same\n  prefix. The sequence starts with `1` if there is only one matching reference.\n\n.. example::\n\n   - Given the custom prefix `'example'` which has no match with an existing reference, the\n     full reference will be `'example'`.\n   - Given the custom prefix `'example'` which matches the existing reference `'example'`,\n     and the custom separator `'-'`, the full reference will be `'example-1'`.\n   - Given the kwargs `{'invoice_ids': [1, 2]}`, the custom separator `'-'` and no custom\n     prefix, the full reference will be `'INV1-INV2'` (or similar) if no existing reference\n     has the same prefix, or `'INV1-INV2-n'` if `n` existing references have the same\n     prefix.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param str prefix: The custom prefix used to compute the full reference.\n:param str separator: The custom separator used to separate the prefix from the suffix.\n:param dict kwargs: Optional values passed to :meth:`_compute_reference_prefix` if no custom\n                    prefix is provided.\n:return: The unique reference for the transaction.\n:rtype: str",
+      "size_in_lines": 79,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_aps",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to ensure that APS' requirements for references are satisfied.\n\nAPS' requirements for transaction are as follows:\n- References can only be made of alphanumeric characters and/or '-' and '_'.\n  The prefix is generated with 'tx' as default. This prevents the prefix from being\n  generated based on document names that may contain non-allowed characters\n  (eg: INV/2020/...).\n\n:param str provider_code: The code of the provider handling the transaction.\n:param str prefix: The custom prefix used to compute the full reference.\n:param str separator: The custom separator used to separate the prefix from the suffix.\n:return: The unique reference for the transaction.\n:rtype: str",
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_asiapay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to ensure that AsiaPay requirements for references are satisfied.\n\nAsiaPay requirements for references are as follows:\n- References must be unique at provider level for a given merchant account.\n  This is satisfied by singularizing the prefix with the current datetime. If two\n  transactions are created simultaneously, `_compute_reference` ensures the uniqueness of\n  references by suffixing a sequence number.\n- References must be at most 35 characters long.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param str prefix: The custom prefix used to compute the full reference.\n:param str separator: The custom separator used to separate the prefix from the suffix.\n:return: The unique reference for the transaction.\n:rtype: str",
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_ecpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to ensure that ECPay requirements for references are satisfied.\n\nECPay requirements for references are as follows:\n- References must be unique at provider level for a given merchant account.\n  This is satisfied by singularizing the prefix with the current datetime. If two\n  transactions are created simultaneously, `_compute_reference` ensures the uniqueness of\n  references by suffixing a sequence number.\n- References must be at most 20 characters long.\n- References must consist of a combination of letters and numbers in Chinese and English.\n- Special characters (e.g., #, @, &) are not permitted.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param str prefix: The custom prefix used to compute the full reference.\n:param str separator: The custom separator used to separate the prefix from the suffix.\n:return: The unique reference for the transaction.\n:rtype: str",
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_flutterwave",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to satisfy Flutterwave requirements for references.\n\nFlutterwave requirements for references are as follows:\n- References must be unique at provider level for a given merchant account. This is\n  satisfied by singularizing the prefix with the current datetime. If two transactions are\n  created simultaneously, `_compute_reference` ensures the uniqueness of references by\n  suffixing a sequence number.\n\n:param str provider_code: The code of the provider handling the transaction\n:param str prefix: The custom prefix used to compute the full reference\n:param str separator: The custom separator used to separate the prefix from the suffix\n:return: The unique reference for the transaction\n:rtype: str",
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_paymob",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to ensure that Paymob references are unique.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param str prefix: The custom prefix used to compute the full reference.\n:param str separator: The custom separator used to separate the prefix from the suffix.\n:return: The unique reference for the transaction.\n:rtype: str",
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_redsys",
+      "decorators": [],
+      "documentation": "Override of `payment` to ensure that Redsys' requirements for references are satisfied.\n\nRedsys' requirements for transaction are as follows:\n- References can only be made of alphanumeric characters.\n- References must be minimum 9 characters and at most 12 characters long.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param str prefix: The custom prefix used to compute the full reference.\n:param str separator: The custom separator used to separate the prefix from the suffix.\n:return: The unique reference for the transaction.\n:rtype: str",
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_toss_payments",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to ensure that Toss Payments' requirements for references are\nsatisfied.\n\nToss Payments' requirements for transaction are as follows:\n- References can only be made of alphanumeric characters and/or '-' and '_'.\n  The prefix is generated with 'tx' as default. This prevents the prefix from being\n  generated based on document names that may contain non-allowed characters\n  (e.g., INV/2025/...).\n\n:param str provider_code: The code of the provider handling the transaction.\n:param str prefix: The custom prefix used to compute the full reference.\n:return: The unique reference for the transaction.\n:rtype: str",
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_worldline",
+      "decorators": [],
+      "documentation": "Override of `payment` to ensure that Worldline requirement for references is satisfied.\n\nWorldline requires for references to be at most 30 characters long.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param str prefix: The custom prefix used to compute the full reference.\n:param str separator: The custom separator used to separate the prefix from the suffix.\n:return: The unique reference for the transaction.\n:rtype: str",
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reference_prefix",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "separator",
+     "**values"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the reference prefix from the transaction values.\n\nNote: This method should be called in sudo mode to give access to the documents (invoices,\nsales orders) referenced in the transaction values.\n\n:param str separator: The custom separator used to separate parts of the computed\n                      reference prefix.\n:param dict values: The transaction values used to compute the reference prefix.\n:return: The computed reference prefix.\n:rtype: str",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the reference prefix from the transaction values.\n\nIf the `values` parameter has an entry with 'invoice_ids' as key and a list of (4, id, O) or\n(6, 0, ids) X2M command as value, the prefix is computed based on the invoice name(s).\nOtherwise, an empty string is returned.\n\nNote: This method should be called in sudo mode to give access to documents (INV, SO, ...).\n\n:param str separator: The custom separator used to separate data references\n:param dict values: The transaction values used to compute the reference prefix. It should\n                    have the structure {'invoice_ids': [(X2M command), ...], ...}.\n:return: The computed reference prefix if invoice ids are found, an empty string otherwise\n:rtype: str",
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of payment to compute the reference prefix based on Sales-specific values.\n\nIf the `values` parameter has an entry with 'sale_order_ids' as key and a list of (4, id, O)\nor (6, 0, ids) X2M command as value, the prefix is computed based on the sales order name(s)\nOtherwise, the computation is delegated to the super method.\n\n:param str separator: The custom separator used to separate data references\n:param dict values: The transaction values used to compute the reference prefix. It should\n                    have the structure {'sale_order_ids': [(X2M command), ...], ...}.\n:return: The computed reference prefix if order ids are found, the one of `super` otherwise\n:rtype: str",
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of payment to compute the reference prefix based on POS-specific values.\n\n:return: The computed reference prefix if POS order id is found, the one of `super` otherwise\n:rtype: str",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_processing_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Return the values used to process the transaction.\n\nThe values are returned as a dict containing entries with the following keys:\n\n- `provider_id`: The provider handling the transaction, as a `payment.provider` id.\n- `provider_code`: The code of the provider.\n- `reference`: The reference of the transaction.\n- `amount`: The rounded amount of the transaction.\n- `currency_id`: The currency of the transaction, as a `res.currency` id.\n- `partner_id`: The partner making the transaction, as a `res.partner` id.\n- `should_tokenize`: Whether this transaction should be tokenized.\n- Additional provider-specific entries.\n\nNote: `self.ensure_one()`\n\n:return: The processing values.\n:rtype: dict",
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_specific_processing_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "processing_values"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Return a dict of provider-specific values used to process the transaction.\n\nFor a provider to add its own processing values, it must overwrite this method and return a\ndict of provider-specific values based on the generic values returned by this method.\nProvider-specific values take precedence over those of the dict of generic processing\nvalues.\n\n:param dict processing_values: The generic processing values of the transaction.\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Override of payment to return Adyen-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic processing values of the transaction\n:return: The dict of provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Override of payment to return an access token as provider-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic processing values of the transaction\n:return: The dict of provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_flutterwave",
+      "decorators": [],
+      "documentation": "Override of payment to redirect pending token-flow transactions.\n\nIf the financial institution insists on 3-D Secure authentication, this\noverride will redirect the user to the provided authorization page.\n\nNote: `self.ensure_one()`",
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_paypal",
+      "decorators": [],
+      "documentation": "Override of `payment` to return the Paypal-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the\n                               transaction.\n:return: The dict of provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to return razorpay-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the\n                               transaction.\n:return: The provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Override of payment to return Stripe-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic processing values of the transaction\n:return: The dict of provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_toss_payments",
+      "decorators": [],
+      "documentation": "Override of `payment` to return Toss Payments-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:return: The provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_worldline",
+      "decorators": [],
+      "documentation": "Override of `payment` to redirect failed token-flow transactions.\n\nIf the financial institution insists on user authentication,\nthis override will reset the transaction, and switch the flow to redirect.\n\nNote: self.ensure_one() from `_get_processing_values`.\n\n:param dict processing_values: The generic processing values of the transaction.\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": "Override of payment to return Xendit-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic processing values of the transaction\n:return: The dict of provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_specific_rendering_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "processing_values"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Return a dict of provider-specific values used to render the redirect form.\n\nFor a provider to add its own rendering values, it must overwrite this method and return a\ndict of provider-specific values based on the processing values (provider-specific\nprocessing values included).\n\n:param dict processing_values: The processing values of the transaction.\n:return: The dict of provider-specific rendering values.\n:rtype: dict",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_custom",
+      "decorators": [],
+      "documentation": "Override of payment to return custom-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the transaction\n:return: The dict of provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_aps",
+      "decorators": [],
+      "documentation": "Override of `payment` to return APS-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic processing values of the transaction.\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_asiapay",
+      "decorators": [],
+      "documentation": "Override of `payment` to return AsiaPay-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`.\n\n:param dict processing_values: The generic and specific processing values of the\n                               transaction.\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_buckaroo",
+      "decorators": [],
+      "documentation": "Override of payment to return Buckaroo-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the transaction\n:return: The dict of provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 31,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_dpo",
+      "decorators": [],
+      "documentation": "Override of `payment` to return DPO-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`.\n\n:param dict processing_values: The generic processing values of the transaction.\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_ecpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to return ECPay-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`.\n\n:param dict processing_values: The generic and specific processing values of the\n                               transaction.\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 52,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_flutterwave",
+      "decorators": [],
+      "documentation": "Override of payment to return Flutterwave-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the transaction\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 41,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_iyzico",
+      "decorators": [],
+      "documentation": "Override of `payment` to return Iyzico specific rendering values.\n\n Note: `self.ensure_one()` from :meth:`_get_processing_values`\n\n:return: The provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Override of `payment` to return Mercado Pago-specific rendering values.\n\nNote: self.ensure_one() from `_get_rendering_values`.\n\n:param dict processing_values: The generic and specific processing values of the transaction\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mollie",
+      "decorators": [],
+      "documentation": "Override of payment to return Mollie-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the transaction\n:return: The dict of provider-specific rendering values\n:rtype: dict",
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_nuvei",
+      "decorators": [],
+      "documentation": "Override of `payment` to return Nuvei-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the\n                               transaction.\n:return: The dict of provider-specific rendering values.\n:rtype: dict",
+      "size_in_lines": 84,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "'Nuvei: ' + _('%(payment_method)s requires both a first and last name.', payment_method=self.payment_method_id.name)",
+        "line": 37
+       }
+      ]
+     },
+     {
+      "package": "payment_paymob",
+      "decorators": [],
+      "documentation": "Override of `payment` to return Paymob-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the\n                               transaction.\n:return: The dict of provider-specific rendering values.\n:rtype: dict",
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_payu",
+      "decorators": [],
+      "documentation": "Override of `payment` to return PayU-specific rendering values.\n\nNote: self.ensure_one() from `_get_rendering_values`\n\n:param dict processing_values: The generic processing values of the transaction\n:return: The provider-specific processing values\n:rtype: dict",
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_redsys",
+      "decorators": [],
+      "documentation": "Override of `payment` to return Redsys-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`.\n\n:param dict processing_values: The generic processing values of the transaction.\n:return: The dict of provider-specific rendering values.\n:rtype: dict",
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_worldline",
+      "decorators": [],
+      "documentation": "Override of `payment` to return Worldline-specific processing values.\n\nNote: self.ensure_one() from `_get_processing_values`.\n\n:param dict processing_values: The generic processing values of the transaction.\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": "Override of `payment` to return Xendit-specific rendering values.\n\nNote: self.ensure_one() from `_get_processing_values`\n\n:param dict processing_values: The generic and specific processing values of the transaction\n:return: The dict of provider-specific processing values.\n:rtype: dict",
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_mandate_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Return a dict of module-specific values used to create a mandate.\n\nFor a module to add its own mandate values, it must overwrite this method and return a dict\nof module-specific values.\n\nNote: `self.ensure_one()`\n\n:return: The dict of module-specific mandate values.\n:rtype: dict",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_charge_with_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Pay the transaction with the given token.\n\nNote: `self.ensure_one()`\n\n:return: None",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_payment_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Request the provider handling the transaction to send a token payment request.\n\nThis method is exclusively used to make payments by token, which correspond to both the\n`online_token` and the `offline` transaction's `operation` field.\n\nFor a provider to support tokenization, it must override this method and send an API request\nto make a payment.\n\nNote: `self.ensure_one()` from :meth:`_charge_with_token`\n\n:return: None",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a payment request to Adyen.",
+      "size_in_lines": 65,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a payment request to Authorize.",
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Override of `payment` to simulate a payment request.",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_flutterwave",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a payment request to Flutterwave.",
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a payment request to Mercado Pago.\n\nNote: `self.ensure_one()` from :meth:`_charge_with_token`\n\n:rtype: None",
+      "size_in_lines": 42,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a payment request to Razorpay.",
+      "size_in_lines": 48,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a payment request to Stripe.",
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_worldline",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a payment request to Worldline.",
+      "size_in_lines": 38,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a payment request to Xendit.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_capture",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount_to_capture"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Capture the authorized amount.\n\nNote: `self.ensure_one()`\n\n:param float amount_to_capture: The amount to capture.\n:return: The capture transaction created to process the capture request.\n:rtype: payment.transaction",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_capture_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Request the provider handling the transaction to send a capture request.\n\nFor a provider to support authorization, it must override this method and send an API\nrequest to capture the payment.\n\nNote: `self.ensure_one()` from :meth:`_capture`\n\n:return: None",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a capture request to Adyen.",
+      "size_in_lines": 37,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a capture request to Authorize.",
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Override of `payment` to simulate a capture request.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a capture request to Razorpay.",
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a capture request to Stripe.",
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_void",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount_to_void"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Void the authorized amount.\n\nNote: `self.ensure_one()`\n\n:param float amount_to_void: The amount to be voided.\n:return: The void transaction created to process the void request.\n:rtype: payment.transaction",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_void_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Request the provider handling the transaction to send a void request.\n\nFor a provider to support authorization, it must override this method and send an API\nrequest to void the payment.\n\nNote: `self.ensure_one()` from :meth:`_void`\n\n:return: None",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a void request to Adyen.",
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a void request to Authorize.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Override of `payment` to simulate a void request.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to explain that it is impossible to void a Razorpay transaction.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Transactions processed by Razorpay can't be manually voided from the system.",
+        "line": 281
+       }
+      ]
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a void request to Stripe.",
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_refund",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount_to_refund"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Refund the transaction.\n\nNote: `self.ensure_one()`\n\n:param float amount_to_refund: The amount to be refunded.\n:return: The refund transaction created to process the refund request.\n:rtype: payment.transaction",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_refund_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Request the provider handling the transaction to send a refund request.\n\nFor a provider to support refunds, it must override this method and send an API request to\nmake a refund.\n\nNote: `self.ensure_one()` from :meth:`_refund`\n\n:return: None",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a refund request to Adyen.",
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a refund request to Authorize.",
+      "size_in_lines": 52,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Override of `payment` to simulate a refund.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a refund request to Razorpay.",
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Override of `payment` to send a refund request to Stripe.",
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_provider_is_not_disabled",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Ensure that the provider's state is not `disabled` before sending a request to its\nprovider.\n\n:return: None\n:raise UserError: If the provider's state is `disabled`.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Making a request to the provider is not possible because the provider is disabled.",
+        "line": 695
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_child_transaction",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "is_refund",
+     "**custom_create_values"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Create a new transaction with the current transaction as its parent transaction.\n\nThis happens only in case of a refund or a partial capture (where the initial transaction is\nsplit between smaller transactions, either captured or voided).\n\nNote: self.ensure_one()\n\n:param float amount: The strictly positive amount of the child transaction, in the same\n                     currency as the source transaction.\n:param bool is_refund: Whether the child transaction is a refund.\n:return: The created child transaction.\n:rtype: payment.transaction",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "provider_code",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Process the payment data received from the provider and update the transaction.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param dict payment_data: The payment data sent by the provider.\n:return: The updated transaction.\n:rtype: payment.transaction",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_by_reference",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "provider_code",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Search the transaction based on the payment data.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param dict payment_data: The payment data sent by the provider.\n:return: The transaction, if found.\n:rtype: payment.transaction",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to search the transaction  with a specific logic for Adyen.",
+      "size_in_lines": 73,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to find the transaction based on razorpay data.\n\n:param str provider_code: The code of the provider that handled the transaction\n:param dict payment_data: The normalized payment data sent by the provider\n:return: The transaction if found\n:rtype: payment.transaction\n:raise: ValidationError if the data match no transaction",
+      "size_in_lines": 39,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of payment to find the transaction based on Stripe data.\n\n:param str provider_code: The code of the provider that handled the transaction\n:param dict payment_data: The payment data sent by the provider\n:return: The transaction if found\n:rtype: payment.transaction",
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extract_reference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "provider_code",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Extract the transaction reference from the payment data.\n\nThis method must be overridden by providers to extract the reference from the payment data.\n\n:param str provider_code: The code of the provider handling the transaction.\n:param dict payment_data: The payment data sent by the provider.\n:return: The transaction reference.\n:rtype: str",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_aps",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the APS data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_asiapay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_buckaroo",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_dpo",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_ecpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_flutterwave",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mollie",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_nuvei",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_paymob",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_paypal",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_payu",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_redsys",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_toss_payments",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_worldline",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_xendit",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `payment` to extract the reference from the payment data.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_amount",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Ensure that the transaction's amount and currency match the ones from the payment data.\n\nValidation transactions and transactions for which providers opt out of the amount check are\nskipped.\n\n:param dict payment_data: The payment data sent by the provider.\n:return: None",
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extract_amount_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Extract the amount, currency and rounding precision from the payment data.\n\nThis method must be overridden by providers to parse the amount data from the payment data.\nIf the provider returns `None`, the amount validation is skipped.\n\n:param dict payment_data: The payment data sent by the provider.\n:return: The amount data, in the {amount: float, currency_code: str, precision_digits: int}\n         format.\n:rtype: dict|None",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_custom",
+      "decorators": [],
+      "documentation": "Override of `payment` to skip the amount validation for custom flows.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_aps",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_asiapay",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_buckaroo",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Override of `payment` to skip the amount validation for demo flows.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_dpo",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_ecpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_flutterwave",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_iyzico",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Override of payment to extract the amount and currency from the payment data.",
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mollie",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_nuvei",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_paymob",
+      "decorators": [],
+      "documentation": "Override of payment to extract the amount and currency from the payment data.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_paypal",
+      "decorators": [],
+      "documentation": "Override of payment to extract the amount and currency from the payment data.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_payu",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Override of payment to extract the amount and currency from the payment data.",
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_redsys",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount and currency from the payment data.",
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Override of payment to extract the amount and currency from the payment data.",
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_toss_payments",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the amount from the payment data.",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_worldline",
+      "decorators": [],
+      "documentation": "Override of payment to extract the amount and currency from the payment data.",
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": "Override of payment to extract the amount and currency from the payment data.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_apply_updates",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Update the transaction based on the payment data received from the provider.\n\nThe updates typically include the payment's state, the provider reference, and the selected\npayment method.\n\nThis method should not be called directly; payment data should go through :meth:`_process`.\n\nThis method must be overridden by providers to update the transaction based on the payment\ndata.\n\nNote: `self.ensure_one()` from :meth:`_process`\n\n:param dict payment_data: The payment data sent by the provider.\n:return: None",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_custom",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Override of payment to update the transaction based on the payment data.",
+      "size_in_lines": 101,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_aps",
+      "decorators": [],
+      "documentation": "Override of `payment' to update the transaction based on the payment data.",
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_asiapay",
+      "decorators": [],
+      "documentation": "Override of `payment' to update the transaction based on the payment data.",
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Received data with missing success code.",
+        "line": 124
+       }
+      ]
+     },
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 64,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_buckaroo",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 42,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 37,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_dpo",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_ecpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 31,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_flutterwave",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 40,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_iyzico",
+      "decorators": [],
+      "documentation": "Override of payment to update the transaction based on the payment data.",
+      "size_in_lines": 38,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 57,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mollie",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_nuvei",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 46,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_paymob",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_paypal",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 41,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_payu",
+      "decorators": [],
+      "documentation": "Override of `payment' to update the transaction based on the payment data.",
+      "size_in_lines": 40,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 84,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_redsys",
+      "decorators": [],
+      "documentation": "Override of `payment' to update the transaction based on the payment data.",
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 64,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_toss_payments",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_worldline",
+      "decorators": [],
+      "documentation": "Override of `payment' to process the transaction based on Worldline data.\n\nNote: self.ensure_one()\n\n:param dict payment_data: The payment data sent by the provider.\n:return: None",
+      "size_in_lines": 68,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": "Override of `payment` to update the transaction based on the payment data.",
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_tokenize",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Create a new token based on the payment data.\n\n:param dict payment_data: The payment data sent by the provider.\n:return: None",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extract_token_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Extract the create values of a token from the payment data.\n\nProviders can override this to supply their own token data based on the payment data.\n\nNote: self.ensure_one() from :meth: `_tokenize`\n\n:param dict payment_data: Data sent by the provider.\n:return: Data to create a payment token.\n:rtype: dict",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the token values from the payment data.",
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the token values from the payment data.",
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the token values from the payment data.",
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_flutterwave",
+      "decorators": [],
+      "documentation": "Override of `payment` to extract the token values from the payment data.",
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Override of `payment` to return token data based on payment data.",
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Override of `payment` to return token data based on Razorpay data.\n\nNote: self.ensure_one() from :meth: `_tokenize`\n\n:param dict payment_data: The payment data sent by the provider.\n:return: Data to create a token.\n:rtype: dict",
+      "size_in_lines": 29,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Override of `payment` to return token data based on Stripe data.\n\nNote: self.ensure_one() from :meth: `_tokenize`\n\n:param dict payment_data: The payment data sent by the provider.\n:return: Data to create a token.\n:rtype: dict",
+      "size_in_lines": 44,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_worldline",
+      "decorators": [],
+      "documentation": "Override of `payment` to return token data based on Worldline data.\n\nNote: self.ensure_one() from :meth: `_tokenize`\n\n:param dict payment_data: The payment data sent by the provider.\n:return: Data to create a token.\n:rtype: dict",
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": "Override of `payment` to return token data based on Xendit data.\n\nNote: self.ensure_one() from :meth: `_tokenize`\n\n:param dict payment_data: The payment data sent by the provider.\n:return: Data to create a token.\n:rtype: dict",
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_pending",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "state_message",
+     "extra_allowed_states"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Update the transactions' state to `pending`.\n\n:param str state_message: The reason for setting the transactions in the state `pending`.\n:param tuple[str] extra_allowed_states: The extra states that should be considered allowed\n                                        target states for the source state 'pending'.\n:return: The updated transactions.\n:rtype: recordset of `payment.transaction`",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_authorized",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "state_message",
+     "extra_allowed_states"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Update the transactions' state to `authorized`.\n\n:param str state_message: The reason for setting the transactions in the state `authorized`.\n:param tuple[str] extra_allowed_states: The extra states that should be considered allowed\n                                        target states for the source state 'authorized'.\n:return: The updated transactions.\n:rtype: recordset of `payment.transaction`",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_done",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "state_message",
+     "extra_allowed_states"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Update the transactions' state to `done`.\n\n:param str state_message: The reason for setting the transactions in the state `done`.\n:param tuple[str] extra_allowed_states: The extra states that should be considered allowed\n                                        target states for the source state 'done'.\n:return: The updated transactions.\n:rtype: recordset of `payment.transaction`",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_canceled",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "state_message",
+     "extra_allowed_states"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Update the transactions' state to `cancel`.\n\n:param str state_message: The reason for setting the transactions in the state `cancel`.\n:param tuple[str] extra_allowed_states: The extra states that should be considered allowed\n                                        target states for the source state 'canceled'.\n:return: The updated transactions.\n:rtype: recordset of `payment.transaction`",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "state_message",
+     "extra_allowed_states"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Update the transactions' state to `error`.\n\n:param str state_message: The reason for setting the transactions in the state `error`.\n:param tuple[str] extra_allowed_states: The extra states that should be considered allowed\n                                        target states for the source state 'error'.\n:return: The updated transactions.\n:rtype: recordset of `payment.transaction`",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_state",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "allowed_states",
+     "target_state",
+     "state_message"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Update the transactions' state to the target state if the current state allows it.\n\nIf the current state is the same as the target state, the transaction is skipped and a log\nwith level INFO is created.\n\n:param tuple[str] allowed_states: The allowed source states for the target state.\n:param str target_state: The target state.\n:param str state_message: The message to set as `state_message`.\n:return: The recordset of transactions whose state was updated.\n:rtype: recordset of `payment.transaction`",
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_source_transaction_state",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Update the state of the source transactions for which all child transactions have\nreached a final state.\n\n:return: None",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_post_process",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Trigger the post-processing of the transactions that were not handled by the client in\nthe `poll_status` controller method.\n\n:return: None",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_process",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Post-process the transactions.\n\nThe generic post-processing only consists in flagging the transactions as post-processed.\nFor a module to add its own logic to the post-processing, it must overwrite this method and\napply its specific logic to the transactions, optionally after filtering them based on their\nstate.\n\n:return: None",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": "Override of `payment` to add account-specific logic to the post-processing.\n\nIn particular, for confirmed transactions we write a message in the chatter with the payment\nand transaction references, post relevant fiscal documents, and create missing payments. For\ncancelled transactions, we cancel the payment.",
+      "size_in_lines": 34,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Override of `payment` to add Sales-specific logic to the post-processing.\n\nIn particular, for pending transactions, we send the quotation by email; for authorized\ntransactions, we confirm the quotation; for confirmed transactions, we automatically confirm\nthe quotation and generate invoices.",
+      "size_in_lines": 67,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": "Override of `payment` to confirm orders with the cash_on_delivery payment method and\ntrigger a picking creation. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": "Override of payment to process POS online payments automatically. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_collect",
+      "decorators": [],
+      "documentation": "Override of `payment` to confirm orders with the on_site payment method and trigger\na picking creation. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_api_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "method",
+     "endpoint",
+     "params",
+     "data",
+     "json",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Send a request to the API.\n\nThis method serves as a helper to:\n\n1. Pass the transaction reference to the provider's\n   :meth:`~the system.addons.payment.models.payment_provider.PaymentProvider._send_api_request`\n   method.\n2. Set the transaction's state to `error` if the request fails, with the exception's message\n   as the `state_message`.\n\nNote: `self.ensure_one()`\n\n:param str method: The HTTP method of the request.\n:param str endpoint: The endpoint of the API to reach with the request.\n:param dict params: The query string parameters of the request.\n:param dict|str data: The body of the request.\n:param dict json: The JSON-formatted body of the request.\n:param dict kwargs: Provider-specific data forwarded to the specialized helper methods.\n:return: The formatted content of the response.\n:rtype: dict|str\n:raise ValidationError: If an HTTP error occurs.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_log_sent_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Log that the transactions have been created in the chatter of relevant documents.\n\n:return: None",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_log_received_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Log that the transactions have been processed in the chatter of relevant documents.\n\n:return: None",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_custom",
+      "decorators": [],
+      "documentation": "Override of `payment` to remove custom providers from the recordset.\n\n:return: None",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_log_message_on_linked_documents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Log a message on the records linked to the transaction.\n\nFor a module to implement payments and link documents to a transaction, it must override\nthis method and call it, then log the message on documents linked to the transaction.\n\nNote: `self.ensure_one()`\n\n:param str message: The message to log.\n:return: None",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": "Log a message on the payment and the invoices linked to the transaction.\n\nFor a module to implement payments and link documents to a transaction, it must override\nthis method and call super, then log the message on documents linked to the transaction.\n\nNote: self.ensure_one()\n\n:param str message: The message to be logged\n:return: None",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Override of payment to log a message on the sales orders linked to the transaction.\n\nNote: self.ensure_one()\n\n:param str message: The message to be logged\n:return: None",
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sent_message",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Return the message to log to state that the transaction has been created.\n\nNote: `self.ensure_one()`\n\n:return: The message to log.\n:rtype: str",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "payment_custom",
+      "decorators": [],
+      "documentation": "Override of payment to return a different message.\n\n:return: The 'transaction sent' message\n:rtype: str",
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_received_message",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Return the message to log to state that the transaction has been processed.\n\nNote: `self.ensure_one()`\n\n:return: The message to log.\n:rtype: str",
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_last",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Return the last transaction of the recordset.\n\n:return: The last transaction of the recordset, sorted by id.\n:rtype: recordset of `payment.transaction`",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoices_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "invoice_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_invoices",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": "Return the action for the views of the invoices linked to the transaction.\n\nNote: self.ensure_one()\n\n:return: The action\n:rtype: dict",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_payment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "**extra_create_values"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": "Create an `account.payment` record for the current transaction.\n\nIf the transaction is linked to some invoices, their reconciliation is done automatically.\n\nNote: self.ensure_one()\n\n:param dict extra_create_values: Optional extra create values\n:return: The created payment\n:rtype: recordset of `account.payment`",
+      "size_in_lines": 79,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invoices_to_notify",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": "Return the invoices on which to log payment-related messages. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_order_reference",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_order_ids_nbr",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_amount_and_confirm_order",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Confirm the sales order based on the amount of a transaction.\n\nConfirm the sales orders only if the transaction amount (or the sum of the partial\ntransaction amounts) is equal to or greater than the required amount for order confirmation\n\nGrouped payments (paying multiple sales orders in one transaction) are not supported.\n\n:return: The confirmed sales orders.\n:rtype: a `sale.order` recordset",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_invoice",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_send_invoice",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Cron to send invoice that where not ready to be send directly after posting",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_invoice_sale_orders",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_sales_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_communication",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_custom",
+      "decorators": [],
+      "documentation": "Return the communication the user should use for their transaction.\n\nThis communication might change according to the settings and the accounting localization.\n\nNote: self.ensure_one()\n\n:return: The selected communication.\n:rtype: str",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_donation_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "is_internal_notification",
+     "comment",
+     "recipient_email"
+    ],
+    "definitions": [
+     {
+      "package": "website_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_adyen_create_child_tx",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "source_tx",
+     "payment_data",
+     "is_refund"
+    ],
+    "definitions": [
+     {
+      "package": "payment_adyen",
+      "decorators": [],
+      "documentation": "Create a child transaction based on Adyen data.\n\n:param payment.transaction source_tx: The source transaction for which a new operation is\n                                      initiated.\n:param dict payment_data: The payment data sent by the provider.\n:return: The newly created child transaction.\n:rtype: payment.transaction",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_authorize_create_transaction_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "opaque_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment_authorize",
+      "decorators": [],
+      "documentation": "Create an Authorize.Net payment transaction request.\n\nNote: self.ensure_one()\n\n:param dict opaque_data: The payment details obfuscated by Authorize.Net\n:return:",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_demo_set_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Set the state of the demo transaction to 'done'.\n\nNote: self.ensure_one()\n\n:return: None",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_demo_set_canceled",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Set the state of the demo transaction to 'cancel'.\n\nNote: self.ensure_one()\n\n:return: None",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_demo_set_error",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_demo",
+      "decorators": [],
+      "documentation": "Set the state of the demo transaction to 'error'.\n\nNote: self.ensure_one()\n\n:return: None",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_dpo_create_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_dpo",
+      "decorators": [],
+      "documentation": "Create a transaction token and return the response data.\n\nThe token is used to redirect the customer to the payment page.\n\n:return: The transaction token data.\n:rtype: dict",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_flutterwave_is_authorization_pending",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_flutterwave",
+      "decorators": [],
+      "documentation": "Filter Flutterwave token transactions that are awaiting external authorization.\n\n:return: Pending transactions awaiting authorization.\n:rtype: recordset of `payment.transaction`",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_iyzico_prepare_cf_initialize_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_iyzico",
+      "decorators": [],
+      "documentation": "Create the payload for the CF-initialize request based on the transaction values.\n\n:return: The request payload.\n:rtype: dict",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mercado_pago_prepare_preference_request_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Create the payload for the preference request based on the transaction values.\n\n:return: The preference request payload.\n:rtype: dict",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mercado_pago_prepare_payment_request_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Create the payload for the direct payment request based on the transaction values.\n\n:return: The payment request payload.\n:rtype: dict",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mercado_pago_prepare_base_request_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Create the base payload for requests based on the transaction values.\n\n:return: The base request payload.\n:rtype: dict",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mercado_pago_convert_amount",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [],
+      "documentation": "Convert the transaction amount according to Mercado Pago's currency requirements.\n\nMercado Pago requires certain currencies (COP, HNL, NIO) to be expressed as integers rather\nthan following the standard ISO 4217 decimal places. This method rounds down the amount to\nthe appropriate decimal places to ensure API compatibility.\n\n:return: The transaction amount rounded to Mercado Pago's required decimal precision.\n:rtype: float",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mercado_pago_get_error_msg",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "status_detail"
+    ],
+    "definitions": [
+     {
+      "package": "payment_mercado_pago",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the error message corresponding to the payment status.\n\n:param str status_detail: The status details sent by the provider.\n:return: The error message.\n:rtype: str",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mollie_prepare_payment_request_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_mollie",
+      "decorators": [],
+      "documentation": "Create the payload for the payment request based on the transaction values.\n\n:return: The request payload\n:rtype: dict",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_paymob_prepare_payment_request_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_paymob",
+      "decorators": [],
+      "documentation": "Create the payload for the payment request based on the transaction values.\n\n:return: The request payload.\n:rtype: dict",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_paypal_prepare_order_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_paypal",
+      "decorators": [],
+      "documentation": "Prepare the payload for the Paypal create order request.\n\n:return: The requested payload to create a Paypal order.\n:rtype: dict",
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_razorpay_create_customer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Create and return a Customer object.\n\n:return: The created Customer.\n:rtype: dict",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_phone_number",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "phone"
+    ],
+    "definitions": [
+     {
+      "package": "payment_razorpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Validate and format the phone number.\n\n:param str phone: The phone number to validate.\n:returns: The formatted phone number.\n:rtype: str\n:raise ValidationError: If the phone number is missing or incorrect.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The phone number is missing.",
+        "line": 90
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The phone number is invalid.",
+        "line": 97
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_razorpay_create_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "customer_id"
+    ],
+    "definitions": [
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Create and return an Order object to initiate the payment.\n\n:param str customer_id: The ID of the Customer object to assign to the Order for\n                        non-subsequent payments.\n:return: The created Order.\n:rtype: dict",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_razorpay_prepare_order_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "customer_id"
+    ],
+    "definitions": [
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Prepare the payload for the order request based on the transaction values.\n\n:param str customer_id: The ID of the Customer object to assign to the Order for\n                        non-subsequent payments.\n:return: The request payload.\n:rtype: dict",
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_razorpay_get_mandate_max_amount",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Return the eMandate's maximum amount to define.\n\n:return: The eMandate's maximum amount.\n:rtype: float",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_razorpay_convert_inr_to_currency",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "currency_id"
+    ],
+    "definitions": [
+     {
+      "package": "payment_razorpay",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Convert the amount from INR to the given currency.\n\n:param float amount: The amount to converted, in INR.\n:param currency_id: The currency to which the amount should be converted.\n:return: The converted amount in the given currency.\n:rtype: float",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_razorpay_create_refund_tx_from_payment_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "source_tx",
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment_razorpay",
+      "decorators": [],
+      "documentation": "Create a refund transaction based on Razorpay data.\n\n:param recordset source_tx: The source transaction for which a refund is initiated, as a\n                            `payment.transaction` recordset.\n:param dict payment_data: The payment data sent by the provider.\n:return: The newly created refund transaction.\n:rtype: payment.transaction\n:raise ValidationError: If inconsistent data were received.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Received incomplete refund data.",
+        "line": 337
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_redsys_prepare_merchant_parameters",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_redsys",
+      "decorators": [],
+      "documentation": "Create the merchant parameters payload based on the transaction values.\n\n:return: The merchant parameters.\n:rtype: str",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_stripe_create_intent",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Create and return a PaymentIntent or a SetupIntent object, depending on the operation.\n\n:return: The created PaymentIntent or SetupIntent object or None if creation failed.\n:rtype: dict|None",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_stripe_prepare_setup_intent_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Prepare the payload for the creation of a SetupIntent object in Stripe format.\n\nNote: This method serves as a hook for modules that would fully implement Stripe Connect.\n\n:return: The Stripe-formatted payload for the SetupIntent request.\n:rtype: dict",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_stripe_prepare_payment_intent_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Prepare the payload for the creation of a PaymentIntent object in Stripe format.\n\nNote: This method serves as a hook for modules that would fully implement Stripe Connect.\n\n:return: The Stripe-formatted payload for the PaymentIntent request.\n:rtype: dict",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_stripe_create_customer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Create and return a Customer.\n\n:return: The Customer\n:rtype: dict",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_stripe_prepare_mandate_options",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_stripe",
+      "decorators": [],
+      "documentation": "Prepare the configuration options for setting up an eMandate along with an intent.\n\n:return: The Stripe-formatted payload for the mandate options.\n:rtype: dict",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_worldline_create_checkout_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_worldline",
+      "decorators": [],
+      "documentation": "Create a hosted checkout session and return the response data.\n\n:return: The hosted checkout session data.\n:rtype: dict",
+      "size_in_lines": 75,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_worldline_extract_payment_method_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "payment_data"
+    ],
+    "definitions": [
+     {
+      "package": "payment_worldline",
+      "decorators": [
+       {
+        "name": "staticmethod",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_xendit_prepare_invoice_request_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": "Create the payload for the invoice request based on the transaction values.\n\n:return: The request payload.\n:rtype: dict",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_xendit_create_charge",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "token_ref",
+     "auth_id"
+    ],
+    "definitions": [
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": "Create a charge on Xendit using the `credit_card_charges` endpoint.\n\n:param str token_ref: The reference of the Xendit token to use to make the payment.\n:param str auth_id: The authentication id to use to make the payment.\n:return: None",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rounded_amount",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment_xendit",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_pos_online_payment",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The payment transaction (%d) has a negative amount.",
+        "line": 37
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The POS online payment (tx.id=%d) could not be saved correctly",
+        "line": 42
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The POS online payment (tx.id=%d) could not be saved correctly because the online payment method could not be found",
+        "line": 49
+       }
+      ]
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_pos_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": "Return the action for the view of the pos order linked to the transaction.\n        ",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_self_order_payment_confirmed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_state_authorized_supported",
+    "package": "payment",
+    "kind": "ValidationError",
+    "message": "Transaction authorization is not supported by the following payment providers: %s"
+   },
+   {
+    "operation": "_check_token_is_active",
+    "package": "payment",
+    "kind": "ValidationError",
+    "message": "Creating a transaction from an archived token is forbidden."
+   },
+   {
+    "operation": "action_void",
+    "package": "payment",
+    "kind": "ValidationError",
+    "message": "Only authorized transactions can be voided."
+   },
+   {
+    "operation": "action_refund",
+    "package": "payment",
+    "kind": "ValidationError",
+    "message": "Only confirmed transactions can be refunded."
+   },
+   {
+    "operation": "_ensure_provider_is_not_disabled",
+    "package": "payment",
+    "kind": "UserError",
+    "message": "Making a request to the provider is not possible because the provider is disabled."
+   },
+   {
+    "operation": "_apply_updates",
+    "package": "payment_asiapay",
+    "kind": "ValidationError",
+    "message": "Received data with missing success code."
+   },
+   {
+    "operation": "_get_specific_rendering_values",
+    "package": "payment_nuvei",
+    "kind": "UserError",
+    "message": "'Nuvei: ' + _('%(payment_method)s requires both a first and last name.', payment_method=self.payment_method_id.name)"
+   },
+   {
+    "operation": "_validate_phone_number",
+    "package": "payment_razorpay",
+    "kind": "ValidationError",
+    "message": "The phone number is missing."
+   },
+   {
+    "operation": "_validate_phone_number",
+    "package": "payment_razorpay",
+    "kind": "ValidationError",
+    "message": "The phone number is invalid."
+   },
+   {
+    "operation": "_send_void_request",
+    "package": "payment_razorpay",
+    "kind": "UserError",
+    "message": "Transactions processed by Razorpay can't be manually voided from the system."
+   },
+   {
+    "operation": "_razorpay_create_refund_tx_from_payment_data",
+    "package": "payment_razorpay",
+    "kind": "ValidationError",
+    "message": "Received incomplete refund data."
+   },
+   {
+    "operation": "_process_pos_online_payment",
+    "package": "pos_online_payment",
+    "kind": "ValidationError",
+    "message": "The payment transaction (%d) has a negative amount."
+   },
+   {
+    "operation": "_process_pos_online_payment",
+    "package": "pos_online_payment",
+    "kind": "ValidationError",
+    "message": "The POS online payment (tx.id=%d) could not be saved correctly"
+   },
+   {
+    "operation": "_process_pos_online_payment",
+    "package": "pos_online_payment",
+    "kind": "ValidationError",
+    "message": "The POS online payment (tx.id=%d) could not be saved correctly because the online payment method could not be found"
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "account_payment.payment_transaction_user",
+    "package": "account_payment",
+    "name": "payment.transaction.user",
+    "entity": "payment.transaction",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "payment.payment_transaction_system",
+    "package": "payment",
+    "name": "payment.transaction.system",
+    "entity": "payment.transaction",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "payment.transaction_company_rule",
+    "package": "payment",
+    "name": "Access transactions in own companies only",
+    "entity": "payment.transaction",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sale.payment_transaction_salesman_rule",
+    "package": "sale",
+    "name": "Access every payment transaction",
+    "entity": "payment.transaction",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('sales_team.group_sale_salesman'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account_payment.payment_transaction_form",
+    "package": "account_payment",
+    "name": "payment.transaction.form",
+    "view_type": "button",
+    "inherits_view": "payment.payment_transaction_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "button",
+     "root_attributes": {
+      "name": "action_view_refunds",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "invoices_count",
+       "widget": "statinfo",
+       "string": "Invoice(s)"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_refunds",
+       "position": "before"
+      },
+      {
+       "name": "action_view_invoices",
+       "type": "object",
+       "invisible": "invoices_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-money"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "payment.payment_transaction_form",
+    "package": "payment",
+    "name": "payment.transaction.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Payment Transactions",
+      "create": "false",
+      "edit": "false"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "refunds_count",
+       "widget": "statinfo",
+       "string": "Refunds"
+      },
+      {
+       "name": "reference"
+      },
+      {
+       "name": "source_transaction_id",
+       "invisible": "not source_transaction_id"
+      },
+      {
+       "name": "amount"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "payment_method_id"
+      },
+      {
+       "name": "provider_id"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "provider_code",
+       "invisible": "1"
+      },
+      {
+       "name": "provider_reference"
+      },
+      {
+       "name": "token_id",
+       "invisible": "not token_id"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "last_state_change"
+      },
+      {
+       "name": "is_live"
+      },
+      {
+       "name": "is_post_processed",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "partner_id",
+       "widget": "res_partner_many2one"
+      },
+      {
+       "name": "partner_address",
+       "placeholder": "Address"
+      },
+      {
+       "name": "partner_city",
+       "placeholder": "City"
+      },
+      {
+       "name": "partner_state_id",
+       "options": "{'no_open': True}",
+       "placeholder": "State"
+      },
+      {
+       "name": "partner_zip",
+       "placeholder": "ZIP"
+      },
+      {
+       "name": "partner_country_id",
+       "options": "{'no_open': True}",
+       "placeholder": "Country"
+      },
+      {
+       "name": "partner_email",
+       "widget": "email"
+      },
+      {
+       "name": "partner_phone",
+       "widget": "phone"
+      },
+      {
+       "name": "partner_lang"
+      },
+      {
+       "name": "child_transaction_ids",
+       "invisible": "not child_transaction_ids"
+      },
+      {
+       "name": "state_message",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_capture",
+       "string": "Capture Transaction",
+       "type": "object",
+       "invisible": "state != 'authorized'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_void",
+       "string": "Void Transaction",
+       "type": "object",
+       "invisible": "state != 'authorized'",
+       "confirm": "Are you sure you want to void the authorized transaction? This action can't be undone."
+      },
+      {
+       "name": "action_post_process",
+       "string": "Post-process",
+       "type": "object",
+       "invisible": "is_post_processed",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "action_view_refunds",
+       "type": "object",
+       "invisible": "refunds_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-money"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 1,
+      "res_partner_many2one": 1,
+      "email": 1,
+      "phone": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "type": "object",
+       "name": "action_capture",
+       "invisible": "state != 'authorized'",
+       "string": "Capture Transaction",
+       "class": "oe_highlight"
+      },
+      {
+       "type": "object",
+       "name": "action_void",
+       "invisible": "state != 'authorized'",
+       "string": "Void Transaction",
+       "confirm": "Are you sure you want to void the authorized transaction? This action can't be undone."
+      },
+      {
+       "string": "Post-process",
+       "help": "Run the post-processing step for this transaction.",
+       "type": "object",
+       "name": "action_post_process",
+       "invisible": "is_post_processed",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": null,
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_view_refunds",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-money",
+       "invisible": "refunds_count == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "payment.payment_transaction_list",
+    "package": "payment",
+    "name": "payment.transaction.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Payment Transactions",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "reference"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "payment_method_id"
+      },
+      {
+       "name": "provider_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "partner_name"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "amount"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "company_id",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "is_live",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "payment.payment_transaction_kanban",
+    "package": "payment",
+    "name": "payment.transaction.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "reference"
+      },
+      {
+       "name": "amount"
+      },
+      {
+       "name": "partner_name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "payment.payment_transaction_search",
+    "package": "payment",
+    "name": "payment.transaction.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "reference"
+      },
+      {
+       "name": "provider_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "partner_name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "live_transactions",
+       "string": "Production Environment",
+       "domain": "[('is_live', '=', True)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "provider_id",
+       "string": "Provider",
+       "context": "{'group_by': 'provider_id'}"
+      },
+      {
+       "name": "partner_id",
+       "string": "Partner",
+       "context": "{'group_by': 'partner_id'}"
+      },
+      {
+       "name": "state",
+       "string": "Status",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "is_live",
+       "string": "Production Environment",
+       "context": "{'group_by': 'is_live'}"
+      },
+      {
+       "name": "company",
+       "string": "Company",
+       "context": "{'group_by': 'company_id'}",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "payment.payment_transaction_graph",
+    "package": "payment",
+    "name": "payment.transaction.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Payment Transactions"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "state"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "create_date",
+       "interval": "month"
+      },
+      {
+       "name": "state"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "payment.payment_transaction_pivot",
+    "package": "payment",
+    "name": "payment.transaction.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Payment Transactions",
+      "display_quantity": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "create_date",
+       "interval": "month",
+       "type": "row"
+      },
+      {
+       "name": "state",
+       "type": "col"
+      },
+      {
+       "name": "amount",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "payment_demo.payment_transaction_form",
+    "package": "payment_demo",
+    "name": "Demo Transaction Form",
+    "view_type": "header",
+    "inherits_view": "payment.payment_transaction_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "header",
+     "root_attributes": {
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "capture_manually",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_demo_set_done",
+       "string": "Authorize",
+       "type": "object",
+       "invisible": "provider_code != 'demo' or not capture_manually or state != 'pending'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_demo_set_done",
+       "string": "Confirm",
+       "type": "object",
+       "invisible": "provider_code != 'demo' or capture_manually or state != 'pending'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_demo_set_canceled",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "provider_code != 'demo' or state != 'pending'"
+      },
+      {
+       "name": "action_demo_set_error",
+       "string": "Set to Error",
+       "type": "object",
+       "invisible": "provider_code != 'demo' or state != 'pending'"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "header",
+       "attributes": {
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "payment_paypal.payment_transaction_form",
+    "package": "payment_paypal",
+    "name": "PayPal Transaction Form",
+    "view_type": "field",
+    "inherits_view": "payment.payment_transaction_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "provider_reference",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "provider_reference",
+       "position": "after"
+      },
+      {
+       "name": "paypal_type",
+       "invisible": "provider_code != 'paypal'",
+       "readonly": "1",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "pos_online_payment.payment_transaction_form",
+    "package": "pos_online_payment",
+    "name": "payment.transaction.form",
+    "view_type": "button",
+    "inherits_view": "payment.payment_transaction_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "button",
+     "root_attributes": {
+      "name": "action_view_refunds",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "pos_order_id",
+       "invisible": "1"
+      },
+      {
+       "name": "pos_order_id",
+       "widget": "statinfo",
+       "string": "POS Order"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_refunds",
+       "position": "before"
+      },
+      {
+       "name": "action_view_pos_order",
+       "type": "object",
+       "invisible": "not pos_order_id",
+       "class": "oe_stat_button",
+       "icon": "fa-shopping-cart"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale.transaction_form_inherit_sale",
+    "package": "sale",
+    "name": "payment.transaction.form.inherit.sale.payment",
+    "view_type": "xpath",
+    "inherits_view": "payment.payment_transaction_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_button_box')]",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "sale_order_ids_nbr",
+       "widget": "statinfo",
+       "string": "Sales Order(s)"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_sales_orders",
+       "type": "object",
+       "invisible": "sale_order_ids_nbr == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-money"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_button_box')]",
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "payment.action_payment_transaction",
+    "package": "payment",
+    "name": "Payment Transactions",
+    "view_mode": "list,kanban,form,graph,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_neutral_face\">\n                There are no transactions to show\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "payment.transaction"
+   },
+   {
+    "external_identifier": "payment.action_payment_transaction_linked_to_token",
+    "package": "payment",
+    "name": "Payment Transactions Linked To Token",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('token_id','=', active_id)]",
+    "context": "{'create': False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "payment.transaction"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "account_payment.payment_transaction_menu",
+    "package": "account_payment",
+    "name": null,
+    "parent_id": "account.root_payment_menu",
+    "action": "payment.action_payment_transaction",
+    "sequence": "25",
+    "groups_id": "base.group_no_one",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.payment_transaction_menu",
+    "package": "sale",
+    "name": null,
+    "parent_id": null,
+    "action": "payment.action_payment_transaction",
+    "sequence": "40",
+    "groups_id": "base.group_no_one",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "website_sale.menu_ecommerce_payment_transactions",
+    "package": "website_sale",
+    "name": null,
+    "parent_id": null,
+    "action": "payment.action_payment_transaction",
+    "sequence": "40",
+    "groups_id": "base.group_no_one",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "payment.cron_post_process_payment_tx",
+    "package": "payment",
+    "name": "Payment: Post-process transactions",
+    "interval_number": "10",
+    "interval_type": "minutes",
+    "priority": null,
+    "active": "False",
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "payment.transaction",
+    "operation": "_cron_post_process",
+    "operation_call": "model._cron_post_process()"
+   },
+   {
+    "external_identifier": "sale.send_invoice_cron",
+    "package": "sale",
+    "name": "automatic invoicing: send ready invoice",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": "False",
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "payment.transaction",
+    "operation": "_cron_send_invoice",
+    "operation_call": "model._cron_send_invoice()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

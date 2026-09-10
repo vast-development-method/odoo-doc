@@ -1,0 +1,761 @@
+{
+ "catalog": {
+  "name": "entity:product.combo",
+  "description": "Complete definition of entity Product Combo (product.combo).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.combo",
+  "storage_name": "product_combo",
+  "full_name": "Product Combo",
+  "kind": "persistent",
+  "description": "Product Combo",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "point_of_sale",
+   "website_sale_stock"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "product",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "copy": false,
+    "defined_in_package": "product",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "string": "Company",
+    "comodel": "res.company",
+    "index": true,
+    "defined_in_package": "product",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "combo_item_ids",
+    "type": "One2many",
+    "comodel": "product.combo.item",
+    "inverse_name": "combo_id",
+    "copy": true,
+    "defined_in_package": "product",
+    "string": "Combo Item",
+    "full_name": "Combo Item",
+    "target_entity": "product.combo.item"
+   },
+   {
+    "name": "combo_item_count",
+    "type": "Integer",
+    "string": "Product Count",
+    "compute": "_compute_combo_item_count",
+    "defined_in_package": "product",
+    "full_name": "Product Count"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "compute": "_compute_currency_id",
+    "defined_in_package": "product",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "base_price",
+    "type": "Float",
+    "string": "Combo Price",
+    "help": "The minimum price among the products in this combo. This value will be used to prorate the price of this combo with respect to the other combos in a combo product. This heuristic ensures that whatever product the user chooses in a combo, it will always be the same price.",
+    "min_display_digits": "Product Price",
+    "compute": "_compute_base_price",
+    "defined_in_package": "product",
+    "full_name": "Combo Price"
+   },
+   {
+    "name": "qty_max",
+    "type": "Integer",
+    "string": "Maximum quantity",
+    "default": 1,
+    "help": "Maximum number of items to select in the combo.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Maximum quantity"
+   },
+   {
+    "name": "qty_free",
+    "type": "Integer",
+    "string": "Free quantity",
+    "default": 1,
+    "help": "Number of free items included in the combo.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Free quantity"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_combo_item_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "combo_item_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_base_price",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "combo_item_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_combo_item_ids_not_empty",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "combo_item_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A combo choice must contain at least 1 product.",
+        "line": 67
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_combo_item_ids_no_duplicates",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "combo_item_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A combo choice can't contain duplicate products.",
+        "line": 73
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_company_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_qty_max",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "qty_max"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The maximum quantity of a combo must be greater or equal to 1.",
+        "line": 31
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_qty_free",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "qty_free"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The free quantity of a combo must be greater or equal to 0.",
+        "line": 36
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_qty_max_greater_than_qty_free",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "qty_max",
+         "qty_free"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The free quantity must be smaller or equal to the maximum quantity.",
+        "line": 41
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_max_quantity",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "website",
+     "sale_order",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_stock",
+      "decorators": [],
+      "documentation": "The max quantity of a combo is the max quantity of its combo item with the highest max\nquantity. If one of the combo items has no max quantity, then the combo also has no max\nquantity.\n\nNote: self.ensure_one()\n\n:param website website: The website for which to compute the max quantity.\n:return: The max quantity of the combo.\n:rtype: float | None",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_combo_item_ids_not_empty",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "A combo choice must contain at least 1 product."
+   },
+   {
+    "operation": "_check_combo_item_ids_no_duplicates",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "A combo choice can't contain duplicate products."
+   },
+   {
+    "operation": "_check_qty_max",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The maximum quantity of a combo must be greater or equal to 1."
+   },
+   {
+    "operation": "_check_qty_free",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The free quantity of a combo must be greater or equal to 0."
+   },
+   {
+    "operation": "_check_qty_max_greater_than_qty_free",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The free quantity must be smaller or equal to the maximum quantity."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_product_combo_pos_user",
+    "package": "point_of_sale",
+    "name": "product.combo user",
+    "entity": "product.combo",
+    "group": "group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_combo_user",
+    "package": "product",
+    "name": "product.combo.user",
+    "entity": "product.combo",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_combo_manager",
+    "package": "product",
+    "name": "product.combo.manager",
+    "entity": "product.combo",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "product.product_combo_comp_rule",
+    "package": "product",
+    "name": "Product combo multi-company rule",
+    "entity": "product.combo",
+    "domain": "['|', ('company_id', '=', False), ('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "point_of_sale.product_combo_view_form",
+    "package": "point_of_sale",
+    "name": "product.combo.form.inherit.point.of.sale",
+    "view_type": "field",
+    "inherits_view": "product.product_combo_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "product_id",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "product_id",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "product.product_combo_view_form",
+    "package": "product",
+    "name": "product.combo.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Combo Choice"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "widget": "text",
+       "options": "{'line_breaks': False}",
+       "placeholder": "e.g. Burger Choice"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "combo_item_ids"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "lst_price",
+       "widget": "monetary",
+       "options": "{'field_digits': True}"
+      },
+      {
+       "name": "extra_price",
+       "widget": "monetary",
+       "options": "{'field_digits': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "text": 1,
+      "monetary": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "product.product_combo_view_tree",
+    "package": "product",
+    "name": "product.combo.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Combo Choices"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "base_price",
+       "widget": "monetary",
+       "options": "{'field_digits': True}"
+      },
+      {
+       "name": "combo_item_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "product.product_combo_action",
+    "package": "product",
+    "name": "Combo Choices",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "product.combo"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "point_of_sale.menu_product_combo",
+    "package": "point_of_sale",
+    "name": "Combo Choices",
+    "parent_id": "point_of_sale.pos_config_menu_catalog",
+    "action": "product.product_combo_action",
+    "sequence": "15",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.menu_product_combos",
+    "package": "sale",
+    "name": "Combo Choices",
+    "parent_id": null,
+    "action": "product.product_combo_action",
+    "sequence": "15",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "website_sale.menu_product_combos",
+    "package": "website_sale",
+    "name": "Combo Choices",
+    "parent_id": null,
+    "action": "product.product_combo_action",
+    "sequence": "6",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

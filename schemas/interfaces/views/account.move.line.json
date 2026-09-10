@@ -1,0 +1,1734 @@
+{
+ "catalog": {
+  "name": "views:account.move.line",
+  "description": "View declarations for entity account.move.line.",
+  "record_count": 21,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account.view_move_line_form",
+   "package": "account",
+   "name": "account.move.line.form",
+   "entity": "account.move.line",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "2",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Journal Item",
+     "create": "false"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "parent_state",
+      "invisible": "1"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "partner_id",
+      "readonly": "1",
+      "domain": "['|', ('parent_id', '=', False), ('is_company', '=', True)]"
+     },
+     {
+      "name": "account_id",
+      "readonly": "1",
+      "domain": "[('company_ids', 'parent_of', company_id)]",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "debit",
+      "readonly": "1"
+     },
+     {
+      "name": "credit",
+      "readonly": "1"
+     },
+     {
+      "name": "balance",
+      "readonly": "1"
+     },
+     {
+      "name": "quantity",
+      "readonly": "1"
+     },
+     {
+      "name": "date",
+      "groups": "account.group_account_readonly"
+     },
+     {
+      "name": "date_maturity"
+     },
+     {
+      "name": "tax_line_id",
+      "invisible": "not tax_line_id",
+      "readonly": "1"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "invisible": "not tax_ids",
+      "readonly": "1"
+     },
+     {
+      "name": "full_reconcile_id",
+      "invisible": "not full_reconcile_id"
+     },
+     {
+      "name": "matched_debit_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "matched_credit_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "display_type",
+      "invisible": "1"
+     },
+     {
+      "name": "amount_currency",
+      "readonly": "display_type != 'tax' or parent_state != 'draft'"
+     },
+     {
+      "name": "product_id",
+      "readonly": "1"
+     },
+     {
+      "name": "analytic_distribution",
+      "widget": "analytic_distribution",
+      "readonly": "1",
+      "groups": "analytic.group_analytic_accounting"
+     },
+     {
+      "name": "date",
+      "invisible": "1"
+     },
+     {
+      "name": "analytic_line_ids",
+      "context": "{'list_view_ref':'analytic.view_account_analytic_line_tree', 'default_general_account_id':account_id, 'default_name': name, 'default_date':date, 'amount': (debit or 0.0)-(credit or 0.0)}"
+     },
+     {
+      "name": "move_id",
+      "readonly": "1",
+      "nolabel": "1"
+     },
+     {
+      "name": "statement_line_id"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "open_reconcile_view",
+      "string": "-> View partially reconciled entries",
+      "type": "object",
+      "invisible": "full_reconcile_id or not matched_debit_ids and not matched_credit_ids",
+      "class": "oe_link"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "information",
+      "string": "Information",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "analytic_lines",
+      "string": "Analytic Lines",
+      "invisible": null,
+      "groups": "analytic.group_analytic_accounting"
+     },
+     {
+      "name": "page_accounting_documents",
+      "string": "Accounting documents",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "many2many_tax_tags": 1,
+     "analytic_distribution": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Journal Item\" create=\"false\">\n                    <sheet>\n                        <field name=\"company_id\" invisible=\"1\"/>\n                        <field name=\"parent_state\" invisible=\"1\"/>\n                        <group>\n                            <field name=\"name\"/>\n                            <field name=\"partner_id\" domain=\"['|', ('parent_id', '=', False), ('is_company', '=', True)]\" readonly=\"1\"/>\n                        </group>\n                        <notebook colspan=\"4\">\n                            <page string=\"Information\" name=\"information\">\n                                <group>\n                                    <group string=\"Amount\">\n                                        <field name=\"account_id\" options=\"{'no_create': True}\" domain=\"[('company_ids', 'parent_of', company_id)]\" readonly=\"1\"/>\n                                        <field name=\"debit\" readonly=\"1\"/>\n                                        <field name=\"credit\" readonly=\"1\"/>\n                                        <field name=\"balance\" readonly=\"1\"/>\n                                        <field name=\"quantity\" readonly=\"1\"/>\n                                    </group>\n                                    <group string=\"Dates\">\n                                        <field name=\"date\" groups=\"account.group_account_readonly\"/>\n                                        <field name=\"date_maturity\"/>\n                                    </group>\n\n                                    <group string=\"Taxes\" invisible=\"not tax_line_id and not tax_ids\">\n                                        <field name=\"tax_line_id\" readonly=\"1\" invisible=\"not tax_line_id\"/>\n                                        <field name=\"tax_ids\" widget=\"many2many_tax_tags\" readonly=\"1\" invisible=\"not tax_ids\"/>\n                                    </group>\n                                    <group string=\"Matching\" invisible=\"not matched_debit_ids and not matched_credit_ids\">\n                                        <label for=\"full_reconcile_id\"/>\n                                        <div>\n                                            <field name=\"full_reconcile_id\" invisible=\"not full_reconcile_id\"/>\n                                            <field name=\"matched_debit_ids\" invisible=\"1\"/>\n                                            <field name=\"matched_credit_ids\" invisible=\"1\"/>\n                                            <button name=\"open_reconcile_view\" class=\"oe_link\" type=\"object\" string=\"-&gt; View partially reconciled entries\" invisible=\"full_reconcile_id or not matched_debit_ids and not matched_credit_ids\">\n                                            </button>\n                                        </div>\n                                    </group>\n                                    <group string=\"Currency\" groups=\"base.group_multi_currency\">\n                                        <field name=\"currency_id\" invisible=\"1\"/>\n                                        <field name=\"display_type\" invisible=\"1\"/>\n                                        <field name=\"amount_currency\" readonly=\"display_type != 'tax' or parent_state != 'draft'\"/>\n                                    </group>\n                                    <group string=\"Product\" invisible=\"not product_id\">\n                                        <field name=\"product_id\" readonly=\"1\"/>\n                                    </group>\n                                    <group string=\"Analytic\" groups=\"analytic.group_analytic_accounting\">\n                                        <field name=\"analytic_distribution\" widget=\"analytic_distribution\" groups=\"analytic.group_analytic_accounting\" readonly=\"1\"/>\n                                    </group>\n                                </group>\n                            </page>\n                            <page string=\"Analytic Lines\" name=\"analytic_lines\" groups=\"analytic.group_analytic_accounting\">\n                                <field name=\"date\" invisible=\"1\"/>\n                                <field name=\"analytic_line_ids\" context=\"{'list_view_ref':'analytic.view_account_analytic_line_tree', 'default_general_account_id':account_id, 'default_name': name, 'default_date':date, 'amount': (debit or 0.0)-(credit or 0.0)}\"/>\n                            </page>\n                            <page string=\"Accounting documents\" name=\"page_accounting_documents\">\n                                <label for=\"move_id\" string=\"Journal Entry\"/>\n                                <field name=\"move_id\" readonly=\"1\" nolabel=\"1\"/>\n                                <group readonly=\"1\" invisible=\"not statement_line_id\">\n                                    <label for=\"statement_line_id\" string=\"Originator Statement Line\"/>\n                                    <field name=\"statement_line_id\"/>\n                                </group>\n                            </page>\n                        </notebook>\n                    </sheet>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.account_move_line_view_kanban",
+   "package": "account",
+   "name": "account.move.line.kanban",
+   "entity": "account.move.line",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "create": "false",
+     "group_create": "false"
+    },
+    "fields": [
+     {
+      "name": "company_currency_id"
+     },
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "date_maturity"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "partner_id",
+      "widget": "image",
+      "options": "{'preview_image': 'avatar_128'}"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags"
+     },
+     {
+      "name": "debit"
+     },
+     {
+      "name": "credit"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "many2many_tax_tags": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban class=\"o_kanban_mobile\" create=\"false\" group_create=\"false\">\n                    <field name=\"company_currency_id\"/>\n                    <templates>\n                        <t t-name=\"card\">\n                            <div class=\"row mb4\">\n                                <div class=\"col-8\">\n                                    <field name=\"account_id\"/>\n                                </div>\n                                <strong t-if=\"record.date_maturity.raw_value\" class=\"col-4 ps-0 text-end\">\n                                    <i class=\"fa fa-clock-o\" aria-label=\"Date\" role=\"img\" title=\"Date\"/> <field name=\"date_maturity\"/>\n                                </strong>\n                            </div>\n                            <div class=\"row mb4\" style=\"min-height: 60px;\">\n                                <em class=\"col-10\">\n                                    <field name=\"name\"/>\n                                </em>\n                                <div class=\"col-2 text-end\">\n                                    <field name=\"partner_id\" widget=\"image\" options=\"{'preview_image': 'avatar_128'}\"/>\n                                </div>\n                            </div>\n                            <div class=\"row\">\n                                <div class=\"col-6\">\n                                    <field name=\"tax_ids\" widget=\"many2many_tax_tags\"/>\n                                </div>\n                                <div class=\"col-6 text-end\">\n                                    <t t-if=\"record.debit.raw_value &gt; 0\">\n                                        <field name=\"debit\"/><span> (DR)</span>\n                                    </t>\n                                    <t t-if=\"record.credit.raw_value &gt; 0\">\n                                        <field name=\"credit\"/><span> (CR)</span>\n                                    </t>\n                                </div>\n                            </div>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.account_move_line_view_kanban_mobile",
+   "package": "account",
+   "name": "account.move.line.kanban.mobile",
+   "entity": "account.move.line",
+   "view_type": "xpath",
+   "inherits_view": "account_move_line_view_kanban",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//kanban[hasclass('o_kanban_mobile')]",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//kanban[hasclass('o_kanban_mobile')]",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//kanban[hasclass('o_kanban_mobile')]\" position=\"attributes\">\n                    <attribute name=\"create\">true</attribute>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_pivot",
+   "package": "account",
+   "name": "account.move.line.pivot",
+   "entity": "account.move.line",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Journal Items",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "journal_id"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "balance"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "journal_id",
+      "type": "row"
+     },
+     {
+      "name": "date",
+      "type": "col"
+     },
+     {
+      "name": "balance",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <pivot string=\"Journal Items\" sample=\"1\">\n                    <field name=\"journal_id\" type=\"row\"/>\n                    <field name=\"date\" type=\"col\"/>\n                    <field name=\"balance\" type=\"measure\"/>\n                </pivot>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_tree",
+   "package": "account",
+   "name": "account.move.line.list",
+   "entity": "account.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "name": "move_line_tree",
+     "string": "Journal Items",
+     "decoration-info": "parent_state == 'draft'",
+     "create": "false",
+     "edit": "true",
+     "expand": "context.get('expand', False)",
+     "multi_edit": "1"
+    },
+    "fields": [
+     {
+      "name": "move_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "invoice_date",
+      "string": "Invoice Date",
+      "optional": "hide"
+     },
+     {
+      "name": "date",
+      "readonly": "1"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "readonly": "1",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "journal_id",
+      "readonly": "1",
+      "options": "{\"no_open\":True}",
+      "optional": "hide"
+     },
+     {
+      "name": "move_name",
+      "widget": "open_move_widget",
+      "string": "Journal Entry"
+     },
+     {
+      "name": "account_id",
+      "domain": "[('company_ids', 'parent_of', company_id)]",
+      "options": "{'no_open': True, 'no_create': True}",
+      "groups": "account.group_account_readonly"
+     },
+     {
+      "name": "partner_id",
+      "readonly": "move_type != 'entry'",
+      "optional": "show"
+     },
+     {
+      "name": "ref",
+      "readonly": "False",
+      "optional": "hide"
+     },
+     {
+      "name": "product_id",
+      "readonly": "1",
+      "optional": "hide"
+     },
+     {
+      "name": "name",
+      "optional": "show"
+     },
+     {
+      "name": "analytic_distribution",
+      "widget": "analytic_distribution",
+      "options": "{'product_field': 'product_id', 'account_field': 'account_id', 'force_applicability': 'optional', 'multi_edit': true}",
+      "optional": "hide",
+      "groups": "analytic.group_analytic_accounting"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "readonly": "1",
+      "optional": "hide"
+     },
+     {
+      "name": "amount_currency",
+      "invisible": "is_same_currency",
+      "readonly": "1",
+      "string": "In Currency",
+      "optional": "hide",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "is_same_currency",
+      "readonly": "1",
+      "string": "Currency",
+      "optional": "hide",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "debit",
+      "readonly": "1",
+      "sum": "Total Debit",
+      "decoration-muted": "debit == 0"
+     },
+     {
+      "name": "credit",
+      "readonly": "1",
+      "sum": "Total Credit",
+      "decoration-muted": "credit == 0"
+     },
+     {
+      "name": "tax_tag_ids",
+      "widget": "many2many_tags",
+      "string": "Tax Grids",
+      "domain": "[('applicability', '=', 'taxes')]",
+      "options": "{'no_create': True, 'no_create_edit': True}",
+      "optional": "hide"
+     },
+     {
+      "name": "discount_date",
+      "string": "Discount Date",
+      "optional": "hide"
+     },
+     {
+      "name": "discount_amount_currency",
+      "string": "Discount Amount",
+      "optional": "hide"
+     },
+     {
+      "name": "tax_line_id",
+      "readonly": "1",
+      "string": "Originator Tax",
+      "optional": "hide"
+     },
+     {
+      "name": "date_maturity",
+      "readonly": "1",
+      "optional": "hide",
+      "decoration-danger": "not reconciled and date_maturity < context_today().strftime('%Y-%m-%d')"
+     },
+     {
+      "name": "balance",
+      "readonly": "1",
+      "optional": "hide",
+      "sum": "Total Balance"
+     },
+     {
+      "name": "matching_number",
+      "readonly": "1",
+      "string": "Matching",
+      "optional": "show"
+     },
+     {
+      "name": "amount_residual",
+      "invisible": "not is_account_reconcile",
+      "readonly": "1",
+      "string": "Residual",
+      "optional": "hide",
+      "sum": "Total Residual"
+     },
+     {
+      "name": "amount_residual_currency",
+      "invisible": "is_same_currency or not is_account_reconcile",
+      "readonly": "1",
+      "string": "Residual in Currency",
+      "optional": "hide",
+      "sum": "Total Residual in Currency",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "move_type",
+      "column_invisible": "True"
+     },
+     {
+      "name": "parent_state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "account_type",
+      "column_invisible": "True"
+     },
+     {
+      "name": "statement_line_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_same_currency",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_account_reconcile",
+      "column_invisible": "True"
+     },
+     {
+      "name": "sequence",
+      "column_invisible": "True"
+     },
+     {
+      "name": "parent_state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "deductible_amount",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "edit",
+      "type": "edit",
+      "icon": "fa-edit"
+     },
+     {
+      "name": "action_post",
+      "string": "Post",
+      "type": "object",
+      "invisible": "state != 'draft'",
+      "class": "btn-primary",
+      "groups": "account.group_account_user"
+     },
+     {
+      "name": "set_moves_checked",
+      "string": "Review",
+      "type": "object",
+      "invisible": "state != 'posted' or checked",
+      "class": "btn-primary",
+      "groups": "account.group_account_user"
+     },
+     {
+      "name": "edit_move",
+      "string": "Edit",
+      "type": "edit",
+      "icon": "fa-edit"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "open_move_widget": 1,
+     "analytic_distribution": 1,
+     "many2many_tax_tags": 1,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "false",
+    "delete": null,
+    "edit": "true",
+    "decorations": {
+     "decoration-info": "parent_state == 'draft'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list name=\"move_line_tree\" string=\"Journal Items\" decoration-info=\"parent_state == 'draft'\" create=\"false\" edit=\"true\" expand=\"context.get('expand', False)\" multi_edit=\"1\">\n                    <field name=\"move_id\" column_invisible=\"True\"/>\n                    <field name=\"invoice_date\" string=\"Invoice Date\" optional=\"hide\"/>\n                    <field name=\"date\" readonly=\"1\"/>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"company_id\" groups=\"base.group_multi_company\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"journal_id\" readonly=\"1\" options=\"{&quot;no_open&quot;:True}\" optional=\"hide\"/>\n                    <field name=\"move_name\" string=\"Journal Entry\" widget=\"open_move_widget\"/>\n                    <field name=\"account_id\" options=\"{'no_open': True, 'no_create': True}\" domain=\"[('company_ids', 'parent_of', company_id)]\" groups=\"account.group_account_readonly\"/>\n                    <field name=\"partner_id\" optional=\"show\" readonly=\"move_type != 'entry'\"/>\n                    <field name=\"ref\" optional=\"hide\" readonly=\"False\"/>\n                    <field name=\"product_id\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"name\" optional=\"show\"/>\n                    <field name=\"analytic_distribution\" widget=\"analytic_distribution\" groups=\"analytic.group_analytic_accounting\" optional=\"hide\" options=\"{'product_field': 'product_id', 'account_field': 'account_id', 'force_applicability': 'optional', 'multi_edit': true}\"/>\n                    <field name=\"tax_ids\" widget=\"many2many_tax_tags\" optional=\"hide\" readonly=\"1\"/>\n                    <field name=\"amount_currency\" string=\"In Currency\" groups=\"base.group_multi_currency\" optional=\"hide\" readonly=\"1\" invisible=\"is_same_currency\"/>\n                    <field name=\"currency_id\" groups=\"base.group_multi_currency\" optional=\"hide\" string=\"Currency\" readonly=\"1\" invisible=\"is_same_currency\"/>\n                    <field name=\"debit\" sum=\"Total Debit\" readonly=\"1\" decoration-muted=\"debit == 0\"/>\n                    <field name=\"credit\" sum=\"Total Credit\" readonly=\"1\" decoration-muted=\"credit == 0\"/>\n                    <field name=\"tax_tag_ids\" string=\"Tax Grids\" options=\"{'no_create': True, 'no_create_edit': True}\" domain=\"[('applicability', '=', 'taxes')]\" widget=\"many2many_tags\" optional=\"hide\"/>\n                    <field name=\"discount_date\" string=\"Discount Date\" optional=\"hide\"/>\n                    <field name=\"discount_amount_currency\" string=\"Discount Amount\" optional=\"hide\"/>\n                    <field name=\"tax_line_id\" string=\"Originator Tax\" optional=\"hide\" readonly=\"1\"/>\n                    <field name=\"date_maturity\" readonly=\"1\" optional=\"hide\" decoration-danger=\"not reconciled and date_maturity &lt; context_today().strftime('%Y-%m-%d')\"/>\n                    <field name=\"balance\" sum=\"Total Balance\" optional=\"hide\" readonly=\"1\"/>\n                    <field name=\"matching_number\" string=\"Matching\" readonly=\"1\" optional=\"show\"/>\n                    <field name=\"amount_residual\" sum=\"Total Residual\" string=\"Residual\" optional=\"hide\" readonly=\"1\" invisible=\"not is_account_reconcile\"/>\n                    <field name=\"amount_residual_currency\" sum=\"Total Residual in Currency\" string=\"Residual in Currency\" optional=\"hide\" readonly=\"1\" invisible=\"is_same_currency or not is_account_reconcile\" groups=\"base.group_multi_currency\"/>\n                    <field name=\"move_type\" column_invisible=\"True\"/>\n                    <field name=\"parent_state\" column_invisible=\"True\"/>\n                    <field name=\"account_type\" column_invisible=\"True\"/>\n                    <field name=\"statement_line_id\" column_invisible=\"True\"/>\n                    <field name=\"company_currency_id\" column_invisible=\"True\"/>\n                    <field name=\"is_same_currency\" column_invisible=\"True\"/>\n                    <field name=\"is_account_reconcile\" column_invisible=\"True\"/>\n                    <field name=\"sequence\" column_invisible=\"True\"/>\n                    <field name=\"parent_state\" column_invisible=\"True\"/>\n                    <field name=\"deductible_amount\" optional=\"hide\"/>\n                    <groupby name=\"partner_id\">\n                        <button name=\"edit\" type=\"edit\" icon=\"fa-edit\" title=\"Edit\"/>\n                    </groupby>\n                    <groupby name=\"move_id\">\n                        <button name=\"action_post\" type=\"object\" string=\"Post\" class=\"btn-primary\" invisible=\"state != 'draft'\" groups=\"account.group_account_user\"/>\n                        <button name=\"set_moves_checked\" type=\"object\" string=\"Review\" class=\"btn-primary\" invisible=\"state != 'posted' or checked\" groups=\"account.group_account_user\"/>\n                        <button name=\"edit_move\" type=\"edit\" icon=\"fa-edit\" string=\"Edit\"/>\n                    </groupby>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_tree_grouped_sales_purchases",
+   "package": "account",
+   "name": "account.move.line.list.grouped.sales.purchase",
+   "entity": "account.move.line",
+   "view_type": "field",
+   "inherits_view": "account.view_move_line_tree",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "date",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "date",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"date\" position=\"attributes\"><attribute name=\"optional\">hide</attribute></field>\n                <field name=\"tax_tag_ids\" position=\"attributes\"><attribute name=\"optional\">show</attribute></field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_tree_grouped_bank_cash",
+   "package": "account",
+   "name": "account.move.line.list.grouped.bank.cash",
+   "entity": "account.move.line",
+   "view_type": "field",
+   "inherits_view": "account.view_move_line_tree",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "date",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "date",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"date\" position=\"attributes\"><attribute name=\"optional\">hide</attribute></field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_tree_grouped_misc",
+   "package": "account",
+   "name": "account.move.line.list.grouped.misc",
+   "entity": "account.move.line",
+   "view_type": "field",
+   "inherits_view": "account.view_move_line_tree",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "date",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "date",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"date\" position=\"attributes\"><attribute name=\"optional\">hide</attribute></field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_tree_grouped_general",
+   "package": "account",
+   "name": "account.move.line.list.grouped.misc",
+   "entity": "account.move.line",
+   "view_type": "field",
+   "inherits_view": "account.view_move_line_tree",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "account_id",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "account_id",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"account_id\" position=\"attributes\"><attribute name=\"optional\">hide</attribute></field>\n                <field name=\"balance\" position=\"attributes\"><attribute name=\"optional\">show</attribute></field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_tree_grouped_partner",
+   "package": "account",
+   "name": "account.move.line.list.grouped.partner",
+   "entity": "account.move.line",
+   "view_type": "field",
+   "inherits_view": "account.view_move_line_tree",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_id",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"partner_id\" position=\"attributes\"><attribute name=\"optional\">hide</attribute></field>\n                <field name=\"date_maturity\" position=\"attributes\"><attribute name=\"optional\">show</attribute></field>\n                <field name=\"balance\" position=\"attributes\"><attribute name=\"optional\">show</attribute></field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_tax_audit_tree",
+   "package": "account",
+   "name": "account.move.line.tax.audit.list",
+   "entity": "account.move.line",
+   "view_type": "field",
+   "inherits_view": "account.view_move_line_tree",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "matching_number",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "matching_number",
+      "position": "replace"
+     },
+     {
+      "name": "tax_line_id",
+      "string": "Tax"
+     },
+     {
+      "name": "tax_base_amount",
+      "sum": "Total Base Amount"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"matching_number\" position=\"replace\">\n                    <field name=\"tax_line_id\" string=\"Tax\"/>\n                    <field name=\"tax_base_amount\" sum=\"Total Base Amount\"/>\n                </field>\n                <field name=\"analytic_distribution\" position=\"attributes\">\n                    <attribute name=\"optional\">hide</attribute>\n                </field>\n                <field name=\"debit\" position=\"attributes\">\n                    <attribute name=\"optional\">show</attribute>\n                </field>\n                <field name=\"credit\" position=\"attributes\">\n                    <attribute name=\"optional\">show</attribute>\n                </field>\n                <field name=\"journal_id\" position=\"attributes\">\n                    <attribute name=\"optional\">show</attribute>\n                </field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.account_move_line_graph_date",
+   "package": "account",
+   "name": "account.move.line.graph",
+   "entity": "account.move.line",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Account Statistics",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "balance",
+      "operator": "+"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "balance",
+      "operator": "+",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <graph string=\"Account Statistics\" sample=\"1\">\n                    <field name=\"date\"/>\n                    <field name=\"balance\" operator=\"+\" type=\"measure\"/>\n                </graph>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_move_line_filter",
+   "package": "account",
+   "name": "account.move.line.search",
+   "entity": "account.move.line",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "16",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Journal Items"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Journal Item",
+      "filter_domain": "[                         '|', '|', '|',                         ('name', 'ilike', self), ('ref', 'ilike', self), ('account_id', 'ilike', self), ('partner_id', 'ilike', self)]"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "ref"
+     },
+     {
+      "name": "invoice_date"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "date_maturity",
+      "string": "Due Date"
+     },
+     {
+      "name": "discount_date",
+      "string": "Discount Date"
+     },
+     {
+      "name": "balance",
+      "string": "Amount",
+      "filter_domain": "['|', ('credit', '=', raw_value), ('debit', '=', raw_value)]"
+     },
+     {
+      "name": "account_id",
+      "context": "{'active_test': False}"
+     },
+     {
+      "name": "account_type"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "journal_id"
+     },
+     {
+      "name": "journal_group_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "product_category_id"
+     },
+     {
+      "name": "move_id",
+      "string": "Journal Entry",
+      "filter_domain": "[                         '|', ('move_id.name', 'ilike', self), ('move_id.ref', 'ilike', self)]"
+     },
+     {
+      "name": "tax_ids"
+     },
+     {
+      "name": "tax_line_id",
+      "string": "Originator Tax"
+     },
+     {
+      "name": "reconcile_model_id"
+     },
+     {
+      "name": "account_root_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "unposted",
+      "string": "Unposted",
+      "domain": "[('parent_state', '=', 'draft')]",
+      "help": "Unposted Journal Items"
+     },
+     {
+      "name": "posted",
+      "string": "Posted",
+      "domain": "[('parent_state', '=', 'posted')]",
+      "help": "Posted Journal Items"
+     },
+     {
+      "name": "not_secured",
+      "string": "Not Secured",
+      "domain": "[('move_id.secured', '=', False), ('move_id.state', '=', 'posted')]",
+      "groups": "account.group_account_secured,base.group_no_one"
+     },
+     {
+      "name": "to_check",
+      "string": "To Review",
+      "domain": "[('move_id.checked', '=', False), ('parent_state', '!=', 'draft')]"
+     },
+     {
+      "name": "reconcilable_account",
+      "string": "Unreconciled",
+      "domain": "[('balance', '!=', 0), ('account_id.reconcile', '=', True), '|', ('matching_number', '=', False), ('matching_number', '=like', 'P%')]",
+      "help": "Journal items where the account allows reconciliation no matter the residual amount"
+     },
+     {
+      "name": "unreconciled",
+      "string": "With residual",
+      "domain": "[('amount_residual', '!=', 0), ('account_id.reconcile', '=', True)]",
+      "help": "Journal items where matching number isn't set"
+     },
+     {
+      "name": "sales",
+      "string": "Sales",
+      "domain": "[('journal_id.type', '=', 'sale')]",
+      "context": "{'default_journal_type': 'sale'}"
+     },
+     {
+      "name": "purchases",
+      "string": "Purchases",
+      "domain": "[('journal_id.type', '=', 'purchase')]",
+      "context": "{'default_journal_type': 'purchase'}"
+     },
+     {
+      "name": "bank",
+      "string": "Bank",
+      "domain": "[('journal_id.type', '=', 'bank')]",
+      "context": "{'default_journal_type': 'bank'}"
+     },
+     {
+      "name": "cash",
+      "string": "Cash",
+      "domain": "[('journal_id.type', '=', 'cash')]",
+      "context": "{'default_journal_type': 'cash'}"
+     },
+     {
+      "name": "credit",
+      "string": "Credit",
+      "domain": "[('journal_id.type', '=', 'credit')]",
+      "context": "{'default_journal_type': 'credit'}"
+     },
+     {
+      "name": "misc_filter",
+      "string": "Miscellaneous",
+      "domain": "[('journal_id.type', '=', 'general')]",
+      "context": "{'default_journal_type': 'general'}"
+     },
+     {
+      "name": "journal_ids",
+      "string": "Journals",
+      "domain": "[('journal_id', 'in', context.get('journal_ids'))]",
+      "invisible": "not context.get('journal_ids')"
+     },
+     {
+      "name": "trade_payable",
+      "string": "Payable",
+      "domain": "[('account_id.account_type', '=', 'liability_payable'), ('account_id.non_trade', '=', False)]",
+      "help": "From Trade Payable accounts"
+     },
+     {
+      "name": "trade_receivable",
+      "string": "Receivable",
+      "domain": "[('account_id.account_type', '=', 'asset_receivable'), ('account_id.non_trade', '=', False)]",
+      "help": "From Trade Receivable accounts"
+     },
+     {
+      "name": "non_trade_payable",
+      "string": "Non Trade Payable",
+      "domain": "[('account_id.account_type', '=', 'liability_payable'), ('account_id.non_trade', '=', True)]",
+      "help": "From Non Trade Receivable accounts",
+      "invisible": "1"
+     },
+     {
+      "name": "non_trade_receivable",
+      "string": "Non Trade Receivable",
+      "domain": "[('account_id.account_type', '=', 'asset_receivable'), ('account_id.non_trade', '=', True)]",
+      "help": "From Non Trade Receivable accounts",
+      "invisible": "1"
+     },
+     {
+      "name": "pl_accounts",
+      "string": "P&L Accounts",
+      "domain": "[('account_id.internal_group', 'in', ('income', 'expense'))]",
+      "help": "From P&L accounts"
+     },
+     {
+      "name": "no_st_line_id",
+      "string": "No Bank Transaction",
+      "domain": "[('statement_line_id', '=', False), ('payment_id', '=', False)]",
+      "invisible": "1"
+     },
+     {
+      "name": "date",
+      "string": "Date",
+      "date": "date"
+     },
+     {
+      "name": "invoice_date",
+      "string": "Invoice Date",
+      "date": "invoice_date"
+     },
+     {
+      "name": "date_between",
+      "string": "Report Dates",
+      "domain": "[('date', '>=', context.get('date_from')), ('date', '<=', context.get('date_to'))]",
+      "invisible": "1"
+     },
+     {
+      "name": "date_before",
+      "string": "Report Dates",
+      "domain": "[('date', '<=', context.get('date_to'))]",
+      "invisible": "1"
+     },
+     {
+      "name": "analytic_accounts",
+      "string": "Analytic Accounts",
+      "domain": "[('analytic_distribution', 'in', context.get('analytic_ids'))]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_by_move",
+      "string": "Journal Entry",
+      "domain": "[]",
+      "context": "{'group_by': 'move_name'}"
+     },
+     {
+      "name": "group_by_account",
+      "string": "Account",
+      "domain": "[]",
+      "context": "{'group_by': 'account_id'}"
+     },
+     {
+      "name": "group_by_partner",
+      "string": "Partner",
+      "domain": "[]",
+      "context": "{'group_by': 'partner_id'}"
+     },
+     {
+      "name": "journal",
+      "string": "Journal",
+      "domain": "[]",
+      "context": "{'group_by': 'journal_id'}"
+     },
+     {
+      "name": "groupby_date",
+      "string": "Date",
+      "domain": "[]",
+      "context": "{'group_by': 'date'}"
+     },
+     {
+      "name": "groupby_invoice_date",
+      "string": "Invoice Date",
+      "domain": "[]",
+      "context": "{'group_by': 'invoice_date'}"
+     },
+     {
+      "name": "group_by_taxes",
+      "string": "Taxes",
+      "domain": "[]",
+      "context": "{'group_by': 'tax_ids'}"
+     },
+     {
+      "name": "group_by_tax_tags",
+      "string": "Tax Grid",
+      "domain": "[]",
+      "context": "{'group_by': 'tax_tag_ids'}"
+     },
+     {
+      "name": "group_by_matching",
+      "string": "Matching",
+      "domain": "[]",
+      "context": "{'group_by': 'matching_number'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search Journal Items\">\n                    <field name=\"name\" string=\"Journal Item\" filter_domain=\"[                         '|', '|', '|',                         ('name', 'ilike', self), ('ref', 'ilike', self), ('account_id', 'ilike', self), ('partner_id', 'ilike', self)]\"/>\n                    <field name=\"name\"/>\n                    <field name=\"ref\"/>\n                    <field name=\"invoice_date\"/>\n                    <field name=\"date\"/>\n                    <field name=\"date_maturity\" string=\"Due Date\"/>\n                    <field name=\"discount_date\" string=\"Discount Date\"/>\n                    <field name=\"balance\" string=\"Amount\" filter_domain=\"['|', ('credit', '=', raw_value), ('debit', '=', raw_value)]\"/>\n                    <field name=\"account_id\" context=\"{'active_test': False}\"/>\n                    <field name=\"account_type\"/>\n                    <field name=\"partner_id\"/>\n                    <field name=\"journal_id\"/>\n                    <field name=\"journal_group_id\"/>\n                    <field name=\"product_id\"/>\n                    <field name=\"product_category_id\"/>\n                    <field name=\"move_id\" string=\"Journal Entry\" filter_domain=\"[                         '|', ('move_id.name', 'ilike', self), ('move_id.ref', 'ilike', self)]\"/>\n                    <field name=\"tax_ids\"/>\n                    <field name=\"tax_line_id\" string=\"Originator Tax\"/>\n                    <field name=\"reconcile_model_id\"/>\n                    <separator/>\n                    <filter string=\"Unposted\" name=\"unposted\" domain=\"[('parent_state', '=', 'draft')]\" help=\"Unposted Journal Items\"/>\n                    <filter string=\"Posted\" name=\"posted\" domain=\"[('parent_state', '=', 'posted')]\" help=\"Posted Journal Items\"/>\n                    <separator groups=\"account.group_account_secured,base.group_no_one\"/>\n                    <filter name=\"not_secured\" string=\"Not Secured\" domain=\"[('move_id.secured', '=', False), ('move_id.state', '=', 'posted')]\" groups=\"account.group_account_secured,base.group_no_one\"/>\n                    <separator/>\n                    <filter string=\"To Review\" name=\"to_check\" domain=\"[('move_id.checked', '=', False), ('parent_state', '!=', 'draft')]\"/>\n                    <separator/>\n                    <filter string=\"Unreconciled\" domain=\"[('balance', '!=', 0), ('account_id.reconcile', '=', True), '|', ('matching_number', '=', False), ('matching_number', '=like', 'P%')]\" name=\"reconcilable_account\" help=\"Journal items where the account allows reconciliation no matter the residual amount\"/>\n                    <filter string=\"With residual\" domain=\"[('amount_residual', '!=', 0), ('account_id.reconcile', '=', True)]\" help=\"Journal items where matching number isn't set\" name=\"unreconciled\"/>\n                    <separator/>\n                    <filter string=\"Sales\" name=\"sales\" domain=\"[('journal_id.type', '=', 'sale')]\" context=\"{'default_journal_type': 'sale'}\"/>\n                    <filter string=\"Purchases\" name=\"purchases\" domain=\"[('journal_id.type', '=', 'purchase')]\" context=\"{'default_journal_type': 'purchase'}\"/>\n                    <filter string=\"Bank\" name=\"bank\" domain=\"[('journal_id.type', '=', 'bank')]\" context=\"{'default_journal_type': 'bank'}\"/>\n                    <filter string=\"Cash\" name=\"cash\" domain=\"[('journal_id.type', '=', 'cash')]\" context=\"{'default_journal_type': 'cash'}\"/>\n                    <filter string=\"Credit\" name=\"credit\" domain=\"[('journal_id.type', '=', 'credit')]\" context=\"{'default_journal_type': 'credit'}\"/>\n                    <filter string=\"Miscellaneous\" domain=\"[('journal_id.type', '=', 'general')]\" name=\"misc_filter\" context=\"{'default_journal_type': 'general'}\"/>\n                    <filter string=\"Journals\" name=\"journal_ids\" domain=\"[('journal_id', 'in', context.get('journal_ids'))]\" invisible=\"not context.get('journal_ids')\"/>\n                    <separator/>\n                    <filter string=\"Payable\" domain=\"[('account_id.account_type', '=', 'liability_payable'), ('account_id.non_trade', '=', False)]\" help=\"From Trade Payable accounts\" name=\"trade_payable\"/>\n                    <filter string=\"Receivable\" domain=\"[('account_id.account_type', '=', 'asset_receivable'), ('account_id.non_trade', '=', False)]\" help=\"From Trade Receivable accounts\" name=\"trade_receivable\"/>\n                    <filter string=\"Non Trade Payable\" domain=\"[('account_id.account_type', '=', 'liability_payable'), ('account_id.non_trade', '=', True)]\" help=\"From Non Trade Receivable accounts\" name=\"non_trade_payable\" invisible=\"1\"/>\n                    <filter string=\"Non Trade Receivable\" domain=\"[('account_id.account_type', '=', 'asset_receivable'), ('account_id.non_trade', '=', True)]\" help=\"From Non Trade Receivable accounts\" name=\"non_trade_receivable\" invisible=\"1\"/>\n                    <filter string=\"P&amp;L Accounts\" domain=\"[('account_id.internal_group', 'in', ('income', 'expense'))]\" help=\"From P&amp;L accounts\" name=\"pl_accounts\"/>\n                    <filter string=\"No Bank Transaction\" domain=\"[('statement_line_id', '=', False), ('payment_id', '=', False)]\" name=\"no_st_line_id\" invisible=\"1\"/>\n                    <separator/>\n                    <filter string=\"Date\" name=\"date\" date=\"date\"/>\n                    <filter string=\"Invoice Date\" name=\"invoice_date\" date=\"invoice_date\"/>\n                    <separator/>\n                    <filter string=\"Report Dates\" name=\"date_between\" domain=\"[('date', '&gt;=', context.get('date_from')), ('date', '&lt;=', context.get('date_to'))]\" invisible=\"1\"/>\n                    <filter string=\"Report Dates\" name=\"date_before\" domain=\"[('date', '&lt;=', context.get('date_to'))]\" invisible=\"1\"/>\n                    <separator/>\n                    <filter string=\"Analytic Accounts\" name=\"analytic_accounts\" domain=\"[('analytic_distribution', 'in', context.get('analytic_ids'))]\" invisible=\"1\"/>\n                    <group>\n                        <filter string=\"Journal Entry\" name=\"group_by_move\" domain=\"[]\" context=\"{'group_by': 'move_name'}\"/>\n                        <filter string=\"Account\" name=\"group_by_account\" domain=\"[]\" context=\"{'group_by': 'account_id'}\"/>\n                        <filter string=\"Partner\" name=\"group_by_partner\" domain=\"[]\" context=\"{'group_by': 'partner_id'}\"/>\n                        <filter string=\"Journal\" name=\"journal\" domain=\"[]\" context=\"{'group_by': 'journal_id'}\"/>\n                        <filter string=\"Date\" name=\"groupby_date\" domain=\"[]\" context=\"{'group_by': 'date'}\"/>\n                        <filter string=\"Invoice Date\" name=\"groupby_invoice_date\" domain=\"[]\" context=\"{'group_by': 'invoice_date'}\"/>\n                        <filter string=\"Taxes\" name=\"group_by_taxes\" domain=\"[]\" context=\"{'group_by': 'tax_ids'}\"/>\n                        <filter string=\"Tax Grid\" name=\"group_by_tax_tags\" domain=\"[]\" context=\"{'group_by': 'tax_tag_ids'}\"/>\n                        <filter string=\"Matching\" name=\"group_by_matching\" domain=\"[]\" context=\"{'group_by': 'matching_number'}\"/>\n                    </group>\n                    <searchpanel class=\"account_root w-auto\">\n                        <field name=\"account_root_id\" icon=\"fa-filter\" groupby=\"account_id\" limit=\"false\"/>\n                    </searchpanel>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_move_line_payment_tree",
+   "package": "account",
+   "name": "account.move.line.payment.list",
+   "entity": "account.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "200",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Payment Items",
+     "decoration-info": "parent_state == 'draft'",
+     "create": "false",
+     "edit": "true",
+     "expand": "context.get('expand', False)",
+     "multi_edit": "1",
+     "sample": "1",
+     "default_order": "payment_date asc, id asc"
+    },
+    "fields": [
+     {
+      "name": "move_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "invoice_date",
+      "string": "Bill Date"
+     },
+     {
+      "name": "date",
+      "readonly": "1",
+      "optional": "hide"
+     },
+     {
+      "name": "date_maturity",
+      "readonly": "1",
+      "string": "Invoice Due Date",
+      "optional": "hide"
+     },
+     {
+      "name": "discount_date",
+      "string": "Discount Date",
+      "optional": "hide"
+     },
+     {
+      "name": "payment_date",
+      "readonly": "1"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "readonly": "1",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "journal_id",
+      "readonly": "1",
+      "options": "{\"no_open\":True}",
+      "optional": "hide"
+     },
+     {
+      "name": "move_name",
+      "widget": "open_move_widget",
+      "string": "Journal Entry"
+     },
+     {
+      "name": "partner_id",
+      "readonly": "move_type != 'entry'",
+      "optional": "show"
+     },
+     {
+      "name": "ref",
+      "readonly": "False"
+     },
+     {
+      "name": "name",
+      "optional": "show"
+     },
+     {
+      "name": "discount_amount_currency",
+      "invisible": "not discount_amount_currency",
+      "string": "Discount Amount",
+      "optional": "show"
+     },
+     {
+      "name": "amount_residual",
+      "invisible": "not is_account_reconcile",
+      "readonly": "1",
+      "string": "Residual",
+      "sum": "Total Residual"
+     },
+     {
+      "name": "amount_residual_currency",
+      "invisible": "is_same_currency or not is_account_reconcile",
+      "readonly": "1",
+      "string": "Residual in Currency",
+      "optional": "hide",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "is_same_currency",
+      "readonly": "1",
+      "string": "Currency",
+      "optional": "hide",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "company_currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "move_type",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_same_currency",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_account_reconcile",
+      "column_invisible": "True"
+     },
+     {
+      "name": "parent_state",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_payment_items_register_payment",
+      "string": "Pay",
+      "type": "object",
+      "groups": "account.group_account_user"
+     },
+     {
+      "name": "edit",
+      "type": "edit",
+      "icon": "fa-edit"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "open_move_widget": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "false",
+    "delete": null,
+    "edit": "true",
+    "decorations": {
+     "decoration-info": "parent_state == 'draft'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Payment Items\" decoration-info=\"parent_state == 'draft'\" create=\"false\" edit=\"true\" expand=\"context.get('expand', False)\" multi_edit=\"1\" sample=\"1\" default_order=\"payment_date asc, id asc\">\n                    <header>\n                        <button name=\"action_payment_items_register_payment\" type=\"object\" string=\"Pay\" groups=\"account.group_account_user\"/>\n                    </header>\n                    <field name=\"move_id\" column_invisible=\"True\"/>\n                    <field name=\"invoice_date\" string=\"Bill Date\"/>\n                    <field name=\"date\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"date_maturity\" string=\"Invoice Due Date\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"discount_date\" string=\"Discount Date\" optional=\"hide\"/>\n                    <field name=\"payment_date\" readonly=\"1\"/>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"company_id\" groups=\"base.group_multi_company\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"journal_id\" readonly=\"1\" options=\"{&quot;no_open&quot;:True}\" optional=\"hide\"/>\n                    <field name=\"move_name\" string=\"Journal Entry\" widget=\"open_move_widget\"/>\n                    <field name=\"partner_id\" optional=\"show\" readonly=\"move_type != 'entry'\"/>\n                    <field name=\"ref\" readonly=\"False\"/>\n                    <field name=\"name\" optional=\"show\"/>\n                    <field name=\"discount_amount_currency\" string=\"Discount Amount\" optional=\"show\" invisible=\"not discount_amount_currency\"/>\n                    <field name=\"amount_residual\" sum=\"Total Residual\" string=\"Residual\" readonly=\"1\" invisible=\"not is_account_reconcile\"/>\n                    <field name=\"amount_residual_currency\" string=\"Residual in Currency\" optional=\"hide\" readonly=\"1\" invisible=\"is_same_currency or not is_account_reconcile\" groups=\"base.group_multi_currency\"/>\n                    <field name=\"currency_id\" groups=\"base.group_multi_currency\" optional=\"hide\" string=\"Currency\" readonly=\"1\" invisible=\"is_same_currency\"/>\n                    <field name=\"company_currency_id\" column_invisible=\"True\"/>\n                    <field name=\"move_type\" column_invisible=\"True\"/>\n                    <field name=\"is_same_currency\" column_invisible=\"True\"/>\n                    <field name=\"is_account_reconcile\" column_invisible=\"True\"/>\n                    <field name=\"parent_state\" column_invisible=\"True\"/>\n                    <groupby name=\"partner_id\">\n                        <button name=\"edit\" type=\"edit\" icon=\"fa-edit\" title=\"Edit\"/>\n                    </groupby>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_move_line_payment_filter",
+   "package": "account",
+   "name": "account.move.line.payment.search",
+   "entity": "account.move.line",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "200",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Journal Items"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Journal Item",
+      "filter_domain": "[                         '|', '|', '|',                         ('name', 'ilike', self), ('ref', 'ilike', self), ('account_id', 'ilike', self), ('partner_id', 'ilike', self)]"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "move_id"
+     },
+     {
+      "name": "ref"
+     },
+     {
+      "name": "payment_date"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "journal_id"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "company_currency_id",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "posted",
+      "string": "Posted",
+      "domain": "[('parent_state', '=', 'posted')]",
+      "help": "Posted Journal Items",
+      "invisible": "1"
+     },
+     {
+      "name": "invoices",
+      "string": "Invoices",
+      "domain": "[('amount_residual', '>', '0')]",
+      "invisible": "context.get('journal_type') != 'sale'"
+     },
+     {
+      "name": "credit_notes",
+      "string": "Credit Notes",
+      "domain": "[('amount_residual', '<', '0')]",
+      "invisible": "context.get('journal_type') != 'sale'"
+     },
+     {
+      "name": "bills",
+      "string": "Bills",
+      "domain": "[('amount_residual', '<', '0')]",
+      "invisible": "context.get('journal_type') != 'purchase'"
+     },
+     {
+      "name": "refunds",
+      "string": "Refunds",
+      "domain": "[('amount_residual', '>', '0')]",
+      "invisible": "context.get('journal_type') != 'purchase'"
+     },
+     {
+      "name": "invoice_date",
+      "string": "Invoice Date",
+      "date": "invoice_date"
+     },
+     {
+      "name": "payment_date",
+      "string": "Next Payment Date",
+      "date": "payment_date"
+     },
+     {
+      "name": "late",
+      "string": "Overdue",
+      "domain": "[('date_maturity', '<', 'today')]",
+      "help": "Overdue payments, due date passed"
+     },
+     {
+      "name": "early_discount",
+      "string": "Early Discount",
+      "domain": "[('discount_date', '!=', False), ('discount_date', '>', 'today')]"
+     },
+     {
+      "name": "date_between",
+      "string": "Report Dates",
+      "domain": "[('date', '>=', context.get('date_from')), ('date', '<=', context.get('date_to'))]",
+      "invisible": "1"
+     },
+     {
+      "name": "date_before",
+      "string": "Report Dates",
+      "domain": "[('date', '<=', context.get('date_to'))]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_by_currencies",
+      "string": "Currency",
+      "domain": "[]",
+      "context": "{'group_by': 'currency_id'}"
+     },
+     {
+      "name": "group_by_partner",
+      "string": "Partner",
+      "domain": "[]",
+      "context": "{'group_by': 'partner_id'}"
+     },
+     {
+      "name": "journal",
+      "string": "Journal",
+      "domain": "[]",
+      "context": "{'group_by': 'journal_id'}"
+     },
+     {
+      "name": "groupby_invoice_date",
+      "string": "Invoice Date",
+      "domain": "[]",
+      "context": "{'group_by': 'invoice_date'}"
+     },
+     {
+      "name": "groupby_payment_date",
+      "string": "Next Payment Date",
+      "domain": "[]",
+      "context": "{'group_by': 'payment_date'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search Journal Items\">\n                    <field name=\"name\" string=\"Journal Item\" filter_domain=\"[                         '|', '|', '|',                         ('name', 'ilike', self), ('ref', 'ilike', self), ('account_id', 'ilike', self), ('partner_id', 'ilike', self)]\"/>\n                    <field name=\"name\"/>\n                    <field name=\"move_id\"/>\n                    <field name=\"ref\"/>\n                    <field name=\"payment_date\"/>\n                    <field name=\"partner_id\"/>\n                    <field name=\"journal_id\"/>\n                    <field name=\"currency_id\" groups=\"base.group_multi_currency\" invisible=\"1\"/>\n                    <field name=\"company_currency_id\" invisible=\"1\"/>\n                    <separator/>\n                    <filter string=\"Posted\" name=\"posted\" domain=\"[('parent_state', '=', 'posted')]\" help=\"Posted Journal Items\" invisible=\"1\"/>\n                    <separator/>\n                    <filter string=\"Invoices\" name=\"invoices\" domain=\"[('amount_residual', '&gt;', '0')]\" invisible=\"context.get('journal_type') != 'sale'\"/>\n                    <filter string=\"Credit Notes\" name=\"credit_notes\" domain=\"[('amount_residual', '&lt;', '0')]\" invisible=\"context.get('journal_type') != 'sale'\"/>\n                    <filter string=\"Bills\" name=\"bills\" domain=\"[('amount_residual', '&lt;', '0')]\" invisible=\"context.get('journal_type') != 'purchase'\"/>\n                    <filter string=\"Refunds\" name=\"refunds\" domain=\"[('amount_residual', '&gt;', '0')]\" invisible=\"context.get('journal_type') != 'purchase'\"/>\n                    <separator/>\n                    <filter string=\"Invoice Date\" name=\"invoice_date\" date=\"invoice_date\"/>\n                    <filter string=\"Next Payment Date\" name=\"payment_date\" date=\"payment_date\"/>\n                    <filter string=\"Overdue\" name=\"late\" domain=\"[('date_maturity', '&lt;', 'today')]\" help=\"Overdue payments, due date passed\"/>\n                    <filter string=\"Early Discount\" name=\"early_discount\" domain=\"[('discount_date', '!=', False), ('discount_date', '&gt;', 'today')]\"/>\n                    <separator/>\n                    <filter string=\"Report Dates\" name=\"date_between\" domain=\"[('date', '&gt;=', context.get('date_from')), ('date', '&lt;=', context.get('date_to'))]\" invisible=\"1\"/>\n                    <filter string=\"Report Dates\" name=\"date_before\" domain=\"[('date', '&lt;=', context.get('date_to'))]\" invisible=\"1\"/>\n                    <separator/>\n                    <group>\n                        <filter string=\"Currency\" name=\"group_by_currencies\" domain=\"[]\" context=\"{'group_by': 'currency_id'}\"/>\n                        <filter string=\"Partner\" name=\"group_by_partner\" domain=\"[]\" context=\"{'group_by': 'partner_id'}\"/>\n                        <filter string=\"Journal\" name=\"journal\" domain=\"[]\" context=\"{'group_by': 'journal_id'}\"/>\n                        <filter string=\"Invoice Date\" name=\"groupby_invoice_date\" domain=\"[]\" context=\"{'group_by': 'invoice_date'}\"/>\n                        <filter string=\"Next Payment Date\" name=\"groupby_payment_date\" domain=\"[]\" context=\"{'group_by': 'payment_date'}\"/>\n                    </group>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account_debit_note.view_account_move_line_filter_debit",
+   "package": "account_debit_note",
+   "name": "account.move.line.search.debit",
+   "entity": "account.move.line",
+   "view_type": "filter",
+   "inherits_view": "account.view_account_move_line_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "unreconciled",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "unreconciled",
+      "position": "after"
+     },
+     {
+      "name": "debit_note_filter",
+      "string": "Debit Note",
+      "domain": "[('move_id.debit_origin_id', '!=', False)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"unreconciled\" position=\"after\">\n                <filter string=\"Debit Note\" name=\"debit_note_filter\" domain=\"[('move_id.debit_origin_id', '!=', False)]\"/>\n            </filter>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "account_fleet.view_move_line_tree_fleet",
+   "package": "account_fleet",
+   "name": "view.move.line.list.fleet",
+   "entity": "account.move.line",
+   "view_type": "xpath",
+   "inherits_view": "account.view_move_line_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "vehicle_id",
+      "optional": "hidden"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='name']\" position=\"after\">\n                <field name=\"vehicle_id\" optional=\"hidden\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_in.view_move_line_list_l10n_in_withholding",
+   "package": "l10n_in",
+   "name": "account.move.line.list.l10n.in.withholding",
+   "entity": "account.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Journal items",
+     "editable": "top",
+     "create": "0",
+     "default_group_by": "l10n_in_tds_tcs_section_id"
+    },
+    "fields": [
+     {
+      "name": "product_id",
+      "readonly": "1"
+     },
+     {
+      "name": "name",
+      "widget": "section_and_note_text"
+     },
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "domain": "[('type_tax_use', '=', context.get('default_tax_type_use'))]",
+      "column_invisible": "context.get('move_type')"
+     },
+     {
+      "name": "l10n_in_tds_tcs_section_id",
+      "string": "Suggested Section"
+     },
+     {
+      "name": "price_total"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "section_and_note_text": 1,
+     "many2many_tax_tags": 1
+    },
+    "inheritance_operations": [],
+    "editable": "top",
+    "create": "0",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Journal items\" editable=\"top\" create=\"0\" default_group_by=\"l10n_in_tds_tcs_section_id\">\n                <field name=\"product_id\" readonly=\"1\"/>\n                <field name=\"name\" widget=\"section_and_note_text\"/>\n                <field name=\"account_id\"/>\n                <field name=\"tax_ids\" widget=\"many2many_tax_tags\" domain=\"[('type_tax_use', '=', context.get('default_tax_type_use'))]\" column_invisible=\"context.get('move_type')\"/>\n                <field name=\"l10n_in_tds_tcs_section_id\" string=\"Suggested Section\"/>\n                <field name=\"price_total\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_in.view_move_line_tree_hsn_l10n_in",
+   "package": "l10n_in",
+   "name": "account.move.line.list.l10n_in",
+   "entity": "account.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Products",
+     "editable": "top",
+     "create": "0"
+    },
+    "fields": [
+     {
+      "name": "move_id",
+      "column_invisible": "not context.get('send_and_print')",
+      "optional": "show"
+     },
+     {
+      "name": "product_id",
+      "readonly": "1"
+     },
+     {
+      "name": "name",
+      "widget": "section_and_note_text"
+     },
+     {
+      "name": "l10n_in_hsn_code",
+      "column_invisible": "context.get('tax_validation') or context.get('restrict_negative_discount_line')",
+      "optional": "show"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "domain": "[('type_tax_use', '=', 'sale')]",
+      "column_invisible": "not context.get('tax_validation', False)",
+      "optional": "show"
+     },
+     {
+      "name": "discount",
+      "column_invisible": "not context.get('restrict_negative_discount_line', False)",
+      "optional": "show"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "section_and_note_text": 1,
+     "many2many_tax_tags": 1
+    },
+    "inheritance_operations": [],
+    "editable": "top",
+    "create": "0",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Products\" editable=\"top\" create=\"0\">\n                <field name=\"move_id\" optional=\"show\" column_invisible=\"not context.get('send_and_print')\"/>\n                <field name=\"product_id\" readonly=\"1\"/>\n                <field name=\"name\" widget=\"section_and_note_text\"/>\n                <field name=\"l10n_in_hsn_code\" optional=\"show\" column_invisible=\"context.get('tax_validation') or context.get('restrict_negative_discount_line')\"/>\n                <field name=\"tax_ids\" optional=\"show\" widget=\"many2many_tax_tags\" domain=\"[('type_tax_use', '=', 'sale')]\" column_invisible=\"not context.get('tax_validation', False)\"/>\n                <field name=\"discount\" optional=\"show\" column_invisible=\"not context.get('restrict_negative_discount_line', False)\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_in.view_move_line_tree_l10n_in",
+   "package": "l10n_in",
+   "name": "account.move.line.list.l10n_in",
+   "entity": "account.move.line",
+   "view_type": "xpath",
+   "inherits_view": "account.view_move_line_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='credit']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_in_gstr_section",
+      "readonly": "1",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='credit']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='credit']\" position=\"after\">\n                <field name=\"l10n_in_gstr_section\" optional=\"hide\" readonly=\"1\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_latam_invoice_document.view_account_move_line_filter",
+   "package": "l10n_latam_invoice_document",
+   "name": "account.move.line.filter",
+   "entity": "account.move.line",
+   "view_type": "separator",
+   "inherits_view": "account.view_account_move_line_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "separator",
+    "root_attributes": {
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "l10n_latam_document_type_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "separator",
+      "attributes": {
+       "position": "before"
+      },
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <separator position=\"before\">\n                <field name=\"l10n_latam_document_type_id\"/>\n            </separator>\n            <group>\n                <filter string=\"Document Type\" name=\"l10n_latam_document_type\" domain=\"\" context=\"{'group_by':'l10n_latam_document_type_id'}\"/>\n            </group>\n        </field>\n    "
+  }
+ ]
+}

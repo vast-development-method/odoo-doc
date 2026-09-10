@@ -1,0 +1,1560 @@
+{
+ "catalog": {
+  "name": "entity:discuss.channel.member",
+  "description": "Complete definition of entity Channel Member (discuss.channel.member).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "discuss.channel.member",
+  "storage_name": "discuss_channel_member",
+  "full_name": "Channel Member",
+  "kind": "persistent",
+  "description": "Channel Member",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "im_livechat"
+  ],
+  "mixins": [
+   "bus.listener.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "channel_id",
+   "partner_id",
+   "guest_id"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_bypass_create_check": {}
+  },
+  "fields": [
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Partner",
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "mail",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "guest_id",
+    "type": "Many2one",
+    "comodel": "mail.guest",
+    "string": "Guest",
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "mail",
+    "full_name": "Guest",
+    "target_entity": "mail.guest"
+   },
+   {
+    "name": "is_self",
+    "type": "Boolean",
+    "compute": "_compute_is_self",
+    "search": "_search_is_self",
+    "defined_in_package": "mail",
+    "string": "Is Self",
+    "full_name": "Is Self"
+   },
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel",
+    "string": "Channel",
+    "ondelete": "cascade",
+    "required": true,
+    "bypass_search_access": true,
+    "defined_in_package": "mail",
+    "full_name": "Channel",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "custom_channel_name",
+    "type": "Char",
+    "string": "Custom channel name",
+    "defined_in_package": "mail",
+    "full_name": "Custom channel name"
+   },
+   {
+    "name": "fetched_message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "string": "Last Fetched",
+    "index": "btree_not_null",
+    "defined_in_package": "mail",
+    "full_name": "Last Fetched",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "seen_message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "string": "Last Seen",
+    "index": "btree_not_null",
+    "defined_in_package": "mail",
+    "full_name": "Last Seen",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "new_message_separator",
+    "type": "Integer",
+    "help": "Message id before which the separator should be displayed",
+    "default": 0,
+    "required": true,
+    "defined_in_package": "mail",
+    "string": "New Message Separator",
+    "full_name": "New Message Separator"
+   },
+   {
+    "name": "message_unread_counter",
+    "type": "Integer",
+    "string": "Unread Messages Counter",
+    "compute": "_compute_message_unread",
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "full_name": "Unread Messages Counter"
+   },
+   {
+    "name": "custom_notifications",
+    "type": "Selection",
+    "selection": [
+     [
+      "all",
+      "All Messages"
+     ],
+     [
+      "mentions",
+      "Mentions Only"
+     ],
+     [
+      "no_notif",
+      "Nothing"
+     ]
+    ],
+    "string": "Customized Notifications",
+    "help": "Use default from user settings if not specified. This setting will only be applied to channels.",
+    "defined_in_package": "mail",
+    "full_name": "Customized Notifications"
+   },
+   {
+    "name": "mute_until_dt",
+    "type": "Datetime",
+    "string": "Mute notifications until",
+    "help": "If set, the member will not receive notifications from the channel until this date.",
+    "defined_in_package": "mail",
+    "full_name": "Mute notifications until"
+   },
+   {
+    "name": "is_pinned",
+    "type": "Boolean",
+    "string": "Is pinned on the interface",
+    "compute": "_compute_is_pinned",
+    "search": "_search_is_pinned",
+    "defined_in_package": "mail",
+    "full_name": "Is pinned on the interface"
+   },
+   {
+    "name": "unpin_dt",
+    "type": "Datetime",
+    "string": "Unpin date",
+    "index": true,
+    "help": "Contains the date and time when the channel was unpinned by the user.",
+    "defined_in_package": "mail",
+    "full_name": "Unpin date"
+   },
+   {
+    "name": "last_interest_dt",
+    "type": "Datetime",
+    "string": "Last Interest",
+    "default": {
+     "dynamic": "lambda self: fields.Datetime.now() - timedelta(seconds=1)"
+    },
+    "index": true,
+    "help": "Contains the date and time of the last interesting event that happened in this channel for this user. This includes: creating, joining, pinning",
+    "defined_in_package": "mail",
+    "full_name": "Last Interest"
+   },
+   {
+    "name": "last_seen_dt",
+    "type": "Datetime",
+    "string": "Last seen date",
+    "defined_in_package": "mail",
+    "full_name": "Last seen date"
+   },
+   {
+    "name": "rtc_session_ids",
+    "type": "One2many",
+    "string": "RTC Sessions",
+    "comodel": "discuss.channel.rtc.session",
+    "inverse_name": "channel_member_id",
+    "defined_in_package": "mail",
+    "full_name": "RTC Sessions",
+    "target_entity": "discuss.channel.rtc.session"
+   },
+   {
+    "name": "rtc_inviting_session_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel.rtc.session",
+    "string": "Ringing session",
+    "defined_in_package": "mail",
+    "full_name": "Ringing session",
+    "target_entity": "discuss.channel.rtc.session"
+   },
+   {
+    "name": "livechat_member_history_ids",
+    "type": "One2many",
+    "comodel": "im_livechat.channel.member.history",
+    "inverse_name": "member_id",
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Member History",
+    "full_name": "Livechat Member History",
+    "target_entity": "im_livechat.channel.member.history"
+   },
+   {
+    "name": "livechat_member_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "agent",
+      "Agent"
+     ],
+     [
+      "visitor",
+      "Visitor"
+     ],
+     [
+      "bot",
+      "Chatbot"
+     ]
+    ],
+    "compute": "_compute_livechat_member_type",
+    "compute_sudo": true,
+    "inverse": "_inverse_livechat_member_type",
+    "defined_in_package": "im_livechat",
+    "string": "Livechat Member Type",
+    "full_name": "Livechat Member Type"
+   },
+   {
+    "name": "chatbot_script_id",
+    "type": "Many2one",
+    "comodel": "chatbot.script",
+    "compute": "_compute_chatbot_script_id",
+    "inverse": "_inverse_chatbot_script_id",
+    "compute_sudo": true,
+    "defined_in_package": "im_livechat",
+    "string": "Chatbot Script",
+    "full_name": "Chatbot Script",
+    "target_entity": "chatbot.script"
+   },
+   {
+    "name": "agent_expertise_ids",
+    "type": "Many2many",
+    "comodel": "im_livechat.expertise",
+    "compute": "_compute_agent_expertise_ids",
+    "compute_sudo": true,
+    "inverse": "_inverse_agent_expertise_ids",
+    "defined_in_package": "im_livechat",
+    "string": "Agent Expertise",
+    "full_name": "Agent Expertise",
+    "target_entity": "im_livechat.expertise"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_seen_message_id_idx",
+    "kind": "Index",
+    "definition": "(channel_id, partner_id, seen_message_id)",
+    "message": null,
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_partner_unique",
+    "kind": "UniqueIndex",
+    "definition": "(channel_id, partner_id) WHERE partner_id IS NOT NULL",
+    "message": null,
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_guest_unique",
+    "kind": "UniqueIndex",
+    "definition": "(channel_id, guest_id) WHERE guest_id IS NOT NULL",
+    "message": null,
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_partner_or_guest_exists",
+    "kind": "Constraint",
+    "definition": "CHECK((partner_id IS NOT NULL AND guest_id IS NULL) OR (partner_id IS NULL AND guest_id IS NOT NULL))",
+    "message": "A channel member must be a partner or a guest.",
+    "defined_in_package": "mail"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_gc_unpin_outdated_sub_channels",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_contrains_no_public_member",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Channel members cannot include public users.",
+        "line": 105
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_self",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid",
+         "guest"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_self",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_pinned",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_message_unread",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id.message_ids",
+         "new_message_separator"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id.name",
+         "guest_id.name",
+         "channel_id.display_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_pinned",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "last_interest_dt",
+         "unpin_dt",
+         "channel_id.last_interest_dt"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 38,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "It appears you're trying to create a channel member, but it seems like you forgot to specify the related channel. To move forward, please make sure to provide the necessary channel information.",
+        "line": 211
+       },
+       {
+        "kind": "UserError",
+        "message": "Adding more members to this chat isn't possible; it's designed for just two people.",
+        "line": 219
+       }
+      ]
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You can not write on %(field_name)s.",
+        "line": 249
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_sync_field_names",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_bus_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_typing",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "is_typing"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Broadcast the typing notification to channel members\n:param is_typing: (boolean) tells whether the members are typing or not",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_mute",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cleanup_expired_mutes",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Cron job for cleanup expired unmute by resetting mute_until_dt and sending bus notifications.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_persona",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_store_partner_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_store_guest_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_rtc_join_call",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "store",
+     "check_rtc_session_ids",
+     "camera"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_join_sfu",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "ice_servers",
+     "force"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rtc_server_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "rtc_session",
+     "ice_servers",
+     "key"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_rtc_leave_call",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "session_id"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_rtc_sync_sessions",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "check_rtc_session_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Synchronize the RTC sessions for self channel member.\n- Inactive sessions of the channel are deleted.\n- Current sessions are returned.\n- Sessions given in check_rtc_session_ids that no longer exists\n  are returned as non-existing.\n\n:param list check_rtc_session_ids: list of the ids of the sessions to check\n:returns: (current_rtc_sessions, outdated_rtc_sessions)\n:rtype: tuple",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rtc_invite_members_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "member_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Get the domain used to get the members to invite to and RTC call on\nthe member's channel.\n\n:param list member_ids: List of the partner ids to invite.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_rtc_invite_members",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "member_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Sends invitations to join the RTC call to all connected members of the thread who are not already invited,\nif member_ids is set, only the specified ids will be invited.\n\n:param list member_ids: list of the partner ids to invite",
+      "size_in_lines": 67,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mark_as_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "last_message_id"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Mark channel as read by updating the seen message id of the current\nmember as well as its new message separator.\n\n:param last_message_id: the id of the message to be marked as read.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_last_seen_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "notify"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Set the last seen message of the current member.\n\n:param message: the message to set as last seen message.\n:param notify: whether to send a bus notification relative to the new\n    last seen message.",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_new_message_separator",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message_id"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": ":param message_id: id of the message above which the new message\n    separator should be displayed.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_html_link_title",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_html_link",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "*args",
+     "for_persona",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_member_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_member_history_ids.livechat_member_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_chatbot_script_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_member_history_ids.chatbot_script_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_agent_expertise_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "livechat_member_history_ids.agent_expertise_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_or_update_history",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values_by_member"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_livechat_member_type",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_chatbot_script_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_agent_expertise_ids",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_unpin_livechat_sessions",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Unpin read livechat sessions with no activity for at least one day to\nclean the operator's interface ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_excluded_rtc_members_partner_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_contrains_no_public_member",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Channel members cannot include public users."
+   },
+   {
+    "operation": "create",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "It appears you're trying to create a channel member, but it seems like you forgot to specify the related channel. To move forward, please make sure to provide the necessary channel information."
+   },
+   {
+    "operation": "create",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Adding more members to this chat isn't possible; it's designed for just two people."
+   },
+   {
+    "operation": "write",
+    "package": "mail",
+    "kind": "AccessError",
+    "message": "You can not write on %(field_name)s."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_discuss_channel_member_public",
+    "package": "mail",
+    "name": "discuss.channel.member.public",
+    "entity": "discuss.channel.member",
+    "group": "base.group_public",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.access_discuss_channel_member_portal",
+    "package": "mail",
+    "name": "discuss.channel.member.portal",
+    "entity": "discuss.channel.member",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.access_discuss_channel_member_user",
+    "package": "mail",
+    "name": "discuss.channel.member.user",
+    "entity": "discuss.channel.member",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "crm_livechat.ir_rule_discuss_channel_member_crm_lead",
+    "package": "crm_livechat",
+    "name": "discuss.channel.member: sales users can read/create members on lead's origin channel",
+    "entity": "discuss.channel.member",
+    "domain": "[(\"channel_id.has_crm_lead\", \"=\", True)]",
+    "groups": "[(4, ref('sales_team.group_sale_salesman'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "im_livechat.ir_rule_discuss_channel_member_im_livechat_group_user",
+    "package": "im_livechat",
+    "name": "discuss.channel.member: livechat users can read all livechat channel members and can invite anyone",
+    "entity": "discuss.channel.member",
+    "domain": "[('channel_id.channel_type', '=', 'livechat')]",
+    "groups": "[(4, ref('im_livechat_group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_channel_member_is_self_all",
+    "package": "mail",
+    "name": "discuss.channel.member: access their own entries",
+    "entity": "discuss.channel.member",
+    "domain": "[\n                    ('is_self', '=', True),\n                    \"|\",\n                        (\"channel_id.channel_type\", \"!=\", \"channel\"),\n                        \"|\",\n                            (\"channel_id.group_public_id\", \"=\", False),\n                            (\"channel_id.group_public_id\", \"in\", user.all_group_ids.ids),\n                ]",
+    "groups": "[                     Command.link(ref('base.group_user')),                     Command.link(ref('base.group_portal')),                     Command.link(ref('base.group_public')),                 ]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": "False",
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_channel_member_read_all",
+    "package": "mail",
+    "name": "discuss.channel.member: read members of accessible channels",
+    "entity": "discuss.channel.member",
+    "domain": "[\n                    \"|\",\n                        \"&\",\n                            (\"channel_id.channel_type\", \"!=\", \"channel\"),\n                            \"|\",\n                                (\"channel_id.is_member\", \"=\", True),\n                                (\"channel_id.parent_channel_id.is_member\", \"=\", True),\n                        \"&\",\n                            (\"channel_id.channel_type\", \"=\", \"channel\"),\n                            \"|\",\n                                (\"channel_id.group_public_id\", \"=\", False),\n                                (\"channel_id.group_public_id\", \"in\", user.all_group_ids.ids),\n                ]",
+    "groups": "[                     Command.link(ref('base.group_user')),                     Command.link(ref('base.group_portal')),                     Command.link(ref('base.group_public')),                 ]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_channel_member_create_is_group_matching_all",
+    "package": "mail",
+    "name": "discuss.channel.member: can join group restricted channels when group is matching",
+    "entity": "discuss.channel.member",
+    "domain": "[\n                    ('is_self', '=', True),\n                    ('channel_id.channel_type', '=', 'channel'),\n                    '|',\n                        ('channel_id.group_public_id', '=', False),\n                        ('channel_id.group_public_id', 'in', user.all_group_ids.ids)\n                ]",
+    "groups": "[                     Command.link(ref('base.group_user')),                     Command.link(ref('base.group_portal')),                     Command.link(ref('base.group_public')),                 ]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "False",
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_channel_member_create_is_group_matching_group_user",
+    "package": "mail",
+    "name": "discuss.channel.member: internal users can invite others in group restricted channels when group is matching",
+    "entity": "discuss.channel.member",
+    "domain": "[\n                    ('is_self', '=', False),\n                    ('channel_id.channel_type', '=', 'channel'),\n                    '|',\n                        ('channel_id.group_public_id', '=', False),\n                        ('channel_id.group_public_id', 'in', user.all_group_ids.ids)\n                ]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "False",
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_channel_member_create_is_member_group_user",
+    "package": "mail",
+    "name": "discuss.channel.member: internal users can invite others in channels they are member of",
+    "entity": "discuss.channel.member",
+    "domain": "[\n                    ('is_self', '=', False),\n                    ('channel_id.channel_type', 'not in', ('channel', 'chat')),\n                    ('channel_id.is_member', '=', True)\n                ]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "False",
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "mail.ir_rule_discuss_channel_member_group_system",
+    "package": "mail",
+    "name": "discuss.channel.member: admin can manipulate all entries",
+    "entity": "discuss.channel.member",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('base.group_system'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mail.discuss_channel_member_view_tree",
+    "package": "mail",
+    "name": "discuss.channel.member.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Channels"
+     },
+     "fields": [
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "guest_id"
+      },
+      {
+       "name": "is_pinned"
+      },
+      {
+       "name": "last_seen_dt"
+      },
+      {
+       "name": "last_interest_dt"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.discuss_channel_member_view_form",
+    "package": "mail",
+    "name": "discuss.channel.member.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Channel Member"
+     },
+     "fields": [
+      {
+       "name": "channel_id",
+       "readonly": "id"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "id or guest_id",
+       "required": "not guest_id"
+      },
+      {
+       "name": "guest_id",
+       "readonly": "id or partner_id",
+       "required": "not partner_id"
+      },
+      {
+       "name": "custom_channel_name"
+      },
+      {
+       "name": "fetched_message_id"
+      },
+      {
+       "name": "seen_message_id"
+      },
+      {
+       "name": "new_message_separator"
+      },
+      {
+       "name": "message_unread_counter"
+      },
+      {
+       "name": "custom_notifications"
+      },
+      {
+       "name": "mute_until_dt"
+      },
+      {
+       "name": "is_pinned"
+      },
+      {
+       "name": "last_interest_dt"
+      },
+      {
+       "name": "last_seen_dt"
+      },
+      {
+       "name": "rtc_inviting_session_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.discuss_channel_member_action",
+    "package": "mail",
+    "name": "Channels/Members",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "discuss.channel.member"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "mail.discuss_channel_member_menu",
+    "package": "mail",
+    "name": "Channels/Members",
+    "parent_id": "base.menu_email",
+    "action": "mail.discuss_channel_member_action",
+    "sequence": "21",
+    "groups_id": "base.group_no_one",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "mail.ir_cron_discuss_channel_member_unmute",
+    "package": "mail",
+    "name": "Discuss: channel member unmute",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "discuss.channel.member",
+    "operation": "_cleanup_expired_mutes",
+    "operation_call": "model._cleanup_expired_mutes()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

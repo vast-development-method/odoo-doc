@@ -1,0 +1,2079 @@
+{
+ "catalog": {
+  "name": "entity:product.pricelist.item",
+  "description": "Complete definition of entity Pricelist Rule (product.pricelist.item).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.pricelist.item",
+  "storage_name": "product_pricelist_item",
+  "full_name": "Pricelist Rule",
+  "kind": "persistent",
+  "description": "Pricelist Rule",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "sale",
+   "point_of_sale",
+   "website_sale",
+   "website_event_sale"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "applied_on, min_quantity desc, categ_id desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "pricelist_id",
+    "type": "Many2one",
+    "comodel": "product.pricelist",
+    "string": "Pricelist",
+    "index": true,
+    "ondelete": "cascade",
+    "required": false,
+    "default": {
+     "dynamic": "_default_pricelist_id"
+    },
+    "defined_in_package": "product",
+    "full_name": "Pricelist",
+    "target_entity": "product.pricelist"
+   },
+   {
+    "name": "is_pricelist_required",
+    "type": "Boolean",
+    "compute": "_compute_is_pricelist_required",
+    "defined_in_package": "product",
+    "string": "Is Pricelist Required",
+    "full_name": "Is Pricelist Required"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "compute": "_compute_company_id",
+    "store": true,
+    "defined_in_package": "product",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "compute": "_compute_currency_id",
+    "store": true,
+    "defined_in_package": "product",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "date_start",
+    "type": "Datetime",
+    "string": "Start Date",
+    "help": "Starting datetime for the pricelist item validation\nThe displayed value depends on the timezone set in your preferences.",
+    "defined_in_package": "product",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_end",
+    "type": "Datetime",
+    "string": "End Date",
+    "help": "Ending datetime for the pricelist item validation\nThe displayed value depends on the timezone set in your preferences.",
+    "defined_in_package": "product",
+    "full_name": "End Date"
+   },
+   {
+    "name": "min_quantity",
+    "type": "Float",
+    "string": "Min. Quantity",
+    "default": 0,
+    "digits": "Product Unit",
+    "help": "For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\nExpressed in the default unit of measure of the product.",
+    "defined_in_package": "product",
+    "full_name": "Min. Quantity"
+   },
+   {
+    "name": "applied_on",
+    "type": "Selection",
+    "selection": [
+     [
+      "3_global",
+      "All Products"
+     ],
+     [
+      "2_product_category",
+      "Product Category"
+     ],
+     [
+      "1_product",
+      "Product"
+     ],
+     [
+      "0_product_variant",
+      "Product Variant"
+     ]
+    ],
+    "string": "Apply On",
+    "default": "3_global",
+    "required": true,
+    "help": "Pricelist Item applicable on selected option",
+    "defined_in_package": "product",
+    "full_name": "Apply On"
+   },
+   {
+    "name": "display_applied_on",
+    "type": "Selection",
+    "selection": [
+     [
+      "1_product",
+      "Product"
+     ],
+     [
+      "2_product_category",
+      "Category"
+     ]
+    ],
+    "default": "1_product",
+    "required": true,
+    "help": "Pricelist Item applicable on selected option",
+    "defined_in_package": "product",
+    "string": "Display Applied On",
+    "full_name": "Display Applied On"
+   },
+   {
+    "name": "categ_id",
+    "type": "Many2one",
+    "comodel": "product.category",
+    "string": "Category",
+    "ondelete": "cascade",
+    "help": "Specify a product category if this rule only applies to products belonging to this category or its children categories. Keep empty otherwise.",
+    "defined_in_package": "product",
+    "full_name": "Category",
+    "target_entity": "product.category"
+   },
+   {
+    "name": "product_tmpl_id",
+    "type": "Many2one",
+    "comodel": "product.template",
+    "string": "Product",
+    "ondelete": "cascade",
+    "check_company": true,
+    "index": "btree_not_null",
+    "help": "Specify a template if this rule only applies to one product template. Keep empty otherwise.",
+    "defined_in_package": "product",
+    "full_name": "Product",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Variant",
+    "ondelete": "cascade",
+    "check_company": true,
+    "index": "btree_not_null",
+    "domain": "[('product_tmpl_id', '=', product_tmpl_id)]",
+    "help": "Specify a product if this rule only applies to one product. Keep empty otherwise.",
+    "defined_in_package": "product",
+    "full_name": "Variant",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_uom_name",
+    "type": "Char",
+    "related": "product_tmpl_id.uom_name",
+    "defined_in_package": "product",
+    "string": "Product Unit of measure Name",
+    "full_name": "Product Unit of measure Name"
+   },
+   {
+    "name": "product_variant_count",
+    "type": "Integer",
+    "related": "product_tmpl_id.product_variant_count",
+    "defined_in_package": "product",
+    "string": "Product Variant Count",
+    "full_name": "Product Variant Count"
+   },
+   {
+    "name": "base",
+    "type": "Selection",
+    "selection": [
+     [
+      "list_price",
+      "Sales Price"
+     ],
+     [
+      "standard_price",
+      "Cost"
+     ],
+     [
+      "pricelist",
+      "Other Pricelist"
+     ]
+    ],
+    "string": "Based on",
+    "default": "list_price",
+    "required": true,
+    "help": "Base price for computation.\nSales Price: The base price will be the Sales Price.\nCost Price: The base price will be the cost price.\nOther Pricelist: Computation of the base price based on another Pricelist.",
+    "defined_in_package": "product",
+    "full_name": "Based on"
+   },
+   {
+    "name": "base_pricelist_id",
+    "type": "Many2one",
+    "comodel": "product.pricelist",
+    "string": "Other Pricelist",
+    "check_company": true,
+    "defined_in_package": "product",
+    "full_name": "Other Pricelist",
+    "target_entity": "product.pricelist"
+   },
+   {
+    "name": "compute_price",
+    "type": "Selection",
+    "selection": [
+     [
+      "percentage",
+      "Discount"
+     ],
+     [
+      "formula",
+      "Formula"
+     ],
+     [
+      "fixed",
+      "Fixed Price"
+     ]
+    ],
+    "help": "Use the discount rules and activate the discount settings in order to show discount to customer.",
+    "index": true,
+    "default": "fixed",
+    "required": true,
+    "defined_in_package": "product",
+    "string": "Compute Price",
+    "full_name": "Compute Price"
+   },
+   {
+    "name": "fixed_price",
+    "type": "Float",
+    "string": "Fixed Price",
+    "min_display_digits": "Product Price",
+    "defined_in_package": "product",
+    "full_name": "Fixed Price"
+   },
+   {
+    "name": "percent_price",
+    "type": "Float",
+    "string": "Percentage Price",
+    "help": "You can apply a mark-up by setting a negative discount.",
+    "defined_in_package": "product",
+    "full_name": "Percentage Price"
+   },
+   {
+    "name": "price_discount",
+    "type": "Float",
+    "string": "Price Discount",
+    "default": 0,
+    "digits": [
+     16,
+     2
+    ],
+    "help": "You can apply a mark-up by setting a negative discount.",
+    "defined_in_package": "product",
+    "full_name": "Price Discount"
+   },
+   {
+    "name": "price_round",
+    "type": "Float",
+    "string": "Price Rounding",
+    "min_display_digits": "Product Price",
+    "help": "Sets the price so that it is a multiple of this value.\nRounding is applied after the discount and before the surcharge.\nTo have prices that end in 9.99, round off to 10.00 and set an extra at -0.01",
+    "defined_in_package": "product",
+    "full_name": "Price Rounding"
+   },
+   {
+    "name": "price_surcharge",
+    "type": "Float",
+    "string": "Extra Fee",
+    "min_display_digits": "Product Price",
+    "help": "Specify the fixed amount to add or subtract (if negative) to the amount calculated with the discount.",
+    "defined_in_package": "product",
+    "full_name": "Extra Fee"
+   },
+   {
+    "name": "price_markup",
+    "type": "Float",
+    "string": "Markup",
+    "digits": [
+     16,
+     2
+    ],
+    "compute": "_compute_price_markup",
+    "inverse": "_inverse_price_markup",
+    "store": true,
+    "help": "You can apply a mark-up on the cost",
+    "defined_in_package": "product",
+    "full_name": "Markup"
+   },
+   {
+    "name": "price_min_margin",
+    "type": "Float",
+    "string": "Min. Price Margin",
+    "min_display_digits": "Product Price",
+    "help": "Specify the minimum amount of margin over the base price.",
+    "defined_in_package": "product",
+    "full_name": "Min. Price Margin"
+   },
+   {
+    "name": "price_max_margin",
+    "type": "Float",
+    "string": "Max. Price Margin",
+    "min_display_digits": "Product Price",
+    "help": "Specify the maximum amount of margin over the base price.",
+    "defined_in_package": "product",
+    "full_name": "Max. Price Margin"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "compute": "_compute_name",
+    "help": "Explicit rule name for this pricelist line.",
+    "defined_in_package": "product",
+    "full_name": "Name"
+   },
+   {
+    "name": "price",
+    "type": "Char",
+    "string": "Price",
+    "compute": "_compute_price_label",
+    "help": "Explicit rule name for this pricelist line.",
+    "defined_in_package": "product",
+    "full_name": "Price"
+   },
+   {
+    "name": "rule_tip",
+    "type": "Char",
+    "compute": "_compute_rule_tip",
+    "defined_in_package": "product",
+    "string": "Rule Tip",
+    "full_name": "Rule Tip"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_pricelist_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_pricelist_required",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pricelist_id.company_id",
+         "product_tmpl_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pricelist_id.currency_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "applied_on",
+         "categ_id",
+         "product_tmpl_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_price_label_base_str",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "This method allows you to extend it to other modules with other\noptions in the base field to return a different text.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_label",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "compute_price",
+         "fixed_price",
+         "pricelist_id",
+         "percent_price",
+         "price_discount",
+         "price_markup",
+         "price_surcharge",
+         "base",
+         "base_pricelist_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_markup",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "price_discount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_price_markup",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rule_tip",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "lang"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "base",
+         "compute_price",
+         "price_discount",
+         "price_markup",
+         "price_round",
+         "price_surcharge"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_integer",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "percentage"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_displayed_discount",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "item"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_base_pricelist_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "base_pricelist_id",
+         "base"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A pricelist item with \"Other Pricelist\" as base must have a base_pricelist_id.",
+        "line": 319
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_pricelist_recursion",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "base_pricelist_id",
+         "pricelist_id",
+         "base"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Recursive pricelist rules detected: %s",
+        "line": 350
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_date_range",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date_start",
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "%(item_name)s: end date (%(end_date)s) should be after start date (%(start_date)s)",
+        "line": 358
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_margin",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "price_min_margin",
+         "price_max_margin"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The minimum margin should be lower than the maximum margin.",
+        "line": 369
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_product_consistency",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "product_id",
+         "product_tmpl_id",
+         "categ_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please specify the category for which this rule should be applied",
+        "line": 375
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Please specify the product for which this rule should be applied",
+        "line": 377
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Please specify the product variant for which this rule should be applied",
+        "line": 379
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_base",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "base"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_base_pricelist_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "base_pricelist_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_compute_price",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "compute_price"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_display_applied_on",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "display_applied_on"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_tmpl_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_tmpl_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_rule_content",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id",
+         "product_tmpl_id",
+         "categ_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_price_round",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "price_round"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The rounding method must be strictly positive.",
+        "line": 471
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_validity_period",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "date_start",
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_applicable_for",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product",
+     "qty_in_product_uom"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Check whether the current rule is valid for the given product & qty.\n\nNote: self.ensure_one()\n\n:param product: product record (product.product/product.template)\n:param float qty_in_product_uom: quantity, expressed in product UoM\n:returns: Whether rules is valid or not\n:rtype: bool",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "product",
+     "quantity",
+     "uom",
+     "date",
+     "currency",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Compute the unit price of a product in the context of a pricelist application.\n\nNote: self and self.ensure_one()\n\n:param product: recordset of product (product.product/product.template)\n:param float quantity: quantity of products requested (in given uom)\n:param uom: unit of measure (uom.uom record)\n:param datetime date: date to use for price computation and currency conversions\n:param currency: currency (for the case where self is empty)\n:param dict kwargs: unused parameters available for overrides\n\n:returns: price according to pricelist rule or the product price, expressed in the param\n          currency, the pricelist currency or the company currency\n:rtype: float",
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_base_price",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "product",
+     "quantity",
+     "uom",
+     "date",
+     "currency",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Compute the base price for a given rule.\n\n:param product: recordset of product (product.product/product.template)\n:param float quantity: quantity of products requested (in given uom)\n:param uom: unit of measure (uom.uom record)\n:param datetime date: date to use for price computation and currency conversions\n:param currency: currency in which the returned price must be expressed\n\n:returns: base price, expressed in provided pricelist currency\n:rtype: float",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_before_discount",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "*args",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Compute the base price of the given rule, considering chained pricelists.\n\n:param product: recordset of product (product.product/product.template)\n:param float qty: quantity of products requested (in given uom)\n:param uom: unit of measure (uom.uom record)\n:param datetime date: date to use for price computation and currency conversions\n:param currency: currency in which the returned price must be expressed\n\n:returns: base price, expressed in provided pricelist currency\n:rtype: float",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_discount_feature_enabled",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_show_discount",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_server_date_to_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_show_discount_on_shop",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "On ecommerce, formula rules are also expected to show discounts.\n\nOnly for /shop, /product, and configurators, not on the cart or the checkout.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_event_sale_warning",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "applied_on",
+         "product_id",
+         "product_tmpl_id",
+         "min_quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_base_pricelist_id",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "A pricelist item with \"Other Pricelist\" as base must have a base_pricelist_id."
+   },
+   {
+    "operation": "_check_pricelist_recursion",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "Recursive pricelist rules detected: %s"
+   },
+   {
+    "operation": "_check_date_range",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "%(item_name)s: end date (%(end_date)s) should be after start date (%(start_date)s)"
+   },
+   {
+    "operation": "_check_margin",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "The minimum margin should be lower than the maximum margin."
+   },
+   {
+    "operation": "_check_product_consistency",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "Please specify the category for which this rule should be applied"
+   },
+   {
+    "operation": "_check_product_consistency",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "Please specify the product for which this rule should be applied"
+   },
+   {
+    "operation": "_check_product_consistency",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "Please specify the product variant for which this rule should be applied"
+   },
+   {
+    "operation": "_onchange_price_round",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "The rounding method must be strictly positive."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_product_pricelist_item_mrp_manager",
+    "package": "mrp",
+    "name": "product.pricelist.item mrp_manager",
+    "entity": "product.pricelist.item",
+    "group": "mrp.group_mrp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "product.access_product_pricelist_item_user",
+    "package": "product",
+    "name": "product.pricelist.item.user",
+    "entity": "product.pricelist.item",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_pricelist_item_manager",
+    "package": "product",
+    "name": "product.pricelist.item.manager",
+    "entity": "product.pricelist.item",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "purchase.access_product_pricelist_item_purchase_manager",
+    "package": "purchase",
+    "name": "product.pricelist.item purchase_manager",
+    "entity": "product.pricelist.item",
+    "group": "purchase.group_purchase_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale.access_product_pricelist_item_sale_manager",
+    "package": "sale",
+    "name": "product.pricelist.item salemanager",
+    "entity": "product.pricelist.item",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_sale.access_product_pricelist_item_public_public",
+    "package": "website_sale",
+    "name": "product.pricelist.item.public",
+    "entity": "product.pricelist.item",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_pricelist_item_public_portal",
+    "package": "website_sale",
+    "name": "product.pricelist.item.public",
+    "entity": "product.pricelist.item",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_pricelist_item_public_employee",
+    "package": "website_sale",
+    "name": "product.pricelist.item.public",
+    "entity": "product.pricelist.item",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "product.product_pricelist_item_comp_rule",
+    "package": "product",
+    "name": "product pricelist item company rule",
+    "entity": "product.pricelist.item",
+    "domain": "['|', ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_sale.product_pricelist_item_comp_rule",
+    "package": "website_sale",
+    "name": "product pricelist item company rule",
+    "entity": "product.pricelist.item",
+    "domain": "['|', ('company_id', 'in', [False, website.company_id.id]), ('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "product.product_pricelist_item_view_search",
+    "package": "product",
+    "name": "product.pricelist.item.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Products Price Rules Search"
+     },
+     "fields": [
+      {
+       "name": "pricelist_id",
+       "groups": "product.group_product_pricelist"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "currency_id",
+       "groups": "base.group_multi_currency"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "Product Rule",
+       "domain": "[('applied_on', '=', '1_product')]"
+      },
+      {
+       "name": "Variant Rule",
+       "domain": "[('applied_on', '=', '0_product_variant')]",
+       "groups": "product.group_product_variant"
+      },
+      {
+       "name": "visible",
+       "string": "Active",
+       "domain": "[('pricelist_id.active', '=', True)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_product",
+       "string": "Product",
+       "context": "{'group_by': 'product_tmpl_id'}"
+      },
+      {
+       "name": "groupby_product_variant",
+       "string": "Variant",
+       "domain": "[('applied_on', '=', '0_product_variant')]",
+       "context": "{'group_by': 'product_id'}",
+       "groups": "product.group_product_variant"
+      },
+      {
+       "name": "groupby_vendor",
+       "string": "Pricelist",
+       "context": "{'group_by': 'pricelist_id'}",
+       "groups": "product.group_product_pricelist"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_item_tree_view",
+    "package": "product",
+    "name": "product.pricelist.item.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Price Rules"
+     },
+     "fields": [
+      {
+       "name": "pricelist_id",
+       "required": "is_pricelist_required",
+       "groups": "product.group_product_pricelist"
+      },
+      {
+       "name": "name",
+       "string": "Applied On"
+      },
+      {
+       "name": "price"
+      },
+      {
+       "name": "min_quantity"
+      },
+      {
+       "name": "date_start",
+       "optional": "hide"
+      },
+      {
+       "name": "date_end",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_item_tree_view_from_product",
+    "package": "product",
+    "name": "product.pricelist.item.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Pricelist Rules",
+      "editable": "bottom"
+     },
+     "fields": [
+      {
+       "name": "pricelist_id",
+       "required": "is_pricelist_required",
+       "options": "{'no_create_edit': 1, 'no_open': 1}",
+       "groups": "product.group_product_pricelist"
+      },
+      {
+       "name": "product_id",
+       "readonly": "context.get('active_model') == 'product.product'",
+       "required": "applied_on == '0_product_variant'",
+       "domain": "['|', '|',                         ('id', '=', context.get('default_product_id', 0)),                         ('product_tmpl_id', '=', context.get('default_product_tmpl_id', 0)),                         ('categ_id', '=', context.get('default_categ_id', 0)), '|', ('company_id', '=', company_id), ('company_id', '=', False)                     ]",
+       "options": "{'no_create_edit': 1, 'no_open': 1}",
+       "column_invisible": "context.get('product_without_variants', False)",
+       "groups": "product.group_product_variant",
+       "placeholder": "All variants"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "categ_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_tmpl_id",
+       "required": "applied_on == '1_product'",
+       "domain": "[('categ_id', '=', context.get('default_categ_id', True)), '|', ('company_id', '=', company_id), ('company_id', '=', False)]",
+       "options": "{'no_create_edit': 1, 'no_open': 1}",
+       "column_invisible": "context.get('active_model') != 'product.category'"
+      },
+      {
+       "name": "fixed_price",
+       "widget": "monetary",
+       "required": "1",
+       "string": "Price",
+       "options": "{'currency_field': 'currency_id', 'field_digits': True}"
+      },
+      {
+       "name": "min_quantity"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "date_start",
+       "optional": "show"
+      },
+      {
+       "name": "date_end",
+       "optional": "show"
+      },
+      {
+       "name": "applied_on",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': 1, 'no_open': 1}",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_item_form_view",
+    "package": "product",
+    "name": "product.pricelist.item.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Pricelist Rule"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "price",
+       "invisible": "1"
+      },
+      {
+       "name": "applied_on",
+       "invisible": "1"
+      },
+      {
+       "name": "display_applied_on",
+       "widget": "radio",
+       "string": "Apply To",
+       "options": "{'horizontal': true}"
+      },
+      {
+       "name": "categ_id",
+       "invisible": "display_applied_on != '2_product_category'",
+       "options": "{'no_create': 1}",
+       "placeholder": "All categories"
+      },
+      {
+       "name": "product_tmpl_id",
+       "invisible": "display_applied_on != '1_product'",
+       "options": "{'no_create': 1}",
+       "placeholder": "All products"
+      },
+      {
+       "name": "product_variant_count",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "invisible": "product_variant_count < 2",
+       "options": "{'no_create': 1}",
+       "placeholder": "All variants"
+      },
+      {
+       "name": "compute_price",
+       "widget": "radio",
+       "invisible": "display_applied_on == '1_product' and compute_price == 'fixed_price'",
+       "string": "Price Type",
+       "options": "{'horizontal': true}",
+       "groups": "product.group_product_pricelist"
+      },
+      {
+       "name": "fixed_price",
+       "widget": "monetary",
+       "options": "{'currency_field': 'currency_id', 'field_digits': True}"
+      },
+      {
+       "name": "product_uom_name"
+      },
+      {
+       "name": "percent_price"
+      },
+      {
+       "name": "base_pricelist_id",
+       "domain": "[('id', '!=', pricelist_id)]",
+       "placeholder": "sales price"
+      },
+      {
+       "name": "min_quantity",
+       "string": "Min Qty"
+      },
+      {
+       "name": "date_start",
+       "widget": "daterange",
+       "string": "Validity Period",
+       "options": "{'end_date_field': 'date_end'}"
+      },
+      {
+       "name": "date_end",
+       "invisible": "1"
+      },
+      {
+       "name": "base",
+       "string": "Based price"
+      },
+      {
+       "name": "base_pricelist_id",
+       "invisible": "base != 'pricelist'",
+       "readonly": "base != 'pricelist'",
+       "required": "compute_price == 'formula' and base == 'pricelist'",
+       "string": "Other Pricelist"
+      },
+      {
+       "name": "price_discount"
+      },
+      {
+       "name": "price_markup"
+      },
+      {
+       "name": "price_round",
+       "string": "Round off to"
+      },
+      {
+       "name": "price_surcharge",
+       "widget": "monetary",
+       "options": "{'currency_field': 'currency_id', 'field_digits': True}"
+      },
+      {
+       "name": "price_min_margin",
+       "widget": "monetary",
+       "string": "Min. Margin",
+       "options": "{'field_digits': True}"
+      },
+      {
+       "name": "price_max_margin",
+       "widget": "monetary",
+       "string": "Max. Margin",
+       "options": "{'field_digits': True}",
+       "nolabel": "1"
+      },
+      {
+       "name": "rule_tip"
+      },
+      {
+       "name": "pricelist_id",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 2,
+      "monetary": 4,
+      "daterange": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_item_product_template_form_view",
+    "package": "product",
+    "name": "product.pricelist.item.product.template.form.inherit",
+    "view_type": "field",
+    "inherits_view": "product.product_pricelist_item_form_view",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "display_applied_on",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "display_applied_on",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_item_product_product_form_view",
+    "package": "product",
+    "name": "product.pricelist.item.product.product.form.inherit",
+    "view_type": "field",
+    "inherits_view": "product.product_pricelist_item_product_template_form_view",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "product_id",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "product_id",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale.product_pricelist_item_form",
+    "package": "sale",
+    "name": "product.pricelist.item.view.form.inherit",
+    "view_type": "group",
+    "inherits_view": "product.product_pricelist_item_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "pricelist_rule_limits",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "min_quantity",
+       "string": "Min Qty"
+      },
+      {
+       "name": "date_start",
+       "widget": "daterange",
+       "string": "Validity Period",
+       "options": "{'end_date_field': 'date_end'}"
+      },
+      {
+       "name": "date_end",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "daterange": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "pricelist_rule_limits",
+        "position": "replace"
+       },
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_sale.product_pricelist_item_form",
+    "package": "website_sale",
+    "name": "product.pricelist.item.view.form.inherit",
+    "view_type": "div",
+    "inherits_view": "sale.product_pricelist_item_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "id": "discount_price_warning",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "id": "discount_price_warning",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "product.product_pricelist_item_action",
+    "package": "product",
+    "name": "Price Rules",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "product.pricelist.item"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

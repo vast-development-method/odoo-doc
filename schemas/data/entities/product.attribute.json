@@ -1,0 +1,1025 @@
+{
+ "catalog": {
+  "name": "entity:product.attribute",
+  "description": "Complete definition of entity Product Attribute (product.attribute).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.attribute",
+  "storage_name": "product_attribute",
+  "full_name": "Product Attribute",
+  "kind": "persistent",
+  "description": "Product Attribute",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "point_of_sale",
+   "website_sale",
+   "website_sale_comparison"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Attribute",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "product",
+    "full_name": "Attribute"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "help": "If unchecked, it will allow you to hide the attribute without removing it.",
+    "defined_in_package": "product",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "create_variant",
+    "type": "Selection",
+    "selection": [
+     [
+      "always",
+      "Instantly"
+     ],
+     [
+      "dynamic",
+      "Dynamically"
+     ],
+     [
+      "no_variant",
+      "Never"
+     ]
+    ],
+    "default": "always",
+    "string": "Variant Creation",
+    "help": "- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n        - Never: Variants are never created for the attribute.\n        Note: this cannot be changed once the attribute is used on a product.",
+    "required": true,
+    "defined_in_package": "product",
+    "full_name": "Variant Creation"
+   },
+   {
+    "name": "display_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "radio",
+      "Radio"
+     ],
+     [
+      "pills",
+      "Pills"
+     ],
+     [
+      "select",
+      "Select"
+     ],
+     [
+      "color",
+      "Color"
+     ],
+     [
+      "multi",
+      "Multi-checkbox"
+     ],
+     [
+      "image",
+      "Image"
+     ]
+    ],
+    "default": "radio",
+    "required": true,
+    "help": "The display type used in the Product Configurator.",
+    "defined_in_package": "product",
+    "string": "Display Type",
+    "full_name": "Display Type"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "help": "Determine the display order",
+    "index": true,
+    "default": 20,
+    "defined_in_package": "product",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "value_ids",
+    "type": "One2many",
+    "comodel": "product.attribute.value",
+    "inverse_name": "attribute_id",
+    "string": "Values",
+    "copy": true,
+    "defined_in_package": "product",
+    "full_name": "Values",
+    "target_entity": "product.attribute.value"
+   },
+   {
+    "name": "template_value_ids",
+    "type": "One2many",
+    "comodel": "product.template.attribute.value",
+    "inverse_name": "attribute_id",
+    "string": "Template Values",
+    "defined_in_package": "product",
+    "full_name": "Template Values",
+    "target_entity": "product.template.attribute.value"
+   },
+   {
+    "name": "attribute_line_ids",
+    "type": "One2many",
+    "comodel": "product.template.attribute.line",
+    "inverse_name": "attribute_id",
+    "string": "Lines",
+    "defined_in_package": "product",
+    "full_name": "Lines",
+    "target_entity": "product.template.attribute.line"
+   },
+   {
+    "name": "product_tmpl_ids",
+    "type": "Many2many",
+    "comodel": "product.template",
+    "string": "Related Products",
+    "compute": "_compute_products",
+    "store": true,
+    "defined_in_package": "product",
+    "full_name": "Related Products",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "number_related_products",
+    "type": "Integer",
+    "compute": "_compute_number_related_products",
+    "defined_in_package": "product",
+    "string": "Number Related Products",
+    "full_name": "Number Related Products"
+   },
+   {
+    "name": "visibility",
+    "type": "Selection",
+    "selection": [
+     [
+      "visible",
+      "Visible"
+     ],
+     [
+      "hidden",
+      "Hidden"
+     ]
+    ],
+    "default": "visible",
+    "defined_in_package": "website_sale",
+    "string": "Visibility",
+    "full_name": "Visibility"
+   },
+   {
+    "name": "preview_variants",
+    "type": "Selection",
+    "string": "On Product Cards",
+    "selection": [
+     [
+      "visible",
+      "Visible"
+     ],
+     [
+      "hidden",
+      "Hidden"
+     ],
+     [
+      "hover",
+      "Hover"
+     ]
+    ],
+    "default": "hidden",
+    "help": "Instantly created variants are available for selection from your /shop page.",
+    "defined_in_package": "website_sale",
+    "full_name": "On Product Cards"
+   },
+   {
+    "name": "is_thumbnail_visible",
+    "type": "Boolean",
+    "string": "Show Thumbnails",
+    "help": "Use product variant images instead of the attribute values displays.",
+    "defined_in_package": "website_sale",
+    "full_name": "Show Thumbnails"
+   },
+   {
+    "name": "category_id",
+    "type": "Many2one",
+    "comodel": "product.attribute.category",
+    "string": "eCommerce Category",
+    "index": true,
+    "help": "Set a category to regroup similar attributes under the same section in the Comparison page of eCommerce.",
+    "defined_in_package": "website_sale_comparison",
+    "full_name": "eCommerce Category",
+    "target_entity": "product.attribute.category"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_multi_checkbox_no_variant",
+    "kind": "Constraint",
+    "definition": "CHECK(display_type != 'multi' OR create_variant = 'no_variant')",
+    "message": "Multi-checkbox display type is not compatible with the creation of variants",
+    "defined_in_package": "product"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_number_related_products",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_tmpl_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_products",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attribute_line_ids.active",
+         "attribute_line_ids.product_tmpl_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_display_type",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "display_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Override to make sure attribute type can't be changed if it's used on\na product template.\n\nThis is important to prevent because changing the type would make\nexisting combinations invalid without recomputing them, and recomputing\nthem might take too long and we don't want to change products without\nthe user knowing about it.",
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n%(products)s",
+        "line": 118
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_used_on_product",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete the attribute %(attribute)s because it is used on the following products:\n%(products)s",
+        "line": 137
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_archive",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot archive this attribute as there are still products linked to it",
+        "line": 149
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_open_product_template_attribute_lines",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_without_no_variant_attributes",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_disable_preview_variants",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "create_variant",
+         "display_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "The option to preview variants is only available for instantly created single variants.\n        ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "write",
+    "package": "product",
+    "kind": "UserError",
+    "message": "You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n%(products)s"
+   },
+   {
+    "operation": "_unlink_except_used_on_product",
+    "package": "product",
+    "kind": "UserError",
+    "message": "You cannot delete the attribute %(attribute)s because it is used on the following products:\n%(products)s"
+   },
+   {
+    "operation": "action_archive",
+    "package": "product",
+    "kind": "UserError",
+    "message": "You cannot archive this attribute as there are still products linked to it"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "product.access_product_attribute",
+    "package": "product",
+    "name": "product.attribute",
+    "entity": "product.attribute",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_attribute_manager",
+    "package": "product",
+    "name": "product.attribute manager",
+    "entity": "product.attribute",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "stock.access_product_attribute_manager",
+    "package": "stock",
+    "name": "product.attribute manager",
+    "entity": "product.attribute",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_sale.access_product_attribute_public_public",
+    "package": "website_sale",
+    "name": "product.attribute public",
+    "entity": "product.attribute",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_attribute_public_portal",
+    "package": "website_sale",
+    "name": "product.attribute public",
+    "entity": "product.attribute",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_attribute_public_employee",
+    "package": "website_sale",
+    "name": "product.attribute public",
+    "entity": "product.attribute",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "product.attribute_tree_view",
+    "package": "product",
+    "name": "product.attribute.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Variant Values"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "display_type"
+      },
+      {
+       "name": "create_variant"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "product.product_attribute_view_form",
+    "package": "product",
+    "name": "product.attribute.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Product Attribute"
+     },
+     "fields": [
+      {
+       "name": "number_related_products",
+       "invisible": "1"
+      },
+      {
+       "name": "number_related_products"
+      },
+      {
+       "name": "name",
+       "nolabel": "1"
+      },
+      {
+       "name": "display_type",
+       "widget": "radio",
+       "options": "{'horizontal': True}"
+      },
+      {
+       "name": "create_variant",
+       "widget": "radio",
+       "readonly": "number_related_products != 0 or display_type == 'multi'",
+       "options": "{'horizontal': True}",
+       "force_save": "1"
+      },
+      {
+       "name": "value_ids",
+       "widget": "pavs_one2many",
+       "nolabel": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "display_type",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_custom",
+       "column_invisible": "parent.display_type == 'multi'"
+      },
+      {
+       "name": "html_color",
+       "widget": "color",
+       "invisible": "image",
+       "column_invisible": "parent.display_type != 'color'"
+      },
+      {
+       "name": "image",
+       "widget": "image",
+       "options": "{'size': [70, 70]}",
+       "column_invisible": "parent.display_type not in ['color', 'image']"
+      },
+      {
+       "name": "default_extra_price"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_product_template_attribute_lines",
+       "type": "object",
+       "invisible": "not number_related_products",
+       "class": "oe_stat_button",
+       "icon": "fa-bars"
+      },
+      {
+       "name": "action_add_to_products",
+       "string": "Add to products",
+       "type": "object",
+       "invisible": "pav_attribute_line_ids",
+       "icon": "fa-plus"
+      },
+      {
+       "name": "action_update_prices",
+       "string": "Update extra prices",
+       "type": "object",
+       "invisible": "not pav_attribute_line_ids or not default_extra_price_changed",
+       "icon": "fa-refresh"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "attribute_values",
+       "string": "Attribute Values",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "radio": 2,
+      "pavs_one2many": 1,
+      "handle": 1,
+      "color": 1,
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_open_product_template_attribute_lines",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-bars",
+       "invisible": "not number_related_products"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product.product_attribute_search",
+    "package": "product",
+    "name": "product.attribute.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Inactive",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_sale.product_attribute_view_form",
+    "package": "website_sale",
+    "name": "product.attribute.view.form",
+    "view_type": "group",
+    "inherits_view": "product.product_attribute_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "main_fields",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "visibility",
+       "widget": "radio",
+       "string": "eCommerce Filter",
+       "options": "{'horizontal': True}"
+      },
+      {
+       "name": "preview_variants",
+       "widget": "radio",
+       "readonly": "create_variant != 'always' or display_type == 'multi'",
+       "options": "{'horizontal': True}",
+       "force_save": "1"
+      },
+      {
+       "name": "is_thumbnail_visible",
+       "widget": "boolean_toggle",
+       "invisible": "preview_variants == 'hidden'",
+       "readonly": "create_variant != 'always' or display_type == 'multi'",
+       "force_save": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 2,
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "main_fields",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_sale.attribute_tree_view",
+    "package": "website_sale",
+    "name": "product.attribute.list",
+    "view_type": "field",
+    "inherits_view": "product.attribute_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "create_variant",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "create_variant",
+       "position": "after"
+      },
+      {
+       "name": "visibility",
+       "string": "eCommerce Filter Visibility"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_sale_comparison.product_attribute_tree_view_inherit",
+    "package": "website_sale_comparison",
+    "name": "product.attribute.list.inherit",
+    "view_type": "field",
+    "inherits_view": "product.attribute_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "category_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_sale_comparison.product_attribute_view_form",
+    "package": "website_sale_comparison",
+    "name": "product.attribute.form.inherit",
+    "view_type": "group",
+    "inherits_view": "website_sale.product_attribute_view_form",
+    "mode": null,
+    "priority": "8",
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "ecommerce_main_fields",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "category_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "ecommerce_main_fields",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "product.attribute_action",
+    "package": "product",
+    "name": "Attributes",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "product.attribute"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "point_of_sale.pos_menu_products_attribute_action",
+    "package": "point_of_sale",
+    "name": null,
+    "parent_id": "point_of_sale.pos_menu_products_configuration",
+    "action": "product.attribute_action",
+    "sequence": "2",
+    "groups_id": "product.group_product_variant",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "purchase.menu_product_attribute_action",
+    "package": "purchase",
+    "name": "Attributes",
+    "parent_id": "purchase.menu_product_in_config_purchase",
+    "action": "product.attribute_action",
+    "sequence": "1",
+    "groups_id": "product.group_product_variant",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.menu_product_attribute_action",
+    "package": "sale",
+    "name": null,
+    "parent_id": null,
+    "action": "product.attribute_action",
+    "sequence": "10",
+    "groups_id": "product.group_product_variant",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "stock.menu_attribute_action",
+    "package": "stock",
+    "name": null,
+    "parent_id": "stock.menu_product_in_config_stock",
+    "action": "product.attribute_action",
+    "sequence": "4",
+    "groups_id": "product.group_product_variant",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "website_sale.menu_product_attribute_action",
+    "package": "website_sale",
+    "name": null,
+    "parent_id": null,
+    "action": "product.attribute_action",
+    "sequence": "5",
+    "groups_id": "product.group_product_variant",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

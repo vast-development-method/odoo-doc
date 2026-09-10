@@ -1,0 +1,169 @@
+{
+ "catalog": {
+  "name": "views:barcode.nomenclature",
+  "description": "View declarations for entity barcode.nomenclature.",
+  "record_count": 4,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "barcodes.view_barcode_nomenclature_form",
+   "package": "barcodes",
+   "name": "Barcode Nomenclatures",
+   "entity": "barcode.nomenclature",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Barcode Nomenclature"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "upc_ean_conv"
+     },
+     {
+      "name": "rule_ids"
+     },
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "type"
+     },
+     {
+      "name": "encoding"
+     },
+     {
+      "name": "pattern"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Barcode Nomenclature\">\n                    <sheet>\n                        <group name=\"general_attributes\" col=\"4\">\n                            <field name=\"name\"/>\n                            <field name=\"upc_ean_conv\"/>\n                        </group>\n                        <div>\n                            <p>\n                                <i>Barcodes Nomenclatures</i> define how barcodes are recognized and categorized.\n                                When a barcode is scanned it is associated to the <i>first</i> rule with a matching\n                                pattern. The pattern syntax is that of regular expression, and a barcode is matched\n                                if the regular expression matches a prefix of the barcode.\n                            </p><p>\n                                Patterns can also define how numerical values, such as weight or price, can be\n                                encoded into the barcode. They are indicated by <code>{NNN}</code> where the N's\n                                define where the number's digits are encoded. Floats are also supported with the\n                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases,\n                                the barcode field on the associated records <i>must</i> show these digits as\n                                zeroes.\n                            </p>\n                        </div>\n                        <field name=\"rule_ids\">\n                            <list string=\"Tables\">\n                                <field name=\"sequence\" widget=\"handle\"/>\n                                <field name=\"name\"/>\n                                <field name=\"type\"/>\n                                <field name=\"encoding\"/>\n                                <field name=\"pattern\"/>\n                            </list>\n                        </field>\n                    </sheet>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "barcodes.view_barcode_nomenclature_tree",
+   "package": "barcodes",
+   "name": "Barcode Nomenclatures",
+   "entity": "barcode.nomenclature",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Barcode Nomenclatures"
+    },
+    "fields": [
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Barcode Nomenclatures\">\n                    <field name=\"name\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "barcodes_gs1_nomenclature.view_barcode_gs1_nomenclature_form",
+   "package": "barcodes_gs1_nomenclature",
+   "name": "Barcode Nomenclatures",
+   "entity": "barcode.nomenclature",
+   "view_type": "xpath",
+   "inherits_view": "barcodes.view_barcode_nomenclature_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='upc_ean_conv']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='upc_ean_conv']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                \n                <xpath expr=\"//field[@name='upc_ean_conv']\" position=\"attributes\">\n                    <attribute name=\"invisible\">is_gs1_nomenclature</attribute>\n                </xpath>\n                <xpath expr=\"//group[@name='general_attributes']\" position=\"after\">\n                    <group name=\"gs1_attributes\" col=\"4\">\n                        <field name=\"is_gs1_nomenclature\"/>\n                        <field name=\"gs1_separator_fnc1\" invisible=\"not is_gs1_nomenclature\"/>\n                    </group>\n                </xpath>\n                \n                <xpath expr=\"//field[@name='rule_ids']\" position=\"attributes\">\n                    <attribute name=\"context\">{'is_gs1': is_gs1_nomenclature}</attribute>\n                </xpath>\n                <xpath expr=\"//field[@name='encoding']\" position=\"attributes\">\n                    <attribute name=\"column_invisible\">parent.is_gs1_nomenclature</attribute>\n                </xpath>\n                <xpath expr=\"//field[@name='pattern']\" position=\"after\">\n                    <field name=\"is_gs1_nomenclature\" column_invisible=\"1\"/> \n                    <field name=\"gs1_content_type\" column_invisible=\"not parent.is_gs1_nomenclature\"/>\n                    <field name=\"gs1_decimal_usage\" column_invisible=\"not parent.is_gs1_nomenclature\" invisible=\"gs1_content_type != 'measure'\"/>\n                    <field name=\"associated_uom_id\" column_invisible=\"not parent.is_gs1_nomenclature\" invisible=\"gs1_content_type != 'measure'\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "barcodes_gs1_nomenclature.view_barcode_gs1_nomenclature_tree",
+   "package": "barcodes_gs1_nomenclature",
+   "name": "Barcode Nomenclatures",
+   "entity": "barcode.nomenclature",
+   "view_type": "xpath",
+   "inherits_view": "barcodes.view_barcode_nomenclature_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "is_gs1_nomenclature"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='name']\" position=\"after\">\n                    <field name=\"is_gs1_nomenclature\"/>\n                </xpath>\n            </field>\n        "
+  }
+ ]
+}

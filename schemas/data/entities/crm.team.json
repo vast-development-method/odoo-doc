@@ -1,0 +1,2217 @@
+{
+ "catalog": {
+  "name": "entity:crm.team",
+  "description": "Complete definition of entity Sales Team (crm.team).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "crm.team",
+  "storage_name": "crm_team",
+  "full_name": "Sales Team",
+  "kind": "persistent",
+  "description": "Sales Team",
+  "defined_by_package": "sales_team",
+  "extended_by_packages": [
+   "crm",
+   "sale",
+   "sale_crm",
+   "website_sale",
+   "pos_sale",
+   "survey_crm"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.alias.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence ASC, create_date DESC, id DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Sales Team",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "sales_team",
+    "full_name": "Sales Team"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 10,
+    "defined_in_package": "sales_team",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "help": "If the active field is set to false, it will allow you to hide the Sales Team without removing it.",
+    "defined_in_package": "sales_team",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "index": true,
+    "defined_in_package": "sales_team",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "related": "company_id.currency_id",
+    "readonly": true,
+    "defined_in_package": "sales_team",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Team Leader",
+    "check_company": true,
+    "domain": [
+     [
+      "share",
+      "!=",
+      true
+     ]
+    ],
+    "defined_in_package": "sales_team",
+    "full_name": "Team Leader",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "is_membership_multi",
+    "type": "Boolean",
+    "string": "Multiple Memberships Allowed",
+    "compute": "_compute_is_membership_multi",
+    "help": "If True, users may belong to several sales teams. Otherwise membership is limited to a single sales team.",
+    "defined_in_package": "sales_team",
+    "full_name": "Multiple Memberships Allowed"
+   },
+   {
+    "name": "member_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "string": "Salespersons",
+    "domain": "['&', ('share', '=', False), ('company_ids', 'in', member_company_ids)]",
+    "compute": "_compute_member_ids",
+    "inverse": "_inverse_member_ids",
+    "search": "_search_member_ids",
+    "help": "Users assigned to this team.",
+    "defined_in_package": "sales_team",
+    "full_name": "Salespersons",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "member_company_ids",
+    "type": "Many2many",
+    "comodel": "res.company",
+    "compute": "_compute_member_company_ids",
+    "help": "UX: Limit to team company or all if no company",
+    "defined_in_package": "sales_team",
+    "string": "Member Company",
+    "full_name": "Member Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "member_warning",
+    "type": "Text",
+    "string": "Membership Issue Warning",
+    "compute": "_compute_member_warning",
+    "defined_in_package": "sales_team",
+    "full_name": "Membership Issue Warning"
+   },
+   {
+    "name": "crm_team_member_ids",
+    "type": "One2many",
+    "comodel": "crm.team.member",
+    "inverse_name": "crm_team_id",
+    "string": "Sales Team Members",
+    "context": {
+     "active_test": true
+    },
+    "help": "Add members to automatically assign their documents to this sales team.",
+    "defined_in_package": "sales_team",
+    "full_name": "Sales Team Members",
+    "target_entity": "crm.team.member"
+   },
+   {
+    "name": "crm_team_member_all_ids",
+    "type": "One2many",
+    "comodel": "crm.team.member",
+    "inverse_name": "crm_team_id",
+    "string": "Sales Team Members (incl. inactive)",
+    "context": {
+     "active_test": false
+    },
+    "defined_in_package": "sales_team",
+    "full_name": "Sales Team Members (incl. inactive)",
+    "target_entity": "crm.team.member"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color Index",
+    "help": "The color of the channel",
+    "default": {
+     "dynamic": "_get_default_color"
+    },
+    "defined_in_package": "sales_team",
+    "full_name": "Color Index"
+   },
+   {
+    "name": "favorite_user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "relation": "team_favorite_user_rel",
+    "column1": "team_id",
+    "column2": "user_id",
+    "string": "Favorite Members",
+    "default": {
+     "dynamic": "_get_default_favorite_user_ids"
+    },
+    "defined_in_package": "sales_team",
+    "full_name": "Favorite Members",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "is_favorite",
+    "type": "Boolean",
+    "string": "Show on dashboard",
+    "compute": "_compute_is_favorite",
+    "inverse": "_inverse_is_favorite",
+    "help": "Favorite teams to display them in the dashboard and access them easily.",
+    "defined_in_package": "sales_team",
+    "full_name": "Show on dashboard"
+   },
+   {
+    "name": "dashboard_button_name",
+    "type": "Char",
+    "string": "Dashboard Button",
+    "compute": "_compute_dashboard_button_name",
+    "defined_in_package": "sales_team",
+    "full_name": "Dashboard Button"
+   },
+   {
+    "name": "use_leads",
+    "type": "Boolean",
+    "string": "Leads",
+    "help": "Check this box to filter and qualify incoming requests as leads before converting them into opportunities and assigning them to a salesperson.",
+    "defined_in_package": "crm",
+    "full_name": "Leads"
+   },
+   {
+    "name": "use_opportunities",
+    "type": "Boolean",
+    "string": "Pipeline",
+    "default": true,
+    "help": "Check this box to manage a presales process with opportunities.",
+    "defined_in_package": "crm",
+    "full_name": "Pipeline"
+   },
+   {
+    "name": "alias_id",
+    "type": "Many2one",
+    "help": "The email address associated with this channel. New emails received will automatically create new leads assigned to the channel.",
+    "defined_in_package": "crm",
+    "string": "Alias",
+    "full_name": "Alias"
+   },
+   {
+    "name": "assignment_enabled",
+    "type": "Boolean",
+    "string": "Lead Assign",
+    "compute": "_compute_assignment_enabled",
+    "defined_in_package": "crm",
+    "full_name": "Lead Assign"
+   },
+   {
+    "name": "assignment_auto_enabled",
+    "type": "Boolean",
+    "string": "Auto Assignment",
+    "compute": "_compute_assignment_enabled",
+    "defined_in_package": "crm",
+    "full_name": "Auto Assignment"
+   },
+   {
+    "name": "assignment_optout",
+    "type": "Boolean",
+    "string": "Skip auto assignment",
+    "defined_in_package": "crm",
+    "full_name": "Skip auto assignment"
+   },
+   {
+    "name": "assignment_max",
+    "type": "Integer",
+    "string": "Lead Average Capacity",
+    "compute": "_compute_assignment_max",
+    "help": "Monthly average leads capacity for all salesmen belonging to the team",
+    "defined_in_package": "crm",
+    "full_name": "Lead Average Capacity"
+   },
+   {
+    "name": "assignment_domain",
+    "type": "Char",
+    "string": "Assignment Domain",
+    "tracking": true,
+    "help": "Additional filter domain when fetching unassigned leads to allocate to the team.",
+    "defined_in_package": "crm",
+    "full_name": "Assignment Domain"
+   },
+   {
+    "name": "lead_unassigned_count",
+    "type": "Integer",
+    "string": "# Unassigned Leads",
+    "compute": "_compute_lead_unassigned_count",
+    "defined_in_package": "crm",
+    "full_name": "# Unassigned Leads"
+   },
+   {
+    "name": "lead_all_assigned_month_count",
+    "type": "Integer",
+    "string": "# Leads/Opps assigned this month",
+    "compute": "_compute_lead_all_assigned_month_count",
+    "help": "Number of leads and opportunities assigned this last month.",
+    "defined_in_package": "crm",
+    "full_name": "# Leads/Opps assigned this month"
+   },
+   {
+    "name": "lead_all_assigned_month_exceeded",
+    "type": "Boolean",
+    "string": "Exceed monthly lead assignement",
+    "compute": "_compute_lead_all_assigned_month_count",
+    "help": "True if the monthly lead assignment count is greater than the maximum assignment limit, false otherwise.",
+    "defined_in_package": "crm",
+    "full_name": "Exceed monthly lead assignement"
+   },
+   {
+    "name": "lead_properties_definition",
+    "type": "PropertiesDefinition",
+    "string": "Lead Properties",
+    "defined_in_package": "crm",
+    "full_name": "Lead Properties"
+   },
+   {
+    "name": "invoiced",
+    "type": "Float",
+    "compute": "_compute_invoiced",
+    "string": "Invoiced This Month",
+    "readonly": true,
+    "help": "Invoice revenue for the current month. This is the amount the sales channel has invoiced this month. It is used to compute the progression ratio of the current and target revenue on the kanban view.",
+    "defined_in_package": "sale",
+    "full_name": "Invoiced This Month"
+   },
+   {
+    "name": "invoiced_target",
+    "type": "Float",
+    "string": "Invoicing Target",
+    "help": "Revenue Target for the current month (untaxed total of paid invoices).",
+    "defined_in_package": "sale",
+    "full_name": "Invoicing Target"
+   },
+   {
+    "name": "sale_order_count",
+    "type": "Integer",
+    "compute": "_compute_sale_order_count",
+    "string": "# Sale Orders",
+    "defined_in_package": "sale",
+    "full_name": "# Sale Orders"
+   },
+   {
+    "name": "website_ids",
+    "type": "One2many",
+    "string": "Websites",
+    "comodel": "website",
+    "inverse_name": "salesteam_id",
+    "defined_in_package": "website_sale",
+    "full_name": "Websites",
+    "target_entity": "website"
+   },
+   {
+    "name": "abandoned_carts_amount",
+    "type": "Integer",
+    "string": "Amount of Abandoned Carts",
+    "compute": "_compute_abandoned_carts",
+    "defined_in_package": "website_sale",
+    "full_name": "Amount of Abandoned Carts"
+   },
+   {
+    "name": "abandoned_carts_count",
+    "type": "Integer",
+    "string": "Number of Abandoned Carts",
+    "compute": "_compute_abandoned_carts",
+    "defined_in_package": "website_sale",
+    "full_name": "Number of Abandoned Carts"
+   },
+   {
+    "name": "pos_config_ids",
+    "type": "One2many",
+    "comodel": "pos.config",
+    "inverse_name": "crm_team_id",
+    "string": "Point of Sales",
+    "defined_in_package": "pos_sale",
+    "full_name": "Point of Sales",
+    "target_entity": "pos.config"
+   },
+   {
+    "name": "origin_survey_ids",
+    "type": "One2many",
+    "comodel": "survey.survey",
+    "inverse_name": "team_id",
+    "string": "Survey opportunities related to the sales team",
+    "defined_in_package": "survey_crm",
+    "full_name": "Survey opportunities related to the sales team",
+    "target_entity": "survey.survey"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_color",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_team_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "user_id",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": "Compute default team id for sales related documents. Note that this\nmethod is not called by default_get as it takes some additional\nparameters and is meant to be called by other default methods.\n\nHeuristic (when multiple match: take from default context value or first\nsequence ordered)\n\n  1- any of my teams (member OR responsible) matching domain, either from\n     context or based on _order;\n  2- any of my teams (member OR responsible), either from context or based\n     on _order;\n  3- default from context\n  4- any team matching my company and domain (based on company rule)\n  5- any team matching my company (based on company rule)\n\n:param user_id: salesperson to target, fallback on env.uid;\n:param domain: optional domain to filter teams (like use_lead = True);",
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_favorite_user_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constrains_company_members",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The following team members are not allowed in company '%(company)s' of the Sales Team '%(team)s': %(users)s",
+        "line": 131
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_membership_multi",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sequence"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_member_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "crm_team_member_ids.active"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_member_ids",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_member_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_membership_multi",
+         "member_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Display a warning message to warn user they are about to archive\nother memberships. Only valid in mono-membership mode and take into\naccount only active memberships as we may keep several archived\nmemberships. ",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_member_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_member_company_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Available companies for members. Either team company if set, either\nany company if not set on team. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_favorite",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_is_favorite",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dashboard_button_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": "Sets the adequate dashboard button name depending on the Sales Team's options\n        ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_default",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cannot delete default team \"%s\"",
+        "line": 241
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_primary_channel_button",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": "Skeleton function to be overloaded It will return the adequate action\ndepending on the Sales Team's options. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_members_to_favorites",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sales_team",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_assignment_max",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "crm_team_member_ids.assignment_max"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_assignment_enabled",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lead_unassigned_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lead_all_assigned_month_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "crm_team_member_ids.lead_month_count",
+         "assignment_max"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_use_leads_opportunities",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "use_leads",
+         "use_opportunities"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constrains_assignment_domain",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "assignment_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Assignment domain for team %(team)s is incorrectly formatted",
+        "line": 90
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "When unlinking, concatenate ``crm.lead.scoring.frequency`` linked to\nthe team into \"no team\" statistics. ",
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alias_get_creation_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_assign_leads",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "force_quota",
+     "creation_delta_days"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Cron method assigning leads. Leads are allocated to all teams and\nassigned to their members.\n\nThe cron is designed to run at least once a day or more.\nA number of leads will be assigned each time depending on the daily leads\nalready assigned.\nThis allows the assignment process based on the cron to work on a daily basis\nwithout allocating too much leads on members if the cron is executed multiple\ntimes a day.\nThe daily quota of leads can be forcefully assigned with force_quota\n(ignoring the daily leads already assigned).\n\nSee ``CrmTeam.action_assign_leads()`` and its sub methods for more\ndetails about assign process.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_assign_leads",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Manual (direct) leads assignment. This method both\n\n  * assigns leads to teams given by self;\n  * assigns leads to salespersons belonging to self;\n\nSee sub methods for more details about assign process.\n\n:returns: action, a client notification giving some insights on assign\n  process;",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_assign_leads",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "force_quota",
+     "creation_delta_days"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Private method for lead assignment. This method both\n\n  * assigns leads to teams given by self;\n  * assigns leads to salespersons belonging to self;\n\nSee sub methods for more details about assign process.\n\n:param bool force_quota: Assign the full daily quota without taking into account\n                         the leads already assigned today\n:param int creation_delta_days: Take into account all leads created in the last nb days (by default 7).\n                                If set to zero we take all the past leads.\n\n:returns: 2-elements tuple (teams_data, members_data) as a\n  structure-based result of assignment process. For more details\n  about data see :meth:`CrmTeam._allocate_leads` and\n  :meth:`CrmTeam._assign_and_convert_leads`;",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Lead/Opportunities automatic assignment is limited to managers or administrators",
+        "line": 243
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_assign_leads_logs",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "teams_data",
+     "members_data"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Tool method to prepare notification about assignment process result.\n\n:param teams_data: see ``CrmTeam._allocate_leads()``;\n:param members_data: see ``CrmTeam._assign_and_convert_leads()``;\n\n:returns: list of formatted logs, ready to be formatted into a nice\nplaintext or html message at caller's will\n:rtype: list[str]",
+      "size_in_lines": 66,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_allocate_leads",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "creation_delta_days"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Allocate leads to teams given by self. This method sets ``team_id``\nfield on lead records that are unassigned (no team and no responsible).\nNo salesperson is assigned in this process. Its purpose is simply to\nallocate leads within teams.\n\nThis process allocates all available leads on teams weighted by their\nmaximum assignment by month that indicates their relative workload.\n\nHeuristic of this method is the following:\n  * find unassigned leads for each team, aka leads being\n    * without team, without user -> not assigned;\n    * not won nor inactive -> live leads;\n    * created in the last creation_delta_days (in the last week by default)\n      This avoid to take into account old leads in the allocation.\n    * if set, a delay after creation can be applied (see BUNDLE_HOURS_DELAY)\n      parameter explanations here below;\n    * matching the team's assignment domain (empty means\n      everything);\n\n  * assign a weight to each team based on their assignment_max that\n    indicates their relative workload;\n\n  * pick a random team using a weighted random choice and find a lead\n    to assign:\n\n    * remove already assigned leads from the available leads. If there\n      is not any lead spare to assign, remove team from active teams;\n    * pick the first lead and set the current team;\n    * when setting a team on leads, leads are also merged with their\n      duplicates. Purpose is to clean database and avoid assigning\n      duplicates to same or different teams;\n    * add lead and its duplicates to already assigned leads;\n\n  * pick another random team until their is no more leads to assign\n    to any team;\n\nThis process ensure that teams having overlapping domains will all\nreceive leads as lead allocation is done one lead at a time. This\nallocation will be proportional to their size (assignment of their\nmembers).\n\nSupported ``ir.config_parameter`` settings.\n\n``crm.assignment.bundle``\n    deprecated\n\n``crm.assignment.commit.bundle`` (``int``)\n    Allow to set size of lead batch to be committed together. By\n    default 100 which is a good trade-off between transaction time and\n    speed.\n\n``crm.assignment.delay`` (``float``)\n    Give a delay before taking a lead into assignment process\n    (BUNDLE_HOURS_DELAY) given in hours. Purpose if to allow other\n    crons or automation rules to make their job. This option is mainly\n    historic as its purpose was to let automation rules prepare leads\n    and score before PLS was added into CRM. This is now not required\n    anymore but still supported;\n\n:param int creation_delta_days: see ``CrmTeam._action_assign_leads()``;\n\n:rtype: dict[str, Any]\n:return: dictionary mapping each team with assignment result:\n\n    ``assigned`` (``set[int]``)\n        Lead IDs directly assigned to the team\n        (no duplicate or merged found)\n\n    ``merged`` (``set[int]``)\n        Lead IDs merged and assigned to the team\n        (main leads being results of merge process)\n\n    ``duplicates`` (``set[int]``)\n        Lead IDs found as duplicates and merged into other leads.\n        Those leads are unlinked during assign process and are already\n        removed at return of this method",
+      "size_in_lines": 174,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_allocate_leads_deduplicate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "leads",
+     "duplicates_cache"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Assign leads to sales team given by self by calling lead tool\nmethod _handle_salesmen_assignment. In this method we deduplicate leads\nallowing to reduce number of resulting leads before assigning them\nto salesmen.\n\n:param leads: recordset of leads to assign to current team;\n:param duplicates_cache: if given, avoid to perform a duplicate search\n  and fetch information in it instead;",
+      "size_in_lines": 48,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_to_assign_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_assign_and_convert_leads",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "force_quota"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Main processing method to assign leads to sales team members. It also\nconverts them into opportunities. This method should be called after\n``_allocate_leads`` as this method assigns leads already allocated to\nthe member's team. Its main purpose is therefore to distribute team\nworkload on its members based on their capacity.\n\nThis method follows the following heuristic\n    * Get quota per member\n    * Find all leads to be assigned per team\n    * Sort list of members per number of leads received in the last 24h\n    * Assign the lead using round robin\n        * Find the first member with a compatible domain\n        * Assign the lead\n        * Move the member at the end of the list if quota is not reached\n        * Remove it otherwise\n        * Move to the next lead\n\n:param bool force_quota: see ``CrmTeam._action_assign_leads()``;\n\n:returns: dict() with each member assignment result:\n  membership: {\n    'assigned': set of lead IDs directly assigned to the member;\n  }, ...",
+      "size_in_lines": 137,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_your_pipeline",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_opportunity_forecast",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_leads",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_unassigned_leads",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_update_to_pipeline",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "action"
+    ],
+    "definitions": [
+     {
+      "package": "crm",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_order_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_in_sale_scope",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "update_invoiced_target",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_used_for_sales",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "If more than 5 active SOs, we consider this team to be actively used.\n5 is some random guess based on \"user testing\", aka more than testing\nCRM feature and less than use it in real life use cases. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Team %(team_name)s has %(sale_order_count)s active sale orders. Consider cancelling them or archiving the team instead.",
+        "line": 80
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_abandoned_carts",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_abandoned_carts",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constrains_company_members",
+    "package": "sales_team",
+    "kind": "UserError",
+    "message": "The following team members are not allowed in company '%(company)s' of the Sales Team '%(team)s': %(users)s"
+   },
+   {
+    "operation": "_unlink_except_default",
+    "package": "sales_team",
+    "kind": "UserError",
+    "message": "Cannot delete default team \"%s\""
+   },
+   {
+    "operation": "_constrains_assignment_domain",
+    "package": "crm",
+    "kind": "ValidationError",
+    "message": "Assignment domain for team %(team)s is incorrectly formatted"
+   },
+   {
+    "operation": "_action_assign_leads",
+    "package": "crm",
+    "kind": "UserError",
+    "message": "Lead/Opportunities automatic assignment is limited to managers or administrators"
+   },
+   {
+    "operation": "_unlink_except_used_for_sales",
+    "package": "sale",
+    "kind": "UserError",
+    "message": "Team %(team_name)s has %(sale_order_count)s active sale orders. Consider cancelling them or archiving the team instead."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "pos_sale.access_crm_team_pos_manager",
+    "package": "pos_sale",
+    "name": "crm.team.pos.manager",
+    "entity": "crm.team",
+    "group": "point_of_sale.group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sales_team.access_crm_team",
+    "package": "sales_team",
+    "name": "crm.team",
+    "entity": "crm.team",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sales_team.access_crm_team_user",
+    "package": "sales_team",
+    "name": "crm.team.user",
+    "entity": "crm.team",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sales_team.access_crm_team_manager",
+    "package": "sales_team",
+    "name": "crm.team.manager",
+    "entity": "crm.team",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "pos_sale.pos_sale_rule_pos_channel_pos_manager",
+    "package": "pos_sale",
+    "name": "POS Sales Team",
+    "entity": "crm.team",
+    "domain": "[(1,'=',1)]",
+    "groups": "[(4, ref('point_of_sale.group_pos_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sales_team.crm_rule_all_salesteam",
+    "package": "sales_team",
+    "name": "All Salesteam",
+    "entity": "crm.team",
+    "domain": "[(1,'=',1)]",
+    "groups": "[(4, ref('sales_team.group_sale_salesman_all_leads'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sales_team.sale_team_comp_rule",
+    "package": "sales_team",
+    "name": "Sales Team multi-company",
+    "entity": "crm.team",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "crm.crm_team_view_tree",
+    "package": "crm",
+    "name": "crm.team.list.inherit.crm",
+    "view_type": "field",
+    "inherits_view": "sales_team.crm_team_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "alias_id",
+       "string": "Alias"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "crm.sales_team_form_view_in_crm",
+    "package": "crm",
+    "name": "crm.team.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "sales_team.crm_team_view_form",
+    "mode": null,
+    "priority": "12",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form/*[1]",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "use_leads",
+       "invisible": "1"
+      },
+      {
+       "name": "use_opportunities",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_assign_leads",
+       "string": "Assign Leads",
+       "type": "object",
+       "invisible": "not use_leads and not use_opportunities or not assignment_enabled",
+       "class": "oe_highlight",
+       "confirm": "This will assign leads to all members. Do you want to proceed?"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form/*[1]",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "crm.crm_team_view_kanban_dashboard",
+    "package": "crm",
+    "name": "crm.team.view.kanban.dashboard.inherit.crm",
+    "view_type": "data",
+    "inherits_view": "sales_team.crm_team_view_kanban_dashboard",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "alias_name"
+      },
+      {
+       "name": "alias_domain"
+      },
+      {
+       "name": "use_opportunities"
+      },
+      {
+       "name": "use_leads"
+      },
+      {
+       "name": "alias_id"
+      },
+      {
+       "name": "lead_unassigned_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//templates",
+       "position": "before"
+      },
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      },
+      {
+       "expr": "//div[hasclass('crm_team_kanban_bottom')]/field",
+       "position": "before"
+      },
+      {
+       "expr": "//div[@name='manage_view']",
+       "position": "attributes"
+      },
+      {
+       "expr": "//div[@name='manage_view']/h5[hasclass('o_kanban_card_manage_title')]",
+       "position": "after"
+      },
+      {
+       "expr": "//div[@name='manage_new']",
+       "position": "attributes"
+      },
+      {
+       "expr": "//div[@name='manage_new']/h5[hasclass('o_kanban_card_manage_title')]",
+       "position": "after"
+      },
+      {
+       "expr": "//div[@name='manage_reports']",
+       "position": "attributes"
+      },
+      {
+       "expr": "//div[@name='manage_reports']/h5[hasclass('o_kanban_card_manage_title')]",
+       "position": "after"
+      },
+      {
+       "expr": "//div[@name='manage_reports']/div[@name='o_team_kanban_report_separator']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale.crm_team_salesteams_view_form",
+    "package": "sale",
+    "name": "crm.team.form",
+    "view_type": "field",
+    "inherits_view": "sales_team.crm_team_view_form",
+    "mode": null,
+    "priority": "9",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "company_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "position": "after"
+      },
+      {
+       "name": "invoiced_target",
+       "widget": "monetary",
+       "options": "{'currency_field': 'currency_id'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale.crm_team_view_kanban_dashboard",
+    "package": "sale",
+    "name": "crm.team.view.kanban.dashboard.inherit.sale",
+    "view_type": "xpath",
+    "inherits_view": "sales_team.crm_team_view_kanban_dashboard",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//templates",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "invoiced_target"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//templates",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_crm.crm_team_salesteams_view_form_in_sale_crm",
+    "package": "sale_crm",
+    "name": "crm.team.form",
+    "view_type": "data",
+    "inherits_view": "crm.sales_team_form_view_in_crm",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//span[@name='opportunities']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sales_team.crm_team_view_search",
+    "package": "sales_team",
+    "name": "crm.team.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Salesteams Search"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "member_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by': 'company_id'}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "team_leader",
+       "string": "Team Leader",
+       "domain": "[]",
+       "context": "{'group_by': 'user_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sales_team.crm_team_view_form",
+    "package": "sales_team",
+    "name": "crm.team.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Sales Team",
+      "js_class": "crm_team_form",
+      "class": "o_crm_team_form_view"
+     },
+     "fields": [
+      {
+       "name": "member_warning"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. North America"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "sequence",
+       "invisible": "1"
+      },
+      {
+       "name": "is_membership_multi",
+       "invisible": "1"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "member_company_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "member_ids",
+       "mode": "kanban"
+      },
+      {
+       "name": "avatar_128",
+       "widget": "image"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "email"
+      },
+      {
+       "name": "crm_team_member_ids",
+       "invisible": "is_membership_multi or not is_membership_multi",
+       "context": "{                                     'kanban_view_ref': 'sales_team.crm_team_member_view_kanban_from_team',                                     'form_view_ref': 'sales_team.crm_team_member_view_form_from_team',                                     'list_view_ref': 'sales_team.crm_team_member_view_tree_from_team',                                     'default_crm_team_id': id,                                 }",
+       "mode": "kanban"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "crm_team_activate_multi_membership",
+       "type": "button",
+       "class": "btn btn-link p-0 lh-1"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "members_users",
+       "string": "Members",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "sales_team.crm_team_view_tree",
+    "package": "sales_team",
+    "name": "crm.team.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Sales Team",
+      "sample": "1",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name",
+       "readonly": "1"
+      },
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "sales_team.crm_team_view_kanban",
+    "package": "sales_team",
+    "name": "crm.team.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "user_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "sales_team.crm_team_view_kanban_dashboard",
+    "package": "sales_team",
+    "name": "crm.team.view.kanban.dashboard",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_crm_team_kanban",
+      "highlight_color": "color",
+      "create": "0",
+      "can_open": "0",
+      "action": "action_primary_channel_button",
+      "type": "object",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "color",
+       "widget": "kanban_color_picker"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "kanban_color_picker": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "sales_team.crm_team_action_sales",
+    "package": "sales_team",
+    "name": "Sales Teams",
+    "view_mode": "kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'in_sales_app': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Define a new sales team\n            </p><p>\n                Use Sales Teams to organize your sales departments.\n                Each team will work with a separate pipeline.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "crm.team"
+   },
+   {
+    "external_identifier": "sales_team.crm_team_action_pipeline",
+    "package": "sales_team",
+    "name": "Teams",
+    "view_mode": "kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Define a new sales team\n            </p><p>\n                Use Sales Teams to organize your sales departments.\n                Each team will work with a separate pipeline.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "crm.team"
+   },
+   {
+    "external_identifier": "sales_team.crm_team_action_config",
+    "package": "sales_team",
+    "name": "Sales Teams",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a Sales Team\n            </p><p>\n                Use Sales Teams to organize your sales departments and draw up reports.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "crm.team"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "crm.action_your_pipeline",
+    "package": "crm",
+    "name": "Crm: My Pipeline",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "crm.action_opportunity_forecast",
+    "package": "crm",
+    "name": "Crm: Forecast",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "crm.sales_team_menu_team_pipeline",
+    "package": "crm",
+    "name": "Teams",
+    "parent_id": "crm_menu_sales",
+    "action": "sales_team.crm_team_action_pipeline",
+    "sequence": "4",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "crm.crm_team_config",
+    "package": "crm",
+    "name": "Sales Teams",
+    "parent_id": "crm_menu_config",
+    "action": "sales_team.crm_team_action_config",
+    "sequence": "5",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.report_sales_team",
+    "package": "sale",
+    "name": "Sales Teams",
+    "parent_id": null,
+    "action": "sales_team.crm_team_action_sales",
+    "sequence": "30",
+    "groups_id": "sales_team.group_sale_manager",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.sales_team_config",
+    "package": "sale",
+    "name": "Sales Teams",
+    "parent_id": null,
+    "action": "sales_team.crm_team_action_config",
+    "sequence": "20",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "crm.ir_cron_crm_lead_assign",
+    "package": "crm",
+    "name": "CRM: Lead Assignment",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": "False",
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "crm.team",
+    "operation": "_cron_assign_leads",
+    "operation_call": "model._cron_assign_leads()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,301 @@
+{
+ "catalog": {
+  "name": "views:payment.method",
+  "description": "View declarations for entity payment.method.",
+  "record_count": 5,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "l10n_ec_sale.payment_method_form",
+   "package": "l10n_ec_sale",
+   "name": "l10n_ec_sale.payment.method.form",
+   "entity": "payment.method",
+   "view_type": "xpath",
+   "inherits_view": "payment.payment_method_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='supported_currency_ids']/..",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "fiscal_country_codes",
+      "invisible": "True"
+     },
+     {
+      "name": "l10n_ec_sri_payment_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='supported_currency_ids']/..",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='supported_currency_ids']/..\" position=\"after\">\n                <field name=\"fiscal_country_codes\" invisible=\"True\"/>\n                <label for=\"l10n_ec_sri_payment_id\" invisible=\"'EC' not in fiscal_country_codes\"/>\n                <div invisible=\"'EC' not in fiscal_country_codes\">\n                    <field name=\"l10n_ec_sri_payment_id\"/>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_method_form",
+   "package": "payment",
+   "name": "payment.method.form",
+   "entity": "payment.method",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Payment Method"
+    },
+    "fields": [
+     {
+      "name": "is_primary",
+      "invisible": "True"
+     },
+     {
+      "name": "image",
+      "widget": "image"
+     },
+     {
+      "name": "name",
+      "placeholder": "Name"
+     },
+     {
+      "name": "code",
+      "invisible": "id"
+     },
+     {
+      "name": "code",
+      "invisible": "not id",
+      "readonly": "id",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "primary_payment_method_id",
+      "invisible": "is_primary"
+     },
+     {
+      "name": "active"
+     },
+     {
+      "name": "supported_country_ids",
+      "widget": "many2many_tags",
+      "readonly": "1"
+     },
+     {
+      "name": "supported_currency_ids",
+      "widget": "many2many_tags",
+      "readonly": "1"
+     },
+     {
+      "name": "provider_ids",
+      "readonly": "1"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "brand_ids"
+     },
+     {
+      "name": "support_tokenization"
+     },
+     {
+      "name": "support_manual_capture"
+     },
+     {
+      "name": "support_express_checkout"
+     },
+     {
+      "name": "support_refund"
+     },
+     {
+      "name": "supported_country_ids",
+      "widget": "many2many_tags",
+      "placeholder": "Select countries. Leave empty to allow any."
+     },
+     {
+      "name": "supported_currency_ids",
+      "widget": "many2many_tags",
+      "placeholder": "Select currencies. Leave empty to allow any."
+     },
+     {
+      "name": "provider_ids",
+      "widget": "many2many_tags",
+      "string": "Supported by"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "providers",
+      "string": "Providers",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "brands",
+      "string": "Brands",
+      "invisible": "not is_primary",
+      "groups": null
+     },
+     {
+      "name": "configuration",
+      "string": "Configuration",
+      "invisible": null,
+      "groups": "base.group_no_one"
+     }
+    ],
+    "widgets": {
+     "image": 1,
+     "many2many_tags": 5
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Payment Method\">\n                <sheet>\n                    <field name=\"is_primary\" invisible=\"True\"/>\n                    <field name=\"image\" widget=\"image\" class=\"oe_avatar\"/>\n                    <div class=\"oe_title\">\n                        <h1><field name=\"name\" placeholder=\"Name\"/></h1>\n                    </div>\n                    <group>\n                        <field name=\"code\" invisible=\"id\"/>\n                        <field name=\"code\" invisible=\"not id\" readonly=\"id\" groups=\"base.group_no_one\"/>\n                        <field name=\"primary_payment_method_id\" invisible=\"is_primary\"/>\n                        <field name=\"active\"/>\n                        <label for=\"supported_country_ids\"/>\n                        <div>\n                            <field name=\"supported_country_ids\" class=\"oe_inline\" widget=\"many2many_tags\" readonly=\"1\"/>\n                            <span class=\"oe_inline text-muted\" invisible=\"supported_country_ids\">\n                                All countries are supported.\n                            </span>\n                        </div>\n                        <label for=\"supported_currency_ids\"/>\n                        <div>\n                            <field name=\"supported_currency_ids\" class=\"oe_inline\" widget=\"many2many_tags\" readonly=\"1\"/>\n                            <span class=\"oe_inline text-muted\" invisible=\"supported_currency_ids\">\n                                All currencies are supported.\n                            </span>\n                        </div>\n                    </group>\n                    <notebook>\n                        <page string=\"Providers\" name=\"providers\">\n                            <field name=\"provider_ids\" readonly=\"1\">\n                                <list decoration-muted=\"state == 'disabled'\" editable=\"bottom\">\n                                    <field name=\"name\"/>\n                                    <field name=\"state\"/>\n                                </list>\n                            </field>\n                        </page>\n                        <page string=\"Brands\" name=\"brands\" invisible=\"not is_primary\">\n                            <field name=\"brand_ids\"/>\n                        </page>\n                        <page string=\"Configuration\" name=\"configuration\" groups=\"base.group_no_one\">\n                            <div class=\"alert alert-warning\" role=\"alert\">\n                                <i class=\"fa fa-exclamation-triangle\"/> These properties are set to\n                                match the behavior of providers and that of their integration with\n                                the system regarding this payment method. Any change may result in errors\n                                and should be tested on a test database first.\n                            </div>\n                            <group>\n                                <field name=\"support_tokenization\"/>\n                                <field name=\"support_manual_capture\"/>\n                                <field name=\"support_express_checkout\"/>\n                                <field name=\"support_refund\"/>\n                                <field name=\"supported_country_ids\" widget=\"many2many_tags\" placeholder=\"Select countries. Leave empty to allow any.\"/>\n                                <field name=\"supported_currency_ids\" widget=\"many2many_tags\" placeholder=\"Select currencies. Leave empty to allow any.\"/>\n                                <field name=\"provider_ids\" string=\"Supported by\" widget=\"many2many_tags\"/>\n                            </group>\n                        </page>\n                    </notebook>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_method_tree",
+   "package": "payment",
+   "name": "payment.method.list",
+   "entity": "payment.method",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "multi_edit": "True",
+     "decoration-muted": "not active"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "active",
+      "widget": "boolean_toggle"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "boolean_toggle": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "not active"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list multi_edit=\"True\" decoration-muted=\"not active\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\"/>\n                <field name=\"active\" widget=\"boolean_toggle\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_method_kanban",
+   "package": "payment",
+   "name": "payment.method.kanban",
+   "entity": "payment.method",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "image",
+      "widget": "image"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban>\n                <templates>\n                    <t t-name=\"card\" class=\"flex-row\">\n                        <field name=\"name\" class=\"fw-bolder\"/>\n                        <field name=\"image\" widget=\"image\" class=\"ms-auto\"/>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "payment.payment_method_search",
+   "package": "payment",
+   "name": "payment.method.search",
+   "entity": "payment.method",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name",
+      "string": "Name"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "available_pms",
+      "string": "Available methods",
+      "domain": "[('provider_ids.state', '!=', 'disabled')]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search>\n                <field name=\"name\" string=\"Name\"/>\n                <filter name=\"available_pms\" string=\"Available methods\" domain=\"[('provider_ids.state', '!=', 'disabled')]\"/>\n            </search>\n        </field>\n    "
+  }
+ ]
+}

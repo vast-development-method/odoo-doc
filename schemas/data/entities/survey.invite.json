@@ -1,0 +1,974 @@
+{
+ "catalog": {
+  "name": "entity:survey.invite",
+  "description": "Complete definition of entity Survey Invitation Wizard (survey.invite).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "survey.invite",
+  "storage_name": "survey_invite",
+  "full_name": "Survey Invitation Wizard",
+  "kind": "transient",
+  "description": "Survey Invitation Wizard",
+  "defined_by_package": "survey",
+  "extended_by_packages": [
+   "hr_recruitment_survey"
+  ],
+  "mixins": [
+   "mail.composer.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "relation": "survey_mail_compose_message_ir_attachments_rel",
+    "column1": "wizard_id",
+    "column2": "attachment_id",
+    "string": "Attachments",
+    "compute": "_compute_attachment_ids",
+    "store": true,
+    "readonly": false,
+    "bypass_search_access": true,
+    "defined_in_package": "survey",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "author_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Author",
+    "index": true,
+    "ondelete": "set null",
+    "default": {
+     "dynamic": "_get_default_author"
+    },
+    "defined_in_package": "survey",
+    "full_name": "Author",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "survey_invite_partner_ids",
+    "column1": "invite_id",
+    "column2": "partner_id",
+    "string": "Recipients",
+    "domain": "[             '|', (survey_users_can_signup, '=', 1),             '|', (not survey_users_login_required, '=', 1),                  ('user_ids', '!=', False),         ]",
+    "defined_in_package": "survey",
+    "full_name": "Recipients",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "existing_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_existing_partner_ids",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "survey",
+    "string": "Existing Partner",
+    "full_name": "Existing Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "emails",
+    "type": "Text",
+    "string": "Additional emails",
+    "defined_in_package": "survey",
+    "full_name": "Additional emails"
+   },
+   {
+    "name": "existing_emails",
+    "type": "Text",
+    "string": "Existing emails",
+    "compute": "_compute_existing_emails",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "survey",
+    "full_name": "Existing emails"
+   },
+   {
+    "name": "existing_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "new",
+      "New invite"
+     ],
+     [
+      "resend",
+      "Resend invite"
+     ]
+    ],
+    "string": "Handle existing",
+    "default": "resend",
+    "required": true,
+    "defined_in_package": "survey",
+    "full_name": "Handle existing"
+   },
+   {
+    "name": "existing_text",
+    "type": "Text",
+    "string": "Resend Comment",
+    "compute": "_compute_existing_text",
+    "defined_in_package": "survey",
+    "full_name": "Resend Comment"
+   },
+   {
+    "name": "mail_server_id",
+    "type": "Many2one",
+    "comodel": "ir.mail_server",
+    "string": "Outgoing mail server",
+    "defined_in_package": "survey",
+    "full_name": "Outgoing mail server",
+    "target_entity": "ir.mail_server"
+   },
+   {
+    "name": "survey_id",
+    "type": "Many2one",
+    "comodel": "survey.survey",
+    "string": "Survey",
+    "required": true,
+    "defined_in_package": "survey",
+    "full_name": "Survey",
+    "target_entity": "survey.survey"
+   },
+   {
+    "name": "survey_start_url",
+    "type": "Char",
+    "string": "Survey URL",
+    "compute": "_compute_survey_start_url",
+    "defined_in_package": "survey",
+    "full_name": "Survey uniform resource locator"
+   },
+   {
+    "name": "survey_access_mode",
+    "type": "Selection",
+    "related": "survey_id.access_mode",
+    "readonly": true,
+    "defined_in_package": "survey",
+    "string": "Survey Access Mode",
+    "full_name": "Survey Access Mode"
+   },
+   {
+    "name": "survey_users_login_required",
+    "type": "Boolean",
+    "related": "survey_id.users_login_required",
+    "readonly": true,
+    "defined_in_package": "survey",
+    "string": "Survey Users Login Required",
+    "full_name": "Survey Users Login Required"
+   },
+   {
+    "name": "survey_users_can_signup",
+    "type": "Boolean",
+    "related": "survey_id.users_can_signup",
+    "defined_in_package": "survey",
+    "string": "Survey Users Can Signup",
+    "full_name": "Survey Users Can Signup"
+   },
+   {
+    "name": "deadline",
+    "type": "Datetime",
+    "string": "Answer deadline",
+    "defined_in_package": "survey",
+    "full_name": "Answer deadline"
+   },
+   {
+    "name": "send_email",
+    "type": "Boolean",
+    "compute": "_compute_send_email",
+    "inverse": "_inverse_send_email",
+    "defined_in_package": "survey",
+    "string": "Send Email",
+    "full_name": "Send Email"
+   },
+   {
+    "name": "applicant_id",
+    "type": "Many2one",
+    "comodel": "hr.applicant",
+    "string": "Applicant",
+    "defined_in_package": "hr_recruitment_survey",
+    "full_name": "Applicant",
+    "target_entity": "hr.applicant"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_author",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_send_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "survey_access_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_send_email",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_existing_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_ids",
+         "survey_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_existing_emails",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "emails",
+         "survey_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_existing_text",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "existing_partner_ids",
+         "existing_emails"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_survey_start_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "survey_id.access_token"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "survey_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_emails",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "emails"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This survey does not allow external people to participate. You should create user accounts or update survey access mode accordingly.",
+        "line": 116
+       },
+       {
+        "kind": "UserError",
+        "message": "Some emails you just entered are incorrect: %s",
+        "line": 128
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_partner_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "partner_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The following recipients have no user account: %s. You should create user accounts for them or allow external signup in configuration.",
+        "line": 140
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_subject",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_attachment_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "'OnChange-like' behavior used for template selection: not intended to update records when\n    individual attachments get added",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_answers",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partners",
+     "emails"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_done_partners_emails",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "existing_answers"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_answers_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "answer"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "Create mail specific for recipient containing notably its access token ",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to post message, please configure the sender's email address.",
+        "line": 227
+       }
+      ]
+     },
+     {
+      "package": "hr_recruitment_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_invite",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": "Process the wizard content and proceed with sending the related\nemail(s), rendering any template patterns on the fly if needed ",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please enter at least one valid recipient.",
+        "line": 280
+       }
+      ]
+     },
+     {
+      "package": "hr_recruitment_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_onchange_emails",
+    "package": "survey",
+    "kind": "UserError",
+    "message": "This survey does not allow external people to participate. You should create user accounts or update survey access mode accordingly."
+   },
+   {
+    "operation": "_onchange_emails",
+    "package": "survey",
+    "kind": "UserError",
+    "message": "Some emails you just entered are incorrect: %s"
+   },
+   {
+    "operation": "_onchange_partner_ids",
+    "package": "survey",
+    "kind": "UserError",
+    "message": "The following recipients have no user account: %s. You should create user accounts for them or allow external signup in configuration."
+   },
+   {
+    "operation": "_send_mail",
+    "package": "survey",
+    "kind": "UserError",
+    "message": "Unable to post message, please configure the sender's email address."
+   },
+   {
+    "operation": "action_invite",
+    "package": "survey",
+    "kind": "UserError",
+    "message": "Please enter at least one valid recipient."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_recruitment_survey.access_survey_invite_recruitment_user",
+    "package": "hr_recruitment_survey",
+    "name": "survey.invite.recruitment.user",
+    "entity": "survey.invite",
+    "group": "hr_recruitment.group_hr_recruitment_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.access_survey_invite_recruitment_interviewer",
+    "package": "hr_recruitment_survey",
+    "name": "survey.invite.recruitment.interviewer",
+    "entity": "survey.invite",
+    "group": "hr_recruitment.group_hr_recruitment_interviewer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "survey.access_survey_invite",
+    "package": "survey",
+    "name": "access.survey.invite",
+    "entity": "survey.invite",
+    "group": "survey.group_survey_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_recruitment_survey.survey_invite_recruitment_manager",
+    "package": "hr_recruitment_survey",
+    "name": "Survey invite: recruitment manager: all recruitment",
+    "entity": "survey.invite",
+    "domain": "[('survey_id.survey_type', '=', 'recruitment')]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.survey_invite_recruitment_user",
+    "package": "hr_recruitment_survey",
+    "name": "Survey invite: recruitment officer: unrestricted or in restricted users",
+    "entity": "survey.invite",
+    "domain": "[\n                '&', ('survey_id.survey_type', '=', 'recruitment'),\n                '|',  ('survey_id.restrict_user_ids', 'in', user.id),\n                        ('survey_id.restrict_user_ids', '=', False)]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_user'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.survey_invite_recruitment_interviewer",
+    "package": "hr_recruitment_survey",
+    "name": "Survey invite: recruitment interviewer: send surveys to applicants for which they are set as interviewer",
+    "entity": "survey.invite",
+    "domain": "[('survey_id.survey_type', '=', 'recruitment'),\n                '|', ('survey_id.hr_job_ids.interviewer_ids', 'in', user.id),\n                     ('survey_id.hr_job_ids.application_ids.interviewer_ids', 'in', user.id)\n                ]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_interviewer'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "survey.survey_invite_survey_user",
+    "package": "survey",
+    "name": "Survey invite: officer: unrestricted or in restricted users",
+    "entity": "survey.invite",
+    "domain": "['|',  ('survey_id.restrict_user_ids', 'in', user.id),\n                ('survey_id.restrict_user_ids', '=', False)]",
+    "groups": "[(4, ref('group_survey_user'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "survey.survey_invite_survey_manager",
+    "package": "survey",
+    "name": "Survey invite: manager: all",
+    "entity": "survey.invite",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_survey_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "0"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "survey.survey_invite_view_form",
+    "package": "survey",
+    "name": "survey.invite.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Compose Email",
+      "class": "o_mail_composer_form"
+     },
+     "fields": [
+      {
+       "name": "author_id",
+       "invisible": "1"
+      },
+      {
+       "name": "survey_access_mode",
+       "invisible": "1"
+      },
+      {
+       "name": "survey_users_login_required",
+       "invisible": "1"
+      },
+      {
+       "name": "survey_users_can_signup",
+       "invisible": "1"
+      },
+      {
+       "name": "survey_id",
+       "invisible": "1"
+      },
+      {
+       "name": "existing_mode",
+       "widget": "radio",
+       "invisible": "1"
+      },
+      {
+       "name": "lang",
+       "invisible": "1"
+      },
+      {
+       "name": "render_model",
+       "invisible": "1"
+      },
+      {
+       "name": "survey_start_url",
+       "widget": "CopyClipboardChar",
+       "invisible": "survey_access_mode != 'public'",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "send_email",
+       "widget": "boolean_toggle",
+       "invisible": "survey_access_mode != 'public'",
+       "string": "Send by Email",
+       "options": "{'autosave': False}"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags_email",
+       "invisible": "not send_email",
+       "required": "True",
+       "context": "{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}",
+       "options": "{'no_quick_create': True}",
+       "placeholder": "Add existing contacts..."
+      },
+      {
+       "name": "emails",
+       "invisible": "survey_users_login_required or not send_email",
+       "placeholder": "e.g.  'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
+      },
+      {
+       "name": "existing_partner_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "existing_emails",
+       "invisible": "1"
+      },
+      {
+       "name": "existing_text"
+      },
+      {
+       "name": "existing_mode",
+       "nolabel": "1"
+      },
+      {
+       "name": "subject",
+       "invisible": "not send_email",
+       "placeholder": "Subject..."
+      },
+      {
+       "name": "can_edit_body",
+       "invisible": "1"
+      },
+      {
+       "name": "body",
+       "widget": "html_mail",
+       "invisible": "not send_email",
+       "readonly": "not can_edit_body",
+       "options": "{'height': 380}",
+       "force_save": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "many2many_binary"
+      },
+      {
+       "name": "deadline"
+      },
+      {
+       "name": "template_id"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_invite",
+       "string": "Send",
+       "type": "object",
+       "invisible": "not send_email",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Close",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1,
+      "CopyClipboardChar": 1,
+      "boolean_toggle": 1,
+      "many2many_tags_email": 1,
+      "html_mail": 1,
+      "many2many_binary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

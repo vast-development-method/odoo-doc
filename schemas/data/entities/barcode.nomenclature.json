@@ -1,0 +1,731 @@
+{
+ "catalog": {
+  "name": "entity:barcode.nomenclature",
+  "description": "Complete definition of entity Barcode Nomenclature (barcode.nomenclature).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "barcode.nomenclature",
+  "storage_name": "barcode_nomenclature",
+  "full_name": "Barcode Nomenclature",
+  "kind": "persistent",
+  "description": "Barcode Nomenclature",
+  "defined_by_package": "barcodes",
+  "extended_by_packages": [
+   "barcodes_gs1_nomenclature"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Barcode Nomenclature",
+    "required": true,
+    "help": "An internal identification of the barcode nomenclature",
+    "defined_in_package": "barcodes",
+    "full_name": "Barcode Nomenclature"
+   },
+   {
+    "name": "rule_ids",
+    "type": "One2many",
+    "comodel": "barcode.rule",
+    "inverse_name": "barcode_nomenclature_id",
+    "string": "Rules",
+    "help": "The list of barcode rules",
+    "defined_in_package": "barcodes",
+    "full_name": "Rules",
+    "target_entity": "barcode.rule"
+   },
+   {
+    "name": "upc_ean_conv",
+    "type": "Selection",
+    "selection": {
+     "expression": "UPC_EAN_CONVERSIONS"
+    },
+    "string": "UPC/EAN Conversion",
+    "required": true,
+    "default": "always",
+    "help": "UPC Codes can be converted to EAN by prefixing them with a zero. This setting determines if a UPC/EAN barcode should be automatically converted in one way or another when trying to match a rule with the other encoding.",
+    "defined_in_package": "barcodes",
+    "full_name": "Universal Product Code/European Article Number Conversion"
+   },
+   {
+    "name": "is_gs1_nomenclature",
+    "type": "Boolean",
+    "string": "Is GS1 Nomenclature",
+    "help": "This Nomenclature use the GS1 specification, only GS1-128 encoding rules is accepted is this kind of nomenclature.",
+    "defined_in_package": "barcodes_gs1_nomenclature",
+    "full_name": "Is Global Standards One Nomenclature"
+   },
+   {
+    "name": "gs1_separator_fnc1",
+    "type": "Char",
+    "string": "FNC1 Separator",
+    "trim": false,
+    "default": "(Alt029|#|\\x1D)",
+    "help": "Alternative regex delimiter for the FNC1. The separator must not match the begin/end of any related rules pattern.",
+    "defined_in_package": "barcodes_gs1_nomenclature",
+    "full_name": "FNC1 Separator"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "sanitize_ean",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "ean"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a valid zero padded EAN-13 from an EAN prefix.\n\n:type ean: str",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "sanitize_upc",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "upc"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a valid zero padded UPC-A from a UPC-A prefix.\n\n:type upc: str",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "match_pattern",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "barcode",
+     "pattern"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [],
+      "documentation": "Checks barcode matches the pattern and retrieves the optional numeric value in barcode.\n\n:param barcode:\n:type barcode: str\n:param pattern:\n:type pattern: str\n:return: an object containing:\n    - value: the numerical value encoded in the barcode (0 if no value encoded)\n    - base_code: the barcode in which numerical content is replaced by 0's\n    - match: boolean\n:rtype: dict",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "parse_barcode",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "barcode"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "parse_nomenclature_barcode",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "barcode"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [],
+      "documentation": "Attempts to interpret and parse a barcode.\n\n:param barcode:\n:type barcode: str\n:return: A object containing various information about the barcode, like as:\n\n    - code: the barcode\n    - type: the barcode's type\n    - value: if the id encodes a numerical value, it will be put there\n    - base_code: the barcode code with all the encoding parts set to\n      zero; the one put on the product in the backend\n\n:rtype: dict",
+      "size_in_lines": 52,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "barcodes_gs1_nomenclature",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "parse_uri",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "barcode"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Convert supported URI format (lgtin, sgtin, sgtin-96, sgtin-198,\nsscc and ssacc-96) into a GS1 barcode.\n:param barcode str: the URI as a string.\n:rtype: str",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_uri_gtin_data_into_tracking_number",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "base_code",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_uri_sscc_data_into_package",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "base_code",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_default",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete '%(name)s' because it's the default barcode nomenclature.",
+        "line": 212
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_pattern",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes_gs1_nomenclature",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "gs1_separator_fnc1"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The FNC1 Separator Alternative is not a valid Regex: %(error)s",
+        "line": 30
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "gs1_date_to_date",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "gs1_date"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes_gs1_nomenclature",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Converts a GS1 date into a datetime.date.\n\n:param gs1_date: A year formated as yymmdd\n:type gs1_date: str\n:return: converted date\n:rtype: datetime.date",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A GS1 barcode nomenclature pattern was matched. However, the barcode failed to be converted to a valid date: '%(error_message)s'",
+        "line": 58
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "parse_gs1_rule_pattern",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "match",
+     "rule"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes_gs1_nomenclature",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "There is something wrong with the barcode rule \"%s\" pattern.\nIf this rule uses decimal, check it can't get sometime else than a digit as last char for the Application Identifier.\nCheck also the possible matched values can only be digits, otherwise the value can't be casted as a measure.",
+        "line": 81
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "gs1_decompose_extended",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "barcode"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes_gs1_nomenclature",
+      "decorators": [],
+      "documentation": "Try to decompose the gs1 extended barcode into several unit of information using gs1 rules.\n\nReturn a ordered list of dict",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_preprocess_gs1_search_args",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "barcode_types",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "barcodes_gs1_nomenclature",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper method to preprocess 'domain' in _search method to add support to\nsearch with GS1 barcode result.\nCut off the padding if using GS1 and searching on barcode. If the barcode\nis only digits to keep the original barcode part only.",
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_except_default",
+    "package": "barcodes",
+    "kind": "UserError",
+    "message": "You cannot delete '%(name)s' because it's the default barcode nomenclature."
+   },
+   {
+    "operation": "_check_pattern",
+    "package": "barcodes_gs1_nomenclature",
+    "kind": "ValidationError",
+    "message": "The FNC1 Separator Alternative is not a valid Regex: %(error)s"
+   },
+   {
+    "operation": "gs1_date_to_date",
+    "package": "barcodes_gs1_nomenclature",
+    "kind": "ValidationError",
+    "message": "A GS1 barcode nomenclature pattern was matched. However, the barcode failed to be converted to a valid date: '%(error_message)s'"
+   },
+   {
+    "operation": "parse_gs1_rule_pattern",
+    "package": "barcodes_gs1_nomenclature",
+    "kind": "ValidationError",
+    "message": "There is something wrong with the barcode rule \"%s\" pattern.\nIf this rule uses decimal, check it can't get sometime else than a digit as last char for the Application Identifier.\nCheck also the possible matched values can only be digits, otherwise the value can't be casted as a measure."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "barcodes.access_barcode_nomenclature_user",
+    "package": "barcodes",
+    "name": "barcode.nomenclature.user",
+    "entity": "barcode.nomenclature",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "barcodes.access_barcode_nomenclature_manager",
+    "package": "barcodes",
+    "name": "barcode.nomenclature.manager",
+    "entity": "barcode.nomenclature",
+    "group": "base.group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mrp_subcontracting.access_subcontracting_portal_barcode_nomenclature_stock_user",
+    "package": "mrp_subcontracting",
+    "name": "subcontracting.portal.barcode.nomenclature",
+    "entity": "barcode.nomenclature",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "point_of_sale.access_barcode_nomenclature_pos_user",
+    "package": "point_of_sale",
+    "name": "barcode.nomenclature.pos.user",
+    "entity": "barcode.nomenclature",
+    "group": "group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "point_of_sale.access_barcode_nomenclature_pos_manager",
+    "package": "point_of_sale",
+    "name": "barcode.nomenclature.pos.manager",
+    "entity": "barcode.nomenclature",
+    "group": "group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "stock.access_barcode_nomenclature_stock_user",
+    "package": "stock",
+    "name": "barcode.nomenclature.stock.user",
+    "entity": "barcode.nomenclature",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_barcode_nomenclature_stock_manager",
+    "package": "stock",
+    "name": "barcode.nomenclature.stock.manager",
+    "entity": "barcode.nomenclature",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "barcodes.view_barcode_nomenclature_form",
+    "package": "barcodes",
+    "name": "Barcode Nomenclatures",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Barcode Nomenclature"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "upc_ean_conv"
+      },
+      {
+       "name": "rule_ids"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "type"
+      },
+      {
+       "name": "encoding"
+      },
+      {
+       "name": "pattern"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "barcodes.view_barcode_nomenclature_tree",
+    "package": "barcodes",
+    "name": "Barcode Nomenclatures",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Barcode Nomenclatures"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "barcodes_gs1_nomenclature.view_barcode_gs1_nomenclature_form",
+    "package": "barcodes_gs1_nomenclature",
+    "name": "Barcode Nomenclatures",
+    "view_type": "xpath",
+    "inherits_view": "barcodes.view_barcode_nomenclature_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='upc_ean_conv']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='upc_ean_conv']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "barcodes_gs1_nomenclature.view_barcode_gs1_nomenclature_tree",
+    "package": "barcodes_gs1_nomenclature",
+    "name": "Barcode Nomenclatures",
+    "view_type": "xpath",
+    "inherits_view": "barcodes.view_barcode_nomenclature_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "is_gs1_nomenclature"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "barcodes.action_barcode_nomenclature_form",
+    "package": "barcodes",
+    "name": "Barcode Nomenclatures",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Add a new barcode nomenclature\n              </p><p>\n                A barcode nomenclature defines how the point of sale identify and interprets barcodes\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "barcode.nomenclature"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "stock.menu_wms_barcode_nomenclature_all",
+    "package": "stock",
+    "name": null,
+    "parent_id": "menu_product_in_config_stock",
+    "action": "barcodes.action_barcode_nomenclature_form",
+    "sequence": "50",
+    "groups_id": "base.group_no_one",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

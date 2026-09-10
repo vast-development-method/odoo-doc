@@ -1,0 +1,7600 @@
+{
+ "catalog": {
+  "name": "entity:sale.order.line",
+  "description": "Complete definition of entity Sales Order Line (sale.order.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sale.order.line",
+  "storage_name": "sale_order_line",
+  "full_name": "Sales Order Line",
+  "kind": "persistent",
+  "description": "Sales Order Line",
+  "defined_by_package": "sale",
+  "extended_by_packages": [
+   "delivery",
+   "sale_stock",
+   "stock_delivery",
+   "sale_management",
+   "event_sale",
+   "event_booth_sale",
+   "website_sale",
+   "pos_sale",
+   "repair",
+   "sale_purchase",
+   "stock_dropshipping",
+   "pos_repair",
+   "pos_sale_loyalty",
+   "sale_margin",
+   "sale_mrp",
+   "sale_service",
+   "sale_project",
+   "sale_expense",
+   "sale_expense_margin",
+   "sale_gelato",
+   "sale_gelato_stock",
+   "sale_loyalty",
+   "sale_stock_margin",
+   "sale_pdf_quote_builder",
+   "sale_product_matrix",
+   "sale_project_stock",
+   "sale_purchase_project",
+   "sale_stock_product_expiry",
+   "sale_timesheet",
+   "sale_timesheet_margin",
+   "website_sale_slides",
+   "website_event_booth_sale",
+   "website_event_sale",
+   "website_sale_stock",
+   "website_sale_loyalty"
+  ],
+  "mixins": [
+   "analytic.mixin",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "order_id, sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "name",
+   "order_id.name"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "order_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "string": "Order Reference",
+    "required": true,
+    "ondelete": "cascade",
+    "index": true,
+    "copy": false,
+    "defined_in_package": "sale",
+    "full_name": "Order Reference",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 10,
+    "defined_in_package": "sale",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "order_id.company_id",
+    "store": true,
+    "index": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "order_id.currency_id",
+    "depends": [
+     "order_id.currency_id"
+    ],
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "order_partner_id",
+    "type": "Many2one",
+    "related": "order_id.partner_id",
+    "string": "Customer",
+    "store": true,
+    "index": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Customer"
+   },
+   {
+    "name": "salesman_id",
+    "type": "Many2one",
+    "related": "order_id.user_id",
+    "string": "Salesperson",
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Salesperson"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "related": "order_id.state",
+    "string": "Order Status",
+    "copy": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Order Status"
+   },
+   {
+    "name": "tax_country_id",
+    "type": "Many2one",
+    "related": "order_id.tax_country_id",
+    "defined_in_package": "sale",
+    "string": "Tax Country",
+    "full_name": "Tax Country"
+   },
+   {
+    "name": "display_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "line_section",
+      "Section"
+     ],
+     [
+      "line_subsection",
+      "Subsection"
+     ],
+     [
+      "line_note",
+      "Note"
+     ]
+    ],
+    "default": false,
+    "defined_in_package": "sale",
+    "string": "Display Type",
+    "full_name": "Display Type"
+   },
+   {
+    "name": "is_configurable_product",
+    "type": "Boolean",
+    "string": "Is the product configurable?",
+    "related": "product_template_id.has_configurable_attributes",
+    "depends": [
+     "product_template_id"
+    ],
+    "defined_in_package": "sale",
+    "full_name": "Is the product configurable?"
+   },
+   {
+    "name": "is_downpayment",
+    "type": "Boolean",
+    "string": "Is a down payment",
+    "help": "Down payments are made when creating invoices from a sales order. They are not copied when duplicating a sales order.",
+    "defined_in_package": "sale",
+    "full_name": "Is a down payment"
+   },
+   {
+    "name": "is_expense",
+    "type": "Boolean",
+    "string": "Is expense",
+    "help": "Is true if the sales order line comes from an expense or a vendor bills",
+    "defined_in_package": "sale",
+    "full_name": "Is expense"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "change_default": true,
+    "ondelete": "restrict",
+    "index": "btree_not_null",
+    "domain": {
+     "dynamic": "lambda self: self._domain_product_id()"
+    },
+    "check_company": true,
+    "defined_in_package": "sale",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_template_id",
+    "type": "Many2one",
+    "string": "Product Template",
+    "comodel": "product.template",
+    "compute": "_compute_product_template_id",
+    "readonly": false,
+    "search": "_search_product_template_id",
+    "domain": {
+     "dynamic": "lambda self: self._fields['product_id']._description_domain(self.env)"
+    },
+    "defined_in_package": "sale",
+    "full_name": "Product Template",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "product_template_attribute_value_ids",
+    "type": "Many2many",
+    "related": "product_id.product_template_attribute_value_ids",
+    "depends": [
+     "product_id"
+    ],
+    "defined_in_package": "sale",
+    "string": "Product Template Attribute Value",
+    "full_name": "Product Template Attribute Value"
+   },
+   {
+    "name": "product_custom_attribute_value_ids",
+    "type": "One2many",
+    "comodel": "product.attribute.custom.value",
+    "inverse_name": "sale_order_line_id",
+    "string": "Custom Values",
+    "compute": "_compute_custom_attribute_values",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "copy": true,
+    "defined_in_package": "sale",
+    "full_name": "Custom Values",
+    "target_entity": "product.attribute.custom.value"
+   },
+   {
+    "name": "product_no_variant_attribute_value_ids",
+    "type": "Many2many",
+    "comodel": "product.template.attribute.value",
+    "string": "Extra Values",
+    "compute": "_compute_no_variant_attribute_values",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "ondelete": "restrict",
+    "defined_in_package": "sale",
+    "full_name": "Extra Values",
+    "target_entity": "product.template.attribute.value"
+   },
+   {
+    "name": "is_product_archived",
+    "type": "Boolean",
+    "compute": "_compute_is_product_archived",
+    "defined_in_package": "sale",
+    "string": "Is Product Archived",
+    "full_name": "Is Product Archived"
+   },
+   {
+    "name": "name",
+    "type": "Text",
+    "string": "Description",
+    "compute": "_compute_name",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Description"
+   },
+   {
+    "name": "translated_product_name",
+    "type": "Text",
+    "compute": "_compute_translated_product_name",
+    "defined_in_package": "sale",
+    "string": "Translated Product Name",
+    "full_name": "Translated Product Name"
+   },
+   {
+    "name": "product_uom_qty",
+    "type": "Float",
+    "string": "Quantity",
+    "compute": "_compute_product_uom_qty",
+    "digits": "Product Unit",
+    "default": 1.0,
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "compute": "_compute_product_uom_id",
+    "domain": "[(\"id\", \"in\", allowed_uom_ids)]",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "ondelete": "restrict",
+    "defined_in_package": "sale",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "allowed_uom_ids",
+    "type": "Many2many",
+    "comodel": "uom.uom",
+    "compute": "_compute_allowed_uom_ids",
+    "defined_in_package": "sale",
+    "string": "Allowed Unit of measure",
+    "full_name": "Allowed Unit of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "linked_line_id",
+    "type": "Many2one",
+    "string": "Linked Order Line",
+    "comodel": "sale.order.line",
+    "ondelete": "cascade",
+    "domain": "[('order_id', '=', order_id)]",
+    "copy": false,
+    "index": true,
+    "defined_in_package": "sale",
+    "full_name": "Linked Order Line",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "linked_line_ids",
+    "type": "One2many",
+    "string": "Linked Order Lines",
+    "comodel": "sale.order.line",
+    "inverse_name": "linked_line_id",
+    "defined_in_package": "sale",
+    "full_name": "Linked Order Lines",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "categ_id",
+    "type": "Many2one",
+    "related": "product_id.categ_id",
+    "defined_in_package": "sale",
+    "string": "Categ",
+    "full_name": "Categ"
+   },
+   {
+    "name": "virtual_id",
+    "type": "Char",
+    "defined_in_package": "sale",
+    "string": "Virtual",
+    "full_name": "Virtual"
+   },
+   {
+    "name": "linked_virtual_id",
+    "type": "Char",
+    "defined_in_package": "sale",
+    "string": "Linked Virtual",
+    "full_name": "Linked Virtual"
+   },
+   {
+    "name": "selected_combo_items",
+    "type": "Char",
+    "store": false,
+    "defined_in_package": "sale",
+    "string": "Selected Combo Items",
+    "full_name": "Selected Combo Items"
+   },
+   {
+    "name": "combo_item_id",
+    "type": "Many2one",
+    "comodel": "product.combo.item",
+    "defined_in_package": "sale",
+    "string": "Combo Item",
+    "full_name": "Combo Item",
+    "target_entity": "product.combo.item"
+   },
+   {
+    "name": "tax_ids",
+    "type": "Many2many",
+    "comodel": "account.tax",
+    "string": "Taxes",
+    "compute": "_compute_tax_ids",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "context": {
+     "active_test": false,
+     "hide_original_tax_ids": true
+    },
+    "check_company": true,
+    "domain": "[('type_tax_use', '=', 'sale'), ('country_id', '=', tax_country_id)]",
+    "defined_in_package": "sale",
+    "full_name": "Taxes",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "pricelist_item_id",
+    "type": "Many2one",
+    "comodel": "product.pricelist.item",
+    "compute": "_compute_pricelist_item_id",
+    "defined_in_package": "sale",
+    "string": "Pricelist Item",
+    "full_name": "Pricelist Item",
+    "target_entity": "product.pricelist.item"
+   },
+   {
+    "name": "price_unit",
+    "type": "Float",
+    "string": "Unit Price",
+    "compute": "_compute_price_unit",
+    "min_display_digits": "Product Price",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Unit Price"
+   },
+   {
+    "name": "technical_price_unit",
+    "type": "Float",
+    "defined_in_package": "sale",
+    "string": "Technical Price Unit",
+    "full_name": "Technical Price Unit"
+   },
+   {
+    "name": "discount",
+    "type": "Float",
+    "string": "Discount (%)",
+    "compute": "_compute_discount",
+    "digits": "Discount",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Discount (%)"
+   },
+   {
+    "name": "price_subtotal",
+    "type": "Monetary",
+    "string": "Subtotal",
+    "compute": "_compute_amount",
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Subtotal"
+   },
+   {
+    "name": "price_tax",
+    "type": "Float",
+    "string": "Total Tax",
+    "compute": "_compute_amount",
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Total Tax"
+   },
+   {
+    "name": "price_total",
+    "type": "Monetary",
+    "string": "Total",
+    "compute": "_compute_amount",
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Total"
+   },
+   {
+    "name": "price_reduce_taxexcl",
+    "type": "Monetary",
+    "string": "Price Reduce Tax excl",
+    "compute": "_compute_price_reduce_taxexcl",
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Price Reduce Tax excl"
+   },
+   {
+    "name": "price_reduce_taxinc",
+    "type": "Monetary",
+    "string": "Price Reduce Tax incl",
+    "compute": "_compute_price_reduce_taxinc",
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "sale",
+    "full_name": "Price Reduce Tax incl"
+   },
+   {
+    "name": "customer_lead",
+    "type": "Float",
+    "string": "Lead Time",
+    "compute": "_compute_customer_lead",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "help": "Number of days between the order confirmation and the shipping of the products to the customer",
+    "defined_in_package": "sale",
+    "inverse": "_inverse_customer_lead",
+    "extended_in_packages": [
+     "sale_stock"
+    ],
+    "full_name": "Lead Time"
+   },
+   {
+    "name": "qty_delivered_method",
+    "type": "Selection",
+    "selection": [
+     [
+      "manual",
+      "Manual"
+     ],
+     [
+      "analytic",
+      "Analytic From Expenses"
+     ],
+     [
+      "stock_move",
+      "Stock Moves"
+     ],
+     [
+      "milestones",
+      "Milestones"
+     ],
+     [
+      "timesheet",
+      "Timesheets"
+     ]
+    ],
+    "string": "Method to update delivered qty",
+    "compute": "_compute_qty_delivered_method",
+    "store": true,
+    "precompute": true,
+    "help": "According to product configuration, the delivered quantity can be automatically computed by mechanism:\n  - Manual: the quantity is set manually on the line\n  - Analytic From expenses: the quantity is the quantity sum from posted expenses\n  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this sale line\n  - Stock Moves: the quantity comes from confirmed pickings\n",
+    "defined_in_package": "sale",
+    "selection_added_by": [
+     "sale_stock",
+     "sale_project",
+     "sale_timesheet"
+    ],
+    "extended_in_packages": [
+     "sale_stock",
+     "sale_project",
+     "sale_timesheet"
+    ],
+    "full_name": "Method to update delivered qty"
+   },
+   {
+    "name": "qty_delivered",
+    "type": "Float",
+    "string": "Delivery Quantity",
+    "compute": "_compute_qty_delivered",
+    "default": 0.0,
+    "digits": "Product Unit",
+    "store": true,
+    "readonly": false,
+    "copy": false,
+    "defined_in_package": "sale",
+    "full_name": "Delivery Quantity"
+   },
+   {
+    "name": "qty_invoiced",
+    "type": "Float",
+    "string": "Invoiced Quantity",
+    "compute": "_compute_qty_invoiced",
+    "digits": "Product Unit",
+    "store": true,
+    "defined_in_package": "sale",
+    "full_name": "Invoiced Quantity"
+   },
+   {
+    "name": "qty_invoiced_posted",
+    "type": "Float",
+    "string": "Invoiced Quantity (posted)",
+    "compute": "_compute_qty_invoiced_posted",
+    "digits": "Product Unit",
+    "defined_in_package": "sale",
+    "full_name": "Invoiced Quantity (posted)"
+   },
+   {
+    "name": "qty_to_invoice",
+    "type": "Float",
+    "string": "Quantity To Invoice",
+    "compute": "_compute_qty_to_invoice",
+    "digits": "Product Unit",
+    "store": true,
+    "defined_in_package": "sale",
+    "full_name": "Quantity To Invoice"
+   },
+   {
+    "name": "analytic_line_ids",
+    "type": "One2many",
+    "comodel": "account.analytic.line",
+    "inverse_name": "so_line",
+    "string": "Analytic lines",
+    "defined_in_package": "sale",
+    "domain": [
+     [
+      "project_id",
+      "=",
+      false
+     ]
+    ],
+    "extended_in_packages": [
+     "sale_timesheet"
+    ],
+    "full_name": "Analytic lines",
+    "target_entity": "account.analytic.line"
+   },
+   {
+    "name": "invoice_lines",
+    "type": "Many2many",
+    "comodel": "account.move.line",
+    "relation": "sale_order_line_invoice_rel",
+    "column1": "order_line_id",
+    "column2": "invoice_line_id",
+    "string": "Invoice Lines",
+    "copy": false,
+    "defined_in_package": "sale",
+    "full_name": "Invoice Lines",
+    "target_entity": "account.move.line"
+   },
+   {
+    "name": "invoice_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "upselling",
+      "Upselling Opportunity"
+     ],
+     [
+      "invoiced",
+      "Fully Invoiced"
+     ],
+     [
+      "to invoice",
+      "To Invoice"
+     ],
+     [
+      "no",
+      "Nothing to Invoice"
+     ]
+    ],
+    "string": "Invoice Status",
+    "compute": "_compute_invoice_status",
+    "store": true,
+    "defined_in_package": "sale",
+    "full_name": "Invoice Status"
+   },
+   {
+    "name": "untaxed_amount_invoiced",
+    "type": "Monetary",
+    "string": "Untaxed Invoiced Amount",
+    "compute": "_compute_untaxed_amount_invoiced",
+    "store": true,
+    "defined_in_package": "sale",
+    "full_name": "Untaxed Invoiced Amount"
+   },
+   {
+    "name": "amount_invoiced",
+    "type": "Monetary",
+    "string": "Invoiced Amount",
+    "compute": "_compute_amount_invoiced",
+    "compute_sudo": true,
+    "defined_in_package": "sale",
+    "full_name": "Invoiced Amount"
+   },
+   {
+    "name": "untaxed_amount_to_invoice",
+    "type": "Monetary",
+    "string": "Untaxed Amount To Invoice",
+    "compute": "_compute_untaxed_amount_to_invoice",
+    "store": true,
+    "defined_in_package": "sale",
+    "full_name": "Untaxed Amount To Invoice"
+   },
+   {
+    "name": "amount_to_invoice",
+    "type": "Monetary",
+    "string": "Un-invoiced Balance",
+    "compute": "_compute_amount_to_invoice",
+    "compute_sudo": true,
+    "defined_in_package": "sale",
+    "full_name": "Un-invoiced Balance"
+   },
+   {
+    "name": "amount_to_invoice_at_date",
+    "type": "Float",
+    "string": "Amount",
+    "compute": "_compute_amount_to_invoice_at_date",
+    "defined_in_package": "sale",
+    "full_name": "Amount"
+   },
+   {
+    "name": "qty_delivered_at_date",
+    "type": "Float",
+    "string": "Delivered",
+    "compute": "_compute_qty_delivered_at_date",
+    "digits": "Product Unit",
+    "defined_in_package": "sale",
+    "full_name": "Delivered"
+   },
+   {
+    "name": "qty_invoiced_at_date",
+    "type": "Float",
+    "string": "Invoiced",
+    "compute": "_compute_qty_invoiced_at_date",
+    "digits": "Product Unit",
+    "defined_in_package": "sale",
+    "full_name": "Invoiced"
+   },
+   {
+    "name": "extra_tax_data",
+    "type": "Json",
+    "defined_in_package": "sale",
+    "string": "Extra Tax Data",
+    "full_name": "Extra Tax Data"
+   },
+   {
+    "name": "product_type",
+    "type": "Selection",
+    "related": "product_id.type",
+    "depends": [
+     "product_id"
+    ],
+    "defined_in_package": "sale",
+    "string": "Product Type",
+    "full_name": "Product Type"
+   },
+   {
+    "name": "service_tracking",
+    "type": "Selection",
+    "related": "product_id.service_tracking",
+    "depends": [
+     "product_id"
+    ],
+    "defined_in_package": "sale",
+    "string": "Service Tracking",
+    "full_name": "Service Tracking"
+   },
+   {
+    "name": "product_updatable",
+    "type": "Boolean",
+    "string": "Can Edit Product",
+    "compute": "_compute_product_updatable",
+    "defined_in_package": "sale",
+    "full_name": "Can Edit Product"
+   },
+   {
+    "name": "product_uom_readonly",
+    "type": "Boolean",
+    "compute": "_compute_product_uom_readonly",
+    "defined_in_package": "sale",
+    "string": "Product Unit of measure Readonly",
+    "full_name": "Product Unit of measure Readonly"
+   },
+   {
+    "name": "tax_calculation_rounding_method",
+    "type": "Selection",
+    "related": "company_id.tax_calculation_rounding_method",
+    "string": "Tax calculation rounding method",
+    "readonly": true,
+    "defined_in_package": "sale",
+    "full_name": "Tax calculation rounding method"
+   },
+   {
+    "name": "company_price_include",
+    "type": "Selection",
+    "related": "company_id.account_price_include",
+    "defined_in_package": "sale",
+    "string": "Company Price Include",
+    "full_name": "Company Price Include"
+   },
+   {
+    "name": "sale_line_warn_msg",
+    "type": "Text",
+    "compute": "_compute_sale_line_warn_msg",
+    "defined_in_package": "sale",
+    "string": "Sale Line Warn Msg",
+    "full_name": "Sale Line Warn Msg"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "string": "Parent Section Line",
+    "comodel": "sale.order.line",
+    "compute": "_compute_parent_id",
+    "defined_in_package": "sale",
+    "full_name": "Parent Section Line",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "collapse_prices",
+    "type": "Boolean",
+    "string": "Collapse Prices",
+    "copy": true,
+    "default": false,
+    "defined_in_package": "sale",
+    "full_name": "Collapse Prices"
+   },
+   {
+    "name": "collapse_composition",
+    "type": "Boolean",
+    "string": "Collapse Composition",
+    "copy": true,
+    "default": false,
+    "defined_in_package": "sale",
+    "full_name": "Collapse Composition"
+   },
+   {
+    "name": "is_delivery",
+    "type": "Boolean",
+    "string": "Is a Delivery",
+    "default": false,
+    "defined_in_package": "delivery",
+    "full_name": "Is a Delivery"
+   },
+   {
+    "name": "product_qty",
+    "type": "Float",
+    "string": "Product Qty",
+    "compute": "_compute_product_qty",
+    "digits": "Product Unit",
+    "defined_in_package": "delivery",
+    "full_name": "Product Qty"
+   },
+   {
+    "name": "recompute_delivery_price",
+    "type": "Boolean",
+    "related": "order_id.recompute_delivery_price",
+    "defined_in_package": "delivery",
+    "string": "Recompute Delivery Price",
+    "full_name": "Recompute Delivery Price"
+   },
+   {
+    "name": "route_ids",
+    "type": "Many2many",
+    "comodel": "stock.route",
+    "string": "Routes",
+    "domain": [
+     [
+      "sale_selectable",
+      "=",
+      true
+     ]
+    ],
+    "ondelete": "restrict",
+    "defined_in_package": "sale_stock",
+    "full_name": "Routes",
+    "target_entity": "stock.route"
+   },
+   {
+    "name": "move_ids",
+    "type": "One2many",
+    "comodel": "stock.move",
+    "inverse_name": "sale_line_id",
+    "string": "Stock Moves",
+    "defined_in_package": "sale_stock",
+    "full_name": "Stock Moves",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "virtual_available_at_date",
+    "type": "Float",
+    "compute": "_compute_qty_at_date",
+    "digits": "Product Unit",
+    "defined_in_package": "sale_stock",
+    "string": "Virtual Available At Date",
+    "full_name": "Virtual Available At Date"
+   },
+   {
+    "name": "scheduled_date",
+    "type": "Datetime",
+    "compute": "_compute_qty_at_date",
+    "defined_in_package": "sale_stock",
+    "string": "Scheduled Date",
+    "full_name": "Scheduled Date"
+   },
+   {
+    "name": "forecast_expected_date",
+    "type": "Datetime",
+    "compute": "_compute_qty_at_date",
+    "defined_in_package": "sale_stock",
+    "string": "Forecast Expected Date",
+    "full_name": "Forecast Expected Date"
+   },
+   {
+    "name": "free_qty_today",
+    "type": "Float",
+    "compute": "_compute_qty_at_date",
+    "digits": "Product Unit",
+    "defined_in_package": "sale_stock",
+    "string": "Free Qty Today",
+    "full_name": "Free Qty Today"
+   },
+   {
+    "name": "qty_available_today",
+    "type": "Float",
+    "compute": "_compute_qty_at_date",
+    "defined_in_package": "sale_stock",
+    "string": "Qty Available Today",
+    "full_name": "Qty Available Today"
+   },
+   {
+    "name": "warehouse_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse",
+    "compute": "_compute_warehouse_id",
+    "store": true,
+    "defined_in_package": "sale_stock",
+    "string": "Warehouse",
+    "full_name": "Warehouse",
+    "target_entity": "stock.warehouse"
+   },
+   {
+    "name": "qty_to_deliver",
+    "type": "Float",
+    "compute": "_compute_qty_to_deliver",
+    "digits": "Product Unit",
+    "defined_in_package": "sale_stock",
+    "string": "Qty To Deliver",
+    "full_name": "Qty To Deliver"
+   },
+   {
+    "name": "is_mto",
+    "type": "Boolean",
+    "compute": "_compute_is_mto",
+    "defined_in_package": "sale_stock",
+    "string": "Is Make to order",
+    "full_name": "Is Make to order"
+   },
+   {
+    "name": "display_qty_widget",
+    "type": "Boolean",
+    "compute": "_compute_qty_to_deliver",
+    "defined_in_package": "sale_stock",
+    "string": "Display Qty Widget",
+    "full_name": "Display Qty Widget"
+   },
+   {
+    "name": "is_storable",
+    "type": "Boolean",
+    "related": "product_id.is_storable",
+    "defined_in_package": "sale_stock",
+    "string": "Is Storable",
+    "full_name": "Is Storable"
+   },
+   {
+    "name": "is_optional",
+    "type": "Boolean",
+    "string": "Optional Line",
+    "copy": true,
+    "default": false,
+    "defined_in_package": "sale_management",
+    "full_name": "Optional Line"
+   },
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "compute": "_compute_event_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "index": "btree_not_null",
+    "help": "Choose an event and it will automatically create a registration for this event.",
+    "defined_in_package": "event_sale",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "event_slot_id",
+    "type": "Many2one",
+    "comodel": "event.slot",
+    "string": "Slot",
+    "compute": "_compute_event_related",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "help": "Choose an event slot and it will automatically create a registration for this event slot.",
+    "defined_in_package": "event_sale",
+    "full_name": "Slot",
+    "target_entity": "event.slot"
+   },
+   {
+    "name": "event_ticket_id",
+    "type": "Many2one",
+    "comodel": "event.event.ticket",
+    "string": "Ticket Type",
+    "compute": "_compute_event_related",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "help": "Choose an event ticket and it will automatically create a registration for this event ticket.",
+    "defined_in_package": "event_sale",
+    "full_name": "Ticket Type",
+    "target_entity": "event.event.ticket"
+   },
+   {
+    "name": "is_multi_slots",
+    "type": "Boolean",
+    "related": "event_id.is_multi_slots",
+    "defined_in_package": "event_sale",
+    "string": "Is Multi Slots",
+    "full_name": "Is Multi Slots"
+   },
+   {
+    "name": "registration_ids",
+    "type": "One2many",
+    "comodel": "event.registration",
+    "inverse_name": "sale_order_line_id",
+    "string": "Registrations",
+    "defined_in_package": "event_sale",
+    "full_name": "Registrations",
+    "target_entity": "event.registration"
+   },
+   {
+    "name": "event_booth_category_id",
+    "type": "Many2one",
+    "comodel": "event.booth.category",
+    "string": "Booths Category",
+    "ondelete": "set null",
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Booths Category",
+    "target_entity": "event.booth.category"
+   },
+   {
+    "name": "event_booth_pending_ids",
+    "type": "Many2many",
+    "comodel": "event.booth",
+    "string": "Pending Booths",
+    "search": "_search_event_booth_pending_ids",
+    "compute": "_compute_event_booth_pending_ids",
+    "inverse": "_inverse_event_booth_pending_ids",
+    "help": "Used to create registration when providing the desired event booth.",
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Pending Booths",
+    "target_entity": "event.booth"
+   },
+   {
+    "name": "event_booth_registration_ids",
+    "type": "One2many",
+    "comodel": "event.booth.registration",
+    "inverse_name": "sale_order_line_id",
+    "string": "Confirmed Registration",
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Confirmed Registration",
+    "target_entity": "event.booth.registration"
+   },
+   {
+    "name": "event_booth_ids",
+    "type": "One2many",
+    "comodel": "event.booth",
+    "inverse_name": "sale_order_line_id",
+    "string": "Confirmed Booths",
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Confirmed Booths",
+    "target_entity": "event.booth"
+   },
+   {
+    "name": "name_short",
+    "type": "Char",
+    "compute": "_compute_name_short",
+    "defined_in_package": "website_sale",
+    "string": "Name Short",
+    "full_name": "Name Short"
+   },
+   {
+    "name": "shop_warning",
+    "type": "Char",
+    "string": "Warning",
+    "defined_in_package": "website_sale",
+    "full_name": "Warning"
+   },
+   {
+    "name": "pos_order_line_ids",
+    "type": "One2many",
+    "comodel": "pos.order.line",
+    "inverse_name": "sale_order_line_id",
+    "string": "Order lines Transfered to Point of Sale",
+    "readonly": true,
+    "groups": "point_of_sale.group_pos_user",
+    "defined_in_package": "pos_sale",
+    "full_name": "Order lines Transfered to Point of Sale",
+    "target_entity": "pos.order.line"
+   },
+   {
+    "name": "purchase_line_ids",
+    "type": "One2many",
+    "comodel": "purchase.order.line",
+    "inverse_name": "sale_line_id",
+    "string": "Generated Purchase Lines",
+    "readonly": true,
+    "help": "Purchase line generated by this Sales item on order confirmation, or when the quantity was increased.",
+    "defined_in_package": "sale_purchase",
+    "full_name": "Generated Purchase Lines",
+    "target_entity": "purchase.order.line"
+   },
+   {
+    "name": "purchase_line_count",
+    "type": "Integer",
+    "string": "Number of generated purchase items",
+    "compute": "_compute_purchase_count",
+    "defined_in_package": "sale_purchase",
+    "full_name": "Number of generated purchase items"
+   },
+   {
+    "name": "is_repair_line",
+    "type": "Boolean",
+    "string": "Is linked to repair",
+    "compute": "_compute_is_repair_line",
+    "defined_in_package": "pos_repair",
+    "full_name": "Is linked to repair"
+   },
+   {
+    "name": "margin",
+    "type": "Float",
+    "string": "Margin",
+    "compute": "_compute_margin",
+    "min_display_digits": "Product Price",
+    "store": true,
+    "groups": "base.group_user",
+    "precompute": true,
+    "defined_in_package": "sale_margin",
+    "full_name": "Margin"
+   },
+   {
+    "name": "margin_percent",
+    "type": "Float",
+    "string": "Margin (%)",
+    "compute": "_compute_margin",
+    "store": true,
+    "groups": "base.group_user",
+    "precompute": true,
+    "defined_in_package": "sale_margin",
+    "full_name": "Margin (%)"
+   },
+   {
+    "name": "purchase_price",
+    "type": "Float",
+    "string": "Cost",
+    "compute": "_compute_purchase_price",
+    "min_display_digits": "Product Price",
+    "store": true,
+    "readonly": false,
+    "copy": false,
+    "precompute": true,
+    "groups": "base.group_user",
+    "defined_in_package": "sale_margin",
+    "full_name": "Cost"
+   },
+   {
+    "name": "is_service",
+    "type": "Boolean",
+    "string": "Is a Service",
+    "compute": "_compute_is_service",
+    "store": true,
+    "compute_sudo": true,
+    "export_string_translation": false,
+    "defined_in_package": "sale_service",
+    "full_name": "Is a Service"
+   },
+   {
+    "name": "project_id",
+    "type": "Many2one",
+    "comodel": "project.project",
+    "string": "Generated Project",
+    "index": true,
+    "copy": false,
+    "export_string_translation": false,
+    "defined_in_package": "sale_project",
+    "full_name": "Generated Project",
+    "target_entity": "project.project"
+   },
+   {
+    "name": "task_id",
+    "type": "Many2one",
+    "comodel": "project.task",
+    "string": "Generated Task",
+    "index": true,
+    "copy": false,
+    "export_string_translation": false,
+    "defined_in_package": "sale_project",
+    "full_name": "Generated Task",
+    "target_entity": "project.task"
+   },
+   {
+    "name": "reached_milestones_ids",
+    "type": "One2many",
+    "comodel": "project.milestone",
+    "inverse_name": "sale_line_id",
+    "string": "Reached Milestones",
+    "domain": [
+     [
+      "is_reached",
+      "=",
+      true
+     ]
+    ],
+    "export_string_translation": false,
+    "defined_in_package": "sale_project",
+    "full_name": "Reached Milestones",
+    "target_entity": "project.milestone"
+   },
+   {
+    "name": "expense_ids",
+    "type": "One2many",
+    "comodel": "hr.expense",
+    "inverse_name": "sale_order_line_id",
+    "string": "Expenses",
+    "readonly": true,
+    "defined_in_package": "sale_expense",
+    "full_name": "Expenses",
+    "target_entity": "hr.expense"
+   },
+   {
+    "name": "expense_id",
+    "type": "Many2one",
+    "comodel": "hr.expense",
+    "string": "Expense",
+    "defined_in_package": "sale_expense_margin",
+    "full_name": "Expense",
+    "target_entity": "hr.expense"
+   },
+   {
+    "name": "is_reward_line",
+    "type": "Boolean",
+    "string": "Is a program reward line",
+    "compute": "_compute_is_reward_line",
+    "defined_in_package": "sale_loyalty",
+    "full_name": "Is a program reward line"
+   },
+   {
+    "name": "reward_id",
+    "type": "Many2one",
+    "comodel": "loyalty.reward",
+    "ondelete": "restrict",
+    "readonly": true,
+    "defined_in_package": "sale_loyalty",
+    "string": "Reward",
+    "full_name": "Reward",
+    "target_entity": "loyalty.reward"
+   },
+   {
+    "name": "coupon_id",
+    "type": "Many2one",
+    "comodel": "loyalty.card",
+    "ondelete": "restrict",
+    "readonly": true,
+    "defined_in_package": "sale_loyalty",
+    "string": "Coupon",
+    "full_name": "Coupon",
+    "target_entity": "loyalty.card"
+   },
+   {
+    "name": "reward_identifier_code",
+    "type": "Char",
+    "help": "Technical field used to link multiple reward lines from the same reward together.",
+    "defined_in_package": "sale_loyalty",
+    "string": "Reward Identifier Code",
+    "full_name": "Reward Identifier Code"
+   },
+   {
+    "name": "points_cost",
+    "type": "Float",
+    "help": "How much point this reward costs on the loyalty card.",
+    "defined_in_package": "sale_loyalty",
+    "string": "Points Cost",
+    "full_name": "Points Cost"
+   },
+   {
+    "name": "available_product_document_ids",
+    "type": "Many2many",
+    "string": "Available Product Documents",
+    "comodel": "product.document",
+    "relation": "available_sale_order_line_product_document_rel",
+    "compute": "_compute_available_product_document_ids",
+    "compute_sudo": true,
+    "defined_in_package": "sale_pdf_quote_builder",
+    "full_name": "Available Product Documents",
+    "target_entity": "product.document"
+   },
+   {
+    "name": "product_document_ids",
+    "type": "Many2many",
+    "string": "Product Documents",
+    "help": "The product documents for this order line that will be merged in the PDF quote.",
+    "comodel": "product.document",
+    "relation": "sale_order_line_product_document_rel",
+    "domain": "[('id', 'in', available_product_document_ids)]",
+    "readonly": false,
+    "defined_in_package": "sale_pdf_quote_builder",
+    "full_name": "Product Documents",
+    "target_entity": "product.document"
+   },
+   {
+    "name": "product_add_mode",
+    "type": "Selection",
+    "related": "product_template_id.product_add_mode",
+    "depends": [
+     "product_template_id"
+    ],
+    "defined_in_package": "sale_product_matrix",
+    "string": "Product Add Mode",
+    "full_name": "Product Add Mode"
+   },
+   {
+    "name": "use_expiration_date",
+    "type": "Boolean",
+    "related": "product_id.use_expiration_date",
+    "defined_in_package": "sale_stock_product_expiry",
+    "string": "Use Expiration Date",
+    "full_name": "Use Expiration Date"
+   },
+   {
+    "name": "remaining_hours_available",
+    "type": "Boolean",
+    "compute": "_compute_remaining_hours_available",
+    "compute_sudo": true,
+    "defined_in_package": "sale_timesheet",
+    "string": "Remaining Hours Available",
+    "full_name": "Remaining Hours Available"
+   },
+   {
+    "name": "remaining_hours",
+    "type": "Float",
+    "string": "Time Remaining on SO",
+    "compute": "_compute_remaining_hours",
+    "compute_sudo": true,
+    "store": true,
+    "defined_in_package": "sale_timesheet",
+    "full_name": "Time Remaining on sales order"
+   },
+   {
+    "name": "has_displayed_warning_upsell",
+    "type": "Boolean",
+    "string": "Has Displayed Warning Upsell",
+    "copy": false,
+    "export_string_translation": false,
+    "defined_in_package": "sale_timesheet",
+    "full_name": "Has Displayed Warning Upsell"
+   },
+   {
+    "name": "timesheet_ids",
+    "type": "One2many",
+    "comodel": "account.analytic.line",
+    "inverse_name": "so_line",
+    "domain": [
+     [
+      "project_id",
+      "!=",
+      false
+     ]
+    ],
+    "string": "Timesheets",
+    "export_string_translation": false,
+    "defined_in_package": "sale_timesheet",
+    "full_name": "Timesheets",
+    "target_entity": "account.analytic.line"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_accountable_required_fields",
+    "kind": "Constraint",
+    "definition": "CHECK(display_type IS NOT NULL OR is_downpayment OR (product_id IS NOT NULL AND product_uom_id IS NOT NULL))",
+    "message": "Missing required fields on accountable sale order line.",
+    "defined_in_package": "sale"
+   },
+   {
+    "name": "_non_accountable_null_fields",
+    "kind": "Constraint",
+    "definition": "CHECK(display_type IS NULL OR (product_id IS NULL AND price_unit = 0 AND product_uom_qty = 0 AND product_uom_id IS NULL AND customer_lead = 0))",
+    "message": "Forbidden values on non-accountable sale order line",
+    "defined_in_package": "sale"
+   },
+   {
+    "name": "_name_search_services_index",
+    "kind": "Index",
+    "definition": "(order_id DESC, sequence, id) WHERE is_service IS TRUE",
+    "message": null,
+    "defined_in_package": "sale_service"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_partner_id",
+         "order_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "remaining_hours_available",
+         "remaining_hours"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "with_remaining_hours",
+         "company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_product_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_template_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_product_template_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_product_archived",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_custom_attribute_values",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_no_variant_attribute_values",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "linked_line_id",
+         "linked_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_management",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_slot_id",
+         "event_ticket_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Override to add the compute dependency.\n\nThe custom name logic can be found below in _get_sale_order_line_multiline_description_sale.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_booth_pending_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Override to add the compute dependency.\n\nThe custom name logic can be found below in _get_sale_order_line_multiline_description_sale.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "pos_order_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sale_order_line_multiline_description_sale",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Compute a default multiline description for this sales order line.\n\nIn most cases the product description is enough but sometimes we need to append information that only\nexists on the sale order line itself.\ne.g:\n- custom attributes and attributes that don't create variants, both introduced by the \"product configurator\"\n- in event_sale we need to know specifically the sales order line as well as the product to generate the name:\n  the product is not sufficient because we also need to know the event_id and the event_ticket_id (both which belong to the sale order line).",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": "We override this method because we decided that:\nThe default description of a sales order line containing a ticket must be different than the default description when no ticket is present.\nSo in that case we use the description computed from the ticket, instead of the description computed from the product.\nWe need this override to be defined here in sales order line (and not in product) because here is the only place where the event_ticket_id is referenced.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sale_order_line_multiline_description_variants",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "When using no_variant attributes or is_custom values, the product\nitself is not sufficient to create the description: we need to add\ninformation about those special attributes and values.\n\n:return: the description related to special variant attributes/values\n:rtype: string",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_downpayment_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_translated_product_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_uom_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "display_type",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_line_warn_msg",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.sale_line_warn_msg"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_uom_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.uom_id",
+         "product_id.uom_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_custom_compute_tax_cache_key",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Hook method to be able to set/get cached taxes while computing them",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_pricelist_item_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_uom_id",
+         "product_uom_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_unit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_uom_id",
+         "product_uom_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_ticket_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reset_price_unit",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_order_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_display_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Compute the displayed unit price for a given line.\n\nOverridden in custom flows:\n* where the price is not specified by the pricelist\n* where the discount is not specified by the pricelist\n\nNote: self.ensure_one()",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_display_price_ignore_combo",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "This helper method allows to compute the display price of a SOL, while ignoring combo\nlogic.\n\nI.e. this method returns the display price of a SOL as if it were neither a combo line nor a\ncombo item line.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pricelist_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Compute the price given by the pricelist for the given line information.\n\n:return: the product sales price in the order currency (without taxes)\n:rtype: float",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pricelist_kwargs",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_price_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Gives the context for product price computation.\n\n:return: additional context to consider extra prices from attributes in the base product price.\n:rtype: dict",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pricelist_price_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "DO NOT USE in new code, this contextual logic should be dropped or heavily refactored soon",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pricelist_price_before_discount",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Compute the price used as base for the pricelist price computation.\n:return: the product sales price in the order currency (without taxes)\n:rtype: float",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_combo_item_display_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Compute the display price of this SOL's combo item.\n\nA combo item's price is a fraction of its combo product's price (i.e. the product of type\n`combo` which is referenced in this SOL's linked line). It is independent of the combo\nitem's product (i.e. the product referenced in this SOL). The combo's `base_price` will be\nused to prorate the price of this combo with respect to the other combos in the combo\nproduct.\n\nNote: this method will throw if this SOL has no combo item or no linked combo product.",
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_discount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_uom_id",
+         "product_uom_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_base_line_for_taxes_computation",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Convert the current record to a dictionary in order to use the generic taxes computation method\ndefined on account.tax.\n\n:return: A python dictionary.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_global_discount",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_uom_qty",
+         "discount",
+         "price_unit",
+         "tax_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_reduce_taxexcl",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "price_subtotal",
+         "product_uom_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_reduce_taxinc",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "price_total",
+         "product_uom_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_customer_lead",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_delivered_method",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_expense"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Sale module compute delivered qty for product [('type', 'in', ['consu']), ('service_type', '=', 'manual')]\n    - consu + expense_policy : analytic (sum of analytic unit_amount)\n    - consu + no expense_policy : manual (set manually on SOL)\n    - service (+ service_type='manual', the only available option) : manual\n\nThis is true when only sale is installed: sale_stock redifine the behavior for 'consu' type,\nand sale_timesheet implements the behavior of 'service' + service_type=timesheet.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Stock module compute delivered qty for product [('type', '=', 'consu')]\nFor SO line coming from expense, no picking should be generate: we don't manage stock for\nthose lines, even if the product is a storable.",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Sale Timesheet module compute delivered qty for product [('type', 'in', ['service']), ('service_type', '=', 'timesheet')] ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_delivered",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "qty_delivered_method",
+         "analytic_line_ids.so_line",
+         "analytic_line_ids.unit_amount",
+         "analytic_line_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "This method compute the delivered quantity of the SO lines: it covers the case provide by sale module, aka\nexpense/vendor bills (sum of unit_amount of AAL), and manual case.\nThis method should be overridden to provide other way to automatically compute delivered qty. Overrides should\ntake their concerned so lines, compute and set the `qty_delivered` field, and call super with the remaining\nrecords.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids.state",
+         "move_ids.location_dest_usage",
+         "move_ids.quantity",
+         "move_ids.product_uom"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pos_order_line_ids.qty",
+         "pos_order_line_ids.order_id.picking_ids",
+         "pos_order_line_ids.order_id.picking_ids.state",
+         "pos_order_line_ids.refund_orderline_ids.order_id.picking_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_uom_qty",
+         "reached_milestones_ids.quantity_percentage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "analytic_line_ids.project_id",
+         "project_id.pricing_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_delivered_at_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "qty_delivered"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "accrual_entry_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_qty_delivered",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_downpayment_state",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_delivered_quantity_by_analytic",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "additional_domain"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Compute and return the delivered quantity of current SO lines,\nbased on their related analytic lines.\n:param additional_domain: domain to restrict AAL to include in computation (required since timesheet is an AAL with a project ...)",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_invoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "invoice_lines.move_id.state",
+         "invoice_lines.quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the quantity invoiced. If case of a refund, the quantity invoiced is decreased. Note\nthat this is the case only if the refund is generated from the SO and that is intentional: if\na refund made would automatically decrease the invoiced quantity, then there is a risk of reinvoicing\nit automatically, which may not be wanted at all. That's why the refund has to be created from the SO",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pos_order_line_ids.qty",
+         "pos_order_line_ids.order_id.state",
+         "pos_order_line_ids.refund_orderline_ids.order_id.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_invoiced_at_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "qty_invoiced"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "accrual_entry_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_qty_invoiced",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_invoiced_posted",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "invoice_lines.move_id.state",
+         "invoice_lines.quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "This method is almost identical to '_compute_qty_invoiced()'. The only difference lies in the fact that\nfor accounting purposes, we only want the quantities of the posted invoices.\nWe need a dedicated computation because the triggers are different and could lead to incorrect values for\n'qty_invoiced' when computed together.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invoice_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_to_invoice",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "qty_invoiced",
+         "qty_delivered",
+         "product_uom_qty",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the quantity to invoice. If the invoice policy is order, the quantity to invoice is\ncalculated from the ordered quantity. Otherwise, the quantity delivered is used.\nFor combo product lines, compute the value if a linked combo item line gets recomputed,\nand set `qty_to_invoice` only if at least one of its combo item lines is invoiceable.",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoice_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "product_uom_qty",
+         "qty_delivered",
+         "qty_to_invoice",
+         "qty_invoiced"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the invoice status of a SO line. Possible statuses:\n- no: if the SO is not in status 'sale', we consider that there is nothing to\n  invoice. This is also the default value if the conditions of no other status is met.\n- to invoice: we refer to the quantity to invoice of the line. Refer to method\n  `_compute_qty_to_invoice()` for more information on how this quantity is calculated.\n- upselling: this is possible only for a product invoiced on ordered quantities for which\n  we delivered more than expected. The could arise if, for example, a project took more\n  time than expected but we decided not to invoice the extra cost to the client. This\n  occurs only in state 'sale', the upselling opportunity is removed from the list.\n- invoiced: the quantity invoiced is larger or equal to the quantity ordered.",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_be_invoiced_alone",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Whether a given line is meaningful to invoice alone.\n\nIt is generally meaningless/confusing or even wrong to invoice some specific SOlines\n(delivery, discounts, rewards, ...) without others, unless they are the only left to invoice\nin the SO.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_discount_line",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_untaxed_amount_invoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "invoice_lines",
+         "invoice_lines.price_total",
+         "invoice_lines.move_id.state",
+         "invoice_lines.move_id.move_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the untaxed amount already invoiced from the sale order line, taking the refund attached\nthe so line into account. This amount is computed as\n    SUM(inv_line.price_subtotal) - SUM(ref_line.price_subtotal)\nwhere\n    `inv_line` is a customer invoice line linked to the SO line\n    `ref_line` is a customer credit note (refund) line linked to the SO line",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pos_order_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount_invoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "invoice_lines",
+         "invoice_lines.price_total",
+         "invoice_lines.move_id.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_untaxed_amount_to_invoice",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "product_id",
+         "untaxed_amount_invoiced",
+         "qty_delivered",
+         "product_uom_qty",
+         "price_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Total of remaining amount to invoice on the sale order line (taxes excl.) as\n    total_sol - amount already invoiced\nwhere Total_sol depends on the invoice policy of the product.\n\nNote: Draft invoice are ignored on purpose, the 'to invoice' amount should\ncome only from the SO lines.",
+      "size_in_lines": 46,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount_to_invoice",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "discount",
+         "price_total",
+         "product_uom_qty",
+         "qty_delivered",
+         "qty_invoiced_posted"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_gross_price_unit",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Mirroring method in purchase ",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount_to_invoice_at_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "price_unit",
+         "discount",
+         "qty_invoiced_at_date",
+         "qty_delivered_at_date"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "accrual_entry_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_analytic_distribution",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_id.partner_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_id.partner_id",
+         "product_id",
+         "order_id.project_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_updatable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "state",
+         "qty_invoiced",
+         "qty_delivered"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "purchase_line_count"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_uom_readonly",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_parent_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_combo_item_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "combo_item_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "`combo_item_id` should never be set manually. This constraint mainly serves to avoid\nprogramming errors.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A sale order line's combo item must be among its linked line's available combo items.",
+        "line": 1305
+       },
+       {
+        "kind": "ValidationError",
+        "message": "A sale order line's product must match its combo item's product.",
+        "line": 1310
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_purchase",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_gelato",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_precomputed_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 55,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot modify the product of this order line.",
+        "line": 1387
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot change the type of a sale order line. Instead you should delete the current line and create a new line of the proper type.",
+        "line": 1377
+       },
+       {
+        "kind": "UserError",
+        "message": "It is forbidden to modify the following fields in a locked order:\n%s",
+        "line": 1416
+       }
+      ]
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_gelato",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_protected_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Give the fields that should not be modified on a locked SO.\n\n:returns: list of field names\n:rtype: list",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_line_quantity",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The ordered quantity of a sale order line cannot be decreased below the amount already delivered. Instead, create a return in your inventory.",
+        "line": 430
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_line_unlink",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Check whether given lines can be deleted or not.\n\n* Lines cannot be deleted if the order is confirmed.\n* Down payment lines who have not yet been invoiced bypass that exception.\n* Sections and Notes can always be deleted.\n\n:returns: Sales Order Lines that cannot be deleted\n:rtype: `sale.order.line` recordset",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": "Extend the allowed deletion policy of SO lines.\n\nLines that are delivery lines can be deleted from a confirmed order.\n\n:rtype: recordset sale.order.line\n:returns: set of lines that cannot be deleted",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_confirmed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Once a sales order is confirmed, you can't remove one of its lines (we need to track if something gets invoiced or delivered).\n                Set the quantity to 0 instead.",
+        "line": 1475
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_add_from_catalog",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_expected_date",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "compute_uom_qty",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "new_qty",
+     "stock_move",
+     "rounding"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invoice_line_sequence",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "new",
+     "old"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Method intended to be overridden in third-party module if we want to prevent the resequencing\nof invoice lines.\n\n:param int new:   the new line sequence\n:param int old:   the old line sequence\n\n:return:          the sequence of the SO line, by default the new one.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_invoice_lines_vals_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "**optional_values"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_invoice_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "**optional_values"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Prepare the values to create the new invoice line for a sales order line.\n\n:param optional_values: any parameter that should be added to the returned invoice line\n:rtype: dict",
+      "size_in_lines": 46,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": "If the sale order line isn't linked to a sale order which already have a default analytic account,\nthis method allows to retrieve the analytic account which is linked to project or task directly linked\nto this sale order line, or the analytic account of the project which uses this sale order line, if it exists.",
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_analytic_distribution",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "inv_line_vals",
+     "**optional_values"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_procurement_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Prepare specific key for moves or other components that will be created from a stock rule\ncoming from a sale order line. This method could be override in order to add other custom key that could\nbe used in move/po creation.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": "Prepare specific key for moves or other components that will be created from a stock rule\ncoming from a sale order line. This method could be override in order to add other custom key that could\nbe used in move/po creation.",
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_analytic_distribution",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_downpayment_line_price_unit",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "invoices"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_grouped_section_summary",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "display_taxes"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Return a tax-wise summary of sales order lines linked to section.\n\nGroup lines by their tax IDs and computes subtotal and total for each group.",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_parent_section_line",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_section_totals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "totals_field"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Return the total/subtotal amount sale order lines linked to section.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_combo_totals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "totals_field"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Return the total/subtotal amount sale order lines linked to combo.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_taxes",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Check if a line has taxes or not. For (sub)sections, check if any child line has taxes.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_section_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_line_in_section",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "line"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Return whether the line is a direct or indirect child of the section.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_display",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_additional_name_per_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_service",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_delivery",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_lines_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Return information about sale order lines in `self`.\n\nIf `self` is empty, this method returns only the default value(s) needed for the product\ncatalog. In this case, the quantity that equals 0.\n\nOtherwise, it returns a quantity and a price based on the product of the SOL(s) and whether\nthe product is read-only or not.\n\nA product is considered read-only if the order is considered read-only (see\n``SaleOrder._is_readonly`` for more details) or if `self` contains multiple records.\n\nNote: This method cannot be called with multiple records that have different products linked.\n\n:raise the system.exceptions.ValueError: ``len(self.product_id) != 1``\n:rtype: dict\n:return: A dict with the following structure:\n    {\n        'quantity': float,\n        'price': float,\n        'readOnly': bool,\n        'uomDisplayName': String,\n    }",
+      "size_in_lines": 62,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": "Override of `sale` to add the delivered quantity.\n\n:rtype: dict\n:return: A dict with the following structure:\n    {\n        'deliveredQty': float,\n        'quantity': float,\n        'price': float,\n        'readOnly': bool,\n    }",
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_to_sol_currency",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "currency"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Convert the given amount from the given currency to the SO(L) currency.\n\n:param float amount: the amount to convert\n:param currency: currency in which the given amount is expressed\n:type currency: `res.currency` record\n:returns: converted amount\n:rtype: float",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_date_in_the_past",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_discounted_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "has_valued_move_ids",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_linked_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Return the linked line of this line, if any.\n\nThis method relies on either `linked_line_id` or `linked_virtual_id` to retrieve the linked\nline, depending on whether the linked line is saved in the DB.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_linked_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Return the linked lines of this line, if any.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_linked_lines_by_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "Batched version of `_get_linked_lines`.\n\nReturn in a single pass a mapping ``{line: linked_lines}`` for each line in `self`.\n\nThis method relies on either `linked_line_id` or `linked_virtual_id` to retrieve the linked\nlines, depending on whether this line is saved in the DB.\n\nNote: we can't rely on `linked_line_ids` as it will only be populated when both this line\nand its linked lines are saved in the DB, which we can't ensure.",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sellable_lines_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lines_with_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": "A combo product line always has a zero price (by design). The actual price of the combo\nproduct can be computed by summing the prices of its combo items (i.e. its linked lines).",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_be_edited_on_portal",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_management",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_uom_id",
+         "product_uom_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invalid_delivery_weight_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": "Retrieve lines containing physical products with no weight defined.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_warehouse_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_ids",
+         "order_id.warehouse_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_to_deliver",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_storable",
+         "product_uom_qty",
+         "qty_delivered",
+         "state",
+         "move_ids",
+         "product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the visibility of the inventory widget.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_uom_qty",
+         "qty_delivered",
+         "product_id",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "The inventory widget should now be visible in more cases if the product is consumable.",
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_qties",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date",
+     "wh"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock_product_expiry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_at_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "customer_lead",
+         "product_uom_qty",
+         "product_uom_id",
+         "order_id.commitment_date",
+         "move_ids",
+         "move_ids.forecast_expected_date",
+         "move_ids.forecast_availability",
+         "warehouse_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the quantity forecasted of product at delivery date. There are\ntwo cases:\n 1. The quotation has a commitment_date, we take it as delivery date\n 2. The quotation hasn't commitment_date, we compute the estimated delivery\n    date based on lead time",
+      "size_in_lines": 77,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_mto",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "route_ids",
+         "warehouse_id",
+         "product_id.route_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Verify the route of the product based on the warehouse\nset 'is_available' at True if the product availability in stock does\nnot need to be verified, which is the case in MTO, Drop-Shipping",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_customer_lead",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_location_final",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_qty_procurement",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "previous_product_uom_qty"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_outgoing_incoming_moves",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "strict"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": "Return the outgoing and incoming moves of the sale order line.\n@param strict: If True, only consider the moves that are strictly delivered to the customer (old behavior).\n               If False, consider the moves that were created through the initial rule of the delivery route,\n               to support the new push mechanism.",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_reference_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_procurements",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_qty",
+     "procurement_uom",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_launch_stock_rule",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "previous_product_uom_qty"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": "Launch procurement run method with required/custom fields generated by a\nsale order line. procurement will launch '_run_pull', '_run_buy' or '_run_manufacture'\ndepending on the sale order line product rule.",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_gelato_stock",
+      "decorators": [],
+      "documentation": "Override of sale_stock to prevent creating pickings for Gelato products. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_action_add_from_catalog_extra_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_use_template_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [],
+      "documentation": "Allows overriding to avoid using the template lines descriptions for the sale order lines descriptions.\nThis is typically useful for 'configured' products, such as event_ticket or event_booth, where we need to have\nspecific configuration information inside description instead of the default values.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": "We do not want configured description to get rewritten by template default",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": "We do not want configured description to get rewritten by template default",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_line_optional",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_management",
+      "decorators": [],
+      "documentation": "Returns whether the line is optional or not.\n\nA line is optional if it is directly under an optional (sub)section, or under a subsection\nwhich is itself under an optional section.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_event_registration_ticket",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "event_id",
+         "event_slot_id",
+         "event_ticket_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The sale order line with the product %(product_name)s needs an event, a ticket and a slot in case the event has multiple time slots.",
+        "line": 33
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_init_registrations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": "Create registrations linked to a sales order line. A sale\norder line has a product_uom_qty attribute that will be the number of\nregistrations linked to this line. ",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_related",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_booth_pending_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_booth_registration_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_event_booth_pending_ids",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": "This method will take care of creating the event.booth.registrations based on selected booths.\nIt will also unlink ones that are de-selected. ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_event_booth_pending_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_event_booth_registration_ids",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "event_booth_registration_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Registrations from the same Order Line must belong to a single event.",
+        "line": 53
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id_booth",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "We reset the event when the selected product doesn't belong to any pending booths.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_event_id_booth",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "We reset the pending booths when the event changes to avoid inconsistent state.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_event_booths",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "set_paid"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The following booths are unavailable, please remove them to continue : %(booth_names)s",
+        "line": 80
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_name_short",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.display_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute a short name for this sale order line, to be used on the website where we don't have much space.\nTo keep it short, instead of using the first line of the description, we take the product name without the internal reference.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_booth_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.display_name",
+         "event_ticket_id.display_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Override of `website_sale` to replace the product name with the ticket name. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_description_following_lines",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_combination_name",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_line_header",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_shop_warning",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "clear"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_displayed_unit_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_selected_combo_items",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_displayed_quantity",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_show_in_cart",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_reorder_allowed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_cart_display_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_validity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The given product does not have a price therefore it cannot be added to cart.",
+        "line": 109
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_should_show_strikethrough_price",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Compute whether the strikethrough price should be shown.\n\nThe strikethrough price should be shown if there is a discount on a sellable line for\nwhich a price unit is non-zero.\n\n:return: Whether the strikethrough price should be shown.\n:rtype: bool",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_sale",
+      "decorators": [],
+      "documentation": "Override of `website_sale` to hide the strikethrough price for events. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_loyalty",
+      "decorators": [],
+      "documentation": "Override of `website_sale` to hide the strikethrough price for rewards. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_sellable",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Check if a line is sellable or not, i.e the link is clickable in the cart or not.\n\nA line is sellable if the product is published and not a delivery line.\n\n:return: Whether the line is sellable or not.\n:rtype: bool",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_loyalty",
+      "decorators": [],
+      "documentation": "Override of `website_sale` to flag reward lines as not sellable.\n\n:return: Whether the line is sellable or not.\n:rtype: bool",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_repair",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sale_order_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "read_converted",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_qty",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sale_line",
+     "qty",
+     "direction"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Converts the given QTY based on the given SALE_LINE and DIR.\n\nif DIR='s2p': convert from sale line uom to product uom\nif DIR='p2s': convert from product uom to sale line uom",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_repair_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cancel_repair_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_purchase_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "purchase_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_service_product_uom_qty",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_uom_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_decrease_ordered_qty",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "new_qty",
+     "origin_values"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "Decrease the quantity from SO line will add a next acitivities on the related purchase order\n:param new_qty: new quantity (lower than the current one on SO line), expressed\n    in UoM of SO line.\n:param origin_values: map from sale line id to old value for the ordered quantity (dict)",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_increase_ordered_qty",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "new_qty",
+     "origin_values"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "Increase the quantity on the related purchase lines\n:param new_qty: new quantity (higher than the current one on SO line), expressed\n    in UoM of SO line.\n:param origin_values: map from sale line id to old value for the ordered quantity (dict)",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_get_date_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "supplierinfo"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "return the ordered date for the purchase order, computed as : SO commitment date - supplier delay ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_get_company",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_prepare_order_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "supplierinfo"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "Returns the values to create the purchase order from the current SO line.\n:param supplierinfo: record of product.supplierinfo\n:rtype: dict",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_purchase_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_get_price_unit_and_taxes",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "supplierinfo",
+     "purchase_order"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_get_product_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "supplierinfo",
+     "purchase_order",
+     "quantity"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_prepare_line_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "purchase_order",
+     "quantity"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "Returns the values to create the purchase order line from the current SO line.\n:param purchase_order: record of purchase.order\n:rtype: dict\n:param quantity: the quantity to force on the PO line, expressed in SO line UoM",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_purchase_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_match_supplier",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "warning"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There is no vendor associated to the product %s. Please define a vendor for this product.",
+        "line": 226
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_additional_domain_for_purchase_order_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_match_purchase_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partner",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_purchase_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "supplierinfo"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_match_or_create_purchase_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "supplierinfo"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_retrieve_purchase_partner",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "In case we want to explicitely name a partner from whom we want to buy or receive products\n        ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_create",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "quantity"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "On Sales Order confirmation, some lines (services ones) can create a purchase order line and maybe a purchase order.\nIf a line should create a RFQ, it will check for existing PO. If no one is find, the SO line will create one, then adds\na new PO line. The created purchase order line will be linked to the SO line.\n:param quantity: the quantity to force on the PO line, expressed in SO line UoM",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_purchase_service_generation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "Create a Purchase for the first time from the sale line. If the SO line already created a PO, it\nwill not create a second one.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_repair_line",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids.repair_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_purchase_price",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_margin",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "company_id",
+         "currency_id",
+         "product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_expense_margin",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_expense"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock_margin",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids",
+         "move_ids.value",
+         "move_ids.picking_id.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet_margin",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "analytic_line_ids.amount",
+         "qty_delivered_method"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_margin",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_margin",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "price_subtotal",
+         "product_uom_qty",
+         "purchase_price"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_bom_component_qty",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "bom"
+    ],
+    "definitions": [
+     {
+      "package": "sale_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_incoming_outgoing_moves_filter",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Method to be override: will get incoming moves and outgoing moves.\n\n:return: Dictionary with incoming moves and outgoing moves\n:rtype: dict",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_sale_line_service",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "sale_service",
+      "decorators": [],
+      "documentation": "Get the default generic services domain for sale.order.line.\nYou can filter out domain leafs by passing kwargs of the form 'check_<leaf_field>=False'.\nOnly 'is_service' cannot be disabled.\n\n:param kwargs: boolean kwargs of the form 'check_<leaf_field>=False'\n:return: a valid domain",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_service",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_service",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_auto_init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_service",
+      "decorators": [],
+      "documentation": "Create column to stop ORM from computing it himself (too slow)",
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "name_search",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "name",
+     "domain",
+     "operator",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "sale_service",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_from_sol_name_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_name"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_qty_company_hours",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "dest_company"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_create_project_prepare_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": "Generate project values",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": "Generate project values",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_create_project",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": "Generate project for the given so line, and link it.\n:param project: record of project.project in which the task should be created\n:return: record of the created project",
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_create_project_account_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "project"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_create_task_prepare_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "project"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_service_policy",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_task_template_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "template",
+     "project"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sale_order_partner_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "project"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_create_task",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "project"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": "Generate task for the given so line, and link it.\n:param project: record of project.project in which the task should be created\n:return task: record of the created task",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_so_lines_task_global_project",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_so_lines_new_project",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_service_generation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": "For service lines, create the task or the project. If already exists, it simply links\nthe existing one to the line.\nNote: If the SO was confirmed, cancelled, set to draft then confirmed, avoid creating a\nnew project/task. This explains the searches on 'sale_line_id' on project/task. This also\nimplied if so line of generated task has been modified, we may regenerate it.",
+      "size_in_lines": 101,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "A project must be defined on the quotation %(order)s or on the form of products creating a task on order.\nThe following product need a project in which to put its task: %(product_name)s",
+        "line": 431
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_handle_milestones",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "project"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_action_per_item",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [],
+      "documentation": "Get action per Sales Order Item\n\n:returns: Dict containing id of SOL as key and the action as value",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_project_stock",
+      "decorators": [],
+      "documentation": "Get action per Sales Order Item to display the stock moves linked\n\n:returns: Dict containing id of SOL as key and the action as value",
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": "Get action per Sales Order Item\n\nWhen the Sales Order Item contains a service product then the action will be View Timesheets.\n\n:returns: Dict containing id of SOL as key and the action as value",
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_reward_line",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reward_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reset_loyalty",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "complete"
+    ],
+    "definitions": [
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": "Reset the line(s) to a state which does not impact reward computation.\nIf complete is set to True we also remove the coupon and reward from the line(s).\n    This option should be used when the line will be unlinked.\n\nReturns self",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id",
+         "product_template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_product_document_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_remaining_hours_available",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.service_policy",
+         "product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_remaining_hours",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "remaining_hours_available",
+         "qty_delivered",
+         "product_uom_qty",
+         "product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_timesheet_compute_delivered_quantity_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": "Hook for validated timesheet in addionnal module ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_recompute_qty_to_invoice",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_date",
+     "end_date"
+    ],
+    "definitions": [
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": "Recompute the qty_to_invoice field for product containing timesheets\n\nSearch the existed timesheets between the given period in parameter.\nRetrieve the unit_amount of this timesheet and then recompute\nthe qty_to_invoice for each current product.\n\n:param start_date: the start date of the period\n:param end_date: the end date of the period",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_shop_warning_stock",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "desired_qty",
+     "new_qty",
+     "save"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_max_line_qty",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_max_available_qty",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_stock",
+      "decorators": [],
+      "documentation": "The max quantity of a combo product is the max quantity of its selected combo item with\nthe lowest max quantity. If none of the combo items has a max quantity, then the combo\nproduct also has no max quantity.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_availability",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_combo_item_id",
+    "package": "sale",
+    "kind": "ValidationError",
+    "message": "A sale order line's combo item must be among its linked line's available combo items."
+   },
+   {
+    "operation": "_check_combo_item_id",
+    "package": "sale",
+    "kind": "ValidationError",
+    "message": "A sale order line's product must match its combo item's product."
+   },
+   {
+    "operation": "write",
+    "package": "sale",
+    "kind": "UserError",
+    "message": "You cannot modify the product of this order line."
+   },
+   {
+    "operation": "write",
+    "package": "sale",
+    "kind": "UserError",
+    "message": "You cannot change the type of a sale order line. Instead you should delete the current line and create a new line of the proper type."
+   },
+   {
+    "operation": "write",
+    "package": "sale",
+    "kind": "UserError",
+    "message": "It is forbidden to modify the following fields in a locked order:\n%s"
+   },
+   {
+    "operation": "_unlink_except_confirmed",
+    "package": "sale",
+    "kind": "UserError",
+    "message": "Once a sales order is confirmed, you can't remove one of its lines (we need to track if something gets invoiced or delivered).\n                Set the quantity to 0 instead."
+   },
+   {
+    "operation": "_update_line_quantity",
+    "package": "sale_stock",
+    "kind": "UserError",
+    "message": "The ordered quantity of a sale order line cannot be decreased below the amount already delivered. Instead, create a return in your inventory."
+   },
+   {
+    "operation": "_check_event_registration_ticket",
+    "package": "event_sale",
+    "kind": "ValidationError",
+    "message": "The sale order line with the product %(product_name)s needs an event, a ticket and a slot in case the event has multiple time slots."
+   },
+   {
+    "operation": "_check_event_booth_registration_ids",
+    "package": "event_booth_sale",
+    "kind": "ValidationError",
+    "message": "Registrations from the same Order Line must belong to a single event."
+   },
+   {
+    "operation": "_update_event_booths",
+    "package": "event_booth_sale",
+    "kind": "ValidationError",
+    "message": "The following booths are unavailable, please remove them to continue : %(booth_names)s"
+   },
+   {
+    "operation": "_check_validity",
+    "package": "website_sale",
+    "kind": "UserError",
+    "message": "The given product does not have a price therefore it cannot be added to cart."
+   },
+   {
+    "operation": "_purchase_service_match_supplier",
+    "package": "sale_purchase",
+    "kind": "UserError",
+    "message": "There is no vendor associated to the product %s. Please define a vendor for this product."
+   },
+   {
+    "operation": "_timesheet_service_generation",
+    "package": "sale_project",
+    "kind": "UserError",
+    "message": "A project must be defined on the quotation %(order)s or on the form of products creating a task on order.\nThe following product need a project in which to put its task: %(product_name)s"
+   }
+  ],
+  "state_fields": [
+   "state",
+   "invoice_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "sale.access_sale_order_line_portal",
+    "package": "sale",
+    "name": "sale.order.line.portal",
+    "entity": "sale.order.line",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale.access_sale_order_line_readonly",
+    "package": "sale",
+    "name": "sale.order.line accountant",
+    "entity": "sale.order.line",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale.access_sale_order_line_invoicing_payments",
+    "package": "sale",
+    "name": "sale.order.line",
+    "entity": "sale.order.line",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale.access_sale_order_line_accountant",
+    "package": "sale",
+    "name": "sale.order.line accountant",
+    "entity": "sale.order.line",
+    "group": "account.group_account_user",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale.access_sale_order_line",
+    "package": "sale",
+    "name": "sale.order.line",
+    "entity": "sale.order.line",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale_mrp.access_sale_order_line_manufacturing_user",
+    "package": "sale_mrp",
+    "name": "sale.order.line manufacturing.user",
+    "entity": "sale.order.line",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_project.access_sale_order_line_project_manager",
+    "package": "sale_project",
+    "name": "sale.order.line.project.manager",
+    "entity": "sale.order.line",
+    "group": "project.group_project_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_project.access_sale_order_line_project_user",
+    "package": "sale_project",
+    "name": "sale.order.line.project.user",
+    "entity": "sale.order.line",
+    "group": "project.group_project_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_stock.access_sale_order_line_stock_worker",
+    "package": "sale_stock",
+    "name": "sale.order.line stock worker",
+    "entity": "sale.order.line",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "sale.sale_order_line_comp_rule",
+    "package": "sale",
+    "name": "Sales Order Line multi-company",
+    "entity": "sale.order.line",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sale.sale_order_line_rule_portal",
+    "package": "sale",
+    "name": "Portal Sales Orders Line",
+    "entity": "sale.order.line",
+    "domain": "[('order_id.partner_id','child_of',[user.commercial_partner_id.id])]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sale.sale_order_line_personal_rule",
+    "package": "sale",
+    "name": "Personal Order Lines",
+    "entity": "sale.order.line",
+    "domain": "['|',('salesman_id','=',user.id),('salesman_id','=',False)]",
+    "groups": "[(4, ref('sales_team.group_sale_salesman'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sale.sale_order_line_see_all",
+    "package": "sale",
+    "name": "All Orders Lines",
+    "entity": "sale.order.line",
+    "domain": "[(1,'=',1)]",
+    "groups": "[(4, ref('sales_team.group_sale_salesman_all_leads'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sale_project.sale_order_line_rule_project_manager",
+    "package": "sale_project",
+    "name": "Project Manager Sales Orders Line",
+    "entity": "sale.order.line",
+    "domain": "[('state', '=', 'sale'), ('is_service', '=', True), '|', ('project_id','!=', False), ('task_id','!=', False)]",
+    "groups": "[(4, ref('project.group_project_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "sale_stock.sale_order_line_rule_stock_user",
+    "package": "sale_stock",
+    "name": "Stock User Sales Orders Line",
+    "entity": "sale.order.line",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('stock.group_stock_user'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "sale.view_order_line_tree",
+    "package": "sale",
+    "name": "sale.order.line.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Sales Order Lines",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "order_id"
+      },
+      {
+       "name": "order_partner_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "salesman_id"
+      },
+      {
+       "name": "product_uom_qty",
+       "string": "Qty"
+      },
+      {
+       "name": "qty_delivered"
+      },
+      {
+       "name": "qty_invoiced"
+      },
+      {
+       "name": "qty_to_invoice"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "context": "{'product_id': product_id}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "price_subtotal",
+       "widget": "monetary",
+       "sum": "Total"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1,
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "sale.sale_order_line_view_form_readonly",
+    "package": "sale",
+    "name": "sale.order.line.form.readonly",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Sales Order Item",
+      "edit": "false"
+     },
+     "fields": [
+      {
+       "name": "display_type",
+       "invisible": "1"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "order_id",
+       "readonly": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "product_id",
+       "widget": "many2one_barcode",
+       "readonly": "id and not product_updatable",
+       "required": "not display_type",
+       "force_save": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "product_uom_qty"
+      },
+      {
+       "name": "qty_delivered",
+       "invisible": "state not in ['sale', 'done']",
+       "readonly": "qty_delivered_method != 'manual'"
+      },
+      {
+       "name": "qty_invoiced",
+       "invisible": "state not in ['sale', 'done']"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "product_uom_readonly",
+       "required": "not display_type",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "order_partner_id",
+       "invisible": "1"
+      },
+      {
+       "name": "price_unit"
+      },
+      {
+       "name": "technical_price_unit",
+       "invisible": "1"
+      },
+      {
+       "name": "discount",
+       "groups": "sale.group_discount_per_so_line"
+      },
+      {
+       "name": "price_subtotal",
+       "widget": "monetary",
+       "invisible": "company_price_include == 'tax_included'",
+       "string": "Amount"
+      },
+      {
+       "name": "price_total",
+       "widget": "monetary",
+       "invisible": "company_price_include == 'tax_excluded'",
+       "string": "Amount"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "readonly": "qty_invoiced > 0",
+       "domain": "[('type_tax_use', '=', 'sale'), ('company_id', '=', company_id), ('country_id', '=', tax_country_id)]",
+       "context": "{'search_view_ref': 'account.account_tax_view_search'}",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "price_tax",
+       "widget": "monetary"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_barcode": 1,
+      "many2one_uom": 1,
+      "monetary": 3,
+      "many2many_tax_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "sale.view_sales_order_line_filter",
+    "package": "sale",
+    "name": "sale.order.line.select",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Sales Order"
+     },
+     "fields": [
+      {
+       "name": "order_id"
+      },
+      {
+       "name": "order_partner_id",
+       "operator": "child_of"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "salesman_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "to_invoice",
+       "string": "To Invoice",
+       "domain": "[('qty_to_invoice', '!=', 0)]",
+       "help": "Sales Order Lines ready to be invoiced"
+      },
+      {
+       "name": "my_sales_order_lines",
+       "string": "My Sales Order Lines",
+       "domain": "[('salesman_id','=',uid)]",
+       "help": "Sales Order Lines related to a Sales Order of mine"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "product",
+       "string": "Product",
+       "context": "{'group_by':'product_id'}"
+      },
+      {
+       "name": "order",
+       "string": "Order",
+       "context": "{'group_by':'order_id'}"
+      },
+      {
+       "name": "salesperson",
+       "string": "Salesperson",
+       "context": "{'group_by':'salesman_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale.sale_order_line_view_kanban",
+    "package": "sale",
+    "name": "sale.order.line.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "display_name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "sale_project.view_order_line_tree_with_create",
+    "package": "sale_project",
+    "name": "sale.order.line.list.with.create",
+    "view_type": "list",
+    "inherits_view": "sale.view_order_line_tree",
+    "mode": "primary",
+    "priority": "999",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "list",
+       "attributes": {
+        "position": "attributes"
+       },
+       "position": "attributes"
+      }
+     ],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "sale_project.sale_order_line_view_form_editable",
+    "package": "sale_project",
+    "name": "sale.order.line.view.form.editable",
+    "view_type": "form",
+    "inherits_view": "sale.sale_order_line_view_form_readonly",
+    "mode": "primary",
+    "priority": "999",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "form",
+       "attributes": {
+        "position": "attributes"
+       },
+       "position": "attributes"
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "sale_stock.view_order_line_tree_inherit_sale_stock",
+    "package": "sale_stock",
+    "name": "sale.order.line.list.sale.stock.location",
+    "view_type": "field",
+    "inherits_view": "sale.view_order_line_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "price_subtotal",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "price_subtotal",
+       "position": "before"
+      },
+      {
+       "name": "route_ids",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_adv_location"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

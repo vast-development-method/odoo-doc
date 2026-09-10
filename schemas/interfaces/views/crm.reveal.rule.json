@@ -1,0 +1,264 @@
+{
+ "catalog": {
+  "name": "views:crm.reveal.rule",
+  "description": "View declarations for entity crm.reveal.rule.",
+  "record_count": 3,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "website_crm_iap_reveal.crm_reveal_rule_form",
+   "package": "website_crm_iap_reveal",
+   "name": "crm.reveal.rule.form",
+   "entity": "crm.reveal.rule",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "opportunity_count"
+     },
+     {
+      "name": "lead_count"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. US Visitors"
+     },
+     {
+      "name": "lead_for",
+      "widget": "radio"
+     },
+     {
+      "name": "active",
+      "widget": "boolean_toggle"
+     },
+     {
+      "name": "country_ids",
+      "widget": "many2many_tags",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "website_id",
+      "options": "{'no_open': True, 'no_create_edit': True}",
+      "groups": "website.group_multi_website"
+     },
+     {
+      "name": "state_ids",
+      "widget": "many2many_tags",
+      "invisible": "not country_ids",
+      "domain": "[('country_id', 'in', country_ids)]"
+     },
+     {
+      "name": "regex_url",
+      "widget": "website_urls",
+      "placeholder": "e.g. /page"
+     },
+     {
+      "name": "sequence"
+     },
+     {
+      "name": "extra_contacts",
+      "readonly": "1"
+     },
+     {
+      "name": "industry_tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color', 'no_create_edit': True, 'no_quick_create': True}"
+     },
+     {
+      "name": "filter_on_size"
+     },
+     {
+      "name": "company_size_min"
+     },
+     {
+      "name": "company_size_max"
+     },
+     {
+      "name": "extra_contacts"
+     },
+     {
+      "name": "contact_filter_type",
+      "widget": "radio"
+     },
+     {
+      "name": "preferred_role_id",
+      "invisible": "contact_filter_type != 'role'",
+      "options": "{'no_create_edit': True, 'no_quick_create': True}"
+     },
+     {
+      "name": "other_role_ids",
+      "widget": "many2many_tags",
+      "invisible": "not preferred_role_id or contact_filter_type != 'role'",
+      "options": "{'color_field': 'color', 'no_create_edit': True, 'no_quick_create': True}"
+     },
+     {
+      "name": "seniority_id",
+      "invisible": "contact_filter_type != 'seniority'",
+      "options": "{'no_create_edit': True, 'no_quick_create': True}"
+     },
+     {
+      "name": "lead_type",
+      "invisible": "1"
+     },
+     {
+      "name": "lead_type",
+      "groups": "crm.group_use_lead"
+     },
+     {
+      "name": "suffix"
+     },
+     {
+      "name": "team_id",
+      "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"
+     },
+     {
+      "name": "user_id",
+      "domain": "[('share', '=', False)]"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags"
+     },
+     {
+      "name": "priority",
+      "widget": "priority"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_get_opportunity_tree_view",
+      "type": "object",
+      "invisible": "lead_type != 'opportunity' and opportunity_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-star"
+     },
+     {
+      "name": "action_get_lead_tree_view",
+      "type": "object",
+      "invisible": "lead_type != 'lead' and lead_count == 0",
+      "class": "oe_stat_button",
+      "groups": "crm.group_use_lead",
+      "icon": "fa-star"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "radio": 2,
+     "boolean_toggle": 1,
+     "many2many_tags": 5,
+     "website_urls": 1,
+     "priority": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": [
+     {
+      "name": "action_get_opportunity_tree_view",
+      "class": "oe_stat_button",
+      "type": "object",
+      "icon": "fa-star",
+      "invisible": "lead_type != 'opportunity' and opportunity_count == 0"
+     },
+     {
+      "name": "action_get_lead_tree_view",
+      "class": "oe_stat_button",
+      "type": "object",
+      "icon": "fa-star",
+      "groups": "crm.group_use_lead",
+      "invisible": "lead_type != 'lead' and lead_count == 0"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form>\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button name=\"action_get_opportunity_tree_view\" class=\"oe_stat_button\" type=\"object\" icon=\"fa-star\" invisible=\"lead_type != 'opportunity' and opportunity_count == 0\">\n                            <div class=\"o_stat_info\">\n                                <field name=\"opportunity_count\"/>\n                                <span class=\"o_stat_text\"> Opportunities </span>\n                            </div>\n                        </button>\n                        <button name=\"action_get_lead_tree_view\" class=\"oe_stat_button\" type=\"object\" icon=\"fa-star\" groups=\"crm.group_use_lead\" invisible=\"lead_type != 'lead' and lead_count == 0\">\n                            <div class=\"o_stat_info\">\n                                <field name=\"lead_count\"/>\n                                <span class=\"o_stat_text\"> Leads </span>\n                            </div>\n                        </button>\n                    </div>\n                    <div class=\"oe_title mb8\">\n                        <label for=\"name\"/>\n                        <h1 class=\"o_row\">\n                            <field name=\"name\" placeholder=\"e.g. US Visitors\"/>\n                        </h1>\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"col-md-6\">\n                            <group>\n                                <field name=\"lead_for\" widget=\"radio\"/>\n                                <field name=\"active\" widget=\"boolean_toggle\"/>\n                            </group>\n                            <group string=\"Website Traffic Conditions\">\n                                <field name=\"country_ids\" widget=\"many2many_tags\" options=\"{'no_open': True, 'no_create': True}\"/>\n                                <field name=\"website_id\" options=\"{'no_open': True, 'no_create_edit': True}\" groups=\"website.group_multi_website\"/>\n                                <field name=\"state_ids\" widget=\"many2many_tags\" invisible=\"not country_ids\" domain=\"[('country_id', 'in', country_ids)]\"/>\n                                <field name=\"regex_url\" widget=\"website_urls\" placeholder=\"e.g. /page\"/>\n                                <field name=\"sequence\"/>\n                            </group>\n                        </div>\n                        <div class=\"col-md-6\">\n                            <div class=\"alert alert-info\" role=\"alert\">\n                                1 credit is consumed per visitor matching the website traffic conditions and whose company can be identified.<br/>\n                                <span invisible=\"lead_for != 'people'\">Up to <field name=\"extra_contacts\" readonly=\"1\" class=\"mb0\"/> additional credit(s) are consumed if the company matches this rule.</span>\n                            </div>\n                            <div class=\"alert alert-info\" role=\"alert\" invisible=\"lead_for != 'people'\">\n                                Make sure you know if you have to be GDPR compliant for storing personal data.\n                            </div>\n                        </div>\n                    </div>\n                    <group>\n                        <group string=\"Opportunity Generation Conditions\">\n                            <field name=\"industry_tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color', 'no_create_edit': True, 'no_quick_create': True}\"/>\n                            <field name=\"filter_on_size\"/>\n                            <label for=\"company_size_min\" invisible=\"not filter_on_size\"/>\n                            <div invisible=\"not filter_on_size\">\n                                From <field name=\"company_size_min\" class=\"oe_inline col-sm-3\"/>\n                                to <field name=\"company_size_max\" class=\"oe_inline col-sm-3\"/>\n                                employees\n                            </div>\n                        </group>\n                        <group string=\"Contact Filter\" invisible=\"lead_for != 'people'\">\n                            <field name=\"extra_contacts\"/>\n                            <field name=\"contact_filter_type\" widget=\"radio\"/>\n                            <field name=\"preferred_role_id\" invisible=\"contact_filter_type != 'role'\" options=\"{'no_create_edit': True, 'no_quick_create': True}\"/>\n                            <field name=\"other_role_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color', 'no_create_edit': True, 'no_quick_create': True}\" invisible=\"not preferred_role_id or contact_filter_type != 'role'\"/>\n                            <field name=\"seniority_id\" invisible=\"contact_filter_type != 'seniority'\" options=\"{'no_create_edit': True, 'no_quick_create': True}\"/>\n                        </group>\n                    </group>\n                    <field name=\"lead_type\" invisible=\"1\"/>\n                    <separator invisible=\"lead_type != 'lead'\" string=\"Lead Data\"/>\n                    <separator invisible=\"lead_type != 'opportunity'\" string=\"Opportunity Data\"/>\n                    <group>\n                        <group>\n                            <field name=\"lead_type\" groups=\"crm.group_use_lead\"/>\n                            <field name=\"suffix\"/>\n                            <field name=\"team_id\" context=\"{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}\"/>\n                            <field name=\"user_id\" domain=\"[('share', '=', False)]\"/>\n                        </group>\n                        <group>\n                            <field name=\"tag_ids\" widget=\"many2many_tags\"/>\n                            <field name=\"priority\" widget=\"priority\"/>\n                        </group>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_crm_iap_reveal.crm_reveal_rule_tree",
+   "package": "website_crm_iap_reveal",
+   "name": "crm.reveal.rule.list",
+   "entity": "crm.reveal.rule",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "lead_type"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list>\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\"/>\n                <field name=\"lead_type\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_crm_iap_reveal.crm_reveal_rule_view_search",
+   "package": "website_crm_iap_reveal",
+   "name": "crm.reveal.rule.view.search",
+   "entity": "crm.reveal.rule",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search CRM Reveal Rule"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Rule"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search CRM Reveal Rule\">\n                <field string=\"Rule\" name=\"name\"/>\n                <separator/>\n                <filter string=\"Archived\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n            </search>\n        </field>\n    "
+  }
+ ]
+}

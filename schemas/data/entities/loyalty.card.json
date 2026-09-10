@@ -1,0 +1,1235 @@
+{
+ "catalog": {
+  "name": "entity:loyalty.card",
+  "description": "Complete definition of entity Loyalty Coupon (loyalty.card).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "loyalty.card",
+  "storage_name": "loyalty_card",
+  "full_name": "Loyalty Coupon",
+  "kind": "persistent",
+  "description": "Loyalty Coupon",
+  "defined_by_package": "loyalty",
+  "extended_by_packages": [
+   "pos_loyalty",
+   "sale_loyalty",
+   "website_sale_loyalty"
+  ],
+  "mixins": [
+   "mail.thread",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "code",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "program_id",
+    "type": "Many2one",
+    "comodel": "loyalty.program",
+    "ondelete": "restrict",
+    "index": "btree_not_null",
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_id', None)"
+    },
+    "defined_in_package": "loyalty",
+    "string": "Program",
+    "full_name": "Program",
+    "target_entity": "loyalty.program"
+   },
+   {
+    "name": "program_type",
+    "type": "Selection",
+    "related": "program_id.program_type",
+    "defined_in_package": "loyalty",
+    "string": "Program Type",
+    "full_name": "Program Type"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "program_id.company_id",
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "loyalty",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "program_id.currency_id",
+    "defined_in_package": "loyalty",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "index": true,
+    "defined_in_package": "loyalty",
+    "string": "Partner",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "points",
+    "type": "Float",
+    "tracking": true,
+    "defined_in_package": "loyalty",
+    "string": "Points",
+    "full_name": "Points"
+   },
+   {
+    "name": "point_name",
+    "type": "Char",
+    "related": "program_id.portal_point_name",
+    "readonly": true,
+    "defined_in_package": "loyalty",
+    "string": "Point Name",
+    "full_name": "Point Name"
+   },
+   {
+    "name": "points_display",
+    "type": "Char",
+    "compute": "_compute_points_display",
+    "defined_in_package": "loyalty",
+    "string": "Points Display",
+    "full_name": "Points Display"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self._generate_code()"
+    },
+    "defined_in_package": "loyalty",
+    "string": "Code",
+    "full_name": "Code"
+   },
+   {
+    "name": "expiration_date",
+    "type": "Date",
+    "defined_in_package": "loyalty",
+    "string": "Expiration Date",
+    "full_name": "Expiration Date"
+   },
+   {
+    "name": "use_count",
+    "type": "Integer",
+    "compute": "_compute_use_count",
+    "defined_in_package": "loyalty",
+    "string": "Use Count",
+    "full_name": "Use Count"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "loyalty",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "history_ids",
+    "type": "One2many",
+    "comodel": "loyalty.history",
+    "inverse_name": "card_id",
+    "readonly": true,
+    "defined_in_package": "loyalty",
+    "string": "History",
+    "full_name": "History",
+    "target_entity": "loyalty.history"
+   },
+   {
+    "name": "source_pos_order_id",
+    "type": "Many2one",
+    "comodel": "pos.order",
+    "string": "PoS Order Reference",
+    "help": "PoS order where this coupon was generated.",
+    "defined_in_package": "pos_loyalty",
+    "full_name": "PoS Order Reference",
+    "target_entity": "pos.order"
+   },
+   {
+    "name": "source_pos_order_partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "PoS Order Customer",
+    "related": "source_pos_order_id.partner_id",
+    "defined_in_package": "pos_loyalty",
+    "full_name": "PoS Order Customer",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "order_id",
+    "type": "Many2one",
+    "string": "Order Reference",
+    "help": "The sales order from which coupon is generated",
+    "comodel": "sale.order",
+    "readonly": true,
+    "defined_in_package": "sale_loyalty",
+    "full_name": "Order Reference",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "order_id_partner_id",
+    "type": "Many2one",
+    "string": "Sale Order Customer",
+    "comodel": "res.partner",
+    "related": "order_id.partner_id",
+    "defined_in_package": "sale_loyalty",
+    "full_name": "Sale Order Customer",
+    "target_entity": "res.partner"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_card_code_unique",
+    "kind": "Constraint",
+    "definition": "UNIQUE(code)",
+    "message": "A coupon/loyalty card must have a unique code.",
+    "defined_in_package": "loyalty"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_generate_code",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Barcode identifiable codes.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "program_id",
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_contrains_code",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A trigger with the same code as one of your coupon already exists.",
+        "line": 64
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_points_display",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "points",
+         "point_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_restrict_expiration_on_loyalty",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "expiration_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Expiration date cannot be set on a loyalty card.",
+        "line": 75
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_format_points",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "points"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_template",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_mail_author",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_signature",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": "To be overriden",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_source_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_coupon_send",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": "Open a window to compose an email, with the default template returned by `_get_default_template`\nmessage loaded by default",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_creation_communication",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "force_send"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": "Sends the 'At Creation' communication plan if it exist for the given coupons.",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_points_reach_communication",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "points_changes"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": "Send the 'When Reaching' communicaton plans for the given coupons.\n\nIf a coupons passes multiple milestones we will only send the one with the highest target.",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_loyalty_update_balance",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mail_get_partner_fields",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "introspect_fields"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_gift_card_status",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "gift_code",
+     "config_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_loyalty_card_partner_by_code",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "code"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_archive",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_coupon_share",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_contrains_code",
+    "package": "loyalty",
+    "kind": "ValidationError",
+    "message": "A trigger with the same code as one of your coupon already exists."
+   },
+   {
+    "operation": "_restrict_expiration_on_loyalty",
+    "package": "loyalty",
+    "kind": "ValidationError",
+    "message": "Expiration date cannot be set on a loyalty card."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "loyalty.access_loyalty_card",
+    "package": "loyalty",
+    "name": "access_loyalty_card",
+    "entity": "loyalty.card",
+    "group": "base.group_user",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "pos_loyalty.access_coupon_pos_user",
+    "package": "pos_loyalty",
+    "name": "Loyalty (PoS User)",
+    "entity": "loyalty.card",
+    "group": "point_of_sale.group_pos_user",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "pos_loyalty.access_coupon_pos_manager",
+    "package": "pos_loyalty",
+    "name": "Loyalty (PoS Manager)",
+    "entity": "loyalty.card",
+    "group": "point_of_sale.group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_loyalty.access_coupon_salesman",
+    "package": "sale_loyalty",
+    "name": "Loyalty (Salesperson)",
+    "entity": "loyalty.card",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_loyalty.access_coupon_manager",
+    "package": "sale_loyalty",
+    "name": "Loyalty (Manager)",
+    "entity": "loyalty.card",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "loyalty.sale_loyalty_card_company_rule",
+    "package": "loyalty",
+    "name": "Loyalty card multi company rule",
+    "entity": "loyalty.card",
+    "domain": "['|', ('company_id', 'in', company_ids + [False]), ('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "loyalty.loyalty_card_view_form",
+    "package": "loyalty",
+    "name": "loyalty.card.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "code",
+       "readonly": "1"
+      },
+      {
+       "name": "expiration_date"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "points_display",
+       "nolabel": "1"
+      },
+      {
+       "name": "history_ids"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "order_id"
+      },
+      {
+       "name": "create_date",
+       "string": "Date"
+      },
+      {
+       "name": "issued"
+      },
+      {
+       "name": "used"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_loyalty_update_balance",
+       "type": "object",
+       "class": "p-0 text-info fw-normal"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": null,
+       "string": "History Lines",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "loyalty.loyalty_card_view_tree",
+    "package": "loyalty",
+    "name": "loyalty.card.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Coupons",
+      "edit": "false",
+      "delete": "false",
+      "js_class": "loyalty_card_list_view"
+     },
+     "fields": [
+      {
+       "name": "code",
+       "readonly": "1"
+      },
+      {
+       "name": "create_date",
+       "optional": "hide"
+      },
+      {
+       "name": "points_display",
+       "string": "Balance"
+      },
+      {
+       "name": "expiration_date"
+      },
+      {
+       "name": "program_id"
+      },
+      {
+       "name": "partner_id"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_coupon_send",
+       "string": "Send",
+       "type": "object",
+       "icon": "fa-paper-plane-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": "false",
+     "edit": "false",
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "loyalty.loyalty_card_view_search",
+    "package": "loyalty",
+    "name": "loyalty.card.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "code"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "program_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "active",
+       "string": "Active",
+       "domain": "[                         '&', ('active', '=', True),                         '&', ('program_id.active', '=', True),                         '|', ('expiration_date', '>=', 'today'), ('expiration_date', '=', False)                     ]"
+      },
+      {
+       "name": "inactive",
+       "string": "Inactive",
+       "domain": "[                         '|', ('active', '=', False),                         '|', ('program_id.active', '=', False), ('expiration_date', '<', 'today')                     ]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "pos_loyalty.loyalty_card_view_form_inherit_pos_loyalty",
+    "package": "pos_loyalty",
+    "name": "loyalty.card.view.form.inherit.pos.loyalty",
+    "view_type": "xpath",
+    "inherits_view": "loyalty.loyalty_card_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='partner_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "source_pos_order_id",
+       "invisible": "not source_pos_order_id",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='partner_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_loyalty.loyalty_card_view_form_inherit_sale_loyalty",
+    "package": "sale_loyalty",
+    "name": "loyalty.card.view.form.inherit.sale.loyalty",
+    "view_type": "field",
+    "inherits_view": "loyalty.loyalty_card_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "partner_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "partner_id",
+       "position": "after"
+      },
+      {
+       "name": "order_id",
+       "invisible": "not order_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_sale_loyalty.loyalty_card_view_tree_inherit_website_sale_loyalty",
+    "package": "website_sale_loyalty",
+    "name": "loyalty.card.view.list.inherit.website.sale.loyalty",
+    "view_type": "button",
+    "inherits_view": "loyalty.loyalty_card_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "button",
+     "root_attributes": {
+      "name": "action_coupon_send",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_coupon_send",
+       "position": "after"
+      },
+      {
+       "name": "action_coupon_share",
+       "string": "Share",
+       "type": "object",
+       "icon": "fa-share-alt"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "loyalty.loyalty_card_action",
+    "package": "loyalty",
+    "name": "Coupons",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('program_id', '=', active_id)]",
+    "context": "{'create': False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <h1>No Coupons Found.</h1>\n            <p>There haven't been any coupons generated yet.</p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "loyalty.card"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "loyalty.report_loyalty_card",
+    "package": "loyalty",
+    "name": "Coupon Code",
+    "report_type": "qweb-pdf",
+    "report_name": "loyalty.loyalty_report_i18n",
+    "report_file": "loyalty.loyalty_report_i18n",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_loyalty_card",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "loyalty.card"
+   },
+   {
+    "external_identifier": "loyalty.report_gift_card",
+    "package": "loyalty",
+    "name": "Gift Card",
+    "report_type": "qweb-pdf",
+    "report_name": "loyalty.gift_card_report_i18n",
+    "report_file": "loyalty.gift_card_report_i18n",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_loyalty_card",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "loyalty.card"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "loyalty.mail_template_gift_card",
+    "package": "loyalty",
+    "name": "Gift Card: Gift Card Information",
+    "subject": "Your Gift Card at {{ object.company_id.name }}"
+   },
+   {
+    "external_identifier": "loyalty.mail_template_loyalty_card",
+    "package": "loyalty",
+    "name": "Coupon: Coupon Information",
+    "subject": "Your reward coupon from {{ object.program_id.company_id.name }}"
+   }
+  ]
+ }
+}

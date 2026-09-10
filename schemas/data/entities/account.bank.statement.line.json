@@ -1,0 +1,1083 @@
+{
+ "catalog": {
+  "name": "entity:account.bank.statement.line",
+  "description": "Complete definition of entity Bank Statement Line (account.bank.statement.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.bank.statement.line",
+  "storage_name": "account_bank_statement_line",
+  "full_name": "Bank Statement Line",
+  "kind": "persistent",
+  "description": "Bank Statement Line",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "account_payment",
+   "point_of_sale",
+   "pos_hr"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {
+   "account.move": "move_id"
+  },
+  "ordering": "internal_index desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "move_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "bypass_search_access": true,
+    "string": "Journal Entry",
+    "required": true,
+    "readonly": true,
+    "ondelete": "cascade",
+    "index": true,
+    "check_company": true,
+    "defined_in_package": "account",
+    "full_name": "Journal Entry",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "inherited": true,
+    "related": "move_id.journal_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "index": false,
+    "required": true,
+    "defined_in_package": "account",
+    "string": "Journal",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "inherited": true,
+    "related": "move_id.company_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "index": false,
+    "required": true,
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "statement_id",
+    "type": "Many2one",
+    "comodel": "account.bank.statement",
+    "string": "Statement",
+    "index": true,
+    "defined_in_package": "account",
+    "full_name": "Statement",
+    "target_entity": "account.bank.statement"
+   },
+   {
+    "name": "payment_ids",
+    "type": "Many2many",
+    "comodel": "account.payment",
+    "relation": "account_payment_account_bank_statement_line_rel",
+    "string": "Auto-generated Payments",
+    "defined_in_package": "account",
+    "full_name": "Auto-generated Payments",
+    "target_entity": "account.payment"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 1,
+    "defined_in_package": "account",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Partner",
+    "ondelete": "restrict",
+    "domain": "['|', ('parent_id','=', False), ('is_company','=',True)]",
+    "check_company": true,
+    "defined_in_package": "account",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "account_number",
+    "type": "Char",
+    "string": "Bank Account Number",
+    "defined_in_package": "account",
+    "full_name": "Bank Account Number"
+   },
+   {
+    "name": "partner_name",
+    "type": "Char",
+    "index": "btree_not_null",
+    "defined_in_package": "account",
+    "string": "Partner Name",
+    "full_name": "Partner Name"
+   },
+   {
+    "name": "transaction_type",
+    "type": "Char",
+    "defined_in_package": "account",
+    "string": "Transaction Type",
+    "full_name": "Transaction Type"
+   },
+   {
+    "name": "payment_ref",
+    "type": "Char",
+    "string": "Label",
+    "index": "trigram",
+    "defined_in_package": "account",
+    "full_name": "Label"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Journal Currency",
+    "compute": "_compute_currency_id",
+    "store": true,
+    "defined_in_package": "account",
+    "full_name": "Journal Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "defined_in_package": "account",
+    "string": "Amount",
+    "full_name": "Amount"
+   },
+   {
+    "name": "running_balance",
+    "type": "Monetary",
+    "compute": "_compute_running_balance",
+    "defined_in_package": "account",
+    "string": "Running Balance",
+    "full_name": "Running Balance"
+   },
+   {
+    "name": "foreign_currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Foreign Currency",
+    "help": "The optional other currency if it is a multi-currency entry.",
+    "defined_in_package": "account",
+    "full_name": "Foreign Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "amount_currency",
+    "type": "Monetary",
+    "compute": "_compute_amount_currency",
+    "store": true,
+    "readonly": false,
+    "string": "Amount in Currency",
+    "currency_field": "foreign_currency_id",
+    "help": "The amount expressed in an optional other currency if it is a multi-currency entry.",
+    "defined_in_package": "account",
+    "full_name": "Amount in Currency"
+   },
+   {
+    "name": "amount_residual",
+    "type": "Float",
+    "string": "Residual Amount",
+    "compute": "_compute_is_reconciled",
+    "store": true,
+    "defined_in_package": "account",
+    "full_name": "Residual Amount"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_id.account_fiscal_country_id.code",
+    "defined_in_package": "account",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "internal_index",
+    "type": "Char",
+    "string": "Internal Reference",
+    "compute": "_compute_internal_index",
+    "store": true,
+    "defined_in_package": "account",
+    "full_name": "Internal Reference"
+   },
+   {
+    "name": "is_reconciled",
+    "type": "Boolean",
+    "string": "Is Reconciled",
+    "compute": "_compute_is_reconciled",
+    "store": true,
+    "defined_in_package": "account",
+    "full_name": "Is Reconciled"
+   },
+   {
+    "name": "statement_complete",
+    "type": "Boolean",
+    "related": "statement_id.is_complete",
+    "defined_in_package": "account",
+    "string": "Statement Complete",
+    "full_name": "Statement Complete"
+   },
+   {
+    "name": "statement_valid",
+    "type": "Boolean",
+    "related": "statement_id.is_valid",
+    "defined_in_package": "account",
+    "string": "Statement Valid",
+    "full_name": "Statement Valid"
+   },
+   {
+    "name": "statement_balance_end_real",
+    "type": "Monetary",
+    "related": "statement_id.balance_end_real",
+    "defined_in_package": "account",
+    "string": "Statement Balance End Real",
+    "full_name": "Statement Balance End Real"
+   },
+   {
+    "name": "statement_name",
+    "type": "Char",
+    "string": "Statement Name",
+    "related": "statement_id.name",
+    "defined_in_package": "account",
+    "full_name": "Statement Name"
+   },
+   {
+    "name": "transaction_details",
+    "type": "Json",
+    "readonly": true,
+    "defined_in_package": "account",
+    "string": "Transaction Details",
+    "full_name": "Transaction Details"
+   },
+   {
+    "name": "pos_session_id",
+    "type": "Many2one",
+    "comodel": "pos.session",
+    "string": "Session",
+    "copy": false,
+    "index": "btree_not_null",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Session",
+    "target_entity": "pos.session"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "help": "The employee who made the cash move.",
+    "defined_in_package": "pos_hr",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unreconciled_idx",
+    "kind": "Index",
+    "definition": "(journal_id, company_id, internal_index) WHERE is_reconciled IS NOT TRUE",
+    "message": null,
+    "defined_in_package": "account"
+   },
+   {
+    "name": "_orphan_idx",
+    "kind": "Index",
+    "definition": "(journal_id, company_id, internal_index) WHERE statement_id IS NULL",
+    "message": null,
+    "defined_in_package": "account"
+   },
+   {
+    "name": "_main_idx",
+    "kind": "Index",
+    "definition": "(journal_id, company_id, internal_index)",
+    "message": null,
+    "defined_in_package": "account"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_amount_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "foreign_currency_id",
+         "date",
+         "amount",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "journal_id.currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_running_balance",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 79,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_internal_index",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "sequence"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Internal index is a field that holds the combination of the date, compliment of sequence and id of each line.\nUsing this prevents us having a compound index, and extensive where clauses.\nWithout this finding lines before current line (which we need for calculating the running balance)\nwould need a query like this:\n  date < current date OR (date = current date AND sequence > current date) or (\n  date = current date AND sequence = current sequence AND id < current id)\nwhich needs to be repeated all over the code.\nThis would be simply \"internal index < current internal index\" using this field.\nAlso, we would need a compound index of date + sequence + id\non the table which is not possible because date is not in this table (it is in the account move table)\nunless we use a sql view which is more complicated.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_reconciled",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "journal_id",
+         "currency_id",
+         "amount",
+         "foreign_currency_id",
+         "amount_currency",
+         "move_id.checked",
+         "move_id.line_ids.account_id",
+         "move_id.line_ids.amount_currency",
+         "move_id.line_ids.amount_residual_currency",
+         "move_id.line_ids.currency_id",
+         "move_id.line_ids.matched_debit_ids",
+         "move_id.line_ids.matched_credit_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the field indicating if the statement lines are already reconciled with something.\nThis field is used for display purpose (e.g. display the 'cancel' button on the statement lines).\nAlso computes the residual amount of the statement line.",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_amounts_currencies",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "amount",
+         "amount_currency",
+         "currency_id",
+         "foreign_currency_id",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure the consistency the specified amounts and the currencies. ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The foreign currency must be different than the journal one: %s",
+        "line": 326
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You can't provide an amount in foreign currency without specifying a foreign currency.",
+        "line": 329
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You can't provide a foreign currency without specifying an amount in 'Amount in Currency' field.",
+        "line": 332
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "new",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "values",
+     "origin",
+     "ref"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 55,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "formatted_read_group",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "domain",
+     "groupby",
+     "aggregates",
+     "having",
+     "offset",
+     "limit",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_undo_reconciliation",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Undo the reconciliation made on the statement line and reset their journal items\nto their original states.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Validated entries can only be changed by your accountant.",
+        "line": 466
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_allow_unlink",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can not delete a transaction from a valid statement.\nIf you want to delete it, please remove the statement first.",
+        "line": 485
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_find_or_create_bank_account",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_amls_matching_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "allow_draft"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_journal",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_statement",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "journal_id",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_accounting_amounts_and_currencies",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Retrieve the transaction amount, journal amount and the company amount with their corresponding currencies\nfrom the journal entry linked to the statement line.\nAll returned amounts will be positive for an inbound transaction, negative for an outbound one.\n\n:return: (\n    transaction_amount, transaction_currency,\n    journal_amount, journal_currency,\n    company_amount, company_currency,\n)",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_counterpart_amounts_using_st_line_rate",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "currency",
+     "balance",
+     "amount_currency"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Convert the amounts passed as parameters to the statement line currency using the rates provided by the\nbank. The computed amounts are the one that could be set on the statement line as a counterpart journal item\nto fully paid the provided amounts as parameters.\n\n:param currency:        The currency in which is expressed 'amount_currency'.\n:param balance:         The amount expressed in company currency. Only needed when the currency passed as\n                        parameter is neither the statement line's foreign currency, neither the journal's\n                        currency.\n:param amount_currency: The amount expressed in the 'currency' passed as parameter.\n:return:                A python dictionary containing:\n    * balance:          The amount to consider expressed in company's currency.\n    * amount_currency:  The amount to consider expressed in statement line's foreign currency.",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_move_line_default_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "counterpart_account_id"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Prepare the dictionary to create the default account.move.lines for the current account.bank.statement.line\nrecord.\n:return: A list of python dictionary to be passed to the account.move.line's 'create' method.",
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't create a new statement line without a suspense account set on the %s journal.",
+        "line": 640
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_seek_for_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Helper used to dispatch the journal items between:\n- The lines using the liquidity account.\n- The lines using the transfer account.\n- The lines being not in one of the two previous categories.\n:return: (liquidity_lines, suspense_lines, other_lines)",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_synchronize_from_moves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "changed_fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Update the account.bank.statement.line regarding its related account.move.\nAlso, check both models are still consistent.\n:param changed_fields: A set containing all modified fields on account.move.",
+      "size_in_lines": 84,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The journal entry %s reached an invalid state regarding its related statement line.\nTo be consistent, the journal entry must always have exactly one journal item involving the bank/cash account.",
+        "line": 732
+       },
+       {
+        "kind": "UserError",
+        "message": "%(move)s reached an invalid state regarding its related statement line.\nTo be consistent, the journal entry must always have exactly one suspense line.",
+        "line": 755
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_synchronize_to_moves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "changed_fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Update the account.move regarding the modified account.bank.statement.line.\n:param changed_fields: A list containing all modified fields on account.bank.statement.line.",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partial_amounts",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "current_balance",
+     "move_line",
+     "open_amount_currency",
+     "open_balance"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_amounts_currencies",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The foreign currency must be different than the journal one: %s"
+   },
+   {
+    "operation": "_check_amounts_currencies",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "You can't provide an amount in foreign currency without specifying a foreign currency."
+   },
+   {
+    "operation": "_check_amounts_currencies",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "You can't provide a foreign currency without specifying an amount in 'Amount in Currency' field."
+   },
+   {
+    "operation": "action_undo_reconciliation",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Validated entries can only be changed by your accountant."
+   },
+   {
+    "operation": "_check_allow_unlink",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can not delete a transaction from a valid statement.\nIf you want to delete it, please remove the statement first."
+   },
+   {
+    "operation": "_prepare_move_line_default_vals",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can't create a new statement line without a suspense account set on the %s journal."
+   },
+   {
+    "operation": "_synchronize_from_moves",
+    "package": "account",
+    "kind": "UserError",
+    "message": "The journal entry %s reached an invalid state regarding its related statement line.\nTo be consistent, the journal entry must always have exactly one journal item involving the bank/cash account."
+   },
+   {
+    "operation": "_synchronize_from_moves",
+    "package": "account",
+    "kind": "UserError",
+    "message": "%(move)s reached an invalid state regarding its related statement line.\nTo be consistent, the journal entry must always have exactly one suspense line."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_bank_statement_line_group_readonly",
+    "package": "account",
+    "name": "account.bank.statement.line.group.invoice",
+    "entity": "account.bank.statement.line",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_bank_statement_line_group_invoice",
+    "package": "account",
+    "name": "account.bank.statement.line.group.invoice",
+    "entity": "account.bank.statement.line",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_bank_statement_line",
+    "package": "account",
+    "name": "account.bank.statement.line",
+    "entity": "account.bank.statement.line",
+    "group": "account.group_account_basic",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "point_of_sale.access_account_bank_statement_line",
+    "package": "point_of_sale",
+    "name": "account.bank.statement.line",
+    "entity": "account.bank.statement.line",
+    "group": "group_pos_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "point_of_sale.access_account_bank_statement_line_manager",
+    "package": "point_of_sale",
+    "name": "account.bank.statement.line manager",
+    "entity": "account.bank.statement.line",
+    "group": "group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.account_bank_statement_line_comp_rule",
+    "package": "account",
+    "name": "Account bank statement line company rule",
+    "entity": "account.bank.statement.line",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "point_of_sale.rule_pos_bank_statement_line_user",
+    "package": "point_of_sale",
+    "name": "Point Of Sale Bank Statement Line POS User",
+    "entity": "account.bank.statement.line",
+    "domain": "[('pos_session_id', '!=', False)]",
+    "groups": "[(4, ref('group_pos_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "point_of_sale.rule_pos_bank_statement_line_account_user",
+    "package": "point_of_sale",
+    "name": "Point Of Sale Bank Statement Line Accountant",
+    "entity": "account.bank.statement.line",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('account.group_account_invoice'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

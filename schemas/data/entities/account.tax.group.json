@@ -1,0 +1,637 @@
+{
+ "catalog": {
+  "name": "entity:account.tax.group",
+  "description": "Complete definition of entity Tax Group (account.tax.group).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.tax.group",
+  "storage_name": "account_tax_group",
+  "full_name": "Tax Group",
+  "kind": "persistent",
+  "description": "Tax Group",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "point_of_sale",
+   "l10n_ar",
+   "l10n_ec"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence asc, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "account",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "account",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "tax_payable_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "check_company": true,
+    "string": "Tax Payable Account",
+    "help": "Tax current account used as a counterpart to the Tax Closing Entry when in favor of the authorities.",
+    "defined_in_package": "account",
+    "full_name": "Tax Payable Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "tax_receivable_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "check_company": true,
+    "string": "Tax Receivable Account",
+    "help": "Tax current account used as a counterpart to the Tax Closing Entry when in favor of the company.",
+    "defined_in_package": "account",
+    "full_name": "Tax Receivable Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "advance_tax_payment_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "check_company": true,
+    "string": "Tax Advance Account",
+    "help": "Downpayments posted on this account will be considered by the Tax Closing Entry.",
+    "defined_in_package": "account",
+    "full_name": "Tax Advance Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "string": "Country",
+    "comodel": "res.country",
+    "compute": "_compute_country_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "help": "The country for which this tax group is applicable.",
+    "defined_in_package": "account",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "country_id.code",
+    "defined_in_package": "account",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "preceding_subtotal",
+    "type": "Char",
+    "string": "Preceding Subtotal",
+    "help": "If set, this value will be used on documents as the label of a subtotal excluding this tax group before displaying it. If not set, the tax group will be displayed after the 'Untaxed amount' subtotal.",
+    "translate": true,
+    "defined_in_package": "account",
+    "full_name": "Preceding Subtotal"
+   },
+   {
+    "name": "pos_receipt_label",
+    "type": "Char",
+    "string": "PoS receipt label",
+    "defined_in_package": "account",
+    "full_name": "PoS receipt label"
+   },
+   {
+    "name": "l10n_ar_tribute_afip_code",
+    "type": "Selection",
+    "selection": [
+     [
+      "01",
+      "01 - National Taxes"
+     ],
+     [
+      "02",
+      "02 - Provincial Taxes"
+     ],
+     [
+      "03",
+      "03 - Municipal Taxes"
+     ],
+     [
+      "04",
+      "04 - Internal Taxes"
+     ],
+     [
+      "06",
+      "06 - VAT perception"
+     ],
+     [
+      "07",
+      "07 - IIBB perception"
+     ],
+     [
+      "08",
+      "08 - Municipal Taxes Perceptions"
+     ],
+     [
+      "09",
+      "09 - Other Perceptions"
+     ],
+     [
+      "99",
+      "99 - Others"
+     ]
+    ],
+    "string": "Tribute ARCA Code",
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "l10n_ar",
+    "full_name": "Tribute ARCA Code"
+   },
+   {
+    "name": "l10n_ar_vat_afip_code",
+    "type": "Selection",
+    "selection": [
+     [
+      "0",
+      "Not Applicable"
+     ],
+     [
+      "1",
+      "Untaxed"
+     ],
+     [
+      "2",
+      "Exempt"
+     ],
+     [
+      "3",
+      "0%"
+     ],
+     [
+      "4",
+      "10.5%"
+     ],
+     [
+      "5",
+      "21%"
+     ],
+     [
+      "6",
+      "27%"
+     ],
+     [
+      "8",
+      "5%"
+     ],
+     [
+      "9",
+      "2,5%"
+     ]
+    ],
+    "string": "VAT ARCA Code",
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "l10n_ar",
+    "full_name": "value-added tax ARCA Code"
+   },
+   {
+    "name": "l10n_ec_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "_TYPE_EC"
+    },
+    "string": "Type Ecuadorian Tax",
+    "help": "Ecuadorian taxes subtype",
+    "defined_in_package": "l10n_ec",
+    "full_name": "Type Ecuadorian Tax"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_country_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_uninstall_required",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Make sure we don't uninstall a required tax group",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The tax group '%s' can't be removed, since it is required in the Argentinian localization.",
+        "line": 45
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "check_uninstall_required",
+    "package": "l10n_ar",
+    "kind": "UserError",
+    "message": "The tax group '%s' can't be removed, since it is required in the Argentinian localization."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_tax_group_internal_user",
+    "package": "account",
+    "name": "account.tax.group internal user",
+    "entity": "account.tax.group",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_tax_group_readonly",
+    "package": "account",
+    "name": "account.tax.group",
+    "entity": "account.tax.group",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_tax_group",
+    "package": "account",
+    "name": "account.tax.group",
+    "entity": "account.tax.group",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_tax_group_manager",
+    "package": "account",
+    "name": "account.tax.group",
+    "entity": "account.tax.group",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale.access_account_tax_group_sale_manager",
+    "package": "sale",
+    "name": "account.tax.group sale manager",
+    "entity": "account.tax.group",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.tax_group_comp_rule",
+    "package": "account",
+    "name": "Tax group multi-company",
+    "entity": "account.tax.group",
+    "domain": "[('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.account_tax_group_view_search",
+    "package": "account",
+    "name": "account.tax.group.search.filters",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Group"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "country_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "group_by_country",
+       "string": "Country",
+       "domain": "[]",
+       "context": "{'group_by': 'country_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "account.view_tax_group_tree",
+    "package": "account",
+    "name": "account.tax.group.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Account Tax Group",
+      "editable": "bottom",
+      "open_form_view": "True"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "country_code",
+       "column_invisible": "True"
+      },
+      {
+       "name": "tax_payable_account_id"
+      },
+      {
+       "name": "tax_receivable_account_id"
+      },
+      {
+       "name": "advance_tax_payment_account_id"
+      },
+      {
+       "name": "preceding_subtotal",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "account.view_tax_group_form",
+    "package": "account",
+    "name": "account.tax.group.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Account Tax Group"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "sequence"
+      },
+      {
+       "name": "pos_receipt_label",
+       "string": "Label on PoS Receipts",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "tax_payable_account_id",
+       "domain": "[('company_ids', '=', company_id)]"
+      },
+      {
+       "name": "tax_receivable_account_id",
+       "domain": "[('company_ids', '=', company_id)]"
+      },
+      {
+       "name": "advance_tax_payment_account_id",
+       "domain": "[('company_ids', '=', company_id)]"
+      },
+      {
+       "name": "preceding_subtotal"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_tax_group",
+    "package": "account",
+    "name": "Tax Groups",
+    "view_mode": "list,form",
+    "view_id": "view_tax_group_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a new tax group\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.tax.group"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

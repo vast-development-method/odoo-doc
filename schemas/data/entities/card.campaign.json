@@ -1,0 +1,1417 @@
+{
+ "catalog": {
+  "name": "entity:card.campaign",
+  "description": "Complete definition of entity Marketing Card Campaign (card.campaign).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "card.campaign",
+  "storage_name": "card_campaign",
+  "full_name": "Marketing Card Campaign",
+  "kind": "persistent",
+  "description": "Marketing Card Campaign",
+  "defined_by_package": "marketing_card",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.activity.mixin",
+   "mail.render.mixin",
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_unrestricted_rendering": true
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "defined_in_package": "marketing_card",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "marketing_card",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "body_html",
+    "type": "Html",
+    "related": "card_template_id.body",
+    "render_engine": "qweb",
+    "readonly": false,
+    "defined_in_package": "marketing_card",
+    "string": "Body Hypertext markup language",
+    "full_name": "Body Hypertext markup language"
+   },
+   {
+    "name": "card_count",
+    "type": "Integer",
+    "compute": "_compute_card_stats",
+    "defined_in_package": "marketing_card",
+    "string": "Card Count",
+    "full_name": "Card Count"
+   },
+   {
+    "name": "card_click_count",
+    "type": "Integer",
+    "compute": "_compute_card_stats",
+    "defined_in_package": "marketing_card",
+    "string": "Card Click Count",
+    "full_name": "Card Click Count"
+   },
+   {
+    "name": "card_share_count",
+    "type": "Integer",
+    "compute": "_compute_card_stats",
+    "defined_in_package": "marketing_card",
+    "string": "Card Share Count",
+    "full_name": "Card Share Count"
+   },
+   {
+    "name": "mailing_ids",
+    "type": "One2many",
+    "comodel": "mailing.mailing",
+    "inverse_name": "card_campaign_id",
+    "defined_in_package": "marketing_card",
+    "string": "Mailing",
+    "full_name": "Mailing",
+    "target_entity": "mailing.mailing"
+   },
+   {
+    "name": "mailing_count",
+    "type": "Integer",
+    "compute": "_compute_mailing_count",
+    "defined_in_package": "marketing_card",
+    "string": "Mailing Count",
+    "full_name": "Mailing Count"
+   },
+   {
+    "name": "card_ids",
+    "type": "One2many",
+    "comodel": "card.card",
+    "inverse_name": "campaign_id",
+    "defined_in_package": "marketing_card",
+    "string": "Card",
+    "full_name": "Card",
+    "target_entity": "card.card"
+   },
+   {
+    "name": "card_template_id",
+    "type": "Many2one",
+    "comodel": "card.template",
+    "string": "Design",
+    "default": {
+     "dynamic": "_default_card_template_id"
+    },
+    "required": true,
+    "defined_in_package": "marketing_card",
+    "full_name": "Design",
+    "target_entity": "card.template"
+   },
+   {
+    "name": "image_preview",
+    "type": "Image",
+    "compute": "_compute_image_preview",
+    "compute_sudo": false,
+    "readonly": true,
+    "store": true,
+    "attachment": false,
+    "defined_in_package": "marketing_card",
+    "string": "Image Preview",
+    "full_name": "Image Preview"
+   },
+   {
+    "name": "link_tracker_id",
+    "type": "Many2one",
+    "comodel": "link.tracker",
+    "ondelete": "restrict",
+    "defined_in_package": "marketing_card",
+    "string": "Link Tracker",
+    "full_name": "Link Tracker",
+    "target_entity": "link.tracker"
+   },
+   {
+    "name": "res_model",
+    "type": "Selection",
+    "string": "Model Name",
+    "compute": "_compute_res_model",
+    "precompute": true,
+    "readonly": true,
+    "required": true,
+    "store": true,
+    "selection_method": "_get_model_selection",
+    "defined_in_package": "marketing_card",
+    "full_name": "Model Name"
+   },
+   {
+    "name": "post_suggestion",
+    "type": "Text",
+    "help": "Description below the card and default text when sharing on X",
+    "defined_in_package": "marketing_card",
+    "string": "Post Suggestion",
+    "full_name": "Post Suggestion"
+   },
+   {
+    "name": "preview_record_ref",
+    "type": "Reference",
+    "string": "Preview On",
+    "required": true,
+    "selection_method": "_get_model_selection",
+    "defined_in_package": "marketing_card",
+    "full_name": "Preview On"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "card.campaign.tag",
+    "string": "Tags",
+    "defined_in_package": "marketing_card",
+    "full_name": "Tags",
+    "target_entity": "card.campaign.tag"
+   },
+   {
+    "name": "target_url",
+    "type": "Char",
+    "string": "Post Link",
+    "defined_in_package": "marketing_card",
+    "full_name": "Post Link"
+   },
+   {
+    "name": "target_url_click_count",
+    "type": "Integer",
+    "related": "link_tracker_id.count",
+    "defined_in_package": "marketing_card",
+    "string": "Target Uniform resource locator Click Count",
+    "full_name": "Target Uniform resource locator Click Count"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "domain": "[('share', '=', False)]",
+    "defined_in_package": "marketing_card",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "reward_message",
+    "type": "Html",
+    "string": "Thank You Message",
+    "defined_in_package": "marketing_card",
+    "full_name": "Thank You Message"
+   },
+   {
+    "name": "reward_target_url",
+    "type": "Char",
+    "string": "Reward Link",
+    "defined_in_package": "marketing_card",
+    "full_name": "Reward Link"
+   },
+   {
+    "name": "request_title",
+    "type": "Char",
+    "string": "Request",
+    "default": {
+     "dynamic": "lambda self: _('Help us share the news')"
+    },
+    "defined_in_package": "marketing_card",
+    "full_name": "Request"
+   },
+   {
+    "name": "request_description",
+    "type": "Text",
+    "string": "Request Description",
+    "defined_in_package": "marketing_card",
+    "full_name": "Request Description"
+   },
+   {
+    "name": "content_background",
+    "type": "Image",
+    "string": "Background",
+    "defined_in_package": "marketing_card",
+    "full_name": "Background"
+   },
+   {
+    "name": "content_button",
+    "type": "Char",
+    "string": "Button",
+    "defined_in_package": "marketing_card",
+    "full_name": "Button"
+   },
+   {
+    "name": "content_header",
+    "type": "Char",
+    "string": "Header",
+    "defined_in_package": "marketing_card",
+    "full_name": "Header"
+   },
+   {
+    "name": "content_header_dyn",
+    "type": "Boolean",
+    "string": "Is Dynamic Header",
+    "defined_in_package": "marketing_card",
+    "full_name": "Is Dynamic Header"
+   },
+   {
+    "name": "content_header_path",
+    "type": "Char",
+    "string": "Header Path",
+    "defined_in_package": "marketing_card",
+    "full_name": "Header Path"
+   },
+   {
+    "name": "content_header_color",
+    "type": "Char",
+    "string": "Header Color",
+    "defined_in_package": "marketing_card",
+    "full_name": "Header Color"
+   },
+   {
+    "name": "content_sub_header",
+    "type": "Char",
+    "string": "Sub-Header",
+    "defined_in_package": "marketing_card",
+    "full_name": "Sub-Header"
+   },
+   {
+    "name": "content_sub_header_dyn",
+    "type": "Boolean",
+    "string": "Is Dynamic Sub-Header",
+    "defined_in_package": "marketing_card",
+    "full_name": "Is Dynamic Sub-Header"
+   },
+   {
+    "name": "content_sub_header_path",
+    "type": "Char",
+    "string": "Sub-Header Path",
+    "defined_in_package": "marketing_card",
+    "full_name": "Sub-Header Path"
+   },
+   {
+    "name": "content_sub_header_color",
+    "type": "Char",
+    "string": "Sub Header Color",
+    "defined_in_package": "marketing_card",
+    "full_name": "Sub Header Color"
+   },
+   {
+    "name": "content_section",
+    "type": "Char",
+    "string": "Section",
+    "defined_in_package": "marketing_card",
+    "full_name": "Section"
+   },
+   {
+    "name": "content_section_dyn",
+    "type": "Boolean",
+    "string": "Is Dynamic Section",
+    "defined_in_package": "marketing_card",
+    "full_name": "Is Dynamic Section"
+   },
+   {
+    "name": "content_section_path",
+    "type": "Char",
+    "string": "Section Path",
+    "defined_in_package": "marketing_card",
+    "full_name": "Section Path"
+   },
+   {
+    "name": "content_sub_section1",
+    "type": "Char",
+    "string": "Sub-Section 1",
+    "defined_in_package": "marketing_card",
+    "full_name": "Sub-Section 1"
+   },
+   {
+    "name": "content_sub_section1_dyn",
+    "type": "Boolean",
+    "string": "Is Dynamic Sub-Section 1",
+    "defined_in_package": "marketing_card",
+    "full_name": "Is Dynamic Sub-Section 1"
+   },
+   {
+    "name": "content_sub_section1_path",
+    "type": "Char",
+    "string": "Sub-Section 1 Path",
+    "defined_in_package": "marketing_card",
+    "full_name": "Sub-Section 1 Path"
+   },
+   {
+    "name": "content_sub_section2",
+    "type": "Char",
+    "string": "Sub-Section 2",
+    "defined_in_package": "marketing_card",
+    "full_name": "Sub-Section 2"
+   },
+   {
+    "name": "content_sub_section2_dyn",
+    "type": "Boolean",
+    "string": "Is Dynamic Sub-Section 2",
+    "defined_in_package": "marketing_card",
+    "full_name": "Is Dynamic Sub-Section 2"
+   },
+   {
+    "name": "content_sub_section2_path",
+    "type": "Char",
+    "string": "Sub-Section 2 Path",
+    "defined_in_package": "marketing_card",
+    "full_name": "Sub-Section 2 Path"
+   },
+   {
+    "name": "content_image1_path",
+    "type": "Char",
+    "string": "Dynamic Image 1",
+    "defined_in_package": "marketing_card",
+    "full_name": "Dynamic Image 1"
+   },
+   {
+    "name": "content_image2_path",
+    "type": "Char",
+    "string": "Dynamic Image 2",
+    "defined_in_package": "marketing_card",
+    "full_name": "Dynamic Image 2"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_card_template_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_model_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Hardcoded list of models, checked against actually-present models.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_card_stats",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "card_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_render_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_access_right_dynamic_template",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "`_unrestricted_rendering` being True means we trust the value on model\nwhen rendering. This means once created, rendering is done without restriction.\nBut this attribute triggers a check at create / write / translation update that\ncurrent user is an admin or has full edition rights (group_mail_template_editor).\n\n However here a Marketing Card Manager must be able to edit the fields other\n than the rendering fields. The qweb rendered field `body_html` cannot be\n modified by users other than the `base.group_system` users, as\n- it's a related field to `card.template.body`,\n- store=False\n- the model `card.template` can only be altered by `base.group_system`\n\nHence the security is delegated to the 'card.template' model, hence the\ncheck done by `_check_access_right_dynamic_template` can be bypassed.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_image_preview",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._get_render_fields() + ['preview_record_ref']"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mailing_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_res_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "preview_record_ref"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Model of campaign %(campaign)s may not be changed as it already has cards",
+        "line": 202
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_view_cards",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_cards_clicked",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_cards_shared",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_mailings",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_preview",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_share",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_or_create_preview_card",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Fetch the card corresponding to the preview record, or create one if none exists.\n\nThe image also gets the preview render if it has none. It is also archived to ensure\nit is rerendered later if sent.",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_share_get_default_body",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_image_b64",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "An error occured while rendering a card for %(record_name)s. Try again or check the server logs for more details.",
+        "line": 341
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_update_cards",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "auto_commit"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Create missing cards and update cards if necessary based for the domain.",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_url_from_res_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "res_id",
+     "suffix"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "override for mail.render.mixin ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_card_element_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Helper to get the right value for dynamic fields.",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "write",
+    "package": "marketing_card",
+    "kind": "ValidationError",
+    "message": "Model of campaign %(campaign)s may not be changed as it already has cards"
+   },
+   {
+    "operation": "_get_image_b64",
+    "package": "marketing_card",
+    "kind": "UserError",
+    "message": "An error occured while rendering a card for %(record_name)s. Try again or check the server logs for more details."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "marketing_card.access_card_campaign_user",
+    "package": "marketing_card",
+    "name": "card.campaign.user",
+    "entity": "card.campaign",
+    "group": "marketing_card.marketing_card_group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "marketing_card.marketing_card_campaign_manager_own_rule",
+    "package": "marketing_card",
+    "name": "Manager may access and edit any card campaign",
+    "entity": "card.campaign",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('marketing_card_group_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "marketing_card.marketing_card_campaign_user_owl_rule",
+    "package": "marketing_card",
+    "name": "Users may only edit their own card campaigns",
+    "entity": "card.campaign",
+    "domain": "[('user_id', '=', user.id)]",
+    "groups": "[(4, ref('marketing_card_group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "True",
+    "applies_to_create": "False",
+    "applies_to_delete": "True"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "marketing_card.card_campaign_view_form",
+    "package": "marketing_card",
+    "name": "card.campaign.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Share Campaign",
+      "class": "o_card_campaign_form"
+     },
+     "fields": [
+      {
+       "name": "mailing_count",
+       "readonly": "1"
+      },
+      {
+       "name": "target_url_click_count",
+       "readonly": "1"
+      },
+      {
+       "name": "card_count",
+       "readonly": "1"
+      },
+      {
+       "name": "card_click_count",
+       "readonly": "1"
+      },
+      {
+       "name": "card_share_count",
+       "readonly": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. the system Experience Talks"
+      },
+      {
+       "name": "preview_record_ref",
+       "string": "Recipients",
+       "options": "{'no_create': True}",
+       "placeholder": "Preview on..."
+      },
+      {
+       "name": "target_url",
+       "placeholder": "Your Home Page"
+      },
+      {
+       "name": "res_model",
+       "invisible": "1"
+      },
+      {
+       "name": "res_model",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "post_suggestion",
+       "widget": "text_emojis",
+       "placeholder": "Join me at this event!"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color', 'no_create_edit': True}"
+      },
+      {
+       "name": "content_background",
+       "widget": "image"
+      },
+      {
+       "name": "content_header_dyn"
+      },
+      {
+       "name": "content_header",
+       "invisible": "content_header_dyn",
+       "placeholder": "e.g. Join the system Experience 2024"
+      },
+      {
+       "name": "content_header_path",
+       "widget": "field_selector",
+       "invisible": "not content_header_dyn",
+       "options": "{'model': 'res_model'}",
+       "placeholder": "Select a field"
+      },
+      {
+       "name": "content_header_color",
+       "widget": "color"
+      },
+      {
+       "name": "content_sub_header_dyn"
+      },
+      {
+       "name": "content_sub_header",
+       "invisible": "content_sub_header_dyn",
+       "placeholder": "e.g. Aug 24, Brussels Expo"
+      },
+      {
+       "name": "content_sub_header_path",
+       "widget": "field_selector",
+       "invisible": "not content_sub_header_dyn",
+       "options": "{'model': 'res_model'}",
+       "placeholder": "Select a field"
+      },
+      {
+       "name": "content_sub_header_color",
+       "widget": "color"
+      },
+      {
+       "name": "content_section_dyn"
+      },
+      {
+       "name": "content_section",
+       "invisible": "content_section_dyn",
+       "placeholder": "e.g. Sample Talk"
+      },
+      {
+       "name": "content_section_path",
+       "widget": "field_selector",
+       "invisible": "not content_section_dyn",
+       "options": "{'model': 'res_model'}",
+       "placeholder": "Select a field"
+      },
+      {
+       "name": "content_sub_section1_dyn"
+      },
+      {
+       "name": "content_sub_section1",
+       "invisible": "content_sub_section1_dyn",
+       "placeholder": "e.g. By Lionel Messy"
+      },
+      {
+       "name": "content_sub_section1_path",
+       "widget": "field_selector",
+       "invisible": "not content_sub_section1_dyn",
+       "options": "{'model': 'res_model'}",
+       "placeholder": "Select a field"
+      },
+      {
+       "name": "content_sub_section2_dyn"
+      },
+      {
+       "name": "content_sub_section2",
+       "invisible": "content_sub_section2_dyn",
+       "placeholder": "e.g. CFO Chief Football Officer"
+      },
+      {
+       "name": "content_sub_section2_path",
+       "widget": "field_selector",
+       "invisible": "not content_sub_section2_dyn",
+       "options": "{'model': 'res_model'}",
+       "placeholder": "Select a field"
+      },
+      {
+       "name": "content_image1_path",
+       "widget": "field_selector",
+       "options": "{'model': 'res_model'}",
+       "placeholder": "Select a field"
+      },
+      {
+       "name": "content_image2_path",
+       "widget": "field_selector",
+       "options": "{'model': 'res_model'}",
+       "placeholder": "Select a field"
+      },
+      {
+       "name": "content_button",
+       "placeholder": "No button"
+      },
+      {
+       "name": "card_template_id",
+       "widget": "selection_badge",
+       "required": "1",
+       "options": "{'size': 'sm'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "image_preview",
+       "widget": "image",
+       "invisible": "not card_template_id",
+       "options": "{'size': [0, 500]}",
+       "nolabel": "1"
+      },
+      {
+       "name": "request_title"
+      },
+      {
+       "name": "request_description",
+       "placeholder": "e.g. Why people should share on their network?"
+      },
+      {
+       "name": "reward_target_url",
+       "placeholder": "e.g. \"https://www.mycompany.com/reward\""
+      },
+      {
+       "name": "reward_message",
+       "placeholder": "e.g. \"Thanks for sharing, here is your reward!\""
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_share",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_preview",
+       "type": "object",
+       "invisible": "not preview_record_ref",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_view_mailings",
+       "type": "object",
+       "icon": "fa-envelope"
+      },
+      {
+       "icon": "fa-mouse-pointer"
+      },
+      {
+       "name": "action_view_cards",
+       "type": "object",
+       "icon": "fa-paper-plane"
+      },
+      {
+       "name": "action_view_cards_clicked",
+       "type": "object",
+       "icon": "fa-eye"
+      },
+      {
+       "name": "action_view_cards_shared",
+       "type": "object",
+       "icon": "fa-share"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "Card Layout",
+       "string": "Card Layout",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "Recipient Message",
+       "string": "Recipient Message",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "text_emojis": 1,
+      "many2one_avatar": 1,
+      "many2many_tags": 1,
+      "image": 2,
+      "field_selector": 7,
+      "color": 2,
+      "selection_badge": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_share",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_preview",
+       "type": "object",
+       "class": "btn-secondary",
+       "invisible": "not preview_record_ref"
+      }
+     ],
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "action_view_mailings",
+       "type": "object",
+       "icon": "fa-envelope"
+      },
+      {
+       "icon": "fa-mouse-pointer"
+      },
+      {
+       "name": "action_view_cards",
+       "type": "object",
+       "icon": "fa-paper-plane"
+      },
+      {
+       "name": "action_view_cards_clicked",
+       "type": "object",
+       "icon": "fa-eye"
+      },
+      {
+       "name": "action_view_cards_shared",
+       "type": "object",
+       "icon": "fa-share"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "marketing_card.card_campaign_view_kanban",
+    "package": "marketing_card",
+    "name": "card.campaign.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "card_share_count"
+      },
+      {
+       "name": "target_url_click_count"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "marketing_card.card_campaign_view_tree",
+    "package": "marketing_card",
+    "name": "card.campaign.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar"
+      },
+      {
+       "name": "res_model",
+       "optional": "hide"
+      },
+      {
+       "name": "target_url",
+       "optional": "hide"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "marketing_card.card_campaign_view_search",
+    "package": "marketing_card",
+    "name": "card.campaign.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Share Campaign"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "tag_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_campaigns",
+       "string": "My Campaigns",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "by_responsible",
+       "string": "Responsible",
+       "domain": "[]",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "by_tags",
+       "string": "Tags",
+       "domain": "[]",
+       "context": "{'group_by': 'tag_ids'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "marketing_card.card_campaign_action",
+    "package": "marketing_card",
+    "name": "Card Campaign",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "card_campaign_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">Create a Sharing Campaign!</p>\n            <p>Prepare a design and some content and let your community spread the word!</p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "card.campaign"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

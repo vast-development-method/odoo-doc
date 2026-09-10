@@ -1,0 +1,521 @@
+{
+ "catalog": {
+  "name": "entity:account.payment.method.line",
+  "description": "Complete definition of entity Payment Methods (account.payment.method.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.payment.method.line",
+  "storage_name": "account_payment_method_line",
+  "full_name": "Payment Methods",
+  "kind": "persistent",
+  "description": "Payment Methods",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "account_payment",
+   "l10n_it_edi"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "compute": "_compute_name",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "account",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "account",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "payment_method_id",
+    "type": "Many2one",
+    "string": "Payment Method",
+    "comodel": "account.payment.method",
+    "domain": "[('payment_type', '=?', payment_type), ('id', 'in', available_payment_method_ids)]",
+    "required": true,
+    "defined_in_package": "account",
+    "full_name": "Payment Method",
+    "target_entity": "account.payment.method"
+   },
+   {
+    "name": "payment_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "check_company": true,
+    "copy": false,
+    "ondelete": "restrict",
+    "domain": "['|', ('account_type', 'in', ('asset_current', 'liability_current')), ('id', '=', default_account_id)]",
+    "defined_in_package": "account",
+    "string": "Payment Account",
+    "full_name": "Payment Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "account",
+    "string": "Journal",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "default_account_id",
+    "type": "Many2one",
+    "related": "journal_id.default_account_id",
+    "defined_in_package": "account",
+    "string": "Default Account",
+    "full_name": "Default Account"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "related": "payment_method_id.code",
+    "defined_in_package": "account",
+    "string": "Code",
+    "full_name": "Code"
+   },
+   {
+    "name": "payment_type",
+    "type": "Selection",
+    "related": "payment_method_id.payment_type",
+    "defined_in_package": "account",
+    "string": "Payment Type",
+    "full_name": "Payment Type"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "journal_id.company_id",
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "available_payment_method_ids",
+    "type": "Many2many",
+    "related": "journal_id.available_payment_method_ids",
+    "defined_in_package": "account",
+    "string": "Available Payment Method",
+    "full_name": "Available Payment Method"
+   },
+   {
+    "name": "payment_provider_id",
+    "type": "Many2one",
+    "comodel": "payment.provider",
+    "compute": "_compute_payment_provider_id",
+    "store": true,
+    "readonly": false,
+    "domain": "[('code', '=', code)]",
+    "defined_in_package": "account_payment",
+    "string": "Payment Provider",
+    "full_name": "Payment Provider",
+    "target_entity": "payment.provider"
+   },
+   {
+    "name": "payment_provider_state",
+    "type": "Selection",
+    "related": "payment_provider_id.state",
+    "defined_in_package": "account_payment",
+    "string": "Payment Provider State",
+    "full_name": "Payment Provider State"
+   },
+   {
+    "name": "l10n_it_payment_method",
+    "type": "Selection",
+    "selection": {
+     "expression": "L10N_IT_PAYMENT_METHOD_SELECTION"
+    },
+    "string": "Italian Payment Method",
+    "default": "MP05",
+    "defined_in_package": "l10n_it_edi",
+    "full_name": "Italian Payment Method"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "journal_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "hide_payment_journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_id.name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_provider_id.name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_unique_name_for_journal",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Payment method lines which are used in a payment should not be deleted from the database,\nonly the link betweend them and the journals must be broken.",
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_auto_toggle_account_to_reconcile",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "account_id"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "This method is deprecated and will be removed.\nAutomatically toggle the account to reconcile if allowed.\n\n:param account_id: The id of an account.account.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_payment_provider_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_active_provider",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Ensure we don't remove an account.payment.method.line that is linked to a provider\nin the test or enabled state.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't delete a payment method that is linked to a provider in the enabled or test state.\nLinked providers(s): %s",
+        "line": 70
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_open_provider_form",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_l10n_it_payment_method_selection_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_except_active_provider",
+    "package": "account_payment",
+    "kind": "UserError",
+    "message": "You can't delete a payment method that is linked to a provider in the enabled or test state.\nLinked providers(s): %s"
+   }
+  ],
+  "state_fields": [
+   "payment_provider_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_payment_method_line_readonly",
+    "package": "account",
+    "name": "account.payment.method.line",
+    "entity": "account.payment.method.line",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_payment_method_line",
+    "package": "account",
+    "name": "account.payment.method.line",
+    "entity": "account.payment.method.line",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "point_of_sale.access_account_payment_method_line_pos_user",
+    "package": "point_of_sale",
+    "name": "account.payment.method.line pos_user",
+    "entity": "account.payment.method.line",
+    "group": "group_pos_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.view_account_payment_method_line_tree",
+    "package": "account",
+    "name": "account.payment.method.line.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "edit": "0"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Payment Method Name"
+      },
+      {
+       "name": "journal_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": "0",
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "account.view_account_payment_method_line_kanban_mobile",
+    "package": "account",
+    "name": "account.payment.method.line.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "display_name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

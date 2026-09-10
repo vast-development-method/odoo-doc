@@ -1,0 +1,900 @@
+{
+ "catalog": {
+  "name": "views:res.partner.bank",
+  "description": "View declarations for entity res.partner.bank.",
+  "record_count": 20,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account.view_partner_bank_form_inherit_account",
+   "package": "account",
+   "name": "res.partner.bank.form.inherit.account",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": "primary",
+   "priority": "14",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//sheet",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "duplicate_bank_partner_ids",
+      "widget": "x2many_buttons",
+      "string": "Partners with same bank"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "x2many_buttons": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//sheet",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//sheet\" position=\"before\">\n                    <div class=\"alert alert-warning\" role=\"alert\" invisible=\"not duplicate_bank_partner_ids\">\n                        <span>The Bank Account could be a duplicate of</span>\n                        <field name=\"duplicate_bank_partner_ids\" widget=\"x2many_buttons\" string=\"Partners with same bank\"/>\n                    </div>\n                </xpath>\n\n                <xpath expr=\"//form[@name='bank_account_form']/sheet[1]\" position=\"after\">\n                    <chatter/>\n                </xpath>\n\n                <xpath expr=\"//field[@name='acc_number']\" position=\"attributes\">\n                    <attribute name=\"readonly\">lock_trust_fields</attribute>\n                    <attribute name=\"force_save\">1</attribute>\n                </xpath>\n\n                <xpath expr=\"//field[@name='partner_id']\" position=\"attributes\">\n                    <attribute name=\"readonly\">lock_trust_fields</attribute>\n                    <attribute name=\"force_save\">1</attribute>\n                </xpath>\n\n                <xpath expr=\"//field[@name='allow_out_payment']\" position=\"replace\">\n                    <field name=\"user_has_group_validate_bank_account\" invisible=\"1\"/>\n                    <field name=\"lock_trust_fields\" invisible=\"1\"/>\n                    <label for=\"allow_out_payment\"/>\n                    <div class=\"d-flex gap-2\">\n                        <field name=\"allow_out_payment\" widget=\"boolean_toggle\" options=\"{'autosave': False}\" readonly=\"not user_has_group_validate_bank_account\" class=\"w-25\"/>\n                        <span class=\"d-flex gap-2 w-100\">\n                            <span invisible=\"allow_out_payment\" class=\"text-muted\">Untrusted</span>\n                            <span invisible=\"not allow_out_payment\" class=\"text-success\">Trusted</span>\n                        </span>\n                    </div>\n                    <div invisible=\"allow_out_payment\" colspan=\"2\">\n                        <field name=\"has_money_transfer_warning\" invisible=\"1\"/>\n                        <div invisible=\"not has_money_transfer_warning\" class=\"mb-1\">\n                            <span class=\"text-danger\">High risk</span>: <field name=\"money_transfer_service\" nolabel=\"1\" class=\"oe_inline\"/> is a money transfer service and not a bank.\n                            Double check if the account can be trusted by calling the vendor.<br/>\n                            <widget name=\"documentation_link\" path=\"/applications/finance/accounting/payables/pay/trusted_accounts.html\" label=\"Check why.\"/>\n                        </div>\n                        <field name=\"has_iban_warning\" invisible=\"1\"/>\n                        <div invisible=\"not has_iban_warning\">\n                            <span class=\"text-warning\">Medium risk</span>: Iban <field name=\"sanitized_acc_number\" nolabel=\"1\" class=\"oe_inline fw-bold\"/>\n                            is not from the same country as the partner (<field name=\"partner_country_name\" nolabel=\"1\" class=\"oe_inline\"/>).<br/>\n                            <widget name=\"documentation_link\" path=\"/applications/finance/accounting/payables/pay/trusted_accounts.html\" label=\"Check why it's risky.\"/>\n                        </div>\n                    </div>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_partner_bank_search_inherit",
+   "package": "account",
+   "name": "res.partner.bank.search.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//search",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "trusted",
+      "string": "Trusted",
+      "domain": "[('allow_out_payment', '=', True)]"
+     },
+     {
+      "name": "untrusted",
+      "string": "Untrusted",
+      "domain": "[('allow_out_payment', '=', False)]"
+     },
+     {
+      "name": "to_validate",
+      "string": "To validate",
+      "domain": "[('allow_out_payment', '=', False), ('related_moves', '!=', False)]"
+     },
+     {
+      "name": "customer",
+      "string": "Customers",
+      "domain": "[('partner_customer_rank','>', 0)]"
+     },
+     {
+      "name": "supplier",
+      "string": "Vendors",
+      "domain": "[('partner_supplier_rank','>', 0)]"
+     },
+     {
+      "name": "high_phishing_risk",
+      "string": "Phishing risk: High",
+      "domain": "[('has_money_transfer_warning', '!=', False)]"
+     },
+     {
+      "name": "medium_phishing_risk",
+      "string": "Phishing risk: Medium",
+      "domain": "[('has_iban_warning', '!=', False)]"
+     },
+     {
+      "name": "create_date",
+      "string": "Created On",
+      "date": "create_date"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "groupby_create_date",
+      "string": "Created On",
+      "context": "{'group_by': 'create_date'}"
+     },
+     {
+      "name": "groupby_create_by",
+      "string": "Created By",
+      "context": "{'group_by': 'create_uid'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//search",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//search\" position=\"inside\">\n                        <filter string=\"Trusted\" name=\"trusted\" domain=\"[('allow_out_payment', '=', True)]\"/>\n                        <filter string=\"Untrusted\" name=\"untrusted\" domain=\"[('allow_out_payment', '=', False)]\"/>\n                        <filter string=\"To validate\" name=\"to_validate\" domain=\"[('allow_out_payment', '=', False), ('related_moves', '!=', False)]\"/>\n                        <separator/>\n                        <filter string=\"Customers\" name=\"customer\" domain=\"[('partner_customer_rank','&gt;', 0)]\"/>\n                        <filter string=\"Vendors\" name=\"supplier\" domain=\"[('partner_supplier_rank','&gt;', 0)]\"/>\n                        <separator/>\n                        <filter string=\"Phishing risk: High\" name=\"high_phishing_risk\" domain=\"[('has_money_transfer_warning', '!=', False)]\"/>\n                        <filter string=\"Phishing risk: Medium\" name=\"medium_phishing_risk\" domain=\"[('has_iban_warning', '!=', False)]\"/>\n                        <separator/>\n                        <filter string=\"Created On\" name=\"create_date\" date=\"create_date\"/>\n                        <group>\n                            <filter string=\"Created On\" name=\"groupby_create_date\" context=\"{'group_by': 'create_date'}\"/>\n                            <filter string=\"Created By\" name=\"groupby_create_by\" context=\"{'group_by': 'create_uid'}\"/>\n                        </group>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account_qr_code_emv.view_partner_bank_form_inherit_account",
+   "package": "account_qr_code_emv",
+   "name": "res.partner.bank.form.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//page[@name='internal_notes']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "display_qr_setting",
+      "invisible": "1"
+     },
+     {
+      "name": "country_proxy_keys",
+      "invisible": "1"
+     },
+     {
+      "name": "proxy_type",
+      "widget": "dynamic_selection",
+      "options": "{'available_field': 'country_proxy_keys'}"
+     },
+     {
+      "name": "proxy_value"
+     },
+     {
+      "name": "include_reference"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "emv_qr_settings",
+      "string": "EMV QR Settings",
+      "invisible": "not display_qr_setting",
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "dynamic_selection": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//page[@name='internal_notes']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//page[@name='internal_notes']\" position=\"before\">\n                <field name=\"display_qr_setting\" invisible=\"1\"/>\n                <page string=\"EMV QR Settings\" name=\"emv_qr_settings\" invisible=\"not display_qr_setting\">\n                    <group>\n                        <field name=\"country_proxy_keys\" invisible=\"1\"/>\n                        <field name=\"proxy_type\" widget=\"dynamic_selection\" options=\"{'available_field': 'country_proxy_keys'}\"/>\n                        <field name=\"proxy_value\"/>\n                        <field name=\"include_reference\"/>\n                    </group>\n                </page>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "base.view_partner_bank_form",
+   "package": "base",
+   "name": "res.partner.bank.form",
+   "entity": "res.partner.bank",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "15",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Bank account",
+     "name": "bank_account_form"
+    },
+    "fields": [
+     {
+      "name": "acc_number"
+     },
+     {
+      "name": "clearing_number"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "acc_holder_name"
+     },
+     {
+      "name": "bank_id"
+     },
+     {
+      "name": "allow_out_payment",
+      "widget": "boolean_toggle"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "currency_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "note",
+      "nolabel": "1",
+      "placeholder": "Internal notes..."
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_archive_bank",
+      "string": "Archive",
+      "type": "object",
+      "class": "btn btn-secondary"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "internal_notes",
+      "string": "Note",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "boolean_toggle": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Bank account\" name=\"bank_account_form\">\n                <sheet>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <group>\n                        <group>\n                            <field name=\"acc_number\"/>\n                            <field name=\"clearing_number\"/>\n                            <field name=\"partner_id\"/>\n                            <field name=\"acc_holder_name\"/>\n                            <field name=\"bank_id\"/>\n                        </group>\n                        <group>\n                            <field name=\"allow_out_payment\" widget=\"boolean_toggle\"/>\n                            <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\"/>\n                            <field name=\"currency_id\" groups=\"base.group_multi_currency\" options=\"{'no_create': True}\"/>\n                        </group>\n                    </group>\n                    <notebook>\n                        <page string=\"Note\" name=\"internal_notes\">\n                            <field name=\"note\" nolabel=\"1\" placeholder=\"Internal notes...\"/>\n                        </page>\n                    </notebook>\n                </sheet>\n                <footer replace=\"0\">\n                    <button name=\"action_archive_bank\" type=\"object\" string=\"Archive\" class=\"btn btn-secondary\"/>\n                </footer>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "base.view_partner_bank_tree",
+   "package": "base",
+   "name": "res.partner.bank.list",
+   "entity": "res.partner.bank",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Bank Accounts",
+     "multi_edit": "1",
+     "decoration-muted": "(not active)"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "acc_number"
+     },
+     {
+      "name": "partner_id",
+      "optional": "hide"
+     },
+     {
+      "name": "bank_name",
+      "string": "Bank",
+      "optional": "show"
+     },
+     {
+      "name": "company_id",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "allow_out_payment",
+      "widget": "boolean_toggle",
+      "optional": "show"
+     },
+     {
+      "name": "active",
+      "widget": "boolean_toggle",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "boolean_toggle": 2
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "(not active)"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Bank Accounts\" multi_edit=\"1\" decoration-muted=\"(not active)\">\n                    <field name=\"sequence\" widget=\"handle\"/>\n                    <field name=\"acc_number\"/>\n                    <field name=\"partner_id\" optional=\"hide\"/>\n                    <field name=\"bank_name\" string=\"Bank\" optional=\"show\"/>\n                    <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"hide\"/>\n                    <field name=\"allow_out_payment\" widget=\"boolean_toggle\" optional=\"show\"/>\n                    <field name=\"active\" widget=\"boolean_toggle\" optional=\"hide\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "base.view_partner_bank_search",
+   "package": "base",
+   "name": "res.partner.bank.search",
+   "entity": "res.partner.bank",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Bank Accounts"
+    },
+    "fields": [
+     {
+      "name": "bank_name",
+      "string": "Bank Name",
+      "filter_domain": "['|', ('bank_name','ilike',self), ('acc_number','ilike',self)]"
+     },
+     {
+      "name": "company_id",
+      "invisible": "context.get('company_hide', True)"
+     },
+     {
+      "name": "partner_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active','=',False)]",
+      "help": "Show inactive bank account"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Bank Accounts\">\n                    <field name=\"bank_name\" filter_domain=\"['|', ('bank_name','ilike',self), ('acc_number','ilike',self)]\" string=\"Bank Name\"/>\n                    <field name=\"company_id\" invisible=\"context.get('company_hide', True)\"/>\n                    <field name=\"partner_id\"/>\n                    <separator/>\n                    <filter name=\"inactive\" string=\"Archived\" domain=\"[('active','=',False)]\" help=\"Show inactive bank account\"/>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "base_iban.view_partner_property_iban_form",
+   "package": "base_iban",
+   "name": "res.partner.bank.form.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "account.view_partner_bank_form_inherit_account",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='acc_number']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='acc_number']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='acc_number']\" position=\"attributes\">\n                <attribute name=\"widget\">iban</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr.view_partner_bank_form_inherit_hr",
+   "package": "hr",
+   "name": "res.partner.bank.form.inherit.hr",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='allow_out_payment']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "employee_has_multiple_bank_accounts",
+      "invisible": "1"
+     },
+     {
+      "name": "employee_salary_amount"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "employee_salary_amount_is_percentage",
+      "readonly": "True"
+     },
+     {
+      "name": "employee_id",
+      "widget": "many2many_avatar_employee",
+      "invisible": "not employee_id",
+      "groups": "hr.group_hr_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_avatar_employee": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='allow_out_payment']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='allow_out_payment']\" position=\"after\">\n                <field name=\"employee_has_multiple_bank_accounts\" invisible=\"1\"/>\n                <label string=\"Salary Allocation\" for=\"employee_salary_amount\" invisible=\"not employee_has_multiple_bank_accounts\" groups=\"hr.group_hr_user\"/>\n                <div class=\"d-flex\" invisible=\"not employee_has_multiple_bank_accounts\" groups=\"hr.group_hr_user\">\n                    <span><field name=\"employee_salary_amount\" style=\"max-width: 200px;\"/></span>\n                    <span invisible=\"not employee_salary_amount_is_percentage\">%</span>\n                    <field name=\"currency_id\" invisible=\"employee_salary_amount_is_percentage\" readonly=\"True\"/>\n                </div>\n                <field name=\"employee_id\" invisible=\"not employee_id\" groups=\"hr.group_hr_user\" widget=\"many2many_avatar_employee\"/>\n            </xpath>\n            <xpath expr=\"//page\" position=\"before\">\n                <page string=\"Bank Information\" invisible=\"not bank_id\">\n                    <group>\n                        <field name=\"bank_name\" string=\"Bank Name\"/>\n                        <field name=\"bank_bic\"/>\n                    </group>\n                    <group>\n                        <group name=\"address_details\">\n                            <label for=\"bank_street\" string=\"Bank Address\"/>\n                            <div class=\"o_address_format\">\n                                <field name=\"bank_street\" placeholder=\"Street...\" class=\"o_address_street\"/>\n                                <field name=\"bank_street2\" placeholder=\"Street 2...\" class=\"o_address_street\"/>\n                                <field name=\"bank_city\" placeholder=\"City\" class=\"o_address_city\"/>\n                                <field name=\"bank_state\" placeholder=\"State\" class=\"o_address_state\" options=\"{&quot;no_open&quot;: True}\"/>\n                                <field name=\"bank_zip\" placeholder=\"ZIP\" class=\"o_address_zip\"/>\n                                <field name=\"bank_country\" placeholder=\"Country\" class=\"o_address_country\" options=\"{&quot;no_open&quot;: True, &quot;no_create&quot;: True}\"/>\n                            </div>\n                        </group>\n                        <group name=\"communication_details\">\n                            <field name=\"bank_phone\" class=\"o_force_ltr\"/>\n                            <field name=\"bank_email\" widget=\"email\"/>\n                        </group>\n                    </group>\n                </page>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_au.view_partner_bank_form",
+   "package": "l10n_au",
+   "name": "aba.res.partner.bank.form",
+   "entity": "res.partner.bank",
+   "view_type": "field",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_id",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "position": "before"
+     },
+     {
+      "name": "aba_bsb"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"partner_id\" position=\"before\">\n                <field name=\"aba_bsb\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_br.view_partner_bank_form_inherit_account",
+   "package": "l10n_br",
+   "name": "res.partner.bank.form.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "field",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "include_reference",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "include_reference",
+      "position": "after"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"include_reference\" position=\"after\">\n                <p invisible=\"country_code != 'BR'\">\n                    <widget name=\"documentation_link\" path=\"/applications/finance/fiscal_localizations/brazil.html\" label=\"Documentation\"/>\n                </p>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_ch.isr_partner_bank_form",
+   "package": "l10n_ch",
+   "name": "l10n_ch.res.partner.bank.form",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='acc_number']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_ch_qr_iban",
+      "invisible": "not l10n_ch_display_qr_bank_options"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='acc_number']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='acc_number']\" position=\"after\">\n                    <field name=\"l10n_ch_qr_iban\" invisible=\"not l10n_ch_display_qr_bank_options\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "l10n_hk.view_partner_bank_form_inherit_account",
+   "package": "l10n_hk",
+   "name": "res.partner.bank.form.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "field",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "include_reference",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "include_reference",
+      "position": "after"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"include_reference\" position=\"after\">\n                <p invisible=\"country_code != 'HK'\">\n                    <widget name=\"documentation_link\" path=\"/applications/finance/fiscal_localizations/hong_kong.html\" label=\"Documentation\"/>\n                </p>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_id.view_partner_bank_form_inherit_account",
+   "package": "l10n_id",
+   "name": "res.partner.bank.form.inherit.account",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='allow_out_payment']/parent::group",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "l10n_id_qris_api_key",
+      "invisible": "country_code != 'ID'"
+     },
+     {
+      "name": "l10n_id_qris_mid",
+      "invisible": "country_code != 'ID'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='allow_out_payment']/parent::group",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='allow_out_payment']/parent::group\" position=\"inside\">\n                <field name=\"l10n_id_qris_api_key\" invisible=\"country_code != 'ID'\"/>\n                <field name=\"l10n_id_qris_mid\" invisible=\"country_code != 'ID'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_kh.view_partner_bank_form_inherit_account",
+   "package": "l10n_kh",
+   "name": "res.partner.bank.form.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "field",
+   "inherits_view": "account_qr_code_emv.view_partner_bank_form_inherit_account",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "proxy_value",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "proxy_value",
+      "position": "after"
+     },
+     {
+      "name": "l10n_kh_merchant_id",
+      "invisible": "proxy_type != 'bakong_id_merchant'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"proxy_value\" position=\"after\">\n                <field name=\"l10n_kh_merchant_id\" invisible=\"proxy_type != 'bakong_id_merchant'\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_mx.view_res_partner_bank_inherit_l10n_mx_edi_bank",
+   "package": "l10n_mx",
+   "name": "view.res.partner.bank.inherit.l10n_mx_edi_bank",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "account.view_partner_bank_form_inherit_account",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='acc_number']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_mx_edi_clabe",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='acc_number']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='acc_number']\" position=\"after\">\n                <field name=\"l10n_mx_edi_clabe\" invisible=\"1\"/>  \n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_mx.view_partner_bank_form_l10n_mx_edi_bank",
+   "package": "l10n_mx",
+   "name": "view.partner.bank.form.mx.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='bank_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "fiscal_country_codes",
+      "invisible": "1"
+     },
+     {
+      "name": "l10n_mx_edi_clabe",
+      "invisible": "'MX' not in fiscal_country_codes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='bank_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='bank_id']\" position=\"after\">\n                <field name=\"fiscal_country_codes\" invisible=\"1\"/>\n                <field name=\"l10n_mx_edi_clabe\" colspan=\"2\" invisible=\"'MX' not in fiscal_country_codes\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_mx.view_partner_bank_tree_l10n_mx_edi_bank",
+   "package": "l10n_mx",
+   "name": "view.partner.bank.list.mx.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='bank_name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_mx_edi_clabe",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='bank_name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='bank_name']\" position=\"after\">\n                <field name=\"l10n_mx_edi_clabe\" optional=\"hide\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_sg.view_partner_bank_form_inherit_account",
+   "package": "l10n_sg",
+   "name": "res.partner.bank.form.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "field",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "include_reference",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "include_reference",
+      "position": "after"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"include_reference\" position=\"after\">\n                <p invisible=\"country_code != 'SG'\">\n                    <widget name=\"documentation_link\" path=\"/applications/finance/fiscal_localizations/singapore.html\" label=\"Documentation\"/>\n                </p>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_us.view_partner_bank_form_inherit_l10n_us",
+   "package": "l10n_us",
+   "name": "res.partner.bank.form.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "xpath",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='clearing_number']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='clearing_number']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='clearing_number']\" position=\"attributes\">\n                <attribute name=\"nolabel\">1</attribute>\n            </xpath>\n            <field name=\"clearing_number\" position=\"before\">\n                <label for=\"clearing_number\" invisible=\"show_aba_routing\"/>\n                <label for=\"clearing_number\" string=\"ABA/Routing\" invisible=\"not show_aba_routing\"/>\n            </field>\n            <field name=\"currency_id\" position=\"after\">\n                <field name=\"l10n_us_bank_account_type\" invisible=\"country_code != 'US'\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_vn.view_partner_bank_form_inherit_account",
+   "package": "l10n_vn",
+   "name": "res.partner.bank.form.inherit",
+   "entity": "res.partner.bank",
+   "view_type": "field",
+   "inherits_view": "base.view_partner_bank_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "include_reference",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "include_reference",
+      "position": "after"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"include_reference\" position=\"after\">\n                <p invisible=\"country_code != 'VN'\">\n                    <widget name=\"documentation_link\" path=\"/applications/finance/fiscal_localizations/vietnam.html\" label=\"Documentation\"/>\n                </p>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

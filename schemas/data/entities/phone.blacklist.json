@@ -1,0 +1,462 @@
+{
+ "catalog": {
+  "name": "entity:phone.blacklist",
+  "description": "Complete definition of entity Phone Blacklist (phone.blacklist).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "phone.blacklist",
+  "storage_name": "phone_blacklist",
+  "full_name": "Phone Blacklist",
+  "kind": "persistent",
+  "description": "Phone Blacklist",
+  "defined_by_package": "phone_validation",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "number",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "number",
+    "type": "Char",
+    "string": "Phone Number",
+    "required": true,
+    "tracking": true,
+    "search": "_search_number",
+    "help": "Number should be E164 formatted",
+    "defined_in_package": "phone_validation",
+    "full_name": "Phone Number"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "tracking": true,
+    "defined_in_package": "phone_validation",
+    "string": "Active",
+    "full_name": "Active"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_number",
+    "kind": "Constraint",
+    "definition": "unique (number)",
+    "message": "Number already exists",
+    "defined_in_package": "phone_validation"
+   }
+  ],
+  "operations": [
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create new (or activate existing) blacklisted numbers.\n        A. Note: Attempt to create a number that already exists, but is non-active, will result in its activation.\n        B. Note: If the number already exists and it's active, it will be added to returned set, (it won't be re-created)\nReturns Recordset union of created and existing phonenumbers from the requested list of numbers to create",
+      "size_in_lines": 36,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "%(error)s Please correct the number and try again.",
+        "line": 37
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "%(error)s Please correct the number and try again.",
+        "line": 66
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_search_number",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "add",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "number",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "numbers",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [],
+      "documentation": "Add or re activate a phone blacklist entry.\n\n:param numbers: list of sanitized numbers ",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "remove",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "number",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_remove",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "numbers",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [],
+      "documentation": "Add de-activated or de-activate a phone blacklist entry.\n\n:param numbers: list of sanitized numbers ",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "phone_action_blacklist_remove",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_add",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "phone_validation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "create",
+    "package": "phone_validation",
+    "kind": "UserError",
+    "message": "%(error)s Please correct the number and try again."
+   },
+   {
+    "operation": "write",
+    "package": "phone_validation",
+    "kind": "UserError",
+    "message": "%(error)s Please correct the number and try again."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "phone_validation.access_phone_blacklist_all",
+    "package": "phone_validation",
+    "name": "access.phone.blacklist.all",
+    "entity": "phone.blacklist",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "phone_validation.access_phone_blacklist_system",
+    "package": "phone_validation",
+    "name": "access.phone.blacklist.system",
+    "entity": "phone.blacklist",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "phone_validation.phone_blacklist_view_tree",
+    "package": "phone_validation",
+    "name": "phone.blacklist.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Phone Blacklist",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date",
+       "string": "Blacklist Date"
+      },
+      {
+       "name": "number"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "phone_validation.phone_blacklist_view_form",
+    "package": "phone_validation",
+    "name": "phone.blacklist.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Phone Blacklist",
+      "duplicate": "false"
+     },
+     "fields": [
+      {
+       "name": "number"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "phone_action_blacklist_remove",
+       "string": "Unblacklist",
+       "type": "object",
+       "invisible": "not active or not number",
+       "class": "oe_highlight",
+       "context": "{'default_phone': number}"
+      },
+      {
+       "name": "action_add",
+       "string": "Blacklist",
+       "type": "object",
+       "invisible": "active or not number",
+       "class": "oe_highlight"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "phone_action_blacklist_remove",
+       "string": "Unblacklist",
+       "type": "object",
+       "class": "oe_highlight",
+       "context": "{'default_phone': number}",
+       "invisible": "not active or not number"
+      },
+      {
+       "name": "action_add",
+       "string": "Blacklist",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "active or not number"
+      }
+     ],
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "phone_validation.phone_blacklist_view_search",
+    "package": "phone_validation",
+    "name": "phone.blacklist.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "number"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "phone_validation.phone_blacklist_action",
+    "package": "phone_validation",
+    "name": "Blacklisted Phone Numbers",
+    "view_mode": null,
+    "view_id": "phone_blacklist_view_tree",
+    "search_view_id": "phone_blacklist_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Add a phone number in the blacklist\n            </p><p>\n                Blacklisted phone numbers won't receive SMS Mailings anymore.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "phone.blacklist"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "mass_mailing_sms.phone_blacklist_menu",
+    "package": "mass_mailing_sms",
+    "name": "Blacklisted Phone Numbers",
+    "parent_id": "mass_mailing_sms_menu_configuration",
+    "action": "phone_validation.phone_blacklist_action",
+    "sequence": "1",
+    "groups_id": "mass_mailing.group_mass_mailing_user",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,1455 @@
+{
+ "catalog": {
+  "name": "entity:hr.work.entry",
+  "description": "Complete definition of entity human resources Work Entry (hr.work.entry).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.work.entry",
+  "storage_name": "hr_work_entry",
+  "full_name": "human resources Work Entry",
+  "kind": "persistent",
+  "description": "HR Work Entry",
+  "defined_by_package": "hr_work_entry",
+  "extended_by_packages": [
+   "hr_work_entry_holidays",
+   "l10n_fr_hr_work_entry_holidays"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "create_date",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "defined_in_package": "hr_work_entry",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "hr_work_entry",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "required": true,
+    "domain": "['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+    "index": true,
+    "defined_in_package": "hr_work_entry",
+    "string": "Employee",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "version_id",
+    "type": "Many2one",
+    "comodel": "hr.version",
+    "string": "Employee Record",
+    "required": true,
+    "index": true,
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Employee Record",
+    "target_entity": "hr.version"
+   },
+   {
+    "name": "work_entry_source",
+    "type": "Selection",
+    "related": "version_id.work_entry_source",
+    "defined_in_package": "hr_work_entry",
+    "string": "Work Entry Source",
+    "full_name": "Work Entry Source"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "required": true,
+    "defined_in_package": "hr_work_entry",
+    "string": "Date",
+    "full_name": "Date"
+   },
+   {
+    "name": "duration",
+    "type": "Float",
+    "string": "Duration",
+    "default": 8,
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Duration"
+   },
+   {
+    "name": "work_entry_type_id",
+    "type": "Many2one",
+    "comodel": "hr.work.entry.type",
+    "index": true,
+    "default": {
+     "dynamic": "lambda self: self.env['hr.work.entry.type'].search([], limit=1)"
+    },
+    "domain": {
+     "dynamic": "lambda self: self._get_work_entry_type_domain()"
+    },
+    "defined_in_package": "hr_work_entry",
+    "string": "Work Entry Type",
+    "full_name": "Work Entry Type",
+    "target_entity": "hr.work.entry.type"
+   },
+   {
+    "name": "display_code",
+    "type": "Char",
+    "related": "work_entry_type_id.display_code",
+    "defined_in_package": "hr_work_entry",
+    "string": "Display Code",
+    "full_name": "Display Code"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "related": "work_entry_type_id.code",
+    "defined_in_package": "hr_work_entry",
+    "string": "Code",
+    "full_name": "Code"
+   },
+   {
+    "name": "external_code",
+    "type": "Char",
+    "related": "work_entry_type_id.external_code",
+    "defined_in_package": "hr_work_entry",
+    "string": "External Code",
+    "full_name": "External Code"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "related": "work_entry_type_id.color",
+    "readonly": true,
+    "defined_in_package": "hr_work_entry",
+    "string": "Color",
+    "full_name": "Color"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "New"
+     ],
+     [
+      "conflict",
+      "In Conflict"
+     ],
+     [
+      "validated",
+      "In Payslip"
+     ],
+     [
+      "cancelled",
+      "Cancelled"
+     ]
+    ],
+    "default": "draft",
+    "defined_in_package": "hr_work_entry",
+    "string": "State",
+    "full_name": "State"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "readonly": true,
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "conflict",
+    "type": "Boolean",
+    "string": "Conflicts",
+    "compute": "_compute_conflict",
+    "store": true,
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Conflicts"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "related": "employee_id.department_id",
+    "store": true,
+    "defined_in_package": "hr_work_entry",
+    "string": "Department",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "amount_rate",
+    "type": "Float",
+    "string": "Pay rate",
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Pay rate"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "related": "employee_id.company_id.country_id",
+    "search": "_search_country_id",
+    "defined_in_package": "hr_work_entry",
+    "string": "Country",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "leave_id",
+    "type": "Many2one",
+    "comodel": "hr.leave",
+    "string": "Time Off",
+    "defined_in_package": "hr_work_entry_holidays",
+    "full_name": "Time Off",
+    "target_entity": "hr.leave"
+   },
+   {
+    "name": "leave_state",
+    "type": "Selection",
+    "related": "leave_id.state",
+    "defined_in_package": "hr_work_entry_holidays",
+    "string": "Leave State",
+    "full_name": "Leave State"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_contract_date_start_stop_idx",
+    "kind": "Index",
+    "definition": "(version_id, date) WHERE state IN ('draft', 'validated')",
+    "message": null,
+    "defined_in_package": "hr_work_entry"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_check_duration",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "duration"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Duration must be positive and cannot exceed 24 hours.",
+        "line": 59
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "display_code",
+         "duration"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "work_entry_type_id",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_conflict",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_version_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "employee_id",
+         "date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_current_contract",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_unusual_days",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "date_from",
+     "date_to"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_validate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": "Try to validate work entries.\nIf some errors are found, set `state` to conflict for conflicting work entries\nand validation fails.\n:return: True if validation succeeded",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_split",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't split a work entry with less than 1 hour.",
+        "line": 125
+       },
+       {
+        "kind": "UserError",
+        "message": "Split work entry duration has to be less than the existing work entry duration.",
+        "line": 128
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_if_error",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mark_conflicting_work_entries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start",
+     "stop"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": "Set `state` to `conflict` for work entries where, for the same employee and day,\nthe total duration exceeds 24 hours.\nReturn True if such entries are found.",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leaves_entries_outside_schedule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mark_leaves_outside_schedule",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": "Check leave work entries in `self` which are completely outside\nthe contract's theoretical calendar schedule. Mark them as conflicting.\n:return: leave work entries completely outside the contract's calendar",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mark_already_validated_days",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_intervals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_from_intervals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "intervals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_validated_work_entries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This work entry is validated. You can't delete it.",
+        "line": 282
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reset_conflicting_state",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_error_checking",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start",
+     "stop",
+     "skip",
+     "employee_ids"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "contextmanager",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Context manager used for conflicts checking.\nWhen exiting the context manager, conflicts are checked\nfor all work entries within a date range. By default, the start and end dates are\ncomputed according to `self` (min and max respectively) but it can be overwritten by providing\nother values as parameter.\n:param start: datetime to overwrite the default behaviour\n:param stop: datetime to overwrite the default behaviour\n:param skip: If True, no error checking is done",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_work_entry_type_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_country_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_approve_leave",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_refuse_leave",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leaves_duration_between_two_dates",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "employee_id",
+     "date_from",
+     "date_to"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_french_part_time_entries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_duration",
+    "package": "hr_work_entry",
+    "kind": "ValidationError",
+    "message": "Duration must be positive and cannot exceed 24 hours."
+   },
+   {
+    "operation": "action_split",
+    "package": "hr_work_entry",
+    "kind": "UserError",
+    "message": "You can't split a work entry with less than 1 hour."
+   },
+   {
+    "operation": "action_split",
+    "package": "hr_work_entry",
+    "kind": "UserError",
+    "message": "Split work entry duration has to be less than the existing work entry duration."
+   },
+   {
+    "operation": "_unlink_except_validated_work_entries",
+    "package": "hr_work_entry",
+    "kind": "UserError",
+    "message": "This work entry is validated. You can't delete it."
+   }
+  ],
+  "state_fields": [
+   "state",
+   "leave_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "hr_work_entry.access_hr_work_entry_officer",
+    "package": "hr_work_entry",
+    "name": "access_hr_work_entry_officer",
+    "entity": "hr.work.entry",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_work_entry.access_hr_work_entry_system",
+    "package": "hr_work_entry",
+    "name": "access_hr_work_entry_system",
+    "entity": "hr.work.entry",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_work_entry.ir_rule_hr_work_entry_multi_company",
+    "package": "hr_work_entry",
+    "name": "HR Work Entry Contract: Multi Company",
+    "entity": "hr.work.entry",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_view_calendar_multi_create_form",
+    "package": "hr_work_entry",
+    "name": "hr.work.entry.calendar.multi_create",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": "primary",
+    "priority": "50",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "work_entry_type_id",
+       "widget": "many2one_work_entry_type"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time"
+      },
+      {
+       "name": "name",
+       "string": "Description",
+       "placeholder": "Additional Description..."
+      },
+      {
+       "name": "employee_id",
+       "invisible": "1"
+      },
+      {
+       "name": "color",
+       "invisible": "1"
+      },
+      {
+       "name": "display_code",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_work_entry_type": 1,
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_view_calendar",
+    "package": "hr_work_entry",
+    "name": "hr.work.entry.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "string": "Work Entry",
+      "date_start": "date",
+      "date_stop": "date",
+      "mode": "month",
+      "scales": "month",
+      "show_unusual_days": "True",
+      "month_overflow": "0",
+      "quick_create": "0",
+      "color": "color",
+      "event_limit": "9",
+      "show_date_picker": "0",
+      "multi_create_view": "hr_work_entry.hr_work_entry_view_calendar_multi_create_form",
+      "js_class": "work_entries_calendar"
+     },
+     "fields": [
+      {
+       "name": "state"
+      },
+      {
+       "name": "name",
+       "invisible": "not name",
+       "string": "Description"
+      },
+      {
+       "name": "duration",
+       "invisible": "1"
+      },
+      {
+       "name": "display_code",
+       "invisible": "1"
+      },
+      {
+       "name": "employee_id",
+       "invisible": "1"
+      },
+      {
+       "name": "work_entry_type_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date",
+      "date_stop": "date",
+      "date_delay": null,
+      "color": "color",
+      "mode": "month",
+      "quick_create": "0",
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_view_form",
+    "package": "hr_work_entry",
+    "name": "hr.work.entry.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Work Entry"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "state == 'conflict'"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "state != 'conflict'",
+       "readonly": "1"
+      },
+      {
+       "name": "name",
+       "readonly": "state == 'validated'",
+       "string": "Description",
+       "placeholder": "Additional Description..."
+      },
+      {
+       "name": "work_entry_type_id",
+       "widget": "many2one_work_entry_type",
+       "readonly": "state == 'validated'",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "state == 'validated'"
+      },
+      {
+       "name": "date",
+       "readonly": "state == 'validated'"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "readonly": "state == 'validated'",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 2,
+      "many2one_work_entry_type": 1,
+      "many2one_avatar_employee": 1,
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,validated",
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_calendar_gantt_view_form",
+    "package": "hr_work_entry",
+    "name": "hr.work.entry.form",
+    "view_type": "xpath",
+    "inherits_view": "hr_work_entry.hr_work_entry_view_form",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='employee_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='employee_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_view_tree",
+    "package": "hr_work_entry",
+    "name": "hr.work.entry.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "multi_edit": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "work_entry_type_id",
+       "widget": "many2one_work_entry_type",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "optional": "show",
+       "decoration-warning": "state == 'conflict'",
+       "decoration-success": "state == 'validated'",
+       "decoration-info": "state == 'draft'"
+      },
+      {
+       "name": "name",
+       "optional": "hide"
+      },
+      {
+       "name": "code",
+       "optional": "hidden"
+      },
+      {
+       "name": "external_code",
+       "optional": "hidden"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1,
+      "many2one_work_entry_type": 1,
+      "float_time": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_view_pivot",
+    "package": "hr_work_entry",
+    "name": "hr.work.entry.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Work Entries",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "duration",
+       "widget": "float_time"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "work_entry_type_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "type": "measure"
+      },
+      {
+       "name": "employee_id",
+       "type": "row"
+      },
+      {
+       "name": "work_entry_type_id",
+       "type": "col"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_view_search",
+    "package": "hr_work_entry",
+    "name": "hr.work.entry.filter",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Work Entry"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "department_id"
+      },
+      {
+       "name": "work_entry_type_id",
+       "widget": "many2one_work_entry_type"
+      },
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "work_entries_draft",
+       "string": "Draft",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "work_entries_validated",
+       "string": "Validated",
+       "domain": "[('state', '=', 'validated')]"
+      },
+      {
+       "name": "work_entries_error",
+       "string": "Conflicting",
+       "domain": "[('state', '=', 'conflict')]"
+      },
+      {
+       "name": "date_filter",
+       "string": "Date",
+       "date": "date"
+      },
+      {
+       "name": "current_month",
+       "string": "Current Month",
+       "domain": "[                     ('date', '>=', 'today =1d'),                     ('date', '<', 'today =1d +1m')]"
+      },
+      {
+       "name": "active_employees",
+       "string": "Active",
+       "domain": "[('employee_id.active', '=', True)]"
+      },
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('employee_id.active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_employee",
+       "string": "Employee",
+       "context": "{'group_by': 'employee_id'}"
+      },
+      {
+       "name": "group_department",
+       "string": "Department",
+       "context": "{'group_by': 'department_id'}"
+      },
+      {
+       "name": "group_work_entry_type",
+       "string": "Type",
+       "context": "{'group_by': 'work_entry_type_id'}"
+      },
+      {
+       "name": "group_start_date",
+       "string": "Date",
+       "context": "{'group_by': 'date'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {
+      "many2one_work_entry_type": 1
+     },
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_action_conflict",
+    "package": "hr_work_entry",
+    "name": "Work Entry",
+    "view_mode": "list,form,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_work_entries_error': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.work.entry"
+   },
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_action",
+    "package": "hr_work_entry",
+    "name": "Work Entry",
+    "view_mode": "list,form,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_active_employees': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No data to display\n            </p>\n            <p>\n                Try to add some records, or make sure that there is no active filter in the search bar.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.work.entry"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "hr_work_entry.action_hr_work_entry_set_to_draft",
+    "package": "hr_work_entry",
+    "name": "Set to Draft",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

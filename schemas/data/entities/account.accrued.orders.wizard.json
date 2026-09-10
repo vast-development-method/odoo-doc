@@ -1,0 +1,574 @@
+{
+ "catalog": {
+  "name": "entity:account.accrued.orders.wizard",
+  "description": "Complete definition of entity Accrued Orders Wizard (account.accrued.orders.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.accrued.orders.wizard",
+  "storage_name": "account_accrued_orders_wizard",
+  "full_name": "Accrued Orders Wizard",
+  "kind": "transient",
+  "description": "Accrued Orders Wizard",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "sale_stock"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "default": {
+     "dynamic": "_get_default_company"
+    },
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "compute": "_compute_journal_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "domain": "[('type', '=', 'general')]",
+    "required": true,
+    "check_company": true,
+    "string": "Journal",
+    "defined_in_package": "account",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "default": {
+     "dynamic": "_get_default_date"
+    },
+    "required": true,
+    "defined_in_package": "account",
+    "string": "Date",
+    "full_name": "Date"
+   },
+   {
+    "name": "reversal_date",
+    "type": "Date",
+    "compute": "_compute_reversal_date",
+    "required": true,
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "account",
+    "string": "Reversal Date",
+    "full_name": "Reversal Date"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "string": "Amount",
+    "help": "Specify an arbitrary value that will be accrued on a         default account for the entire order, regardless of the products on the different lines.",
+    "defined_in_package": "account",
+    "full_name": "Amount"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "company_id.currency_id",
+    "string": "Company Currency",
+    "readonly": true,
+    "store": true,
+    "help": "Utility field to express amount currency",
+    "defined_in_package": "account",
+    "full_name": "Company Currency"
+   },
+   {
+    "name": "account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "required": true,
+    "string": "Accrual Account",
+    "check_company": true,
+    "domain": "[('account_type', '=', 'liability_current')] if context.get('active_model') in ['purchase.order', 'purchase.order.line'] else [('account_type', '=', 'asset_current')]",
+    "defined_in_package": "account",
+    "full_name": "Accrual Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "preview_data",
+    "type": "Text",
+    "compute": "_compute_preview_data",
+    "defined_in_package": "account",
+    "string": "Preview Data",
+    "full_name": "Preview Data"
+   },
+   {
+    "name": "display_amount",
+    "type": "Boolean",
+    "compute": "_compute_display_amount",
+    "defined_in_package": "account",
+    "string": "Display Amount",
+    "full_name": "Display Amount"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_company",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reversal_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_journal_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_preview_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "journal_id",
+         "account_id",
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_computed_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "order",
+     "product",
+     "is_purchase"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_move_vals",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 258,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Entries can only be created for a single company at a time.",
+        "line": 148
+       },
+       {
+        "kind": "UserError",
+        "message": "Cannot create an accrual entry with orders in different currencies.",
+        "line": 150
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_accrual_message_body",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move",
+     "reverse_move"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_entries",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Reversal date must be posterior to date.",
+        "line": 382
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_product_expense_and_stock_var_accounts",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_compute_move_vals",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Entries can only be created for a single company at a time."
+   },
+   {
+    "operation": "_compute_move_vals",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Cannot create an accrual entry with orders in different currencies."
+   },
+   {
+    "operation": "create_entries",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Reversal date must be posterior to date."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_accrued_orders_wizard",
+    "package": "account",
+    "name": "account.account.accrued.orders.wizard",
+    "entity": "account.accrued.orders.wizard",
+    "group": "group_account_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.view_account_accrued_orders_wizard",
+    "package": "account",
+    "name": "account.accrued.orders.wizard.view",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Make Accrual Entries"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "journal_id"
+      },
+      {
+       "name": "account_id"
+      },
+      {
+       "name": "amount",
+       "invisible": "not display_amount"
+      },
+      {
+       "name": "display_amount",
+       "invisible": "1"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "reversal_date"
+      },
+      {
+       "name": "preview_data",
+       "widget": "grouped_view_widget"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "create_entries",
+       "string": "Create Entry",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "grouped_view_widget": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "purchase.action_accrued_expense_entry",
+    "package": "purchase",
+    "name": "Accrued Expense Entry",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "purchase.model_purchase_order",
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.accrued.orders.wizard"
+   },
+   {
+    "external_identifier": "sale.action_accrued_revenue_entry",
+    "package": "sale",
+    "name": "Accrued Revenue Entry",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "sale.model_sale_order",
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.accrued.orders.wizard"
+   },
+   {
+    "external_identifier": "sale.action_accrued_revenue_entry_sale_order_line",
+    "package": "sale",
+    "name": "Accrued Revenue Entry",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "sale.model_sale_order_line",
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.accrued.orders.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

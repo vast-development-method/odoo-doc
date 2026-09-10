@@ -1,0 +1,657 @@
+{
+ "catalog": {
+  "name": "entity:lunch.alert",
+  "description": "Complete definition of entity Lunch Alert (lunch.alert).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "lunch.alert",
+  "storage_name": "lunch_alert",
+  "full_name": "Lunch Alert",
+  "kind": "persistent",
+  "description": "Lunch Alert",
+  "defined_by_package": "lunch",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "write_date desc, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Alert Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "lunch",
+    "full_name": "Alert Name"
+   },
+   {
+    "name": "message",
+    "type": "Html",
+    "string": "Message",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "lunch",
+    "full_name": "Message"
+   },
+   {
+    "name": "mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "alert",
+      "Alert in app"
+     ],
+     [
+      "chat",
+      "Chat notification"
+     ]
+    ],
+    "string": "Display",
+    "default": "alert",
+    "defined_in_package": "lunch",
+    "full_name": "Display"
+   },
+   {
+    "name": "recipients",
+    "type": "Selection",
+    "selection": [
+     [
+      "everyone",
+      "Everyone"
+     ],
+     [
+      "last_week",
+      "Employee who ordered last week"
+     ],
+     [
+      "last_month",
+      "Employee who ordered last month"
+     ],
+     [
+      "last_year",
+      "Employee who ordered last year"
+     ]
+    ],
+    "string": "Recipients",
+    "default": "everyone",
+    "defined_in_package": "lunch",
+    "full_name": "Recipients"
+   },
+   {
+    "name": "notification_time",
+    "type": "Float",
+    "default": 10.0,
+    "string": "Notification Time",
+    "defined_in_package": "lunch",
+    "full_name": "Notification Time"
+   },
+   {
+    "name": "notification_moment",
+    "type": "Selection",
+    "selection": [
+     [
+      "am",
+      "AM"
+     ],
+     [
+      "pm",
+      "PM"
+     ]
+    ],
+    "default": "am",
+    "required": true,
+    "defined_in_package": "lunch",
+    "string": "Notification Moment",
+    "full_name": "Notification Moment"
+   },
+   {
+    "name": "tz",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "string": "Timezone",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.user.tz or 'UTC'"
+    },
+    "defined_in_package": "lunch",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "cron_id",
+    "type": "Many2one",
+    "comodel": "ir.cron",
+    "ondelete": "cascade",
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "lunch",
+    "string": "Cron",
+    "full_name": "Cron",
+    "target_entity": "ir.cron"
+   },
+   {
+    "name": "until",
+    "type": "Date",
+    "string": "Show Until",
+    "defined_in_package": "lunch",
+    "full_name": "Show Until"
+   },
+   {
+    "name": "mon",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Mon",
+    "full_name": "Mon"
+   },
+   {
+    "name": "tue",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Tue",
+    "full_name": "Tue"
+   },
+   {
+    "name": "wed",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Wed",
+    "full_name": "Wed"
+   },
+   {
+    "name": "thu",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Thu",
+    "full_name": "Thu"
+   },
+   {
+    "name": "fri",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Fri",
+    "full_name": "Fri"
+   },
+   {
+    "name": "sat",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Sat",
+    "full_name": "Sat"
+   },
+   {
+    "name": "sun",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Sun",
+    "full_name": "Sun"
+   },
+   {
+    "name": "available_today",
+    "type": "Boolean",
+    "string": "Is Displayed Today",
+    "compute": "_compute_available_today",
+    "search": "_search_available_today",
+    "defined_in_package": "lunch",
+    "full_name": "Is Displayed Today"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "lunch",
+    "full_name": "Active"
+   },
+   {
+    "name": "location_ids",
+    "type": "Many2many",
+    "comodel": "lunch.location",
+    "string": "Location",
+    "defined_in_package": "lunch",
+    "full_name": "Location",
+    "target_entity": "lunch.location"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_notification_time_range",
+    "kind": "Constraint",
+    "definition": "CHECK(notification_time >= 0 and notification_time <= 12)",
+    "message": "Notification time must be between 0 and 12",
+    "defined_in_package": "lunch"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_available_today",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mon",
+         "tue",
+         "wed",
+         "thu",
+         "fri",
+         "sat",
+         "sun"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_available_today",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sync_cron",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": "Synchronise the related cron fields to reflect this alert ",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_chat",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "lunch.lunch_alert_access",
+    "package": "lunch",
+    "name": "access_lunch_alert_user",
+    "entity": "lunch.alert",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "lunch.lunch_alert_manager",
+    "package": "lunch",
+    "name": "access_lunch_alert_manager",
+    "entity": "lunch.alert",
+    "group": "group_lunch_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "lunch.lunch_alert_view_search",
+    "package": "lunch",
+    "name": "lunch.alert.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search"
+     },
+     "fields": [
+      {
+       "name": "message"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive_today",
+       "string": "Currently inactive",
+       "domain": "[('available_today', '=', False)]"
+      },
+      {
+       "name": "active",
+       "string": "Active",
+       "domain": "[('active', '=', True)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_alert_view_tree",
+    "package": "lunch",
+    "name": "lunch.alert.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "mode"
+      },
+      {
+       "name": "message",
+       "column_invisible": "True"
+      },
+      {
+       "name": "available_today"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_alert_view_form",
+    "package": "lunch",
+    "name": "lunch.alert.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "alert form"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. Order before 11am"
+      },
+      {
+       "name": "mode",
+       "widget": "radio"
+      },
+      {
+       "name": "recipients",
+       "widget": "radio",
+       "invisible": "mode != 'chat'"
+      },
+      {
+       "name": "location_ids",
+       "widget": "many2many_tags",
+       "required": "1"
+      },
+      {
+       "name": "until"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "notification_time",
+       "widget": "float_time",
+       "required": "mode == 'chat'"
+      },
+      {
+       "name": "notification_moment"
+      },
+      {
+       "name": "tz",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "message"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 2,
+      "many2many_tags": 1,
+      "boolean_toggle": 1,
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_alert_view_kanban",
+    "package": "lunch",
+    "name": "lunch.alert.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "mode"
+      },
+      {
+       "name": "recipients"
+      },
+      {
+       "name": "notification_time"
+      },
+      {
+       "name": "notification_moment"
+      },
+      {
+       "name": "location_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "lunch.lunch_alert_action",
+    "package": "lunch",
+    "name": "Lunch Alerts",
+    "view_mode": "list,form,kanban",
+    "view_id": "lunch_alert_view_tree",
+    "search_view_id": "lunch_alert_view_search",
+    "domain": "['|', ('active', '=', True), ('active', '=', False)]",
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create new lunch alerts\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "lunch.alert"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

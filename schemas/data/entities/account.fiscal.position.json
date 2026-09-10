@@ -1,0 +1,1433 @@
+{
+ "catalog": {
+  "name": "entity:account.fiscal.position",
+  "description": "Complete definition of entity Fiscal Position (account.fiscal.position).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.fiscal.position",
+  "storage_name": "account_fiscal_position",
+  "full_name": "Fiscal Position",
+  "kind": "persistent",
+  "description": "Fiscal Position",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "point_of_sale",
+   "l10n_ar",
+   "l10n_br",
+   "l10n_fr_pos_cert",
+   "l10n_gr_edi",
+   "l10n_it_edi_doi"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "defined_in_package": "account",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Fiscal Position",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "account",
+    "full_name": "Fiscal Position"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "help": "By unchecking the active field, you may hide a fiscal position without deleting it.",
+    "defined_in_package": "account",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "readonly": true,
+    "index": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "account",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "account_ids",
+    "type": "One2many",
+    "comodel": "account.fiscal.position.account",
+    "inverse_name": "position_id",
+    "string": "Account Mapping",
+    "copy": true,
+    "defined_in_package": "account",
+    "full_name": "Account Mapping",
+    "target_entity": "account.fiscal.position.account"
+   },
+   {
+    "name": "account_map",
+    "type": "Binary",
+    "compute": "_compute_account_map",
+    "defined_in_package": "account",
+    "string": "Account Map",
+    "full_name": "Account Map"
+   },
+   {
+    "name": "tax_ids",
+    "type": "Many2many",
+    "comodel": "account.tax",
+    "relation": "account_fiscal_position_account_tax_rel",
+    "column1": "account_fiscal_position_id",
+    "column2": "account_tax_id",
+    "string": "Taxes",
+    "defined_in_package": "account",
+    "full_name": "Taxes",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "tax_map",
+    "type": "Binary",
+    "compute": "_compute_tax_map",
+    "defined_in_package": "account",
+    "string": "Tax Map",
+    "full_name": "Tax Map"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Notes",
+    "translate": true,
+    "help": "Legal mentions that have to be printed on the invoices.",
+    "defined_in_package": "account",
+    "full_name": "Notes"
+   },
+   {
+    "name": "auto_apply",
+    "type": "Boolean",
+    "string": "Detect Automatically",
+    "help": "Apply tax & account mappings on invoices automatically if the matching criterias (VAT/Country) are met.",
+    "defined_in_package": "account",
+    "full_name": "Detect Automatically"
+   },
+   {
+    "name": "vat_required",
+    "type": "Boolean",
+    "string": "VAT required",
+    "help": "Apply only if partner has a VAT number.",
+    "defined_in_package": "account",
+    "full_name": "value-added tax required"
+   },
+   {
+    "name": "company_country_id",
+    "type": "Many2one",
+    "string": "Company Country",
+    "related": "company_id.account_fiscal_country_id",
+    "defined_in_package": "account",
+    "full_name": "Company Country"
+   },
+   {
+    "name": "fiscal_country_codes",
+    "type": "Char",
+    "string": "Company Fiscal Country Code",
+    "related": "company_country_id.code",
+    "defined_in_package": "account",
+    "full_name": "Company Fiscal Country Code"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Country",
+    "inverse": "_inverse_foreign_vat",
+    "help": "Apply only if delivery country matches.",
+    "defined_in_package": "account",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "is_domestic",
+    "type": "Boolean",
+    "compute": "_compute_is_domestic",
+    "store": true,
+    "defined_in_package": "account",
+    "string": "Is Domestic",
+    "full_name": "Is Domestic"
+   },
+   {
+    "name": "country_group_id",
+    "type": "Many2one",
+    "comodel": "res.country.group",
+    "string": "Country Group",
+    "inverse": "_inverse_foreign_vat",
+    "help": "Apply only if delivery country matches the group.",
+    "defined_in_package": "account",
+    "full_name": "Country Group",
+    "target_entity": "res.country.group"
+   },
+   {
+    "name": "state_ids",
+    "type": "Many2many",
+    "comodel": "res.country.state",
+    "string": "Federal States",
+    "defined_in_package": "account",
+    "full_name": "Federal States",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "zip_from",
+    "type": "Char",
+    "string": "Zip Range From",
+    "defined_in_package": "account",
+    "full_name": "Zip Range From"
+   },
+   {
+    "name": "zip_to",
+    "type": "Char",
+    "string": "Zip Range To",
+    "defined_in_package": "account",
+    "full_name": "Zip Range To"
+   },
+   {
+    "name": "states_count",
+    "type": "Integer",
+    "compute": "_compute_states_count",
+    "defined_in_package": "account",
+    "string": "States Count",
+    "full_name": "States Count"
+   },
+   {
+    "name": "foreign_vat",
+    "type": "Char",
+    "string": "Foreign Tax ID",
+    "inverse": "_inverse_foreign_vat",
+    "help": "The tax ID of your company in the region mapped by this fiscal position.",
+    "defined_in_package": "account",
+    "full_name": "Foreign Tax identifier"
+   },
+   {
+    "name": "foreign_vat_header_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "templates_found",
+      "Templates Found"
+     ],
+     [
+      "no_template",
+      "No Template"
+     ]
+    ],
+    "compute": "_compute_foreign_vat_header_mode",
+    "defined_in_package": "account",
+    "string": "Foreign Value-added tax Header Mode",
+    "full_name": "Foreign Value-added tax Header Mode"
+   },
+   {
+    "name": "l10n_ar_afip_responsibility_type_ids",
+    "type": "Many2many",
+    "comodel": "l10n_ar.afip.responsibility.type",
+    "relation": "l10n_ar_afip_reponsibility_type_fiscal_pos_rel",
+    "string": "ARCA Responsibility Types",
+    "help": "List of ARCA responsibilities where this fiscal position should be auto-detected",
+    "defined_in_package": "l10n_ar",
+    "full_name": "ARCA Responsibility Types",
+    "target_entity": "l10n_ar.afip.responsibility.type"
+   },
+   {
+    "name": "l10n_br_fp_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "internal",
+      "Internal"
+     ],
+     [
+      "ss_nnm",
+      "South/Southeast selling to North/Northeast/Midwest"
+     ],
+     [
+      "interstate",
+      "Other interstate"
+     ]
+    ],
+    "string": "Interstate Fiscal Position Type",
+    "defined_in_package": "l10n_br",
+    "full_name": "Interstate Fiscal Position Type"
+   },
+   {
+    "name": "l10n_gr_edi_preferred_classification_ids",
+    "type": "One2many",
+    "comodel": "l10n_gr_edi.preferred_classification",
+    "string": "Preferred myDATA Classification",
+    "inverse_name": "fiscal_position_id",
+    "defined_in_package": "l10n_gr_edi",
+    "full_name": "Preferred myDATA Classification",
+    "target_entity": "l10n_gr_edi.preferred_classification"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_is_domestic",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id.domestic_fiscal_position_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_states_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_foreign_vat_header_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "foreign_vat",
+         "country_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_map",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "tax_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_map",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_ids.account_src_id",
+         "account_ids.account_dest_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_zip",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "zip_from",
+         "zip_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values for the zip range and \"To\" should be greater than \"From\".",
+        "line": 116
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_validate_foreign_vat_country",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "country_id",
+         "country_group_id",
+         "state_ids",
+         "foreign_vat"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The country of the foreign VAT number could not be detected. Please assign a country to the fiscal position.",
+        "line": 123
+       },
+       {
+        "kind": "ValidationError",
+        "message": "A fiscal position with a foreign VAT already exists in this country.",
+        "line": 139
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You cannot create a fiscal position with a country outside of the selected country group.",
+        "line": 130
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You cannot create a fiscal position with a foreign VAT within your fiscal country without assigning it a state.",
+        "line": 127
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_foreign_vat",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "country_id",
+         "foreign_vat"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_foreign_vat",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "map_tax",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "taxes"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "map_account",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "account"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_country_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "country_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_country_group_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "country_group_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_zip_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "zip_from",
+     "zip_to"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot modify a fiscal position used in a POS order. You should archive it and create a new one.",
+        "line": 13
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_first_matching_fpos",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partner"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fpos_validation_functions",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partner"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Returns a list of functions to validate fiscal positions against a partner.\n        ",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fiscal_position",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partner",
+     "delivery"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": ":return: fiscal position found (recordset)\n:rtype: :class:`account.fiscal.position`",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_related_taxes",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_foreign_taxes",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_archive",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_never_unlink_declaration_of_intent_fiscal_position",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete the special fiscal position for Declarations of Intent.",
+        "line": 14
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_zip",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values for the zip range and \"To\" should be greater than \"From\"."
+   },
+   {
+    "operation": "_validate_foreign_vat_country",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The country of the foreign VAT number could not be detected. Please assign a country to the fiscal position."
+   },
+   {
+    "operation": "_validate_foreign_vat_country",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "A fiscal position with a foreign VAT already exists in this country."
+   },
+   {
+    "operation": "_validate_foreign_vat_country",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "You cannot create a fiscal position with a country outside of the selected country group."
+   },
+   {
+    "operation": "_validate_foreign_vat_country",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "You cannot create a fiscal position with a foreign VAT within your fiscal country without assigning it a state."
+   },
+   {
+    "operation": "write",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "You cannot modify a fiscal position used in a POS order. You should archive it and create a new one."
+   },
+   {
+    "operation": "_never_unlink_declaration_of_intent_fiscal_position",
+    "package": "l10n_it_edi_doi",
+    "kind": "UserError",
+    "message": "You cannot delete the special fiscal position for Declarations of Intent."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_fiscal_position_product_manager",
+    "package": "account",
+    "name": "account.fiscal.position account.manager",
+    "entity": "account.fiscal.position",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "account.access_account_fiscal_position",
+    "package": "account",
+    "name": "account.fiscal.position all",
+    "entity": "account.fiscal.position",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase.access_account_fiscal_position_purchase_user",
+    "package": "purchase",
+    "name": "account.fiscal.position purchase",
+    "entity": "account.fiscal.position",
+    "group": "group_purchase_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_fiscal_position_public",
+    "package": "website_sale",
+    "name": "fiscal position public",
+    "entity": "account.fiscal.position",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.account_fiscal_position_comp_rule",
+    "package": "account",
+    "name": "Account fiscal Mapping company rule",
+    "entity": "account.fiscal.position",
+    "domain": "[('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.view_account_position_form",
+    "package": "account",
+    "name": "account.fiscal.position.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Fiscal Position"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "states_count",
+       "invisible": "1"
+      },
+      {
+       "name": "company_country_id",
+       "invisible": "1"
+      },
+      {
+       "name": "fiscal_country_codes",
+       "invisible": "1"
+      },
+      {
+       "name": "foreign_vat_header_mode",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "auto_apply"
+      },
+      {
+       "name": "vat_required",
+       "invisible": "not auto_apply"
+      },
+      {
+       "name": "foreign_vat"
+      },
+      {
+       "name": "country_group_id",
+       "invisible": "not auto_apply"
+      },
+      {
+       "name": "country_id",
+       "required": "foreign_vat",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "state_ids",
+       "widget": "many2many_tags",
+       "invisible": "(not auto_apply and not foreign_vat) or not country_id or states_count == 0",
+       "domain": "[('country_id', '=', country_id)]"
+      },
+      {
+       "name": "zip_from"
+      },
+      {
+       "name": "zip_to"
+      },
+      {
+       "name": "account_ids",
+       "widget": "one2many",
+       "nolabel": "1"
+      },
+      {
+       "name": "account_src_id",
+       "domain": "['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"
+      },
+      {
+       "name": "account_dest_id",
+       "domain": "['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"
+      },
+      {
+       "name": "account_src_id",
+       "domain": "['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"
+      },
+      {
+       "name": "account_dest_id",
+       "domain": "['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"
+      },
+      {
+       "name": "note",
+       "placeholder": "Legal Notes..."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_create_foreign_taxes",
+       "string": "here",
+       "type": "object",
+       "class": "oe_link p-0 align-baseline"
+      },
+      {
+       "name": "action_open_related_taxes",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-bars"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "account_mapping",
+       "string": "Account Mapping",
+       "invisible": null,
+       "groups": "account.group_account_readonly"
+      }
+     ],
+     "widgets": {
+      "many2many_tags": 1,
+      "one2many": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "action_open_related_taxes",
+       "type": "object",
+       "icon": "fa-bars"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.view_account_position_filter",
+    "package": "account",
+    "name": "account.fiscal.position.filter",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Fiscal Positions"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Fiscal Position"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "active",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      },
+      {
+       "name": "domestic",
+       "string": "Domestic",
+       "domain": "[('is_domestic', '=', True)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "account.view_account_position_tree",
+    "package": "account",
+    "name": "account.fiscal.position.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Fiscal Position"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "l10n_ar.view_account_position_form",
+    "package": "l10n_ar",
+    "name": "account.fiscal.position.form",
+    "view_type": "field",
+    "inherits_view": "account.view_account_position_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "auto_apply",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "auto_apply",
+       "position": "after"
+      },
+      {
+       "name": "l10n_ar_afip_responsibility_type_ids",
+       "widget": "many2many_tags",
+       "invisible": "'AR' not in fiscal_country_codes or not auto_apply",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_br.view_account_position_form",
+    "package": "l10n_br",
+    "name": "account.fiscal.position.form",
+    "view_type": "field",
+    "inherits_view": "account.view_account_position_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "auto_apply",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "auto_apply",
+       "position": "after"
+      },
+      {
+       "name": "l10n_br_fp_type",
+       "invisible": "country_id != %(base.br)d",
+       "options": "{'no_open': True, 'no_create': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_gr_edi.view_account_position_form",
+    "package": "l10n_gr_edi",
+    "name": "account.fiscal.position.form",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_position_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//page[@name='account_mapping']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_gr_edi_preferred_classification_ids"
+      },
+      {
+       "name": "priority",
+       "widget": "handle"
+      },
+      {
+       "name": "l10n_gr_edi_available_inv_type",
+       "column_invisible": "1"
+      },
+      {
+       "name": "l10n_gr_edi_available_cls_category",
+       "column_invisible": "1"
+      },
+      {
+       "name": "l10n_gr_edi_available_cls_type",
+       "column_invisible": "1"
+      },
+      {
+       "name": "l10n_gr_edi_inv_type",
+       "widget": "dynamic_selection",
+       "options": "{'available_field': 'l10n_gr_edi_available_inv_type'}"
+      },
+      {
+       "name": "l10n_gr_edi_cls_category",
+       "widget": "dynamic_selection",
+       "options": "{'available_field': 'l10n_gr_edi_available_cls_category'}"
+      },
+      {
+       "name": "l10n_gr_edi_cls_type",
+       "widget": "dynamic_selection",
+       "options": "{'available_field': 'l10n_gr_edi_available_cls_type'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "l10n_gr_edi_classification",
+       "string": "myDATA",
+       "invisible": "'GR' not in fiscal_country_codes",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "handle": 1,
+      "dynamic_selection": 3
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//page[@name='account_mapping']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_account_fiscal_position_form",
+    "package": "account",
+    "name": "Fiscal Positions",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "view_account_position_filter",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a new fiscal position\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.fiscal.position"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,6733 @@
+{
+ "catalog": {
+  "name": "entity:purchase.order",
+  "description": "Complete definition of entity Purchase Order (purchase.order).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "purchase.order",
+  "storage_name": "purchase_order",
+  "full_name": "Purchase Order",
+  "kind": "persistent",
+  "description": "Purchase Order",
+  "defined_by_package": "purchase",
+  "extended_by_packages": [
+   "purchase_stock",
+   "sale_purchase",
+   "sale_purchase_stock",
+   "stock_dropshipping",
+   "mrp_subcontracting_dropshipping",
+   "purchase_mrp",
+   "mrp_subcontracting_purchase",
+   "project_purchase",
+   "project_purchase_stock",
+   "purchase_edi_ubl_bis3",
+   "purchase_product_matrix",
+   "purchase_repair",
+   "purchase_requisition",
+   "purchase_requisition_stock"
+  ],
+  "mixins": [
+   "portal.mixin",
+   "product.catalog.mixin",
+   "mail.thread",
+   "mail.activity.mixin",
+   "account.document.import.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "priority desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "name",
+   "partner_ref"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Order Reference",
+    "required": true,
+    "index": "trigram",
+    "copy": false,
+    "default": {
+     "dynamic": "lambda self: _('New')"
+    },
+    "defined_in_package": "purchase",
+    "full_name": "Order Reference"
+   },
+   {
+    "name": "priority",
+    "type": "Selection",
+    "selection": [
+     [
+      "0",
+      "Normal"
+     ],
+     [
+      "1",
+      "Urgent"
+     ]
+    ],
+    "string": "Priority",
+    "default": "0",
+    "index": true,
+    "defined_in_package": "purchase",
+    "full_name": "Priority"
+   },
+   {
+    "name": "origin",
+    "type": "Char",
+    "string": "Source",
+    "copy": false,
+    "help": "Reference of the document that generated this purchase order request (e.g. a sales order)",
+    "defined_in_package": "purchase",
+    "full_name": "Source"
+   },
+   {
+    "name": "partner_ref",
+    "type": "Char",
+    "string": "Vendor Reference",
+    "copy": false,
+    "help": "Reference of the sales order or bid sent by the vendor. It's used to do the matching when you receive the products as this reference is usually written on the delivery order sent by your vendor.",
+    "defined_in_package": "purchase",
+    "full_name": "Vendor Reference"
+   },
+   {
+    "name": "date_order",
+    "type": "Datetime",
+    "string": "Order Deadline",
+    "required": true,
+    "index": true,
+    "copy": false,
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "help": "Depicts the date within which the Quotation should be confirmed and converted into a purchase order.",
+    "defined_in_package": "purchase",
+    "full_name": "Order Deadline"
+   },
+   {
+    "name": "date_approve",
+    "type": "Datetime",
+    "string": "Confirmation Date",
+    "readonly": true,
+    "index": true,
+    "copy": false,
+    "defined_in_package": "purchase",
+    "full_name": "Confirmation Date"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Vendor",
+    "required": true,
+    "change_default": true,
+    "tracking": true,
+    "check_company": true,
+    "index": true,
+    "help": "You can find a vendor by its Name, TIN, Email or Internal Reference.",
+    "defined_in_package": "purchase",
+    "full_name": "Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "dest_address_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "check_company": true,
+    "string": "Dropship Address",
+    "help": "Put an address if you want to deliver directly from the vendor to the customer. Otherwise, keep empty to deliver to your own company.",
+    "defined_in_package": "purchase",
+    "compute": "_compute_dest_address_id",
+    "store": true,
+    "readonly": false,
+    "extended_in_packages": [
+     "purchase_stock"
+    ],
+    "full_name": "Dropship Address",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "required": true,
+    "compute": "_compute_currency_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "defined_in_package": "purchase",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "RFQ"
+     ],
+     [
+      "sent",
+      "RFQ Sent"
+     ],
+     [
+      "to approve",
+      "To Approve"
+     ],
+     [
+      "purchase",
+      "Purchase Order"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "readonly": true,
+    "index": true,
+    "copy": false,
+    "default": "draft",
+    "tracking": true,
+    "defined_in_package": "purchase",
+    "full_name": "Status"
+   },
+   {
+    "name": "locked",
+    "type": "Boolean",
+    "help": "Locked Purchase Orders cannot be modified.",
+    "default": false,
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "purchase",
+    "string": "Locked",
+    "full_name": "Locked"
+   },
+   {
+    "name": "lock_confirmed_po",
+    "type": "Selection",
+    "related": "company_id.po_lock",
+    "defined_in_package": "purchase",
+    "string": "Lock Confirmed Purchase order",
+    "full_name": "Lock Confirmed Purchase order"
+   },
+   {
+    "name": "order_line",
+    "type": "One2many",
+    "comodel": "purchase.order.line",
+    "inverse_name": "order_id",
+    "string": "Order Lines",
+    "copy": true,
+    "defined_in_package": "purchase",
+    "full_name": "Order Lines",
+    "target_entity": "purchase.order.line"
+   },
+   {
+    "name": "acknowledged",
+    "type": "Boolean",
+    "string": "Acknowledged",
+    "copy": false,
+    "tracking": true,
+    "help": "It indicates that the vendor has acknowledged the receipt of the purchase order.",
+    "defined_in_package": "purchase",
+    "full_name": "Acknowledged"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Terms and Conditions",
+    "defined_in_package": "purchase",
+    "full_name": "Terms and Conditions"
+   },
+   {
+    "name": "partner_bill_count",
+    "type": "Integer",
+    "related": "partner_id.supplier_invoice_count",
+    "defined_in_package": "purchase",
+    "string": "Partner Bill Count",
+    "full_name": "Partner Bill Count"
+   },
+   {
+    "name": "invoice_count",
+    "type": "Integer",
+    "compute": "_compute_invoice",
+    "string": "Bill Count",
+    "copy": false,
+    "default": 0,
+    "store": true,
+    "defined_in_package": "purchase",
+    "full_name": "Bill Count"
+   },
+   {
+    "name": "invoice_ids",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "compute": "_compute_invoice",
+    "string": "Bills",
+    "copy": false,
+    "store": true,
+    "defined_in_package": "purchase",
+    "full_name": "Bills",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "invoice_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "no",
+      "Nothing to Bill"
+     ],
+     [
+      "to invoice",
+      "Waiting Bills"
+     ],
+     [
+      "invoiced",
+      "Fully Billed"
+     ]
+    ],
+    "string": "Billing Status",
+    "compute": "_get_invoiced",
+    "store": true,
+    "readonly": true,
+    "copy": false,
+    "default": "no",
+    "defined_in_package": "purchase",
+    "full_name": "Billing Status"
+   },
+   {
+    "name": "date_planned",
+    "type": "Datetime",
+    "string": "Expected Arrival",
+    "index": true,
+    "copy": false,
+    "compute": "_compute_date_planned",
+    "store": true,
+    "readonly": false,
+    "help": "Delivery date promised by vendor. This date is used to determine expected arrival of products.",
+    "defined_in_package": "purchase",
+    "full_name": "Expected Arrival"
+   },
+   {
+    "name": "date_calendar_start",
+    "type": "Datetime",
+    "compute": "_compute_date_calendar_start",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "purchase",
+    "string": "Date Calendar Start",
+    "full_name": "Date Calendar Start"
+   },
+   {
+    "name": "amount_untaxed",
+    "type": "Monetary",
+    "string": "Untaxed Amount",
+    "store": true,
+    "readonly": true,
+    "compute": "_amount_all",
+    "tracking": true,
+    "defined_in_package": "purchase",
+    "full_name": "Untaxed Amount"
+   },
+   {
+    "name": "tax_totals",
+    "type": "Binary",
+    "compute": "_compute_tax_totals",
+    "exportable": false,
+    "defined_in_package": "purchase",
+    "string": "Tax Totals",
+    "full_name": "Tax Totals"
+   },
+   {
+    "name": "amount_tax",
+    "type": "Monetary",
+    "string": "Taxes",
+    "store": true,
+    "readonly": true,
+    "compute": "_amount_all",
+    "defined_in_package": "purchase",
+    "full_name": "Taxes"
+   },
+   {
+    "name": "amount_total",
+    "type": "Monetary",
+    "string": "Total",
+    "store": true,
+    "readonly": true,
+    "compute": "_amount_all",
+    "defined_in_package": "purchase",
+    "full_name": "Total"
+   },
+   {
+    "name": "amount_total_cc",
+    "type": "Monetary",
+    "string": "Total in currency",
+    "store": true,
+    "readonly": true,
+    "compute": "_amount_all",
+    "currency_field": "company_currency_id",
+    "defined_in_package": "purchase",
+    "full_name": "Total in currency"
+   },
+   {
+    "name": "fiscal_position_id",
+    "type": "Many2one",
+    "comodel": "account.fiscal.position",
+    "string": "Fiscal Position",
+    "domain": "['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+    "defined_in_package": "purchase",
+    "full_name": "Fiscal Position",
+    "target_entity": "account.fiscal.position"
+   },
+   {
+    "name": "tax_country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "compute": "_compute_tax_country_id",
+    "compute_sudo": true,
+    "help": "Technical field to filter the available taxes depending on the fiscal country and fiscal position.",
+    "defined_in_package": "purchase",
+    "string": "Tax Country",
+    "full_name": "Tax Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "tax_calculation_rounding_method",
+    "type": "Selection",
+    "related": "company_id.tax_calculation_rounding_method",
+    "string": "Tax calculation rounding method",
+    "readonly": true,
+    "defined_in_package": "purchase",
+    "full_name": "Tax calculation rounding method"
+   },
+   {
+    "name": "payment_term_id",
+    "type": "Many2one",
+    "comodel": "account.payment.term",
+    "string": "Payment Terms",
+    "domain": "['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+    "defined_in_package": "purchase",
+    "full_name": "Payment Terms",
+    "target_entity": "account.payment.term"
+   },
+   {
+    "name": "incoterm_id",
+    "type": "Many2one",
+    "comodel": "account.incoterms",
+    "string": "Incoterm",
+    "help": "International Commercial Terms are a series of predefined commercial terms used in international transactions.",
+    "defined_in_package": "purchase",
+    "full_name": "Incoterm",
+    "target_entity": "account.incoterms"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "related": "order_line.product_id",
+    "string": "Product",
+    "defined_in_package": "purchase",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Buyer",
+    "index": true,
+    "tracking": true,
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "check_company": true,
+    "defined_in_package": "purchase",
+    "full_name": "Buyer",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "index": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company.id"
+    },
+    "defined_in_package": "purchase",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "company_currency_id",
+    "type": "Many2one",
+    "related": "company_id.currency_id",
+    "string": "Company Currency",
+    "defined_in_package": "purchase",
+    "full_name": "Company Currency"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_id.account_fiscal_country_id.code",
+    "string": "Country code",
+    "defined_in_package": "purchase",
+    "full_name": "Country code"
+   },
+   {
+    "name": "company_price_include",
+    "type": "Selection",
+    "related": "company_id.account_price_include",
+    "defined_in_package": "purchase",
+    "string": "Company Price Include",
+    "full_name": "Company Price Include"
+   },
+   {
+    "name": "currency_rate",
+    "type": "Float",
+    "string": "Currency Rate",
+    "compute": "_compute_currency_rate",
+    "digits": 0,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "purchase",
+    "full_name": "Currency Rate"
+   },
+   {
+    "name": "duplicated_order_ids",
+    "type": "Many2many",
+    "comodel": "purchase.order",
+    "compute": "_compute_duplicated_order_ids",
+    "defined_in_package": "purchase",
+    "string": "Duplicated Order",
+    "full_name": "Duplicated Order",
+    "target_entity": "purchase.order"
+   },
+   {
+    "name": "receipt_reminder_email",
+    "type": "Boolean",
+    "string": "Receipt Reminder Email",
+    "compute": "_compute_receipt_reminder_email",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "purchase",
+    "full_name": "Receipt Reminder Email"
+   },
+   {
+    "name": "reminder_date_before_receipt",
+    "type": "Integer",
+    "string": "Days Before Receipt",
+    "compute": "_compute_receipt_reminder_email",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "purchase",
+    "full_name": "Days Before Receipt"
+   },
+   {
+    "name": "is_late",
+    "type": "Boolean",
+    "string": "Is Late",
+    "store": false,
+    "search": "_search_is_late",
+    "defined_in_package": "purchase",
+    "full_name": "Is Late"
+   },
+   {
+    "name": "show_comparison",
+    "type": "Boolean",
+    "string": "Show Comparison",
+    "compute": "_compute_show_comparison",
+    "defined_in_package": "purchase",
+    "full_name": "Show Comparison"
+   },
+   {
+    "name": "purchase_warning_text",
+    "type": "Text",
+    "string": "Purchase Warning",
+    "help": "Internal warning for the partner or the products as set by the user.",
+    "compute": "_compute_purchase_warning_text",
+    "defined_in_package": "purchase",
+    "full_name": "Purchase Warning"
+   },
+   {
+    "name": "incoterm_location",
+    "type": "Char",
+    "string": "Incoterm Location",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Incoterm Location"
+   },
+   {
+    "name": "incoming_picking_count",
+    "type": "Integer",
+    "string": "Incoming Shipment count",
+    "compute": "_compute_incoming_picking_count",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Incoming Shipment count"
+   },
+   {
+    "name": "picking_ids",
+    "type": "Many2many",
+    "comodel": "stock.picking",
+    "compute": "_compute_picking_ids",
+    "string": "Receptions",
+    "copy": false,
+    "store": true,
+    "defined_in_package": "purchase_stock",
+    "full_name": "Receptions",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "picking_type_id",
+    "type": "Many2one",
+    "comodel": "stock.picking.type",
+    "string": "Deliver To",
+    "required": true,
+    "default": {
+     "dynamic": "_default_picking_type"
+    },
+    "domain": "['|', ('warehouse_id', '=', False), ('warehouse_id.company_id', '=', company_id)]",
+    "help": "This will determine operation type of incoming shipment",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Deliver To",
+    "target_entity": "stock.picking.type"
+   },
+   {
+    "name": "default_location_dest_id_usage",
+    "type": "Selection",
+    "related": "picking_type_id.default_location_dest_id.usage",
+    "string": "Destination Location Type",
+    "help": "Technical field used to display the Drop Ship Address",
+    "readonly": true,
+    "defined_in_package": "purchase_stock",
+    "full_name": "Destination Location Type"
+   },
+   {
+    "name": "reference_ids",
+    "type": "Many2many",
+    "comodel": "stock.reference",
+    "relation": "stock_reference_purchase_rel",
+    "column1": "purchase_id",
+    "column2": "reference_id",
+    "string": "References",
+    "copy": false,
+    "defined_in_package": "purchase_stock",
+    "full_name": "References",
+    "target_entity": "stock.reference"
+   },
+   {
+    "name": "is_shipped",
+    "type": "Boolean",
+    "compute": "_compute_is_shipped",
+    "defined_in_package": "purchase_stock",
+    "string": "Is Shipped",
+    "full_name": "Is Shipped"
+   },
+   {
+    "name": "effective_date",
+    "type": "Datetime",
+    "string": "Arrival",
+    "compute": "_compute_effective_date",
+    "store": true,
+    "copy": false,
+    "help": "Completion date of the first receipt order.",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Arrival"
+   },
+   {
+    "name": "on_time_rate",
+    "type": "Float",
+    "related": "partner_id.on_time_rate",
+    "compute_sudo": false,
+    "defined_in_package": "purchase_stock",
+    "string": "On Time Rate",
+    "full_name": "On Time Rate"
+   },
+   {
+    "name": "receipt_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "pending",
+      "Not Received"
+     ],
+     [
+      "partial",
+      "Partially Received"
+     ],
+     [
+      "full",
+      "Fully Received"
+     ]
+    ],
+    "string": "Receipt Status",
+    "compute": "_compute_receipt_status",
+    "store": true,
+    "help": "Red: Late\n            Orange: To process today\n            Green: On time",
+    "defined_in_package": "purchase_stock",
+    "full_name": "Receipt Status"
+   },
+   {
+    "name": "sale_order_count",
+    "type": "Integer",
+    "string": "Number of Source Sale",
+    "compute": "_compute_sale_order_count",
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "sale_purchase",
+    "full_name": "Number of Source Sale"
+   },
+   {
+    "name": "has_sale_order",
+    "type": "Boolean",
+    "string": "Technical field for whether the purchase order has associated sale orders",
+    "compute": "_compute_sale_order_count",
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "sale_purchase",
+    "full_name": "Technical field for whether the purchase order has associated sale orders"
+   },
+   {
+    "name": "dropship_picking_count",
+    "type": "Integer",
+    "string": "Dropship Count",
+    "compute": "_compute_incoming_picking_count",
+    "defined_in_package": "stock_dropshipping",
+    "full_name": "Dropship Count"
+   },
+   {
+    "name": "default_location_dest_id_is_subcontracting_loc",
+    "type": "Boolean",
+    "compute": "_compute_default_location_dest_id_is_subcontracting_loc",
+    "defined_in_package": "mrp_subcontracting_dropshipping",
+    "string": "Default Location Dest Identifier Is Subcontracting Loc",
+    "full_name": "Default Location Dest Identifier Is Subcontracting Loc"
+   },
+   {
+    "name": "mrp_production_count",
+    "type": "Integer",
+    "string": "Count of MO Source",
+    "compute": "_compute_mrp_production_count",
+    "groups": "mrp.group_mrp_user",
+    "defined_in_package": "purchase_mrp",
+    "full_name": "Count of manufacturing order Source"
+   },
+   {
+    "name": "subcontracting_resupply_picking_count",
+    "type": "Integer",
+    "string": "Count of Subcontracting Resupply",
+    "compute": "_compute_subcontracting_resupply_picking_count",
+    "help": "Count of Subcontracting Resupply for component",
+    "defined_in_package": "mrp_subcontracting_purchase",
+    "full_name": "Count of Subcontracting Resupply"
+   },
+   {
+    "name": "project_id",
+    "type": "Many2one",
+    "comodel": "project.project",
+    "domain": [
+     [
+      "is_template",
+      "=",
+      false
+     ]
+    ],
+    "defined_in_package": "project_purchase",
+    "string": "Project",
+    "full_name": "Project",
+    "target_entity": "project.project"
+   },
+   {
+    "name": "report_grids",
+    "type": "Boolean",
+    "string": "Print Variant Grids",
+    "default": true,
+    "help": "If set, the matrix of configurable products will be shown on the report of this order.",
+    "defined_in_package": "purchase_product_matrix",
+    "full_name": "Print Variant Grids"
+   },
+   {
+    "name": "grid_product_tmpl_id",
+    "type": "Many2one",
+    "comodel": "product.template",
+    "store": false,
+    "help": "Technical field for product_matrix functionalities.",
+    "defined_in_package": "purchase_product_matrix",
+    "string": "Grid Product Tmpl",
+    "full_name": "Grid Product Tmpl",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "grid_update",
+    "type": "Boolean",
+    "default": false,
+    "store": false,
+    "help": "Whether the grid field contains a new matrix to apply or not.",
+    "defined_in_package": "purchase_product_matrix",
+    "string": "Grid Update",
+    "full_name": "Grid Update"
+   },
+   {
+    "name": "grid",
+    "type": "Char",
+    "store": false,
+    "help": "Technical storage of grid. \nIf grid_update, will be loaded on the PO. \nIf not, represents the matrix to open.",
+    "defined_in_package": "purchase_product_matrix",
+    "string": "Grid",
+    "full_name": "Grid"
+   },
+   {
+    "name": "repair_count",
+    "type": "Integer",
+    "string": "Count of source repairs",
+    "compute": "_compute_repair_count",
+    "groups": "stock.group_stock_user",
+    "defined_in_package": "purchase_repair",
+    "full_name": "Count of source repairs"
+   },
+   {
+    "name": "requisition_id",
+    "type": "Many2one",
+    "comodel": "purchase.requisition",
+    "string": "Agreement",
+    "copy": false,
+    "index": "btree_not_null",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Agreement",
+    "target_entity": "purchase.requisition"
+   },
+   {
+    "name": "requisition_type",
+    "type": "Selection",
+    "related": "requisition_id.requisition_type",
+    "defined_in_package": "purchase_requisition",
+    "string": "Requisition Type",
+    "full_name": "Requisition Type"
+   },
+   {
+    "name": "purchase_group_id",
+    "type": "Many2one",
+    "comodel": "purchase.order.group",
+    "index": "btree_not_null",
+    "defined_in_package": "purchase_requisition",
+    "string": "Purchase Group",
+    "full_name": "Purchase Group",
+    "target_entity": "purchase.order.group"
+   },
+   {
+    "name": "alternative_po_ids",
+    "type": "One2many",
+    "comodel": "purchase.order",
+    "related": "purchase_group_id.order_ids",
+    "readonly": false,
+    "domain": "[('id', '!=', id), ('state', 'in', ['draft', 'sent', 'to approve'])]",
+    "string": "Alternative POs",
+    "check_company": true,
+    "help": "Other potential purchase orders for purchasing products",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Alternative purchase orders",
+    "target_entity": "purchase.order"
+   },
+   {
+    "name": "on_time_rate_perc",
+    "type": "Float",
+    "string": "OTD",
+    "compute": "_compute_on_time_rate_perc",
+    "defined_in_package": "purchase_requisition_stock",
+    "full_name": "OTD"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_amount_all",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.price_subtotal",
+         "company_id",
+         "currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "order_line.qty_to_invoice"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoice",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.invoice_lines.move_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_order_line_company_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id",
+         "order_line"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Your quotation contains products from company %(product_company)s whereas your quotation belongs to company %(quote_company)s. \n Please change the company of your quotation or remove the products from other companies (%(bad_products)s).",
+        "line": 194
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_access_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_calendar_start",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "date_order",
+         "date_approve"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_rate",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "currency_id",
+         "date_order",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount_total_cc",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount_total",
+         "currency_rate"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_planned",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.date_planned"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "date_planned = the earliest date_planned across all order lines. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "partner_ref",
+         "amount_total",
+         "currency_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "show_total_amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_receipt_reminder_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "partner_id",
+         "partner_id.reminder_date_before_receipt"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_totals",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "lang"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.price_subtotal",
+         "currency_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_country_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id.account_fiscal_country_id",
+         "fiscal_position_id.country_id",
+         "fiscal_position_id.foreign_vat"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_comparison",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line",
+         "order_line.product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_purchase_warning_text",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id.name",
+         "partner_id.purchase_warn_msg",
+         "order_line.purchase_line_warn_msg"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duplicated_order_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_ref",
+         "origin",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute duplicated purchase orders based on key fields.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_duplicate_orders",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Fetch duplicated orders.\n\n:return: Dictionary mapping order to its related duplicated orders.\n:rtype: dict",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_business_doc",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "onchange_date_planned",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "date_planned"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_late",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Unsupported operator",
+        "line": 369
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_domain_is_late",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_requisition",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_cancelled",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "In order to delete a purchase order, you must cancel it first.",
+        "line": 412
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_must_delete_date_planned",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_product_matrix",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "onchange",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "values",
+     "field_names",
+     "fields_spec"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Override onchange to NOT update all date_planned on PO lines when\ndate_planned on PO is updated by the change of date_planned on PO lines.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_report_base_filename",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "onchange_partner_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "partner_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "fiscal_position_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Trigger the recompute of the taxes if the fiscal position is changed on the PO.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "message_post",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_get_recipients_groups",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "model_description",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_by_email_prepare_rendering_context",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "msg_vals",
+     "model_description",
+     "force_email_company",
+     "force_email_lang",
+     "force_record_name"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_subtype",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "init_values"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_rfq_send",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "This function opens a window to compose an email, with the edi purchase template message loaded by default",
+      "size_in_lines": 55,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_acknowledge",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_purchase_comparison",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "print_quotation",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_approve",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "force"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_draft",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_confirm",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "error_msg",
+        "line": 631
+       }
+      ]
+     },
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to cancel purchase order(s): %s. You must first unlock them.",
+        "line": 644
+       },
+       {
+        "kind": "UserError",
+        "message": "Unable to cancel purchase order(s): %s. You must first cancel their related vendor bills.",
+        "line": 648
+       }
+      ]
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_lock",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_unlock",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_confirmation_error_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Return whether order can be confirmed or not if not then return error message. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_supplier_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partner",
+     "line",
+     "price",
+     "currency"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_supplier_to_product",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_bill_matching",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_down_payment_section_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_downpayments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "line_vals"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_invoice",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "attachment_ids"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Create the invoice associated to the PO.\n        ",
+      "size_in_lines": 74,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You can only upload a bill for a single vendor at a time.",
+        "line": 824
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_merge",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 80,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please select at least two purchase orders with state RFQ and RFQ sent to merge.",
+        "line": 842
+       },
+       {
+        "kind": "UserError",
+        "message": "In selected purchase order to merge these details must be same\nVendor, currency, destination, dropship address and agreement",
+        "line": 851
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_merge_po_post_process",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "rfqs"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_merge_alternative_po",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "rfqs"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_grouped_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "rfq"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_invoice",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Prepare the dict of values to create the new invoice for a purchase order.\n        ",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_invoice",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "invoices"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "This function returns an action that display existing vendor bills of\ngiven purchase order ids. When only one found, show the vendor bill\nimmediately.",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "retrieve_dashboard",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "This function returns the values to populate the custom dashboard in\nthe purchase order views.",
+      "size_in_lines": 86,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessDenied",
+        "message": null,
+        "line": 982
+       }
+      ]
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_reminder_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "send_single"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send_reminder_preview",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_reminder_open_composer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_id"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_orders_to_remind",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "When auto sending a reminder mail, only send for unconfirmed purchase\norder and not all products are service.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "When auto sending reminder mails, don't send for purchase order with\nvalidated receipts.",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_order_line_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "child_field"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_add_from_catalog",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_action_add_from_catalog_extra_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_order_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "products",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_record_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_ids",
+     "section_id",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_price_and_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Fetch the product's data used by the purchase's catalog.\n\n:return: the product's price and, if applicable, the minimum quantity to\n         buy and the product's packaging data.\n:rtype: dict",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": "Fetch the product's data used by the purchase's catalog.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_acknowledge_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_confirm_url",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "confirm_type"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Create url for confirm reminder or purchase reception email for sending\nin mail. Unsuported anymore. We only use the acknowledge mechanism. Keep it\nfor backward compatibility",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_update_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Create portal url for user to update the scheduled date on purchase\norder lines.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_approval_allowed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Returns whether the order qualifies to be approved by the current user",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_localized_date_planned",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "date_planned"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Returns the localized date planned in the timezone of the order's user or the\ncompany's partner or UTC if none of them are set.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_order_timezone",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Returns the timezone of the order's user or the company's partner\nor UTC if none of them are set. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_date_planned_for_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "updated_dates"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_order_line_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "quantity",
+     "section_id",
+     "child_field",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Update purchase order line information for a given product or create\na new one if none exists yet.\n:param int product_id: The product, as a `product.product` id.\n:param int quantity: The quantity selected in the catalog.\n:param int section_id: The id of section selected in the catalog.\n:return: The unit price of the product, based on the pricelist of the\n         purchase order and the quantity selected.\n:rtype: float",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_create_section_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Return the default values for creating a section line in the purchase order through\ncatalog.\n\n:return: A dictionary with default values for creating a new section.\n:rtype: dict",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_parent_field_on_child_model",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_update_date_activity",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "updated_dates"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_update_date_activity",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "updated_dates",
+     "activity"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_readonly",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Return whether the purchase order is read-only or not based on the state.\nA purchase order is considered read-only if its state is 'cancel'.\n\n:return: Whether the purchase order is read-only or not.\n:rtype: bool",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_import_templates",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_edi_builders",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_edi_ubl_bis3",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_document_from_attachment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "attachment_ids"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": "Create the purchase orders from given attachment_ids\nand redirect newly create order view.\n\n:param list attachment_ids: List of attachments process.\n:return: An action redirecting to related sale order view.\n:rtype: dict",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No attachment was provided",
+        "line": 1414
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_default_picking_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_picking_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.move_ids.picking_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_incoming_picking_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_ids.is_dropship"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_effective_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_ids.date_done"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_shipped",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_ids",
+         "picking_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_receipt_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_ids",
+         "picking_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dest_address_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.sale_order_id.partner_shipping_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting_dropshipping",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "default_location_dest_id_is_subcontracting_loc"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_company_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_purchase_order_suggest",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": "Adds suggested products to PO, removing products with no suggested_qty, and\ncollapsing existing po_lines into at most 1 orderline. Saves suggestion params\n(eg. number_of_days) to partner table. ",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_picking",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_action_view_picking",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "pickings"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": "This function returns an action that display existing picking orders of given purchase order ids. When only one found, show the picking immediately.\n        ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_log_decrease_ordered_quantity",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "purchase_order_lines_quantities"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_destination_location",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_final_location_record",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_picking_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_reference_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_picking",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You must set a Vendor Location for this partner %s",
+        "line": 364
+       }
+      ]
+     },
+     {
+      "package": "project_purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_picking",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_picking_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "activity"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": "Helper method to add picking info to the Date Updated activity when\nvender updates date_planned of the po lines.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_display_stock_in_catalog",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_order_line_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_ids",
+     "child_field",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": "Add suggest_ctx to env in order to trigger product.product suggest compute fields",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_reference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reference"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": "link the given references to the list of references. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_remove_reference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reference"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": "remove the given references from the list of references. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_order_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.sale_order_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reference_ids",
+         "reference_ids.sale_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_sale_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sale_orders",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_activity_cancel_on_sale",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": "If some PO are cancelled, we need to put an activity on their origin SO (only the open ones). Since a PO can have\nbeen modified by several SO, when cancelling one PO, many next activities can be schedulded on different SO.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_set_dest_address",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_dropship",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_dropshipped",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_dropshipping",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_default_location_dest_id_is_subcontracting_loc",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting_dropshipping",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_type_id.default_location_dest_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "onchange_picking_type_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting_dropshipping",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "picking_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mrp_production_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reference_ids",
+         "reference_ids.production_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_mrp_productions",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_mrp_productions",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_subcontracting_resupply_picking_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting_purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_subcontracting_resupply",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_subcontracting_resupplies",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting_purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_import_file_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "file_data"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_edi_ubl_bis3",
+      "decorators": [],
+      "documentation": "Identify UBL files. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_edi_decoder",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "file_data",
+     "new"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_edi_ubl_bis3",
+      "decorators": [],
+      "documentation": "Override of purchase to add edi decoder for xml files.\n\n:param dict file_data: File data to decode.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_activity_set_details",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "body"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_edi_ubl_bis3",
+      "decorators": [],
+      "documentation": "Create activity on purchase order to set details.\n:return: None.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_line_vals_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "lines_vals"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_edi_ubl_bis3",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get purchases order line values list.\n:param list line_vals: List of values [name, qty, price, tax].\n:return: List of dict values.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_grid_up",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_product_matrix",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "grid_product_tmpl_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_apply_grid",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_product_matrix",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "grid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 80,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot change the quantity of a product present in multiple purchase lines.",
+        "line": 87
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_matrix",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_template"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_product_matrix",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_report_matrixes",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_product_matrix",
+      "decorators": [],
+      "documentation": "Reporting method.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_repair_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_line.move_dest_ids.repair_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_repair_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_requisition_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "requisition_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_requisition_stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "requisition_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_alternative",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_compare_alternative_lines",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_tender_best_lines",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_on_time_rate_perc",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "on_time_rate"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_order_line_company_id",
+    "package": "purchase",
+    "kind": "ValidationError",
+    "message": "Your quotation contains products from company %(product_company)s whereas your quotation belongs to company %(quote_company)s. \n Please change the company of your quotation or remove the products from other companies (%(bad_products)s)."
+   },
+   {
+    "operation": "_search_is_late",
+    "package": "purchase",
+    "kind": "ValidationError",
+    "message": "Unsupported operator"
+   },
+   {
+    "operation": "_unlink_if_cancelled",
+    "package": "purchase",
+    "kind": "UserError",
+    "message": "In order to delete a purchase order, you must cancel it first."
+   },
+   {
+    "operation": "button_confirm",
+    "package": "purchase",
+    "kind": "UserError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "button_cancel",
+    "package": "purchase",
+    "kind": "UserError",
+    "message": "Unable to cancel purchase order(s): %s. You must first unlock them."
+   },
+   {
+    "operation": "button_cancel",
+    "package": "purchase",
+    "kind": "UserError",
+    "message": "Unable to cancel purchase order(s): %s. You must first cancel their related vendor bills."
+   },
+   {
+    "operation": "action_create_invoice",
+    "package": "purchase",
+    "kind": "ValidationError",
+    "message": "You can only upload a bill for a single vendor at a time."
+   },
+   {
+    "operation": "action_merge",
+    "package": "purchase",
+    "kind": "UserError",
+    "message": "Please select at least two purchase orders with state RFQ and RFQ sent to merge."
+   },
+   {
+    "operation": "action_merge",
+    "package": "purchase",
+    "kind": "UserError",
+    "message": "In selected purchase order to merge these details must be same\nVendor, currency, destination, dropship address and agreement"
+   },
+   {
+    "operation": "create_document_from_attachment",
+    "package": "purchase",
+    "kind": "UserError",
+    "message": "No attachment was provided"
+   },
+   {
+    "operation": "_prepare_picking",
+    "package": "purchase_stock",
+    "kind": "UserError",
+    "message": "You must set a Vendor Location for this partner %s"
+   },
+   {
+    "operation": "_apply_grid",
+    "package": "purchase_product_matrix",
+    "kind": "ValidationError",
+    "message": "You cannot change the quantity of a product present in multiple purchase lines."
+   }
+  ],
+  "state_fields": [
+   "state",
+   "invoice_status",
+   "receipt_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "purchase.access_purchase_order",
+    "package": "purchase",
+    "name": "purchase.order",
+    "entity": "purchase.order",
+    "group": "group_purchase_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "purchase.access_purchase_order_manager",
+    "package": "purchase",
+    "name": "purchase.order",
+    "entity": "purchase.order",
+    "group": "group_purchase_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "purchase.access_purchase_order_invoicing_payments_readonly",
+    "package": "purchase",
+    "name": "purchase.order",
+    "entity": "purchase.order",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase.access_purchase_order_invoicing_payments",
+    "package": "purchase",
+    "name": "purchase.order",
+    "entity": "purchase.order",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase.access_purchase_order_portal",
+    "package": "purchase",
+    "name": "purchase.order.portal",
+    "entity": "purchase.order",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase_stock.access_purchase_order_stock_worker",
+    "package": "purchase_stock",
+    "name": "purchase.order",
+    "entity": "purchase.order",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "purchase.purchase_order_comp_rule",
+    "package": "purchase",
+    "name": "Purchase Order multi-company",
+    "entity": "purchase.order",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "purchase.portal_purchase_order_user_rule",
+    "package": "purchase",
+    "name": "Portal Purchase Orders",
+    "entity": "purchase.order",
+    "domain": "[('partner_id', 'child_of', [user.commercial_partner_id.id])]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "0",
+    "applies_to_delete": "1"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mrp_subcontracting_dropshipping.view_purchase_order_inherit",
+    "package": "mrp_subcontracting_dropshipping",
+    "name": "Purchase Order Inherit Dropship Subcontractor",
+    "view_type": "field",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "dest_address_id",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "dest_address_id",
+       "position": "before"
+      },
+      {
+       "name": "default_location_dest_id_is_subcontracting_loc",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp_subcontracting_purchase.purchase_order_form_mrp_subcontracting_purchase",
+    "package": "mrp_subcontracting_purchase",
+    "name": "purchase.order.inherited.form.mrp.subcontracting.purchase",
+    "view_type": "xpath",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_button_box')]/button[@name='action_view_picking']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "subcontracting_resupply_picking_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_subcontracting_resupply",
+       "type": "object",
+       "invisible": "subcontracting_resupply_picking_count == 0",
+       "class": "oe_stat_button",
+       "groups": "stock.group_stock_user",
+       "icon": "fa-truck"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_button_box')]/button[@name='action_view_picking']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "project_purchase.view_order_form_inherit_project_purchase",
+    "package": "project_purchase",
+    "name": "purchase.order.form.purchase.project",
+    "view_type": "field",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "origin",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "origin",
+       "position": "after"
+      },
+      {
+       "name": "project_id",
+       "groups": "project.group_project_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_calendar",
+    "package": "purchase",
+    "name": "purchase.order.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "string": "Calendar View",
+      "date_start": "date_calendar_start",
+      "color": "partner_id",
+      "hide_time": "true",
+      "event_limit": "5",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_ref"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary"
+      },
+      {
+       "name": "partner_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date_calendar_start",
+      "date_stop": null,
+      "date_delay": null,
+      "color": "partner_id",
+      "mode": null,
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_pivot",
+    "package": "purchase",
+    "name": "purchase.order.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Purchase Order",
+      "display_quantity": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "amount_total"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "partner_id",
+       "type": "row"
+      },
+      {
+       "name": "amount_total",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_graph",
+    "package": "purchase",
+    "name": "purchase.order.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Purchase Order",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "amount_total"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "amount_total",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_form",
+    "package": "purchase",
+    "name": "purchase.order.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Purchase Order",
+      "class": "o_purchase_order"
+     },
+     "fields": [
+      {
+       "name": "locked",
+       "invisible": "1"
+      },
+      {
+       "name": "lock_confirmed_po",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "readonly": "1"
+      },
+      {
+       "name": "purchase_warning_text"
+      },
+      {
+       "name": "duplicated_order_ids",
+       "widget": "x2many_buttons",
+       "string": "Duplicated Documents"
+      },
+      {
+       "name": "invoice_count",
+       "widget": "statinfo",
+       "string": "Vendor Bills"
+      },
+      {
+       "name": "invoice_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "show_comparison",
+       "invisible": "1"
+      },
+      {
+       "name": "priority",
+       "widget": "priority"
+      },
+      {
+       "name": "name",
+       "readonly": "1"
+      },
+      {
+       "name": "partner_id",
+       "widget": "res_partner_many2one",
+       "readonly": "state in ['cancel', 'purchase']",
+       "context": "{'res_partner_search_mode': 'supplier', 'show_vat': True}",
+       "placeholder": "Name, TIN, Email, or Reference"
+      },
+      {
+       "name": "partner_ref"
+      },
+      {
+       "name": "currency_id",
+       "readonly": "state in ['cancel', 'purchase']",
+       "groups": "base.group_multi_currency",
+       "force_save": "1"
+      },
+      {
+       "name": "id",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1",
+       "readonly": "state in ['cancel', 'purchase']"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1",
+       "readonly": "state in ['cancel', 'purchase']",
+       "groups": "!base.group_multi_currency"
+      },
+      {
+       "name": "tax_calculation_rounding_method",
+       "invisible": "1"
+      },
+      {
+       "name": "date_order",
+       "invisible": "state  == 'purchase'",
+       "readonly": "state in ['cancel', 'purchase']"
+      },
+      {
+       "name": "date_approve"
+      },
+      {
+       "name": "date_planned",
+       "readonly": "state not in ('draft', 'sent', 'to approve', 'purchase')"
+      },
+      {
+       "name": "receipt_reminder_email"
+      },
+      {
+       "name": "reminder_date_before_receipt"
+      },
+      {
+       "name": "tax_country_id",
+       "invisible": "1"
+      },
+      {
+       "name": "order_line",
+       "widget": "product_label_section_and_note_field_o2m",
+       "readonly": "state == 'cancel' or locked",
+       "context": "{'default_state': 'draft'}",
+       "options": "{ 'subsections': True }",
+       "mode": "list,kanban"
+      },
+      {
+       "name": "tax_calculation_rounding_method",
+       "column_invisible": "True"
+      },
+      {
+       "name": "display_type",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_type",
+       "column_invisible": "True"
+      },
+      {
+       "name": "invoice_lines",
+       "column_invisible": "True"
+      },
+      {
+       "name": "technical_price_unit",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "product_id",
+       "widget": "product_label_section_and_note_field",
+       "readonly": "state in ('purchase', 'to approve', 'cancel') or is_downpayment",
+       "required": "not display_type and not is_downpayment",
+       "domain": "[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', 'parent_of', parent.company_id)]",
+       "context": "{'partner_id':partner_id, 'quantity':product_qty, 'company_id': parent.company_id}",
+       "options": "{'show_label_warning': True}",
+       "optional": "show",
+       "force_save": "1"
+      },
+      {
+       "name": "name",
+       "widget": "section_and_note_text",
+       "optional": "show"
+      },
+      {
+       "name": "date_planned",
+       "readonly": "is_downpayment",
+       "required": "not display_type and not is_downpayment",
+       "optional": "hide",
+       "force_save": "1"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "options": "{'product_field': 'product_id', 'business_domain': 'purchase_order', 'amount_field': 'price_subtotal'}",
+       "groups": "analytic.group_analytic_accounting"
+      },
+      {
+       "name": "product_qty",
+       "readonly": "is_downpayment"
+      },
+      {
+       "name": "qty_received_manual",
+       "column_invisible": "True"
+      },
+      {
+       "name": "qty_received_method",
+       "column_invisible": "True"
+      },
+      {
+       "name": "qty_received",
+       "readonly": "qty_received_method != 'manual' or is_downpayment",
+       "string": "Received",
+       "column_invisible": "parent.state != 'purchase'",
+       "optional": "show"
+      },
+      {
+       "name": "qty_invoiced",
+       "string": "Billed",
+       "column_invisible": "parent.state != 'purchase'",
+       "optional": "show"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "state in ('purchase', 'cancel') or is_downpayment",
+       "required": "not display_type and not is_downpayment",
+       "options": "{'no_create': True, 'no_open': True, 'quantity_field': 'product_qty'}",
+       "optional": "show",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "price_unit",
+       "readonly": "qty_invoiced != 0"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "readonly": "is_downpayment",
+       "domain": "[('type_tax_use', '=', 'purchase'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id), ('active', '=', True)]",
+       "context": "{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}",
+       "options": "{'no_create': True}",
+       "optional": "show"
+      },
+      {
+       "name": "discount",
+       "readonly": "qty_invoiced != 0",
+       "string": "Disc.%",
+       "optional": "hide"
+      },
+      {
+       "name": "price_subtotal",
+       "string": "Amount"
+      },
+      {
+       "name": "tax_calculation_rounding_method",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "invisible": "1"
+      },
+      {
+       "name": "display_type",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "widget": "many2one_barcode",
+       "readonly": "state in ('purchase', 'to approve', 'cancel')",
+       "domain": "[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]",
+       "context": "{'partner_id': parent.partner_id}"
+      },
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "required": "not display_type and not is_downpayment",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "qty_received_method",
+       "invisible": "1"
+      },
+      {
+       "name": "qty_received",
+       "invisible": "parent.state != 'purchase'",
+       "readonly": "qty_received_method != 'manual'",
+       "string": "Received Quantity"
+      },
+      {
+       "name": "qty_invoiced",
+       "invisible": "parent.state != 'purchase'",
+       "string": "Billed Quantity"
+      },
+      {
+       "name": "price_unit"
+      },
+      {
+       "name": "discount"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "domain": "[('type_tax_use', '=', 'purchase'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id)]",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "date_planned",
+       "required": "not display_type and not is_downpayment"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "options": "{'product_field': 'product_id', 'business_domain': 'purchase_order'}",
+       "groups": "analytic.group_analytic_accounting"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "invoice_lines"
+      },
+      {
+       "name": "name",
+       "invisible": "not display_type",
+       "nolabel": "1"
+      },
+      {
+       "name": "display_type"
+      },
+      {
+       "name": "tax_calculation_rounding_method"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "price_subtotal"
+      },
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "product_uom_id",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "price_total"
+      },
+      {
+       "name": "price_unit"
+      },
+      {
+       "name": "discount"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "note",
+       "nolabel": "1",
+       "placeholder": "Define your terms and conditions ..."
+      },
+      {
+       "name": "tax_totals",
+       "widget": "account-tax-totals-field",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state in ['cancel', 'purchase']",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "origin"
+      },
+      {
+       "name": "invoice_status",
+       "invisible": "state in ('draft', 'sent', 'to approve', 'cancel')"
+      },
+      {
+       "name": "payment_term_id",
+       "readonly": "invoice_status == 'invoiced' or locked",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "fiscal_position_id",
+       "readonly": "invoice_status == 'invoiced' or locked",
+       "options": "{'no_create': True}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_rfq_send",
+       "string": "Send RFQ",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight",
+       "context": "{'send_rfq':True}",
+       "data-hotkey": "g"
+      },
+      {
+       "name": "button_confirm",
+       "string": "Confirm Order",
+       "type": "object",
+       "invisible": "state != 'sent'",
+       "class": "oe_highlight",
+       "context": "{'validate_analytic': True}",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_approve",
+       "string": "Approve Order",
+       "type": "object",
+       "invisible": "state != 'to approve'",
+       "class": "oe_highlight",
+       "groups": "purchase.group_purchase_manager",
+       "data-hotkey": "z"
+      },
+      {
+       "name": "action_rfq_send",
+       "string": "Send RFQ",
+       "type": "object",
+       "invisible": "state != 'sent'",
+       "context": "{'send_rfq':True}",
+       "data-hotkey": "g"
+      },
+      {
+       "name": "button_confirm",
+       "string": "Confirm Order",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "context": "{'validate_analytic': True}",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_rfq_send",
+       "string": "Send PO",
+       "type": "object",
+       "invisible": "state != 'purchase'",
+       "context": "{'send_rfq':False}",
+       "data-hotkey": "g"
+      },
+      {
+       "name": "action_acknowledge",
+       "string": "Acknowledge",
+       "type": "object",
+       "invisible": "acknowledged or state != 'purchase'"
+      },
+      {
+       "name": "button_draft",
+       "string": "Set to Draft",
+       "type": "object",
+       "invisible": "state != 'cancel'",
+       "data-hotkey": "o"
+      },
+      {
+       "name": "print_quotation",
+       "string": "Print",
+       "type": "object",
+       "invisible": "state == 'purchase'",
+       "groups": "base.group_user",
+       "data-hotkey": "k"
+      },
+      {
+       "name": "%(purchase.action_report_purchase_order)d",
+       "string": "Print",
+       "type": "action",
+       "invisible": "state != 'purchase'",
+       "groups": "base.group_user",
+       "data-hotkey": "k"
+      },
+      {
+       "name": "button_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state not in ('draft', 'to approve', 'sent', 'purchase') or locked",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "button_lock",
+       "string": "Lock",
+       "type": "object",
+       "invisible": "locked or state != 'purchase' or not lock_confirmed_po == 'lock'",
+       "data-hotkey": "l"
+      },
+      {
+       "name": "button_unlock",
+       "string": "Unlock",
+       "type": "object",
+       "invisible": "not locked",
+       "groups": "purchase.group_purchase_manager",
+       "data-hotkey": "l"
+      },
+      {
+       "name": "action_bill_matching",
+       "type": "object",
+       "invisible": "not partner_id or state != 'purchase' or not partner_bill_count or invoice_status == 'invoiced'",
+       "class": "oe_stat_button",
+       "groups": "account.group_account_invoice",
+       "icon": "fa-bullseye"
+      },
+      {
+       "name": "action_view_invoice",
+       "type": "object",
+       "invisible": "invoice_count == 0 or state in ('draft', 'sent', 'to approve')",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      },
+      {
+       "name": "action_purchase_comparison",
+       "type": "object",
+       "invisible": "not show_comparison",
+       "class": "oe_stat_button",
+       "icon": "fa-dollar"
+      },
+      {
+       "name": "action_add_from_catalog",
+       "string": "Catalog",
+       "type": "object",
+       "class": "px-4 btn-link",
+       "context": "{'order_id': parent.id}"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "products",
+       "string": "Products",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "notes",
+       "string": "Notes",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "invoices_incoming_shiptments",
+       "string": "Invoices and Incoming Shipments",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "purchase_delivery_invoice",
+       "string": "Other Information",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "x2many_buttons": 1,
+      "statinfo": 1,
+      "priority": 1,
+      "res_partner_many2one": 1,
+      "product_label_section_and_note_field_o2m": 1,
+      "handle": 1,
+      "product_label_section_and_note_field": 1,
+      "section_and_note_text": 1,
+      "analytic_distribution": 2,
+      "many2one_uom": 2,
+      "many2many_tax_tags": 2,
+      "many2one_barcode": 1,
+      "account-tax-totals-field": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_rfq_send",
+       "invisible": "state != 'draft'",
+       "string": "Send RFQ",
+       "type": "object",
+       "context": "{'send_rfq':True}",
+       "class": "oe_highlight",
+       "data-hotkey": "g"
+      },
+      {
+       "name": "button_confirm",
+       "type": "object",
+       "invisible": "state != 'sent'",
+       "string": "Confirm Order",
+       "context": "{'validate_analytic': True}",
+       "class": "oe_highlight",
+       "id": "bid_confirm",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_approve",
+       "type": "object",
+       "invisible": "state != 'to approve'",
+       "string": "Approve Order",
+       "class": "oe_highlight",
+       "groups": "purchase.group_purchase_manager",
+       "data-hotkey": "z"
+      },
+      {
+       "name": "action_rfq_send",
+       "invisible": "state != 'sent'",
+       "string": "Send RFQ",
+       "type": "object",
+       "context": "{'send_rfq':True}",
+       "data-hotkey": "g"
+      },
+      {
+       "name": "button_confirm",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "context": "{'validate_analytic': True}",
+       "string": "Confirm Order",
+       "id": "draft_confirm",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_rfq_send",
+       "invisible": "state != 'purchase'",
+       "string": "Send PO",
+       "type": "object",
+       "context": "{'send_rfq':False}",
+       "data-hotkey": "g"
+      },
+      {
+       "name": "action_acknowledge",
+       "string": "Acknowledge",
+       "type": "object",
+       "invisible": "acknowledged or state != 'purchase'"
+      },
+      {
+       "name": "button_draft",
+       "invisible": "state != 'cancel'",
+       "string": "Set to Draft",
+       "type": "object",
+       "data-hotkey": "o"
+      },
+      {
+       "name": "print_quotation",
+       "string": "Print",
+       "type": "object",
+       "groups": "base.group_user",
+       "data-hotkey": "k",
+       "invisible": "state == 'purchase'"
+      },
+      {
+       "name": "%(purchase.action_report_purchase_order)d",
+       "string": "Print",
+       "type": "action",
+       "groups": "base.group_user",
+       "data-hotkey": "k",
+       "invisible": "state != 'purchase'"
+      },
+      {
+       "name": "button_cancel",
+       "invisible": "state not in ('draft', 'to approve', 'sent', 'purchase') or locked",
+       "string": "Cancel",
+       "type": "object",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "button_lock",
+       "type": "object",
+       "string": "Lock",
+       "invisible": "locked or state != 'purchase' or not lock_confirmed_po == 'lock'",
+       "data-hotkey": "l"
+      },
+      {
+       "name": "button_unlock",
+       "type": "object",
+       "string": "Unlock",
+       "invisible": "not locked",
+       "groups": "purchase.group_purchase_manager",
+       "data-hotkey": "l"
+      }
+     ],
+     "statusbar_field": "locked",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "action_bill_matching",
+       "type": "object",
+       "groups": "account.group_account_invoice",
+       "icon": "fa-bullseye",
+       "invisible": "not partner_id or state != 'purchase' or not partner_bill_count or invoice_status == 'invoiced'"
+      },
+      {
+       "type": "object",
+       "name": "action_view_invoice",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o",
+       "invisible": "invoice_count == 0 or state in ('draft', 'sent', 'to approve')"
+      },
+      {
+       "type": "object",
+       "name": "action_purchase_comparison",
+       "class": "oe_stat_button",
+       "invisible": "not show_comparison",
+       "icon": "fa-dollar"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase.view_purchase_order_filter",
+    "package": "purchase",
+    "name": "request.quotation.select",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Purchase Order"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Order",
+       "filter_domain": "['|', '|', ('name', 'ilike', self), ('partner_ref', 'ilike', self), ('partner_id', 'child_of', self)]"
+      },
+      {
+       "name": "partner_id",
+       "operator": "child_of"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "origin"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_purchases",
+       "string": "My Purchases",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "starred",
+       "string": "Starred",
+       "domain": "[('priority', '=', '1')]"
+      },
+      {
+       "name": "to_approve",
+       "string": "To Approve",
+       "domain": "[('state', '=', 'to approve')]",
+       "invisible": "1"
+      },
+      {
+       "name": "draft_rfqs",
+       "string": "New",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "waiting_rfqs",
+       "string": "Sent",
+       "domain": "[('state', '=', 'sent')]"
+      },
+      {
+       "name": "approved",
+       "string": "Purchase Orders",
+       "domain": "[('state', '=', 'purchase')]"
+      },
+      {
+       "name": "late",
+       "string": "Late",
+       "domain": "[('state', 'in', ['draft', 'sent', 'to approve']),('date_order', '<', 'now')]"
+      },
+      {
+       "name": "not_acknowledged",
+       "string": "Not Acknowledged",
+       "domain": "[('state', 'in', ['purchase', 'done']), ('acknowledged', '=', False)]"
+      },
+      {
+       "name": "late_receipt",
+       "string": "Late Receipts",
+       "domain": "[('state', 'in', ['purchase', 'done']), ('is_late', '=', True)]"
+      },
+      {
+       "name": "order_date",
+       "string": "Order Date",
+       "date": "date_order"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_exception",
+       "string": "Warnings",
+       "domain": "[('activity_exception_decoration', '!=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "vendor",
+       "string": "Vendor",
+       "domain": "[]",
+       "context": "{'group_by': 'partner_id'}"
+      },
+      {
+       "name": "representative",
+       "string": "Buyer",
+       "domain": "[]",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "order_date",
+       "string": "Order Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date_order'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_view_search",
+    "package": "purchase",
+    "name": "purchase.order.select",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Purchase Order"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Order",
+       "filter_domain": "['|', '|', ('name', 'ilike', self), ('partner_ref', 'ilike', self), ('partner_id', 'child_of', self)]"
+      },
+      {
+       "name": "partner_id",
+       "operator": "child_of"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "activity_user_id",
+       "string": "Activities of"
+      },
+      {
+       "name": "activity_type_id",
+       "string": "Activity type"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_Orders",
+       "string": "My Orders",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "starred",
+       "string": "Starred",
+       "domain": "[('priority', '=', '1')]"
+      },
+      {
+       "name": "not_invoiced",
+       "string": "Waiting Bills",
+       "domain": "[('invoice_status', '=', 'to invoice')]",
+       "help": "Purchase orders that include lines not invoiced."
+      },
+      {
+       "name": "invoiced",
+       "string": "Bills Received",
+       "domain": "[('invoice_status', '=', 'invoiced')]",
+       "help": "Purchase orders that have been invoiced."
+      },
+      {
+       "name": "order_date",
+       "string": "Order Date",
+       "date": "date_order"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_exception",
+       "string": "Warnings",
+       "domain": "[('activity_exception_decoration', '!=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "vendor",
+       "string": "Vendor",
+       "domain": "[]",
+       "context": "{'group_by': 'partner_id'}"
+      },
+      {
+       "name": "representative",
+       "string": "Buyer",
+       "domain": "[]",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "order_date",
+       "string": "Order Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date_order'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase.view_purchase_order_kanban",
+    "package": "purchase",
+    "name": "purchase.order.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "js_class": "purchase_dashboard_kanban",
+      "sample": "1",
+      "quick_create": "false"
+     },
+     "fields": [
+      {
+       "name": "date_order"
+      },
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "priority",
+       "widget": "priority"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "date_order",
+       "options": "{'show_time': false}"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "kanban_activity"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "options": "{'classes': {'draft': 'default', 'cancel': 'default', 'approved': 'warning'}}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "priority": 1,
+      "monetary": 1,
+      "kanban_activity": 1,
+      "label_selection": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": "false",
+     "progressbar": [
+      {
+       "field": "activity_state",
+       "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_view_kanban_without_dashboard",
+    "package": "purchase",
+    "name": "purchase.order.view.kanban.without.dashboard",
+    "view_type": "xpath",
+    "inherits_view": "purchase.view_purchase_order_kanban",
+    "mode": "primary",
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//kanban",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//kanban",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_tree",
+    "package": "purchase",
+    "name": "purchase.order.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Purchase Order",
+      "decoration-muted": "state=='cancel'",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "priority",
+       "widget": "priority",
+       "optional": "show",
+       "nolabel": "1"
+      },
+      {
+       "name": "partner_ref",
+       "optional": "hide"
+      },
+      {
+       "name": "name",
+       "readonly": "1",
+       "string": "Reference",
+       "decoration-info": "state in ('draft','sent')"
+      },
+      {
+       "name": "date_order",
+       "readonly": "state in ['cancel', 'purchase']",
+       "column_invisible": "not context.get('quotation_only', False)",
+       "optional": "show"
+      },
+      {
+       "name": "date_approve",
+       "column_invisible": "context.get('quotation_only', False)",
+       "optional": "show"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "1"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "options": "{'no_create': True}",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "list_activity",
+       "string": "Next Activity"
+      },
+      {
+       "name": "user_id",
+       "optional": "show"
+      },
+      {
+       "name": "origin",
+       "optional": "hide"
+      },
+      {
+       "name": "amount_untaxed",
+       "widget": "monetary",
+       "string": "Untaxed",
+       "optional": "hide",
+       "sum": "Total Untaxed amount"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary",
+       "optional": "show",
+       "sum": "Total amount"
+      },
+      {
+       "name": "currency_id",
+       "readonly": "state in ['cancel', 'purchase']",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "optional": "show"
+      },
+      {
+       "name": "date_planned",
+       "column_invisible": "context.get('quotation_only', False)",
+       "optional": "show"
+      },
+      {
+       "name": "invoice_status",
+       "column_invisible": "context.get('quotation_only', False)",
+       "optional": "hide"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "priority": 1,
+      "list_activity": 1,
+      "monetary": 2,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "state=='cancel'"
+     }
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_kpis_tree",
+    "package": "purchase",
+    "name": "purchase.order.inherit.purchase.order.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Purchase Order",
+      "decoration-info": "state in ['draft', 'sent']",
+      "decoration-muted": "state == 'cancel'",
+      "multi_edit": "1",
+      "class": "o_purchase_order",
+      "js_class": "purchase_dashboard_list",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "priority",
+       "widget": "priority",
+       "optional": "show",
+       "nolabel": "1"
+      },
+      {
+       "name": "partner_ref",
+       "optional": "hide"
+      },
+      {
+       "name": "name",
+       "readonly": "1",
+       "string": "Reference",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "date_approve",
+       "column_invisible": "context.get('quotation_only', False)",
+       "optional": "show"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "1"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "options": "{'no_create': True}",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state in ['cancel', 'purchase']",
+       "column_invisible": "True",
+       "groups": "!base.group_multi_company"
+      },
+      {
+       "name": "date_planned",
+       "column_invisible": "context.get('quotation_only', False)",
+       "optional": "show"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "optional": "show"
+      },
+      {
+       "name": "date_order",
+       "widget": "remaining_days",
+       "invisible": "state == 'purchase' or state == 'cancel'",
+       "readonly": "state in ['cancel', 'purchase']",
+       "column_invisible": "not context.get('quotation_only', False)",
+       "optional": "show"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "list_activity",
+       "optional": "show"
+      },
+      {
+       "name": "origin",
+       "optional": "hide"
+      },
+      {
+       "name": "amount_untaxed",
+       "widget": "monetary",
+       "string": "Untaxed",
+       "optional": "hide",
+       "sum": "Total Untaxed amount"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary",
+       "optional": "show",
+       "sum": "Total amount",
+       "decoration-bf": "state == 'purchase'"
+      },
+      {
+       "name": "currency_id",
+       "readonly": "state in ['cancel', 'purchase']",
+       "column_invisible": "True"
+      },
+      {
+       "name": "amount_total_cc",
+       "widget": "monetary",
+       "optional": "hide",
+       "sum": "Total amount"
+      },
+      {
+       "name": "company_currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "optional": "show",
+       "decoration-warning": "state == 'to approve'",
+       "decoration-success": "state == 'purchase'",
+       "decoration-info": "state == 'draft' or state == 'sent'"
+      },
+      {
+       "name": "invoice_status",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "confirm": "Are you sure you want to cancel the selected RFQs/Orders?"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "priority": 1,
+      "many2one_avatar_user": 1,
+      "remaining_days": 1,
+      "list_activity": 1,
+      "monetary": 3,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state in ['draft', 'sent']",
+      "decoration-muted": "state == 'cancel'"
+     }
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_view_tree",
+    "package": "purchase",
+    "name": "purchase.order.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "decoration-muted": "state == 'cancel'",
+      "decoration-info": "invoice_status == 'to invoice'",
+      "string": "Purchase Order",
+      "class": "o_purchase_order",
+      "multi_edit": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "priority",
+       "widget": "priority",
+       "optional": "show",
+       "nolabel": "1"
+      },
+      {
+       "name": "partner_ref",
+       "optional": "hide"
+      },
+      {
+       "name": "name",
+       "readonly": "1",
+       "string": "Reference",
+       "decoration-info": "state in ('draft','sent')",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "date_approve",
+       "column_invisible": "context.get('quotation_only', False)",
+       "optional": "show"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "state in ['cancel', 'purchase']"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state in ['cancel', 'purchase']",
+       "options": "{'no_create': True}",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state in ['cancel', 'purchase']",
+       "column_invisible": "True",
+       "groups": "!base.group_multi_company"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "optional": "show"
+      },
+      {
+       "name": "date_order",
+       "readonly": "state in ['cancel', 'purchase']",
+       "column_invisible": "not context.get('quotation_only', False)",
+       "optional": "show"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "list_activity",
+       "optional": "show"
+      },
+      {
+       "name": "origin",
+       "optional": "show"
+      },
+      {
+       "name": "amount_untaxed",
+       "widget": "monetary",
+       "string": "Untaxed",
+       "optional": "hide",
+       "sum": "Total Untaxed amount"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary",
+       "optional": "show",
+       "sum": "Total amount",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "currency_id",
+       "readonly": "state in ['cancel', 'purchase']",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "amount_total_cc",
+       "widget": "monetary",
+       "optional": "hide",
+       "sum": "Total amount"
+      },
+      {
+       "name": "company_currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "invoice_status",
+       "widget": "badge",
+       "optional": "show",
+       "decoration-success": "invoice_status == 'invoiced'",
+       "decoration-info": "invoice_status == 'to invoice'"
+      },
+      {
+       "name": "date_planned",
+       "column_invisible": "context.get('quotation_only', False)",
+       "optional": "show"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_create_invoice",
+       "string": "Create Bills",
+       "type": "object"
+      },
+      {
+       "name": "button_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "confirm": "Are you sure you want to cancel the selected RFQs/Orders?"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "priority": 1,
+      "many2one_avatar_user": 1,
+      "list_activity": 1,
+      "monetary": 3,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "state == 'cancel'",
+      "decoration-info": "invoice_status == 'to invoice'"
+     }
+    }
+   },
+   {
+    "external_identifier": "purchase.purchase_order_view_activity",
+    "package": "purchase",
+    "name": "purchase.order.activity",
+    "view_type": "activity",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "activity",
+     "root_attributes": {
+      "string": "Purchase Order"
+     },
+     "fields": [
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "amount_total",
+       "widget": "monetary"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-warning": "state == 'to approve'",
+       "decoration-success": "state == 'purchase'",
+       "decoration-info": "state == 'draft' or state == 'sent'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1,
+      "badge": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase_mrp.purchase_order_form_mrp",
+    "package": "purchase_mrp",
+    "name": "purchase.order.inherited.form.mrp",
+    "view_type": "xpath",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "mrp_production_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_mrp_productions",
+       "type": "object",
+       "invisible": "mrp_production_count == 0",
+       "class": "oe_stat_button",
+       "groups": "mrp.group_mrp_user",
+       "icon": "fa-wrench"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_product_matrix.purchase_order_form_matrix",
+    "package": "purchase_product_matrix",
+    "name": "purchase.order.form.inherit.matrix",
+    "view_type": "xpath",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list/field[@name='product_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list/field[@name='product_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_repair.purchase_order_form_inherit",
+    "package": "purchase_repair",
+    "name": "purchase.order.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_view_invoice']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "repair_count",
+       "widget": "statinfo",
+       "string": "Repair Orders"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_repair_orders",
+       "type": "object",
+       "invisible": "repair_count == 0",
+       "class": "oe_stat_button",
+       "groups": "stock.group_stock_user",
+       "icon": "fa-wrench"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_view_invoice']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition.purchase_order_form_inherit",
+    "package": "purchase_requisition",
+    "name": "purchase.order.form.inherit",
+    "view_type": "field",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "partner_id",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "partner_id",
+       "position": "replace"
+      },
+      {
+       "name": "requisition_type",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_id",
+       "widget": "res_partner_many2one",
+       "readonly": "requisition_type == 'blanket_order' or state in ['purchase', 'cancel']",
+       "context": "{'res_partner_search_mode': 'supplier', 'show_vat': True}",
+       "placeholder": "Name, TIN, Email, or Reference",
+       "force_save": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "res_partner_many2one": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition.purchase_order_search_inherit",
+    "package": "purchase_requisition",
+    "name": "purchase.order.list.select.inherit",
+    "view_type": "field",
+    "inherits_view": "purchase.view_purchase_order_filter",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "product_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "product_id",
+       "position": "after"
+      },
+      {
+       "name": "requisition_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition_stock.purchase_order_form_inherit_purchase_requisition_stock",
+    "package": "purchase_requisition_stock",
+    "name": "purchase.order.form.inherit.purchase.requisition.stock",
+    "view_type": "xpath",
+    "inherits_view": "purchase_requisition.purchase_order_form_inherit",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//page[@name='alternative_pos']//field[@name='alternative_po_ids']//field[@name='partner_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "on_time_rate_perc",
+       "widget": "percentage",
+       "invisible": "on_time_rate_perc < 0"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "percentage": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//page[@name='alternative_pos']//field[@name='alternative_po_ids']//field[@name='partner_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_stock.purchase_order_view_form_inherit",
+    "package": "purchase_stock",
+    "name": "purchase.order.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header/button[@name='action_rfq_send']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_view_picking",
+       "string": "Receive",
+       "type": "object",
+       "invisible": "is_shipped or state != 'purchase' or incoming_picking_count == 0",
+       "class": "oe_highlight",
+       "groups": "stock.group_stock_user",
+       "data-hotkey": "y"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header/button[@name='action_rfq_send']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_stock.purchase_order_view_tree_inherit",
+    "package": "purchase_stock",
+    "name": "purchase.order.list.inherit",
+    "view_type": "field",
+    "inherits_view": "purchase.purchase_order_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "invoice_status",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "invoice_status",
+       "position": "before"
+      },
+      {
+       "name": "effective_date",
+       "column_invisible": "True"
+      },
+      {
+       "name": "receipt_status",
+       "widget": "badge",
+       "optional": "hide",
+       "decoration-danger": "date_planned and (date_planned < effective_date or date_planned < datetime.datetime.combine(datetime.date.today(), datetime.time(0,0,0)).to_utc().strftime('%Y-%m-%d %H:%M:%S') and receipt_status!='full' and effective_date <= date_planned)",
+       "decoration-warning": "date_planned and date_planned >= datetime.datetime.combine(datetime.date.today(), datetime.time(0,0,0)).to_utc().strftime('%Y-%m-%d %H:%M:%S') and date_planned <= datetime.datetime.combine(datetime.date.today(), datetime.time(23,59,59)).to_utc().strftime('%Y-%m-%d %H:%M:%S') and receipt_status!='full'",
+       "decoration-success": "receipt_status=='full'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale_purchase.purchase_order_inherited_form_sale",
+    "package": "sale_purchase",
+    "name": "purchase.order.inherited.form.sale",
+    "view_type": "xpath",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "sale_order_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_sale_orders",
+       "type": "object",
+       "invisible": "sale_order_count == 0",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-dollar"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_purchase_stock.purchase_order_form_sale_purchase_stock",
+    "package": "sale_purchase_stock",
+    "name": "purchase.order.form.sale.purchase.stock",
+    "view_type": "field",
+    "inherits_view": "purchase_stock.purchase_order_view_form_inherit",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "dest_address_id",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "dest_address_id",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock_dropshipping.purchase_order_form_inherit_stock_dropshipping",
+    "package": "stock_dropshipping",
+    "name": "purchase.order.form.inherit.stock.dropshipping",
+    "view_type": "xpath",
+    "inherits_view": "purchase.purchase_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_button_box')]/button[@name='action_view_picking']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "dropship_picking_count",
+       "widget": "statinfo",
+       "string": "Dropship"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_dropship",
+       "type": "object",
+       "invisible": "dropship_picking_count == 0",
+       "class": "oe_stat_button",
+       "groups": "stock.group_stock_user",
+       "icon": "fa-truck"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_button_box')]/button[@name='action_view_picking']",
+       "position": "before"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "purchase.purchase_rfq",
+    "package": "purchase",
+    "name": "Requests for Quotation",
+    "view_mode": "list,kanban,form,pivot,graph,calendar,activity",
+    "view_id": "purchase_order_kpis_tree",
+    "search_view_id": "view_purchase_order_filter",
+    "domain": "[]",
+    "context": "{'quotation_only': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                No request for quotation found. Let's create one!\n              </p><p>\n                Requests for quotation are documents that will be sent to your suppliers to request prices for different products you consider buying.\n                Once an agreement has been found with the supplier, they will be confirmed and turned into purchase orders.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "purchase.order"
+   },
+   {
+    "external_identifier": "purchase.purchase_form_action",
+    "package": "purchase",
+    "name": "Purchase Orders",
+    "view_mode": "list,kanban,form,pivot,graph,calendar,activity",
+    "view_id": null,
+    "search_view_id": "purchase_order_view_search",
+    "domain": "[('state','=', 'purchase')]",
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                No purchase order found. Let's create one!\n              </p><p>\n                Once you ordered your products to your supplier, confirm your request for quotation and it will turn into a purchase order.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "purchase.order"
+   },
+   {
+    "external_identifier": "purchase.action_rfq_form",
+    "package": "purchase",
+    "name": "Requests for Quotation",
+    "view_mode": "form",
+    "view_id": "purchase.purchase_order_form",
+    "search_view_id": "view_purchase_order_filter",
+    "domain": null,
+    "context": null,
+    "target": "main",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "purchase.order"
+   },
+   {
+    "external_identifier": "purchase.act_res_partner_2_purchase_order",
+    "package": "purchase",
+    "name": "RFQs and Purchases",
+    "view_mode": "list,kanban,form,graph",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_partner_id': active_id, 'default_partner_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    This vendor has no purchase order. Create a new RfQ\n                </p><p>\n                    The request for quotation is the first step of the purchases flow. Once\n                    converted into a purchase order, you will be able to control the receipt\n                    of the products and the vendor bill.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "purchase.order"
+   },
+   {
+    "external_identifier": "purchase_requisition.action_purchase_requisition_to_so",
+    "package": "purchase_requisition",
+    "name": "Request for Quotation",
+    "view_mode": "form,list",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('requisition_id','=',active_id)]",
+    "context": "{\n            \"default_requisition_id\":active_id,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "purchase.order"
+   },
+   {
+    "external_identifier": "purchase_requisition.action_purchase_requisition_list",
+    "package": "purchase_requisition",
+    "name": "Request for Quotations",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('requisition_id','=',active_id)]",
+    "context": "{\n            \"default_requisition_id\":active_id,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "purchase.order"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "purchase.model_purchase_order_action_share",
+    "package": "purchase",
+    "name": "Share",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "purchase.action_purchase_send_reminder",
+    "package": "purchase",
+    "name": "Send Reminder",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "purchase.action_merger",
+    "package": "purchase",
+    "name": "Merge RFQs",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "purchase.action_confirm_rfqs",
+    "package": "purchase",
+    "name": "Confirm RFQ",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [
+   {
+    "external_identifier": "purchase.action_report_purchase_order",
+    "package": "purchase",
+    "name": "Purchase Order",
+    "report_type": "qweb-pdf",
+    "report_name": "purchase.report_purchaseorder",
+    "report_file": "purchase.report_purchaseorder",
+    "print_report_name": "(object.state in ('draft', 'sent') and 'Request for Quotation - %s' % (object.name) or\n                'Purchase Order - %s' % (object.name))",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_purchase_order",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "purchase.order"
+   },
+   {
+    "external_identifier": "purchase.report_purchase_quotation",
+    "package": "purchase",
+    "name": "Request for Quotation",
+    "report_type": "qweb-pdf",
+    "report_name": "purchase.report_purchasequotation",
+    "report_file": "purchase.report_purchasequotation",
+    "print_report_name": "'Request for Quotation - %s' % (object.name)",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_purchase_order",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "purchase.order"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "purchase.purchase_send_reminder_mail",
+    "package": "purchase",
+    "name": "Purchase reminder",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": null,
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "purchase.order",
+    "operation": "_send_reminder_mail",
+    "operation_call": "model._send_reminder_mail()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "purchase.email_template_edi_purchase",
+    "package": "purchase",
+    "name": "Purchase: Request For Quotation",
+    "subject": "{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})"
+   },
+   {
+    "external_identifier": "purchase.email_template_edi_purchase_done",
+    "package": "purchase",
+    "name": "Purchase: Purchase Order",
+    "subject": "{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})"
+   },
+   {
+    "external_identifier": "purchase.email_template_edi_purchase_reminder",
+    "package": "purchase",
+    "name": "Purchase: Vendor Reminder",
+    "subject": "{{ object.company_id.name }} Order (Ref {{ object.name or 'n/a' }})"
+   }
+  ]
+ }
+}

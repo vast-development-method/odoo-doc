@@ -1,0 +1,293 @@
+{
+ "catalog": {
+  "name": "entity:mail.thread.blacklist",
+  "description": "Complete definition of entity Mail Blacklist mixin (mail.thread.blacklist).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.thread.blacklist",
+  "storage_name": "mail_thread_blacklist",
+  "full_name": "Mail Blacklist mixin",
+  "kind": "abstract",
+  "description": "Mail Blacklist mixin",
+  "defined_by_package": "mail",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": "email",
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "email_normalized",
+    "type": "Char",
+    "string": "Normalized Email",
+    "compute": "_compute_email_normalized",
+    "compute_sudo": true,
+    "store": true,
+    "help": "This field is used to search on email address as the primary email field can contain more than strictly an email address.",
+    "defined_in_package": "mail",
+    "full_name": "Normalized Email"
+   },
+   {
+    "name": "is_blacklisted",
+    "type": "Boolean",
+    "string": "Blacklist",
+    "compute": "_compute_is_blacklisted",
+    "compute_sudo": true,
+    "store": false,
+    "search": "_search_is_blacklisted",
+    "groups": "base.group_user",
+    "help": "If the email address is on the blacklist, the contact won't receive mass mailing anymore, from any list",
+    "defined_in_package": "mail",
+    "full_name": "Blacklist"
+   },
+   {
+    "name": "message_bounce",
+    "type": "Integer",
+    "string": "Bounce",
+    "help": "Counter of the number of bounced emails for this contact",
+    "default": 0,
+    "defined_in_package": "mail",
+    "full_name": "Bounce"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_email_normalized",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: [self._primary_email]"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_blacklisted",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_blacklisted",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "email_normalized"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_assert_primary_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Invalid primary email field on model %s",
+        "line": 93
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid primary email field on model %s",
+        "line": 95
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_message_receive_bounce",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "email",
+     "partner"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Override of mail.thread generic method. Purpose is to increment the\nbounce counter of the record. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_reset_bounce",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "email"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Override of mail.thread generic method. Purpose is to reset the\nbounce counter of the record. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mail_action_blacklist_remove",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You do not have the access right to unblacklist emails. Please contact your administrator.",
+        "line": 123
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_detect_loop_sender_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "email_from_normalized"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the domain to be used to detect duplicated records created by alias.\n\n:param email_from_normalized: FROM of the incoming email, normalized",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_assert_primary_email",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Invalid primary email field on model %s"
+   },
+   {
+    "operation": "_assert_primary_email",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Invalid primary email field on model %s"
+   },
+   {
+    "operation": "mail_action_blacklist_remove",
+    "package": "mail",
+    "kind": "AccessError",
+    "message": "You do not have the access right to unblacklist emails. Please contact your administrator."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

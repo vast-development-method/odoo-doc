@@ -1,0 +1,3132 @@
+{
+ "catalog": {
+  "name": "entity:hr.leave.allocation",
+  "description": "Complete definition of entity Time Off Allocation (hr.leave.allocation).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.leave.allocation",
+  "storage_name": "hr_leave_allocation",
+  "full_name": "Time Off Allocation",
+  "kind": "persistent",
+  "description": "Time Off Allocation",
+  "defined_by_package": "hr_holidays",
+  "extended_by_packages": [
+   "hr_holidays_attendance"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "create_date desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": "read",
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Description",
+    "compute": "_compute_description",
+    "store": true,
+    "readonly": false,
+    "compute_sudo": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Description"
+   },
+   {
+    "name": "is_name_custom",
+    "type": "Boolean",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Is Name Custom",
+    "full_name": "Is Name Custom"
+   },
+   {
+    "name": "name_validity",
+    "type": "Char",
+    "string": "Description with validity",
+    "compute": "_compute_description_validity",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Description with validity"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "confirm",
+      "To Approve"
+     ],
+     [
+      "refuse",
+      "Refused"
+     ],
+     [
+      "validate1",
+      "Second Approval"
+     ],
+     [
+      "validate",
+      "Approved"
+     ]
+    ],
+    "string": "Status",
+    "default": "confirm",
+    "tracking": true,
+    "copy": false,
+    "readonly": true,
+    "help": "The status is 'To Approve', when an allocation request is created.\nThe status is 'Refused', when an allocation request is refused by manager.\nThe status is 'Approved', when an allocation request is approved by manager.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Status"
+   },
+   {
+    "name": "date_from",
+    "type": "Date",
+    "string": "Start Date",
+    "index": true,
+    "copy": false,
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "tracking": true,
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_to",
+    "type": "Date",
+    "string": "End Date",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "End Date"
+   },
+   {
+    "name": "holiday_status_id",
+    "type": "Many2one",
+    "comodel": "hr.leave.type",
+    "compute": "_compute_holiday_status_id",
+    "store": true,
+    "string": "Time Off Type",
+    "required": true,
+    "readonly": false,
+    "domain": {
+     "dynamic": "_domain_holiday_status_id"
+    },
+    "default": {
+     "dynamic": "_default_holiday_status_id"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Type",
+    "target_entity": "hr.leave.type"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "default": {
+     "dynamic": "lambda self: self.env.user.employee_id"
+    },
+    "index": true,
+    "ondelete": "restrict",
+    "required": true,
+    "tracking": true,
+    "domain": {
+     "dynamic": "_domain_employee_id"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "employee_company_id",
+    "type": "Many2one",
+    "related": "employee_id.company_id",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Employee Company",
+    "full_name": "Employee Company"
+   },
+   {
+    "name": "active_employee",
+    "type": "Boolean",
+    "string": "Active Employee",
+    "related": "employee_id.active",
+    "readonly": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Active Employee"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "compute": "_compute_manager_id",
+    "store": true,
+    "string": "Manager",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Manager",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "notes",
+    "type": "Text",
+    "string": "Reasons",
+    "readonly": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Reasons"
+   },
+   {
+    "name": "number_of_days",
+    "type": "Float",
+    "string": "Number of Days",
+    "compute": "_compute_number_of_days",
+    "store": true,
+    "readonly": false,
+    "tracking": true,
+    "default": 1,
+    "help": "Duration in days. Reference field to use when necessary.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Number of Days"
+   },
+   {
+    "name": "number_of_days_display",
+    "type": "Float",
+    "string": "Duration (days)",
+    "compute": "_compute_number_of_days_display",
+    "help": "For an Accrual Allocation, this field contains the theorical amount of time given to the employee, due to a previous start date, on the first run of the plan. This can be manually edited.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Duration (days)"
+   },
+   {
+    "name": "number_of_hours_display",
+    "type": "Float",
+    "string": "Duration (hours)",
+    "default_export_compatible": true,
+    "compute": "_compute_number_of_hours_display",
+    "store": true,
+    "help": "For an Accrual Allocation, this field contains the theorical amount of time given to the employee, due to a previous start date, on the first run of the plan. This can be manually edited.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Duration (hours)"
+   },
+   {
+    "name": "duration_display",
+    "type": "Char",
+    "string": "Allocated (Days/Hours)",
+    "compute": "_compute_duration_display",
+    "help": "Field allowing to see the allocation duration in days or hours depending on the type_request_unit",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocated (Days/Hours)"
+   },
+   {
+    "name": "last_executed_carryover_date",
+    "type": "Date",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Last Executed Carryover Date",
+    "full_name": "Last Executed Carryover Date"
+   },
+   {
+    "name": "approver_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "First Approval",
+    "readonly": true,
+    "copy": false,
+    "help": "This area is automatically filled by the user who validates the allocation",
+    "defined_in_package": "hr_holidays",
+    "full_name": "First Approval",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "second_approver_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Second Approval",
+    "readonly": true,
+    "copy": false,
+    "help": "This area is automatically filled by the user who validates the allocation with second level (If time off type need second validation)",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Second Approval",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "validation_type",
+    "type": "Selection",
+    "string": "Validation Type",
+    "related": "holiday_status_id.allocation_validation_type",
+    "readonly": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Validation Type"
+   },
+   {
+    "name": "can_approve",
+    "type": "Boolean",
+    "string": "Can Approve",
+    "compute": "_compute_can_approve",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Can Approve"
+   },
+   {
+    "name": "can_validate",
+    "type": "Boolean",
+    "string": "Can Validate",
+    "compute": "_compute_can_validate",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Can Validate"
+   },
+   {
+    "name": "can_refuse",
+    "type": "Boolean",
+    "string": "Can Refuse",
+    "compute": "_compute_can_refuse",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Can Refuse"
+   },
+   {
+    "name": "type_request_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "hour",
+      "Hours"
+     ],
+     [
+      "half_day",
+      "Half-Day"
+     ],
+     [
+      "day",
+      "Day"
+     ]
+    ],
+    "compute": "_compute_type_request_unit",
+    "defined_in_package": "hr_holidays",
+    "string": "Type Request Unit",
+    "full_name": "Type Request Unit"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "compute": "_compute_department_id",
+    "store": true,
+    "string": "Department",
+    "readonly": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "lastcall",
+    "type": "Date",
+    "string": "Date of the last accrual allocation",
+    "readonly": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Date of the last accrual allocation"
+   },
+   {
+    "name": "actual_lastcall",
+    "type": "Date",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Actual Lastcall",
+    "full_name": "Actual Lastcall"
+   },
+   {
+    "name": "nextcall",
+    "type": "Date",
+    "string": "Date of the next accrual allocation",
+    "readonly": true,
+    "default": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Date of the next accrual allocation"
+   },
+   {
+    "name": "already_accrued",
+    "type": "Boolean",
+    "defined_in_package": "hr_holidays",
+    "string": "Already Accrued",
+    "full_name": "Already Accrued"
+   },
+   {
+    "name": "yearly_accrued_amount",
+    "type": "Float",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Yearly Accrued Amount",
+    "full_name": "Yearly Accrued Amount"
+   },
+   {
+    "name": "allocation_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "regular",
+      "Regular Allocation"
+     ],
+     [
+      "accrual",
+      "Accrual Allocation"
+     ]
+    ],
+    "string": "Allocation Type",
+    "default": "regular",
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocation Type"
+   },
+   {
+    "name": "is_officer",
+    "type": "Boolean",
+    "compute": "_compute_is_officer",
+    "defined_in_package": "hr_holidays",
+    "string": "Is Officer",
+    "full_name": "Is Officer"
+   },
+   {
+    "name": "accrual_plan_id",
+    "type": "Many2one",
+    "comodel": "hr.leave.accrual.plan",
+    "compute": "_compute_accrual_plan_id",
+    "inverse": "_inverse_accrual_plan_id",
+    "store": true,
+    "index": "btree_not_null",
+    "readonly": false,
+    "tracking": true,
+    "domain": "['|', ('time_off_type_id', '=', False), ('time_off_type_id', '=', holiday_status_id)]",
+    "defined_in_package": "hr_holidays",
+    "string": "Accrual Plan",
+    "full_name": "Accrual Plan",
+    "target_entity": "hr.leave.accrual.plan"
+   },
+   {
+    "name": "max_leaves",
+    "type": "Float",
+    "compute": "_compute_leaves",
+    "defined_in_package": "hr_holidays",
+    "string": "Max Leaves",
+    "full_name": "Max Leaves"
+   },
+   {
+    "name": "leaves_taken",
+    "type": "Float",
+    "compute": "_compute_leaves",
+    "string": "Time off Taken",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time off Taken"
+   },
+   {
+    "name": "virtual_remaining_leaves",
+    "type": "Float",
+    "compute": "_compute_leaves",
+    "string": "Available Time Off",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Available Time Off"
+   },
+   {
+    "name": "expiring_carryover_days",
+    "type": "Float",
+    "string": "The number of carried over days that will expire on carried_over_days_expiration_date",
+    "defined_in_package": "hr_holidays",
+    "full_name": "The number of carried over days that will expire on carried_over_days_expiration_date"
+   },
+   {
+    "name": "carried_over_days_expiration_date",
+    "type": "Date",
+    "string": "Carried over days expiration date",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Carried over days expiration date"
+   },
+   {
+    "name": "overtime_deductible",
+    "type": "Boolean",
+    "compute": "_compute_overtime_deductible",
+    "defined_in_package": "hr_holidays_attendance",
+    "string": "Overtime Deductible",
+    "full_name": "Overtime Deductible"
+   },
+   {
+    "name": "employee_overtime",
+    "type": "Float",
+    "compute": "_compute_employee_overtime",
+    "groups": "base.group_user",
+    "defined_in_package": "hr_holidays_attendance",
+    "string": "Employee Overtime",
+    "full_name": "Employee Overtime"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_duration_check",
+    "kind": "Constraint",
+    "definition": "CHECK( ( number_of_days > 0 AND allocation_type='regular') or (allocation_type != 'regular'))",
+    "message": "The duration must be greater than 0.",
+    "defined_in_package": "hr_holidays"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_default_holiday_status_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_holiday_status_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_employee_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_date_from_date_to",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date_from",
+         "date_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The Start Date of the Validity Period must be anterior to the End Date.",
+        "line": 140
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_officer",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allocation_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_title",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_name",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "holiday_status_id",
+         "number_of_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_description_validity",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "date_from",
+         "date_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_leaves",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "holiday_status_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_number_of_days_display",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "number_of_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_number_of_hours_display",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "number_of_days",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration_display",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "number_of_hours_display",
+         "number_of_days_display"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_approve",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_validate",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_refuse",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_department_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_manager_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_holiday_status_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "accrual_plan_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_number_of_days",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "holiday_status_id",
+         "number_of_hours_display",
+         "number_of_days_display",
+         "type_request_unit",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_accrual_plan_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "holiday_status_id",
+         "allocation_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_accrual_plan_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_request_unit",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_type_request_unit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allocation_type",
+         "holiday_status_id",
+         "accrual_plan_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_carryover_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_from"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_days_to_allocation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "current_level",
+     "current_level_maximum_leave",
+     "leaves_taken",
+     "period_start",
+     "period_end"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_current_accrual_plan_level_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date",
+     "level_ids"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Returns a pair (accrual_plan_level, idx) where accrual_plan_level is the level for the given date\nand idx is the index for the plan in the ordered set of levels",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_accrual_plan_level_work_entry_prorata",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "level",
+     "start_period",
+     "start_date",
+     "end_period",
+     "end_date"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_accrual_plan_level",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "level",
+     "start_period",
+     "start_date",
+     "end_period",
+     "end_date"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Returns the added days for that level",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_accrual_plans",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "date_to",
+     "force_period",
+     "log"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "This method is part of the cron's process.\nThe goal of this method is to retroactively apply accrual plan levels and progress from nextcall to date_to or today.\nIf force_period is set, the accrual will run until date_to in a prorated way (used for end of year accrual actions).",
+      "size_in_lines": 234,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_accrual",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Method called by the cron task in order to increment the number_of_days when\nnecessary.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_future_leaves_on",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "accrual_date"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_states_by_state",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "onchange",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "values",
+     "field_names",
+     "fields_spec"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "holiday_status_id",
+         "type_request_unit",
+         "number_of_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_lastcalls",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "add_follower",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "employee_id"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override to avoid automatic logging of creation ",
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Incorrect state for new allocation",
+        "line": 816
+       }
+      ]
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot reduce the duration below the duration of leaves already taken by the employee.",
+        "line": 869
+       }
+      ]
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Only an Officer or Administrator is allowed to edit the allocation duration in this status.",
+        "line": 50
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_correct_states",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete an allocation request which is in %s state.",
+        "line": 880
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_no_leaves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete an allocation request which has some validated leaves.",
+        "line": 885
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_redirect_suggested_company",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_approve",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Allocation must be \"To Approve\" in order to approve it.",
+        "line": 909
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_validate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_refuse",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Allocation request must be confirmed, second approval or validated in order to refuse it.",
+        "line": 932
+       }
+      ]
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_approval_update",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "state",
+     "raise_if_not_possible"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Check if target state is achievable. ",
+      "size_in_lines": 49,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "error_message",
+        "line": 984
+       },
+       {
+        "kind": "UserError",
+        "message": "e",
+        "line": 978
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_initialize_accrual_plan_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_from"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_allocation_type",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "allocation_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_date_from",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "date_from",
+         "accrual_plan_id",
+         "date_to",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_responsible_for_approval",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_update",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 49,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_subtype",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "init_values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "message_subscribe",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "partner_ids",
+     "subtype_ids"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_overtime_deductible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "holiday_status_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_employee_overtime",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_employee_overtime_balance",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The employee does not have enough overtime hours to request this leave.",
+        "line": 64
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_date_from_date_to",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "The Start Date of the Validity Period must be anterior to the End Date."
+   },
+   {
+    "operation": "create",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "Incorrect state for new allocation"
+   },
+   {
+    "operation": "write",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "You cannot reduce the duration below the duration of leaves already taken by the employee."
+   },
+   {
+    "operation": "_unlink_if_correct_states",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "You cannot delete an allocation request which is in %s state."
+   },
+   {
+    "operation": "_unlink_if_no_leaves",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "You cannot delete an allocation request which has some validated leaves."
+   },
+   {
+    "operation": "action_approve",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "Allocation must be \"To Approve\" in order to approve it."
+   },
+   {
+    "operation": "action_refuse",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "Allocation request must be confirmed, second approval or validated in order to refuse it."
+   },
+   {
+    "operation": "_check_approval_update",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "error_message"
+   },
+   {
+    "operation": "_check_approval_update",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "e"
+   },
+   {
+    "operation": "write",
+    "package": "hr_holidays_attendance",
+    "kind": "ValidationError",
+    "message": "Only an Officer or Administrator is allowed to edit the allocation duration in this status."
+   },
+   {
+    "operation": "_check_employee_overtime_balance",
+    "package": "hr_holidays_attendance",
+    "kind": "ValidationError",
+    "message": "The employee does not have enough overtime hours to request this leave."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_manager_allocation",
+    "package": "hr_holidays",
+    "name": "hr.holidays.manager.allocation",
+    "entity": "hr.leave.allocation",
+    "group": "hr_holidays.group_hr_holidays_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_user_allocation",
+    "package": "hr_holidays",
+    "name": "hr.holidays.user.allocation",
+    "entity": "hr.leave.allocation",
+    "group": "hr_holidays.group_hr_holidays_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_employee_allocation",
+    "package": "hr_holidays",
+    "name": "hr.holidays.employee.allocation",
+    "entity": "hr.leave.allocation",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_rule_multicompany",
+    "package": "hr_holidays",
+    "name": "Time Off: multi company global rule",
+    "entity": "hr.leave.allocation",
+    "domain": "[\n            '|',\n                ('employee_id', '=', False),\n                ('employee_id.company_id', 'in', company_ids),\n            ('holiday_status_id.company_id', 'in', company_ids + [False])\n        ]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_rule_employee",
+    "package": "hr_holidays",
+    "name": "Allocations: employee: read own",
+    "entity": "hr.leave.allocation",
+    "domain": "[\n            '|',\n                ('employee_id.leave_manager_id', '=', user.id),\n                ('employee_id.user_id', '=', user.id),\n        ]",
+    "groups": "[(4,ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_rule_employee_update",
+    "package": "hr_holidays",
+    "name": "Allocations: base.group_user create/write",
+    "entity": "hr.leave.allocation",
+    "domain": "[\n            '|',\n                '&',\n                    ('employee_id.user_id', '=', user.id),\n                    ('state', '=', 'confirm'),\n                '&',\n                    ('validation_type', 'in', ['manager', 'both', 'no_validation']),\n                    ('employee_id.leave_manager_id', '=', user.id),\n        ]",
+    "groups": "[(4,ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_rule_responsible_update",
+    "package": "hr_holidays",
+    "name": "Allocations: Responsible: create/write",
+    "entity": "hr.leave.allocation",
+    "domain": "[\n            '|',\n                '&',\n                    ('employee_id.user_id', '=', user.id),\n                    ('state', '!=', 'validate'),\n                ('employee_id.leave_manager_id', '=', user.id),\n        ]",
+    "groups": "[(4, ref('hr_holidays.group_hr_holidays_responsible'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_rule_officer_read",
+    "package": "hr_holidays",
+    "name": "Allocations: see all time off: read all",
+    "entity": "hr.leave.allocation",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('hr_holidays.group_hr_holidays_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leav_allocation_rule_employee_unlink",
+    "package": "hr_holidays",
+    "name": "Allocations base.group_user unlink",
+    "entity": "hr.leave.allocation",
+    "domain": "[('employee_id.user_id', '=', user.id), ('state', '=', 'draft')]",
+    "groups": "[(4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_rule_officer_update",
+    "package": "hr_holidays",
+    "name": "Allocations: holiday user: create/write",
+    "entity": "hr.leave.allocation",
+    "domain": "[\n            '|',\n                '&',\n                    ('employee_id.user_id', '=', user.id),\n                    ('state', '!=', 'validate'),\n                '|',\n                    ('employee_id.user_id', '!=', user.id),\n                    ('employee_id.user_id', '=', False)\n        ]",
+    "groups": "[(4,ref('hr_holidays.group_hr_holidays_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_rule_manager",
+    "package": "hr_holidays",
+    "name": "Allocations: administrator: no limit",
+    "entity": "hr.leave.allocation",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_hr_holidays_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_holidays.view_hr_leave_allocation_filter",
+    "package": "hr_holidays",
+    "name": "hr.holidays.filter_allocations",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search allocations"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "string": "Employee"
+      },
+      {
+       "name": "name",
+       "string": "Title"
+      },
+      {
+       "name": "department_id"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "allocation_type"
+      },
+      {
+       "name": "accrual_plan_id"
+      },
+      {
+       "name": "activity_user_id",
+       "string": "Activities of"
+      },
+      {
+       "name": "activity_type_id",
+       "string": "Activity type"
+      },
+      {
+       "name": "state",
+       "string": "Status"
+      },
+      {
+       "name": "department_id",
+       "string": "Department"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "waiting_for_me",
+       "string": "Waiting For Me",
+       "domain": "[                         ('state','in',['confirm']),                         '|',                         ('employee_id.user_id', '!=', uid),                         '&',                         ('employee_id.user_id', '=', uid),                         ('employee_id.leave_manager_id', '=', uid)]",
+       "groups": "hr_holidays.group_hr_holidays_responsible,!hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "waiting_for_me_manager",
+       "string": "Waiting For Me",
+       "domain": "[                         ('state','in',['confirm','validate1']),                         '|',                             ('employee_id.user_id', '!=', uid),                             '|',                                 '&',                                     ('state','=','confirm'),                                     ('holiday_status_id.leave_validation_type','=','hr'),                                 ('state','=','validate1')]",
+       "groups": "hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "approve",
+       "string": "First Approval",
+       "domain": "[('state','in',('confirm','validate1'))]"
+      },
+      {
+       "name": "second_approval",
+       "string": "Second Approval",
+       "domain": "[('state', '=', 'validate1')]"
+      },
+      {
+       "name": "validated",
+       "string": "Approved",
+       "domain": "[('state', '=', 'validate')]"
+      },
+      {
+       "name": "refused_allocations",
+       "string": "Refused",
+       "domain": "[('state', '=', 'refuse')]"
+      },
+      {
+       "name": "year",
+       "string": "Currently Valid",
+       "domain": "[                         ('date_from', '<=', 'today'),                         '|',                         ('date_to', '=', False),                         ('date_to', '>=', 'today'),                     ]",
+       "help": "Active Allocations"
+      },
+      {
+       "name": "message_needaction",
+       "string": "Unread Messages",
+       "domain": "[('message_needaction','=',True)]",
+       "groups": "mail.group_mail_notification_type_inbox"
+      },
+      {
+       "name": "my_team",
+       "string": "My Team",
+       "domain": "['|', ('employee_id.leave_manager_id', '=', uid), ('employee_id.user_id', '=', uid)]",
+       "help": "Time off of people you are manager of"
+      },
+      {
+       "name": "my_team_leaves",
+       "string": "My Department",
+       "domain": "[('employee_id.parent_id.user_id', '=', uid)]",
+       "help": "Time Off of Your Team Member",
+       "groups": "hr_holidays.group_hr_holidays_manager"
+      },
+      {
+       "name": "my_leaves",
+       "string": "My Allocations",
+       "domain": "[('employee_id.user_id', '=', uid)]"
+      },
+      {
+       "name": "validity_start",
+       "string": "Validity Start",
+       "date": "date_from"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')                         ]",
+       "invisible": "1"
+      },
+      {
+       "name": "approved_state",
+       "string": "To Approve or Approved Allocations",
+       "domain": "[('state', 'in', ('confirm', 'validate'))]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_employee",
+       "string": "Employee",
+       "context": "{'group_by':'employee_id'}"
+      },
+      {
+       "name": "group_type",
+       "string": "Type",
+       "context": "{'group_by':'holiday_status_id'}"
+      },
+      {
+       "name": "group_allocation_type",
+       "string": "Allocation Type",
+       "context": "{'group_by':'allocation_type'}"
+      },
+      {
+       "name": "group_state",
+       "string": "Status",
+       "context": "{'group_by': 'state'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_form",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Allocation Request",
+      "duplicate": "false"
+     },
+     "fields": [
+      {
+       "name": "can_approve",
+       "invisible": "1"
+      },
+      {
+       "name": "validation_type",
+       "invisible": "1"
+      },
+      {
+       "name": "expiring_carryover_days",
+       "invisible": "1"
+      },
+      {
+       "name": "carried_over_days_expiration_date",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "validation_type != 'both'"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "validation_type == 'both'"
+      },
+      {
+       "name": "name",
+       "invisible": "state != 'confirm'",
+       "readonly": "True",
+       "placeholder": "e.g. Time Off type (From validity start to validity end / no limit)",
+       "force_save": "True"
+      },
+      {
+       "name": "name_validity",
+       "invisible": "state == 'confirm'"
+      },
+      {
+       "name": "is_name_custom",
+       "invisible": "1"
+      },
+      {
+       "name": "type_request_unit",
+       "invisible": "1"
+      },
+      {
+       "name": "already_accrued",
+       "invisible": "1"
+      },
+      {
+       "name": "holiday_status_id",
+       "readonly": "state == 'validate'",
+       "context": "{'employee_id':employee_id, 'default_date_from':current_date, 'request_type':'allocation'}"
+      },
+      {
+       "name": "allocation_type",
+       "widget": "radio",
+       "invisible": "1",
+       "readonly": "not is_officer or state == 'validate'"
+      },
+      {
+       "name": "is_officer",
+       "invisible": "1"
+      },
+      {
+       "name": "accrual_plan_id",
+       "invisible": "allocation_type == 'regular'",
+       "readonly": "not is_officer or state == 'validate'",
+       "required": "allocation_type == 'accrual'"
+      },
+      {
+       "name": "date_from",
+       "invisible": "allocation_type == 'regular' and state != 'confirm'",
+       "readonly": "allocation_type == 'accrual' and state != 'confirm'",
+       "nolabel": "1"
+      },
+      {
+       "name": "date_to",
+       "invisible": "allocation_type == 'regular' and state != 'confirm'",
+       "readonly": "allocation_type == 'accrual' and state != 'confirm'",
+       "nolabel": "1",
+       "placeholder": "No Limit"
+      },
+      {
+       "name": "number_of_days",
+       "invisible": "1"
+      },
+      {
+       "name": "number_of_days_display",
+       "invisible": "type_request_unit == 'hour'",
+       "readonly": "state != 'confirm' and not is_officer",
+       "nolabel": "1"
+      },
+      {
+       "name": "number_of_hours_display",
+       "invisible": "type_request_unit != 'hour'",
+       "readonly": "state != 'confirm' and not is_officer",
+       "nolabel": "1"
+      },
+      {
+       "name": "employee_id",
+       "invisible": "1",
+       "readonly": "state in ['refuse', 'validate']"
+      },
+      {
+       "name": "notes",
+       "readonly": "state not in ['confirm']",
+       "nolabel": "1",
+       "placeholder": "Add a reason..."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "invisible": "not can_approve or not id",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_approve",
+       "string": "Validate",
+       "type": "object",
+       "invisible": "not can_validate or can_approve or not id",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "type": "object",
+       "invisible": "not can_refuse or not id"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 2,
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Approve",
+       "name": "action_approve",
+       "type": "object",
+       "class": "oe_highlight",
+       "invisible": "not can_approve or not id"
+      },
+      {
+       "string": "Validate",
+       "name": "action_approve",
+       "invisible": "not can_validate or can_approve or not id",
+       "type": "object",
+       "class": "oe_highlight"
+      },
+      {
+       "string": "Refuse",
+       "name": "action_refuse",
+       "type": "object",
+       "invisible": "not can_refuse or not id"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "confirm,validate,validate1",
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_form_manager",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.form.manager",
+    "view_type": "div",
+    "inherits_view": "hr_holidays.hr_leave_allocation_view_form",
+    "mode": "primary",
+    "priority": "16",
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "id": "title",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "required": "1",
+       "placeholder": "e.g. Time Off type (From validity start to validity end / no limit)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "id": "title",
+        "position": "replace"
+       },
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_form_dashboard",
+    "package": "hr_holidays",
+    "name": "hr.leave.view.form.dashboard",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.hr_leave_allocation_view_form",
+    "mode": "primary",
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_form_manager_dashboard",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.form.manager.dashboard",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.hr_leave_allocation_view_form_manager",
+    "mode": "primary",
+    "priority": "16",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_tree",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "16",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Allocation Requests",
+      "sample": "1",
+      "class": "o_hr_holidays_list",
+      "js_class": "hr_holidays_payslip_list"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "state in ['refuse', 'validate']",
+       "decoration-muted": "not active_employee"
+      },
+      {
+       "name": "department_id",
+       "readonly": "state not in ['confirm']",
+       "optional": "hide"
+      },
+      {
+       "name": "holiday_status_id",
+       "readonly": "state in ['refuse', 'validate', 'validate1']"
+      },
+      {
+       "name": "name",
+       "string": "Title",
+       "optional": "hide"
+      },
+      {
+       "name": "duration_display",
+       "string": "Amount"
+      },
+      {
+       "name": "date_from",
+       "string": "Validity Start",
+       "optional": "hide"
+      },
+      {
+       "name": "date_to",
+       "readonly": "state in ['refuse', 'validate', 'validate1']",
+       "string": "Validity Stop",
+       "optional": "hide"
+      },
+      {
+       "name": "allocation_type",
+       "readonly": "state not in ['confirm']"
+      },
+      {
+       "name": "accrual_plan_id"
+      },
+      {
+       "name": "notes",
+       "string": "Reason",
+       "optional": "hide"
+      },
+      {
+       "name": "message_needaction",
+       "column_invisible": "True"
+      },
+      {
+       "name": "active_employee",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-danger": "state == 'refuse'",
+       "decoration-warning": "state in ['confirm', 'validate1']",
+       "decoration-success": "state == 'validate'"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(hr_holidays.action_hr_leave_allocation_generate_multi_wizard)d",
+       "string": "New Group Allocation",
+       "type": "action",
+       "class": "btn btn-secondary",
+       "groups": "hr_holidays.group_hr_holidays_responsible"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "class": "btn btn-outline-success",
+       "icon": "fa-thumbs-up"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "type": "object",
+       "class": "btn btn-outline-danger",
+       "icon": "fa-times"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "invisible": "not can_approve",
+       "class": "text-success",
+       "icon": "fa-thumbs-up"
+      },
+      {
+       "name": "action_approve",
+       "string": "Validate",
+       "type": "object",
+       "invisible": "not can_validate or can_approve",
+       "class": "text-success",
+       "icon": "fa-check"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "type": "object",
+       "invisible": "not can_refuse",
+       "class": "text-danger",
+       "icon": "fa-times"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1,
+      "badge": 1,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_tree_my",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.list.my",
+    "view_type": "xpath",
+    "inherits_view": "hr_leave_allocation_view_tree",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='employee_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='employee_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_search_my",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.search.my",
+    "view_type": "xpath",
+    "inherits_view": "view_hr_leave_allocation_filter",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//searchpanel",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//searchpanel",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_search_manager",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.search.my",
+    "view_type": "xpath",
+    "inherits_view": "view_hr_leave_allocation_filter",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='message_needaction']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='message_needaction']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_kanban",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_holidays_view_kanban",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "can_approve"
+      },
+      {
+       "name": "can_validate"
+      },
+      {
+       "name": "can_refuse"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "write_date"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "allocation_type"
+      },
+      {
+       "name": "duration_display"
+      },
+      {
+       "name": "virtual_remaining_leaves",
+       "widget": "float"
+      },
+      {
+       "name": "max_leaves",
+       "widget": "float"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "duration_display"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(hr_holidays.action_hr_leave_allocation_generate_multi_wizard)d",
+       "string": "New Group Allocation",
+       "type": "action",
+       "class": "btn btn-secondary",
+       "groups": "hr_holidays.group_hr_holidays_responsible"
+      },
+      {
+       "name": "action_approve",
+       "type": "object",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "action_approve",
+       "type": "object",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "action_refuse",
+       "type": "object",
+       "class": "btn btn-secondary"
+      },
+      {
+       "name": "action_approve",
+       "type": "object",
+       "class": "btn btn-sm btn-primary py-0"
+      },
+      {
+       "name": "action_approve",
+       "type": "object",
+       "class": "btn btn-sm btn-primary py-0"
+      },
+      {
+       "name": "action_refuse",
+       "type": "object",
+       "class": "btn btn-sm btn-secondary py-0"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float": 2,
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_view_activity",
+    "package": "hr_holidays",
+    "name": "hr.leave.allocation.view.activity",
+    "view_type": "activity",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "activity",
+     "root_attributes": {
+      "string": "Allocation Requests"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "number_of_days"
+      },
+      {
+       "name": "holiday_status_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.hr_attendance_holidays_hr_leave_allocation_view_form_inherit",
+    "package": "hr_holidays_attendance",
+    "name": null,
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.hr_leave_allocation_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "(//div[@name='duration_display']/span)[last()]",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "employee_overtime",
+       "widget": "float_time",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "(//div[@name='duration_display']/span)[last()]",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.hr_leave_allocation_overtime_manager_view_form",
+    "package": "hr_holidays_attendance",
+    "name": null,
+    "view_type": "xpath",
+    "inherits_view": "hr_attendance_holidays_hr_leave_allocation_view_form_inherit",
+    "mode": "primary",
+    "priority": "60",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_action_my",
+    "package": "hr_holidays",
+    "name": "My Allocations",
+    "view_mode": "list,kanban,form,activity",
+    "view_id": null,
+    "search_view_id": "hr_holidays.hr_leave_allocation_view_search_my",
+    "domain": "[('employee_id.user_id', '=', uid)]",
+    "context": "{'search_default_year': 1 , 'is_employee_allocation': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a new allocation request\n            </p><p>\n                You can create a new allocation or follow the approval status of the current ones.\n            </p>\n        </field>\n        ",
+    "usage": null,
+    "entity": "hr.leave.allocation"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_action_all",
+    "package": "hr_holidays",
+    "name": "All Allocations",
+    "view_mode": "list,kanban,form,activity",
+    "view_id": null,
+    "search_view_id": "hr_holidays.hr_leave_allocation_view_search_manager",
+    "domain": "[]",
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a new allocation request\n            </p><p>\n                You can create a new allocation or follow the approval status of the current ones.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.leave.allocation"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_action_form",
+    "package": "hr_holidays",
+    "name": "New allocation",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": "hr_holidays.hr_leave_allocation_view_search_manager",
+    "domain": "[]",
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.leave.allocation"
+   },
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_action_approve_department",
+    "package": "hr_holidays",
+    "name": "Allocations",
+    "view_mode": "kanban,list,form,activity",
+    "view_id": null,
+    "search_view_id": "hr_holidays.hr_leave_allocation_view_search_manager",
+    "domain": "[]",
+    "context": "{'search_default_my_team': 1,'search_default_approve': 2}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a new allocation request\n            </p><p>\n                You can create a new allocation or follow the approval status of the current ones.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.leave.allocation"
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.hr_leave_allocation_overtime_manager_action",
+    "package": "hr_holidays_attendance",
+    "name": "New Allocation Request",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.leave.allocation"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "hr_holidays.action_report_holidayssummary",
+    "package": "hr_holidays",
+    "name": "Time Off Summary",
+    "report_type": "qweb-pdf",
+    "report_name": "hr_holidays.report_holidayssummary",
+    "report_file": "hr_holidays.report_holidayssummary",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "paperformat_id": "hr_holidays.paperformat_hrsummary",
+    "groups_id": null,
+    "multi": null,
+    "entity": "hr.leave.allocation"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_cron_accrual",
+    "package": "hr_holidays",
+    "name": "Accrual Time Off: Updates the number of time off",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "hr.leave.allocation",
+    "operation": "_update_accrual",
+    "operation_call": "model._update_accrual()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

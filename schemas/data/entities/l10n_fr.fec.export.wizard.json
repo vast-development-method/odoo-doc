@@ -1,0 +1,331 @@
+{
+ "catalog": {
+  "name": "entity:l10n_fr.fec.export.wizard",
+  "description": "Complete definition of entity Fichier Echange Informatise (l10n_fr.fec.export.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_fr.fec.export.wizard",
+  "storage_name": "l10n_fr_fec_export_wizard",
+  "full_name": "Fichier Echange Informatise",
+  "kind": "transient",
+  "description": "Fichier Echange Informatise",
+  "defined_by_package": "l10n_fr_account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "date_from",
+    "type": "Date",
+    "string": "Start Date",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('report_dates', {}).get('date_from')"
+    },
+    "defined_in_package": "l10n_fr_account",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_to",
+    "type": "Date",
+    "string": "End Date",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('report_dates', {}).get('date_to')"
+    },
+    "defined_in_package": "l10n_fr_account",
+    "full_name": "End Date"
+   },
+   {
+    "name": "filename",
+    "type": "Char",
+    "string": "Filename",
+    "size": 256,
+    "readonly": true,
+    "defined_in_package": "l10n_fr_account",
+    "full_name": "Filename"
+   },
+   {
+    "name": "test_file",
+    "type": "Boolean",
+    "defined_in_package": "l10n_fr_account",
+    "string": "Test File",
+    "full_name": "Test File"
+   },
+   {
+    "name": "export_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "official",
+      "Official FEC report (posted entries only)"
+     ],
+     [
+      "nonofficial",
+      "Non-official FEC report (posted and unposted entries)"
+     ]
+    ],
+    "string": "Export Type",
+    "required": true,
+    "default": "official",
+    "defined_in_package": "l10n_fr_account",
+    "full_name": "Export Type"
+   },
+   {
+    "name": "excluded_journal_ids",
+    "type": "Many2many",
+    "comodel": "account.journal",
+    "string": "Excluded Journals",
+    "domain": "[('company_id', 'parent_of', current_company_id)]",
+    "defined_in_package": "l10n_fr_account",
+    "full_name": "Excluded Journals",
+    "target_entity": "account.journal"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_onchange_export_file",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "test_file"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_base_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_do_query_unaffected_earnings",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_account",
+      "decorators": [],
+      "documentation": "Compute the sum of ending balances for all accounts that are of a type that does not bring forward the balance in new fiscal years.\nThis is needed because we have to display only one line for the initial balance of all expense/revenue accounts in the FEC.",
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_company_legal_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_account",
+      "decorators": [],
+      "documentation": "Dom-Tom are excluded from the EU's fiscal territory\nThose regions do not have SIREN\nsources:\n    https://www.service-public.fr/professionnels-entreprises/vosdroits/F23570\n    http://www.douane.gouv.fr/articles/a11024-tva-dans-les-dom\n\n* Returns the siren if the company is french or an empty siren for dom-tom\n* For non-french companies -> returns the complete vat number",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fec_stream",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 280,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "generate_fec",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_fec_report_action",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_fr_account.access_l10n_fr_fec_export_wizard",
+    "package": "l10n_fr_account",
+    "name": "access_l10n_fr_fec_export_wizard",
+    "entity": "l10n_fr.fec.export.wizard",
+    "group": "account.group_account_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_fr_account.fec_export_wizard_view",
+    "package": "l10n_fr_account",
+    "name": "l10n_fr.fec.export.wizard.view",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "FEC File Generation"
+     },
+     "fields": [
+      {
+       "name": "date_from"
+      },
+      {
+       "name": "date_to"
+      },
+      {
+       "name": "test_file"
+      },
+      {
+       "name": "export_type",
+       "invisible": "not test_file"
+      },
+      {
+       "name": "excluded_journal_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_create': True}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "create_fec_report_action",
+       "string": "Generate",
+       "type": "object",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "options",
+       "string": "Options",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "technical_info",
+       "string": "Technical Info",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

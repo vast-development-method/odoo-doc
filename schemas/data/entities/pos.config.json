@@ -1,0 +1,5905 @@
+{
+ "catalog": {
+  "name": "entity:pos.config",
+  "description": "Complete definition of entity Point of Sale Configuration (pos.config).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "pos.config",
+  "storage_name": "pos_config",
+  "full_name": "Point of Sale Configuration",
+  "kind": "persistent",
+  "description": "Point of Sale Configuration",
+  "defined_by_package": "point_of_sale",
+  "extended_by_packages": [
+   "l10n_gcc_pos",
+   "l10n_ar_pos",
+   "pos_restaurant",
+   "l10n_be_pos_restaurant",
+   "pos_sale",
+   "l10n_be_pos_sale",
+   "l10n_es_edi_tbai_pos",
+   "l10n_es_edi_verifactu_pos",
+   "l10n_es_pos",
+   "l10n_fr_pos_cert",
+   "l10n_in_pos",
+   "l10n_pe_pos",
+   "l10n_sa_pos",
+   "l10n_sa_edi_pos",
+   "l10n_tw_edi_ecpay_pos",
+   "l10n_vn_edi_viettel_pos",
+   "pos_adyen",
+   "pos_discount",
+   "pos_event",
+   "pos_hr",
+   "pos_loyalty",
+   "pos_online_payment",
+   "pos_self_order",
+   "pos_online_payment_self_order",
+   "pos_self_order_qfpay",
+   "pos_sms"
+  ],
+  "mixins": [
+   "pos.bus.mixin",
+   "pos.load.mixin",
+   "hr.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Point of Sale",
+    "required": true,
+    "help": "An internal identification of the point of sale.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Point of Sale"
+   },
+   {
+    "name": "printer_ids",
+    "type": "Many2many",
+    "comodel": "pos.printer",
+    "relation": "pos_config_printer_rel",
+    "column1": "config_id",
+    "column2": "printer_id",
+    "string": "Order Printers",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Printers",
+    "target_entity": "pos.printer"
+   },
+   {
+    "name": "is_order_printer",
+    "type": "Boolean",
+    "string": "Order Printer",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Printer"
+   },
+   {
+    "name": "is_installed_account_accountant",
+    "type": "Boolean",
+    "string": "Is the Full Accounting Installed",
+    "compute": "_compute_is_installed_account_accountant",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Is the Full Accounting Installed"
+   },
+   {
+    "name": "picking_type_id",
+    "type": "Many2one",
+    "comodel": "stock.picking.type",
+    "string": "Operation Type",
+    "default": {
+     "dynamic": "_default_picking_type_id"
+    },
+    "required": true,
+    "domain": {
+     "dynamic": "lambda self: [('code', '=', 'outgoing'), ('warehouse_id.company_id', '=', self.env.company.id)]"
+    },
+    "ondelete": "restrict",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Operation Type",
+    "target_entity": "stock.picking.type"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Point of Sale Journal",
+    "domain": [
+     [
+      "type",
+      "in",
+      [
+       "general",
+       "sale"
+      ]
+     ]
+    ],
+    "check_company": true,
+    "help": "Accounting journal used to post POS session journal entries and POS invoice payments.",
+    "default": {
+     "dynamic": "_default_sale_journal"
+    },
+    "ondelete": "restrict",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Point of Sale Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "invoice_journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Invoice Journal",
+    "check_company": true,
+    "domain": [
+     [
+      "type",
+      "=",
+      "sale"
+     ]
+    ],
+    "help": "Accounting journal used to create invoices.",
+    "default": {
+     "dynamic": "_default_invoice_journal"
+    },
+    "defined_in_package": "point_of_sale",
+    "full_name": "Invoice Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "compute": "_compute_currency",
+    "store": true,
+    "compute_sudo": true,
+    "string": "Currency",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "order_seq_id",
+    "type": "Many2one",
+    "comodel": "ir.sequence",
+    "string": "Order Sequence",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Sequence",
+    "target_entity": "ir.sequence"
+   },
+   {
+    "name": "order_backend_seq_id",
+    "type": "Many2one",
+    "comodel": "ir.sequence",
+    "string": "Order Backend Sequence",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Backend Sequence",
+    "target_entity": "ir.sequence"
+   },
+   {
+    "name": "order_line_seq_id",
+    "type": "Many2one",
+    "comodel": "ir.sequence",
+    "string": "Order Line Sequence",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Line Sequence",
+    "target_entity": "ir.sequence"
+   },
+   {
+    "name": "device_seq_id",
+    "type": "Many2one",
+    "comodel": "ir.sequence",
+    "string": "Device Sequence",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Device Sequence",
+    "target_entity": "ir.sequence"
+   },
+   {
+    "name": "iface_cashdrawer",
+    "type": "Boolean",
+    "string": "Cashdrawer",
+    "help": "Automatically open the cashdrawer.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Cashdrawer"
+   },
+   {
+    "name": "iface_electronic_scale",
+    "type": "Boolean",
+    "string": "Electronic Scale",
+    "help": "Enables Electronic Scale integration.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Electronic Scale"
+   },
+   {
+    "name": "iface_print_via_proxy",
+    "type": "Boolean",
+    "string": "Print via Proxy",
+    "help": "Bypass browser printing and prints via the hardware proxy.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Print via Proxy"
+   },
+   {
+    "name": "iface_scan_via_proxy",
+    "type": "Boolean",
+    "string": "Scan via Proxy",
+    "help": "Enable barcode scanning with a remotely connected barcode scanner and card swiping with a Vantiv card reader.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Scan via Proxy"
+   },
+   {
+    "name": "iface_big_scrollbars",
+    "type": "Boolean",
+    "string": "Large Scrollbars",
+    "help": "For imprecise industrial touchscreens.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Large Scrollbars"
+   },
+   {
+    "name": "iface_group_by_categ",
+    "type": "Boolean",
+    "string": "Group products by categories",
+    "help": "Display products grouped by categories.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Group products by categories"
+   },
+   {
+    "name": "iface_print_auto",
+    "type": "Boolean",
+    "string": "Automatic Receipt Printing",
+    "default": false,
+    "help": "The receipt will automatically be printed at the end of each order.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Automatic Receipt Printing"
+   },
+   {
+    "name": "iface_print_skip_screen",
+    "type": "Boolean",
+    "string": "Skip Preview Screen",
+    "default": true,
+    "help": "The receipt screen will be skipped if the receipt can be printed automatically.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Skip Preview Screen"
+   },
+   {
+    "name": "iface_tax_included",
+    "type": "Selection",
+    "selection": [
+     [
+      "subtotal",
+      "Tax-Excluded Price"
+     ],
+     [
+      "total",
+      "Tax-Included Price"
+     ]
+    ],
+    "string": "Tax Display",
+    "default": "total",
+    "required": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Tax Display"
+   },
+   {
+    "name": "iface_available_categ_ids",
+    "type": "Many2many",
+    "comodel": "pos.category",
+    "string": "Available PoS Product Categories",
+    "help": "The point of sale will only display products which are within one of the selected category trees. If no category is specified, all available products will be shown",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Available PoS Product Categories",
+    "target_entity": "pos.category"
+   },
+   {
+    "name": "customer_display_bg_img",
+    "type": "Image",
+    "string": "Background Image",
+    "max_width": 1920,
+    "max_height": 1920,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Background Image"
+   },
+   {
+    "name": "customer_display_bg_img_name",
+    "type": "Char",
+    "string": "Background Image Name",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Background Image Name"
+   },
+   {
+    "name": "restrict_price_control",
+    "type": "Boolean",
+    "string": "Restrict Price Modifications to Managers",
+    "help": "Only users with Manager access rights for PoS app can modify the product prices on orders.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Restrict Price Modifications to Managers"
+   },
+   {
+    "name": "is_margins_costs_accessible_to_every_user",
+    "type": "Boolean",
+    "string": "Margins & Costs",
+    "default": false,
+    "help": "When disabled, only PoS manager can view the margin and cost of product among the Product info.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Margins & Costs"
+   },
+   {
+    "name": "cash_control",
+    "type": "Boolean",
+    "string": "Advanced Cash Control",
+    "compute": "_compute_cash_control",
+    "help": "Check the amount of the cashbox at opening and closing.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Advanced Cash Control"
+   },
+   {
+    "name": "set_maximum_difference",
+    "type": "Boolean",
+    "string": "Set Maximum Difference",
+    "help": "Set a maximum difference allowed between the expected and counted money during the closing of the session.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Set Maximum Difference"
+   },
+   {
+    "name": "receipt_header",
+    "type": "Text",
+    "string": "Receipt Header",
+    "help": "A short text that will be inserted as a header in the printed receipt.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Receipt Header"
+   },
+   {
+    "name": "receipt_footer",
+    "type": "Text",
+    "string": "Receipt Footer",
+    "help": "A short text that will be inserted as a footer in the printed receipt.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Receipt Footer"
+   },
+   {
+    "name": "basic_receipt",
+    "type": "Boolean",
+    "string": "Basic Receipt",
+    "help": "Print basic ticket without prices. Can be used for gifts.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Basic Receipt"
+   },
+   {
+    "name": "proxy_ip",
+    "type": "Char",
+    "string": "IP Address",
+    "size": 45,
+    "help": "The hostname or ip address of the hardware proxy, Will be autodetected if left empty.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "internet protocol Address"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "point_of_sale",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "uuid",
+    "type": "Char",
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: str(uuid4())"
+    },
+    "copy": false,
+    "help": "A globally unique identifier for this pos configuration, used to prevent conflicts in client-generated data.",
+    "defined_in_package": "point_of_sale",
+    "string": "Uuid",
+    "full_name": "Uuid"
+   },
+   {
+    "name": "session_ids",
+    "type": "One2many",
+    "comodel": "pos.session",
+    "inverse_name": "config_id",
+    "string": "Sessions",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Sessions",
+    "target_entity": "pos.session"
+   },
+   {
+    "name": "current_session_id",
+    "type": "Many2one",
+    "comodel": "pos.session",
+    "compute": "_compute_current_session",
+    "string": "Current Session",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Current Session",
+    "target_entity": "pos.session"
+   },
+   {
+    "name": "current_session_state",
+    "type": "Char",
+    "compute": "_compute_current_session",
+    "defined_in_package": "point_of_sale",
+    "string": "Current Session State",
+    "full_name": "Current Session State"
+   },
+   {
+    "name": "number_of_rescue_session",
+    "type": "Integer",
+    "string": "Number of Rescue Session",
+    "compute": "_compute_current_session",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Number of Rescue Session"
+   },
+   {
+    "name": "last_session_closing_cash",
+    "type": "Float",
+    "compute": "_compute_last_session",
+    "defined_in_package": "point_of_sale",
+    "string": "Last Session Closing Cash",
+    "full_name": "Last Session Closing Cash"
+   },
+   {
+    "name": "last_session_closing_date",
+    "type": "Date",
+    "compute": "_compute_last_session",
+    "defined_in_package": "point_of_sale",
+    "string": "Last Session Closing Date",
+    "full_name": "Last Session Closing Date"
+   },
+   {
+    "name": "pos_session_username",
+    "type": "Char",
+    "compute": "_compute_current_session_user",
+    "defined_in_package": "point_of_sale",
+    "string": "Point of sale Session Username",
+    "full_name": "Point of sale Session Username"
+   },
+   {
+    "name": "pos_session_state",
+    "type": "Char",
+    "compute": "_compute_current_session_user",
+    "defined_in_package": "point_of_sale",
+    "string": "Point of sale Session State",
+    "full_name": "Point of sale Session State"
+   },
+   {
+    "name": "pos_session_duration",
+    "type": "Char",
+    "compute": "_compute_current_session_user",
+    "defined_in_package": "point_of_sale",
+    "string": "Point of sale Session Duration",
+    "full_name": "Point of sale Session Duration"
+   },
+   {
+    "name": "pricelist_id",
+    "type": "Many2one",
+    "comodel": "product.pricelist",
+    "string": "Default Pricelist",
+    "help": "The pricelist used if no customer is selected or if the customer has no Sale Pricelist configured if any.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Default Pricelist",
+    "target_entity": "product.pricelist"
+   },
+   {
+    "name": "available_pricelist_ids",
+    "type": "Many2many",
+    "comodel": "product.pricelist",
+    "string": "Available Pricelists",
+    "help": "Make several pricelists available in the Point of Sale. You can also apply a pricelist to specific customers from their contact form (in Sales tab). To be valid, this pricelist must be listed here as an available pricelist. Otherwise the default pricelist will apply.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Available Pricelists",
+    "target_entity": "product.pricelist"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "point_of_sale",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "group_pos_manager_id",
+    "type": "Many2one",
+    "comodel": "res.groups",
+    "string": "Point of Sale Manager Group",
+    "default": {
+     "dynamic": "_get_group_pos_manager"
+    },
+    "help": "This field is there to pass the id of the pos manager group to the point of sale client.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Point of Sale Manager Group",
+    "target_entity": "res.groups"
+   },
+   {
+    "name": "group_pos_user_id",
+    "type": "Many2one",
+    "comodel": "res.groups",
+    "string": "Point of Sale User Group",
+    "default": {
+     "dynamic": "_get_group_pos_user"
+    },
+    "help": "This field is there to pass the id of the pos user group to the point of sale client.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Point of Sale User Group",
+    "target_entity": "res.groups"
+   },
+   {
+    "name": "iface_tipproduct",
+    "type": "Boolean",
+    "string": "Product tips",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Product tips"
+   },
+   {
+    "name": "tip_product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Tip Product",
+    "default": {
+     "dynamic": "_get_default_tip_product"
+    },
+    "help": "This product is used as reference on customer receipts.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Tip Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "fiscal_position_ids",
+    "type": "Many2many",
+    "comodel": "account.fiscal.position",
+    "string": "Fiscal Positions",
+    "help": "This is useful for restaurants with onsite and take-away services that imply specific tax rates.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Fiscal Positions",
+    "target_entity": "account.fiscal.position"
+   },
+   {
+    "name": "default_fiscal_position_id",
+    "type": "Many2one",
+    "comodel": "account.fiscal.position",
+    "string": "Default Fiscal Position",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Default Fiscal Position",
+    "target_entity": "account.fiscal.position"
+   },
+   {
+    "name": "default_bill_ids",
+    "type": "Many2many",
+    "comodel": "pos.bill",
+    "string": "Coins/Bills",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Coins/Bills",
+    "target_entity": "pos.bill"
+   },
+   {
+    "name": "use_pricelist",
+    "type": "Boolean",
+    "string": "Use a pricelist.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Use a pricelist."
+   },
+   {
+    "name": "use_presets",
+    "type": "Boolean",
+    "string": "Use Presets",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Use Presets"
+   },
+   {
+    "name": "default_preset_id",
+    "type": "Many2one",
+    "comodel": "pos.preset",
+    "string": "Default Preset",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Default Preset",
+    "target_entity": "pos.preset"
+   },
+   {
+    "name": "available_preset_ids",
+    "type": "Many2many",
+    "comodel": "pos.preset",
+    "string": "Available Presets",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Available Presets",
+    "target_entity": "pos.preset"
+   },
+   {
+    "name": "tax_regime_selection",
+    "type": "Boolean",
+    "string": "Tax Regime Selection value",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Tax Regime Selection value"
+   },
+   {
+    "name": "limit_categories",
+    "type": "Boolean",
+    "string": "Restrict Categories",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Restrict Categories"
+   },
+   {
+    "name": "module_pos_restaurant",
+    "type": "Boolean",
+    "string": "Is a Bar/Restaurant",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Is a Bar/Restaurant"
+   },
+   {
+    "name": "module_pos_avatax",
+    "type": "Boolean",
+    "string": "AvaTax PoS Integration",
+    "help": "Use automatic taxes mapping with Avatax in PoS",
+    "defined_in_package": "point_of_sale",
+    "full_name": "AvaTax PoS Integration"
+   },
+   {
+    "name": "module_pos_discount",
+    "type": "Boolean",
+    "string": "Global Discounts",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Global Discounts"
+   },
+   {
+    "name": "module_pos_appointment",
+    "type": "Boolean",
+    "string": "Online Booking",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Online Booking"
+   },
+   {
+    "name": "is_posbox",
+    "type": "Boolean",
+    "string": "PosBox",
+    "defined_in_package": "point_of_sale",
+    "full_name": "PosBox"
+   },
+   {
+    "name": "is_header_or_footer",
+    "type": "Boolean",
+    "string": "Custom Header & Footer",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Custom Header & Footer"
+   },
+   {
+    "name": "module_pos_hr",
+    "type": "Boolean",
+    "help": "Show employee login screen",
+    "defined_in_package": "point_of_sale",
+    "string": "Module Point of sale Human resources",
+    "full_name": "Module Point of sale Human resources"
+   },
+   {
+    "name": "amount_authorized_diff",
+    "type": "Float",
+    "string": "Amount Authorized Difference",
+    "help": "This field depicts the maximum difference allowed between the ending balance and the theoretical cash when closing a session, for non-POS managers. If this maximum is reached, the user will have an error message at the closing of his session saying that he needs to contact his manager.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Amount Authorized Difference"
+   },
+   {
+    "name": "payment_method_ids",
+    "type": "Many2many",
+    "comodel": "pos.payment.method",
+    "string": "Payment Methods",
+    "default": {
+     "dynamic": "lambda self: self._default_payment_methods()"
+    },
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Payment Methods",
+    "target_entity": "pos.payment.method"
+   },
+   {
+    "name": "company_has_template",
+    "type": "Boolean",
+    "string": "Company has chart of accounts",
+    "compute": "_compute_company_has_template",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Company has chart of accounts"
+   },
+   {
+    "name": "current_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Current Session Responsible",
+    "compute": "_compute_current_session_user",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Current Session Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "other_devices",
+    "type": "Boolean",
+    "string": "Other Devices",
+    "help": "Connect devices to your PoS without an IoT Box.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Other Devices"
+   },
+   {
+    "name": "rounding_method",
+    "type": "Many2one",
+    "comodel": "account.cash.rounding",
+    "string": "Cash rounding",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Cash rounding",
+    "target_entity": "account.cash.rounding"
+   },
+   {
+    "name": "cash_rounding",
+    "type": "Boolean",
+    "string": "Cash Rounding",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Cash Rounding"
+   },
+   {
+    "name": "only_round_cash_method",
+    "type": "Boolean",
+    "string": "Only apply rounding on cash",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Only apply rounding on cash"
+   },
+   {
+    "name": "has_active_session",
+    "type": "Boolean",
+    "compute": "_compute_current_session",
+    "defined_in_package": "point_of_sale",
+    "string": "Has Active Session",
+    "full_name": "Has Active Session"
+   },
+   {
+    "name": "manual_discount",
+    "type": "Boolean",
+    "string": "Line Discounts",
+    "default": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Line Discounts"
+   },
+   {
+    "name": "ship_later",
+    "type": "Boolean",
+    "string": "Ship Later",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Ship Later"
+   },
+   {
+    "name": "warehouse_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse",
+    "compute": "_compute_warehouse_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "ondelete": "restrict",
+    "defined_in_package": "point_of_sale",
+    "string": "Warehouse",
+    "full_name": "Warehouse",
+    "target_entity": "stock.warehouse"
+   },
+   {
+    "name": "route_id",
+    "type": "Many2one",
+    "comodel": "stock.route",
+    "string": "Spefic route for products delivered later.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Spefic route for products delivered later.",
+    "target_entity": "stock.route"
+   },
+   {
+    "name": "picking_policy",
+    "type": "Selection",
+    "selection": [
+     [
+      "direct",
+      "As soon as possible"
+     ],
+     [
+      "one",
+      "When all products are ready"
+     ]
+    ],
+    "string": "Shipping Policy",
+    "required": true,
+    "default": "direct",
+    "help": "If you deliver all products at once, the delivery order will be scheduled based on the greatest product lead time. Otherwise, it will be based on the shortest.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Shipping Policy"
+   },
+   {
+    "name": "auto_validate_terminal_payment",
+    "type": "Boolean",
+    "default": true,
+    "help": "Automatically validates orders paid with a payment terminal.",
+    "defined_in_package": "point_of_sale",
+    "string": "Auto Validate Terminal Payment",
+    "full_name": "Auto Validate Terminal Payment"
+   },
+   {
+    "name": "trusted_config_ids",
+    "type": "Many2many",
+    "comodel": "pos.config",
+    "relation": "pos_config_trust_relation",
+    "column1": "is_trusting",
+    "column2": "is_trusted",
+    "string": "Trusted Point of Sale Configurations",
+    "domain": "[('company_id', '=', company_id)]",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Trusted Point of Sale Configurations",
+    "target_entity": "pos.config"
+   },
+   {
+    "name": "access_token",
+    "type": "Char",
+    "string": "Access Token",
+    "default": {
+     "dynamic": "lambda self: uuid4().hex[:16]"
+    },
+    "defined_in_package": "point_of_sale",
+    "full_name": "Access Token"
+   },
+   {
+    "name": "show_product_images",
+    "type": "Boolean",
+    "string": "Show Product Images",
+    "help": "Show product images in the Point of Sale interface.",
+    "default": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Show Product Images"
+   },
+   {
+    "name": "show_category_images",
+    "type": "Boolean",
+    "string": "Show Category Images",
+    "help": "Show category images in the Point of Sale interface.",
+    "default": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Show Category Images"
+   },
+   {
+    "name": "note_ids",
+    "type": "Many2many",
+    "comodel": "pos.note",
+    "string": "Note Models",
+    "help": "The predefined notes of this point of sale.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Note Models",
+    "target_entity": "pos.note"
+   },
+   {
+    "name": "module_pos_sms",
+    "type": "Boolean",
+    "string": "SMS Enabled",
+    "help": "Activate SMS feature for point_of_sale",
+    "defined_in_package": "point_of_sale",
+    "full_name": "text message Enabled"
+   },
+   {
+    "name": "is_closing_entry_by_product",
+    "type": "Boolean",
+    "string": "Closing Entry by product",
+    "help": "Display the breakdown of sales lines by product in the automatically generated closing entry.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Closing Entry by product"
+   },
+   {
+    "name": "order_edit_tracking",
+    "type": "Boolean",
+    "string": "Track orders edits",
+    "help": "Store edited orders in the backend",
+    "default": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Track orders edits"
+   },
+   {
+    "name": "last_data_change",
+    "type": "Datetime",
+    "string": "Last Write Date",
+    "readonly": true,
+    "compute": "_compute_local_data_integrity",
+    "store": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Last Write Date"
+   },
+   {
+    "name": "fallback_nomenclature_id",
+    "type": "Many2one",
+    "comodel": "barcode.nomenclature",
+    "string": "Fallback Nomenclature",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Fallback Nomenclature",
+    "target_entity": "barcode.nomenclature"
+   },
+   {
+    "name": "epson_printer_ip",
+    "type": "Char",
+    "string": "Epson Printer IP",
+    "help": "Local IP address of an Epson receipt printer, or its serial number if the 'Automatic Certificate Update' option is enabled in the printer settings.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Epson Printer internet protocol"
+   },
+   {
+    "name": "use_fast_payment",
+    "type": "Boolean",
+    "string": "Fast Payment Validation",
+    "help": "Enable fast payment methods to validate orders on the product screen.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Fast Payment Validation"
+   },
+   {
+    "name": "fast_payment_method_ids",
+    "type": "Many2many",
+    "comodel": "pos.payment.method",
+    "string": "Fast Payment Methods",
+    "compute": "_compute_fast_payment_method_ids",
+    "relation": "pos_payment_method_config_fast_validation_relation",
+    "store": true,
+    "help": "These payment methods will be available for fast payment",
+    "readonly": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Fast Payment Methods",
+    "target_entity": "pos.payment.method"
+   },
+   {
+    "name": "statistics_for_current_session",
+    "type": "Json",
+    "string": "Session Statistics",
+    "compute": "_compute_statistics_for_session",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Session Statistics"
+   },
+   {
+    "name": "l10n_gcc_dual_language_receipt",
+    "type": "Boolean",
+    "string": "GCC Formatted Receipts",
+    "defined_in_package": "l10n_gcc_pos",
+    "full_name": "GCC Formatted Receipts"
+   },
+   {
+    "name": "iface_splitbill",
+    "type": "Boolean",
+    "string": "Bill Splitting",
+    "help": "Enables Bill Splitting in the Point of Sale.",
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Bill Splitting"
+   },
+   {
+    "name": "iface_printbill",
+    "type": "Boolean",
+    "string": "Bill Printing",
+    "help": "Allows to print the Bill before payment.",
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Bill Printing"
+   },
+   {
+    "name": "floor_ids",
+    "type": "Many2many",
+    "comodel": "restaurant.floor",
+    "string": "Restaurant Floors",
+    "help": "The restaurant floors served by this point of sale.",
+    "copy": false,
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Restaurant Floors",
+    "target_entity": "restaurant.floor"
+   },
+   {
+    "name": "set_tip_after_payment",
+    "type": "Boolean",
+    "string": "Set Tip After Payment",
+    "help": "Adjust the amount authorized by payment terminals to add a tip after the customers left or at the end of the day.",
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Set Tip After Payment"
+   },
+   {
+    "name": "default_screen",
+    "type": "Selection",
+    "selection": [
+     [
+      "tables",
+      "Tables"
+     ],
+     [
+      "register",
+      "Register"
+     ]
+    ],
+    "string": "Default Screen",
+    "default": "tables",
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Default Screen"
+   },
+   {
+    "name": "crm_team_id",
+    "type": "Many2one",
+    "comodel": "crm.team",
+    "string": "Sales Team",
+    "ondelete": "set null",
+    "index": "btree_not_null",
+    "help": "This Point of sale's sales will be related to this Sales Team.",
+    "defined_in_package": "pos_sale",
+    "full_name": "Sales Team",
+    "target_entity": "crm.team"
+   },
+   {
+    "name": "down_payment_product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Down Payment Product",
+    "help": "This product will be used as down payment on a sale order.",
+    "defined_in_package": "pos_sale",
+    "full_name": "Down Payment Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_required",
+    "type": "Boolean",
+    "string": "Veri*Factu Required",
+    "related": "company_id.l10n_es_edi_verifactu_required",
+    "defined_in_package": "l10n_es_edi_verifactu_pos",
+    "full_name": "Veri*Factu Required"
+   },
+   {
+    "name": "is_spanish",
+    "type": "Boolean",
+    "string": "Company located in Spain",
+    "compute": "_compute_is_spanish",
+    "defined_in_package": "l10n_es_pos",
+    "full_name": "Company located in Spain"
+   },
+   {
+    "name": "l10n_es_simplified_invoice_journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "domain": [
+     [
+      "type",
+      "=",
+      "sale"
+     ]
+    ],
+    "check_company": true,
+    "defined_in_package": "l10n_es_pos",
+    "string": "Localization Es Simplified Invoice Journal",
+    "full_name": "Localization Es Simplified Invoice Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "simplified_partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Simplified invoice partner",
+    "compute": "_compute_simplified_partner_id",
+    "defined_in_package": "l10n_es_pos",
+    "full_name": "Simplified invoice partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "is_ecpay_enabled",
+    "type": "Boolean",
+    "string": "Is Ecpay Enabled",
+    "compute": "_compute_is_ecpay_enabled",
+    "defined_in_package": "l10n_tw_edi_ecpay_pos",
+    "full_name": "Is Ecpay Enabled"
+   },
+   {
+    "name": "l10n_vn_auto_send_to_sinvoice",
+    "type": "Boolean",
+    "string": "Auto-send to SInvoice",
+    "default": true,
+    "defined_in_package": "l10n_vn_edi_viettel_pos",
+    "full_name": "Auto-send to SInvoice"
+   },
+   {
+    "name": "l10n_vn_pos_symbol",
+    "type": "Many2one",
+    "comodel": "l10n_vn_edi_viettel.sinvoice.symbol",
+    "string": "POS Symbol",
+    "groups": "base.group_system,point_of_sale.group_pos_manager",
+    "help": "This is the symbol that will be used on invoices issued from this POS.",
+    "compute": "_compute_l10n_vn_pos_symbol",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_vn_edi_viettel_pos",
+    "full_name": "point of sale Symbol",
+    "target_entity": "l10n_vn_edi_viettel.sinvoice.symbol"
+   },
+   {
+    "name": "adyen_ask_customer_for_tip",
+    "type": "Boolean",
+    "string": "Ask Customers For Tip",
+    "defined_in_package": "pos_adyen",
+    "full_name": "Ask Customers For Tip"
+   },
+   {
+    "name": "iface_discount",
+    "type": "Boolean",
+    "string": "Order Discounts",
+    "help": "Allow the cashier to give discounts on the whole order.",
+    "defined_in_package": "pos_discount",
+    "full_name": "Order Discounts"
+   },
+   {
+    "name": "discount_pc",
+    "type": "Float",
+    "string": "Discount Percentage",
+    "help": "The default discount percentage when clicking on the Discount button",
+    "default": 10.0,
+    "defined_in_package": "pos_discount",
+    "full_name": "Discount Percentage"
+   },
+   {
+    "name": "discount_product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Discount Product",
+    "domain": [
+     [
+      "sale_ok",
+      "=",
+      true
+     ]
+    ],
+    "help": "The product used to apply the discount on the ticket.",
+    "defined_in_package": "pos_discount",
+    "full_name": "Discount Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "minimal_employee_ids",
+    "type": "Many2many",
+    "comodel": "hr.employee",
+    "relation": "pos_hr_minimal_employee_hr_employee",
+    "string": "Employees with minimal access",
+    "help": "If left empty, all employees can log in to PoS",
+    "defined_in_package": "pos_hr",
+    "full_name": "Employees with minimal access",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "basic_employee_ids",
+    "type": "Many2many",
+    "comodel": "hr.employee",
+    "relation": "pos_hr_basic_employee_hr_employee",
+    "string": "Employees with basic access",
+    "help": "If left empty, all employees can log in to PoS",
+    "defined_in_package": "pos_hr",
+    "full_name": "Employees with basic access",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "advanced_employee_ids",
+    "type": "Many2many",
+    "comodel": "hr.employee",
+    "relation": "pos_hr_advanced_employee_hr_employee",
+    "string": "Employees with manager access",
+    "help": "Employees linked to users with the PoS Manager role are automatically added to this list",
+    "defined_in_package": "pos_hr",
+    "full_name": "Employees with manager access",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "status",
+    "type": "Selection",
+    "selection": [
+     [
+      "inactive",
+      "Inactive"
+     ],
+     [
+      "active",
+      "Active"
+     ]
+    ],
+    "string": "Status",
+    "compute": "_compute_status",
+    "store": false,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Status"
+   },
+   {
+    "name": "self_ordering_url",
+    "type": "Char",
+    "compute": "_compute_self_ordering_url",
+    "defined_in_package": "pos_self_order",
+    "string": "Self Ordering Uniform resource locator",
+    "full_name": "Self Ordering Uniform resource locator"
+   },
+   {
+    "name": "self_ordering_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "nothing",
+      "Disable"
+     ],
+     [
+      "consultation",
+      "QR menu"
+     ],
+     [
+      "mobile",
+      "QR menu + Ordering"
+     ],
+     [
+      "kiosk",
+      "Kiosk"
+     ]
+    ],
+    "string": "Self Ordering Mode",
+    "default": "nothing",
+    "help": "Choose the self ordering mode",
+    "required": true,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Self Ordering Mode"
+   },
+   {
+    "name": "self_ordering_service_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "counter",
+      "Pickup zone"
+     ],
+     [
+      "table",
+      "Table"
+     ]
+    ],
+    "string": "Self Ordering Service Mode",
+    "default": "counter",
+    "help": "Choose the kiosk mode",
+    "required": true,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Self Ordering Service Mode"
+   },
+   {
+    "name": "self_ordering_default_language_id",
+    "type": "Many2one",
+    "comodel": "res.lang",
+    "string": "Default Language",
+    "help": "Default language for the kiosk mode",
+    "default": {
+     "dynamic": "lambda self: self.env['res.lang'].search([('code', '=', self.env.lang)], limit=1)"
+    },
+    "defined_in_package": "pos_self_order",
+    "full_name": "Default Language",
+    "target_entity": "res.lang"
+   },
+   {
+    "name": "self_ordering_available_language_ids",
+    "type": "Many2many",
+    "comodel": "res.lang",
+    "string": "Available Languages",
+    "help": "Languages available for the kiosk mode",
+    "default": {
+     "dynamic": "_self_order_kiosk_default_languages"
+    },
+    "defined_in_package": "pos_self_order",
+    "full_name": "Available Languages",
+    "target_entity": "res.lang"
+   },
+   {
+    "name": "self_ordering_image_home_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "string": "Add images",
+    "help": "Image to display on the self order screen",
+    "bypass_search_access": true,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Add images",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "self_ordering_image_background_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "string": "Set background image",
+    "help": "Image to be displayed in the background",
+    "relation": "pos_self_order_background_rels",
+    "bypass_search_access": true,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Set background image",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "self_ordering_default_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Default User",
+    "help": "Access rights of this user will be used when visiting self order website when no session is open.",
+    "default": {
+     "dynamic": "_self_order_default_user"
+    },
+    "defined_in_package": "pos_self_order",
+    "full_name": "Default User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "self_ordering_pay_after",
+    "type": "Selection",
+    "selection": {
+     "expression": "lambda self: self._compute_selection_pay_after()"
+    },
+    "string": "Pay After:",
+    "default": "meal",
+    "help": "Choose when the customer will pay",
+    "required": true,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Pay After:"
+   },
+   {
+    "name": "self_ordering_image_brand",
+    "type": "Image",
+    "string": "Self Order Kiosk Image Brand",
+    "help": "Image to display on the self order screen",
+    "max_width": 1200,
+    "max_height": 250,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Self Order Kiosk Image Brand"
+   },
+   {
+    "name": "self_ordering_image_brand_name",
+    "type": "Char",
+    "string": "Self Order Kiosk Image Brand Name",
+    "help": "Name of the image to display on the self order screen",
+    "defined_in_package": "pos_self_order",
+    "full_name": "Self Order Kiosk Image Brand Name"
+   },
+   {
+    "name": "has_paper",
+    "type": "Boolean",
+    "string": "Has paper",
+    "default": true,
+    "defined_in_package": "pos_self_order",
+    "full_name": "Has paper"
+   },
+   {
+    "name": "self_order_online_payment_method_id",
+    "type": "Many2one",
+    "comodel": "pos.payment.method",
+    "string": "Self Online Payment",
+    "help": "The online payment method to use when a customer pays a self-order online.",
+    "domain": [
+     [
+      "is_online_payment",
+      "=",
+      true
+     ]
+    ],
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "pos_online_payment_self_order",
+    "full_name": "Self Online Payment",
+    "target_entity": "pos.payment.method"
+   },
+   {
+    "name": "sms_receipt_template_id",
+    "type": "Many2one",
+    "comodel": "sms.template",
+    "string": "Sms Receipt template",
+    "domain": [
+     [
+      "model",
+      "=",
+      "pos.order"
+     ]
+    ],
+    "help": "SMS will be sent to the customer based on this template",
+    "defined_in_package": "pos_sms",
+    "full_name": "Sms Receipt template",
+    "target_entity": "sms.template"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_warehouse_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_picking_type_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_sale_journal",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_invoice_journal",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_payment_methods",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Should only default to payment methods that are compatible to this config's company and currency.\n        ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_group_pos_manager",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_group_pos_user",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_tip_product",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_order_refs",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "device_identifier"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "notify_synchronisation",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "session_id",
+     "device_identifier",
+     "records"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "read_config_open_orders",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "domain",
+     "record_ids"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ar_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_be_pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_tbai_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_verifactu_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_pe_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sa_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn_edi_viettel_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_fast_payment_method_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_warehouse_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_cash_control",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_has_template",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_installed_account_accountant",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "journal_id.currency_id",
+         "journal_id.company_id.currency_id",
+         "company_id",
+         "company_id.currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_session",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "session_ids",
+         "session_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "If there is an open session, store it to current_session_id / current_session_State.\n        ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_statistics_for_session",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_statistics_for_session",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "session"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_last_session",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "session_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_session_user",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "session_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_rounding_method_strategy",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "rounding_method"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The cash rounding strategy of the point of sale %(pos)s must be: '%(value)s'",
+        "line": 465
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_profit_loss_cash_journal",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You need a loss and profit account on your cash journal.",
+        "line": 475
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_company_payment",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id",
+         "payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The payment methods for the point of sale %s must belong to its company.",
+        "line": 481
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_currencies",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "pricelist_id",
+         "use_pricelist",
+         "available_pricelist_ids",
+         "journal_id",
+         "invoice_journal_id",
+         "payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The default pricelist must be included in the available pricelists.",
+        "line": 487
+       },
+       {
+        "kind": "ValidationError",
+        "message": "All available pricelists must be in the same currency as the company or as the Sales Journal set on this point of sale if you use the Accounting application.",
+        "line": 495
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The invoice journal must be in the same currency as the Sales Journal or the company currency if that is not set.",
+        "line": 499
+       },
+       {
+        "kind": "ValidationError",
+        "message": "All payment methods must be in the same currency as the Sales Journal or the company currency if that is not set.",
+        "line": 492
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_payment_method_ids",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You must have at least one payment method configured to launch a session.",
+        "line": 504
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_pricelists",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "pricelist_id",
+         "available_pricelist_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The default pricelist must belong to no company or the company of the point of sale.",
+        "line": 513
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_companies",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id",
+         "available_pricelist_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The selected pricelists must belong to no company or the company of the point of sale.",
+        "line": 520
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_company_has_template",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "No chart of account configured, go to the \"configuration / settings\" menu, and install one from the Invoicing tab.",
+        "line": 525
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_payment_method_ids_journal",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "This cash payment method is already used in another Point of Sale.\nA new cash payment method should be created for this Point of Sale.",
+        "line": 533
+       },
+       {
+        "kind": "ValidationError",
+        "message": "You cannot use the same journal on multiples cash payment methods.",
+        "line": 536
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_trusted_config_ids_currency",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "trusted_config_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot share open orders with configuration that does not use the same currency.",
+        "line": 543
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_header_footer",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only administrators can edit receipt headers and footers",
+        "line": 547
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_company_has_fiscal_country",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The company must have a fiscal country set.",
+        "line": 552
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_sequences",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "register_new_device_identifier",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reset_default_on_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The default tip product is missing. Please manually specify the tip product. (See Tips field.)",
+        "line": 619
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_update_preparation_printers_menuitem_visibility",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_local_data_integrity",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "use_pricelist",
+         "pricelist_id",
+         "available_pricelist_ids",
+         "payment_method_ids",
+         "limit_categories",
+         "iface_available_categ_ids",
+         "module_pos_hr",
+         "module_pos_discount",
+         "iface_tipproduct",
+         "default_preset_id",
+         "module_pos_appointment",
+         "cash_rounding",
+         "rounding_method",
+         "only_round_cash_method"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "set_tip_after_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to modify this PoS Configuration because you can't modify %s while a session is open.",
+        "line": 656
+       }
+      ]
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_preprocess_x2many_vals_from_settings_view",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "From the res.config.settings view, changes in the x2many fields always result to an array of link commands or a single set command.\n- As a result, the items that should be unlinked are not properly unlinked.\n- So before doing the write, we inspect the commands to determine which records should be unlinked.\n- We only care about the link command.\n- We can consider set command as absolute as it will replace all.",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_keep_new_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Keep values in vals that are different than\nself's values.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_forbidden_change_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_fiscal_position",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_modules_to_install",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_groups_implied",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "execute",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_to_open_ui",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_url_to_cache",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "debug"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_before_creating_new_session",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "f'{prefix_error_msg}\\n{invalid_reward_products_msg}'",
+        "line": 52
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid gift card program. More than one reward.",
+        "line": 57
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid gift card program rule. Use 1 point per currency spent.",
+        "line": 62
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid gift card program reward. Use 1 currency per point discount.",
+        "line": 65
+       },
+       {
+        "kind": "UserError",
+        "message": "There is no email template on the gift card program and your pos is set to print them.",
+        "line": 67
+       },
+       {
+        "kind": "UserError",
+        "message": "There is no print report on the gift card program and your pos is set to print them.",
+        "line": 69
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid gift card program. More than one rule.",
+        "line": 59
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "open_ui",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Open the pos interface with config_id as an extra argument.\n\nIn vanilla PoS each user can only have one active session, therefore it was not needed to pass the config_id\non opening a session. It is also possible to login to sessions created by other users.\n\n:returns: dict",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You do not have permission to open a POS session. Please try opening a session with a different user",
+        "line": 818
+       }
+      ]
+     },
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You have to set a country in your company setting.",
+        "line": 20
+       }
+      ]
+     },
+     {
+      "package": "l10n_sa_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You have to set a country in your company setting.",
+        "line": 14
+       }
+      ]
+     },
+     {
+      "package": "l10n_sa_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "RedirectWarning",
+        "message": "msg",
+        "line": 25
+       }
+      ]
+     },
+     {
+      "package": "pos_discount",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "A discount product is needed to use the Global Discount feature. Go to Point of Sale > Configuration > Settings to set it.",
+        "line": 32
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "close_ui",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_existing_session_cb",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "close session button\n\naccess session form to validate entries",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_open_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "session_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_opened_rescue_session_form",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_link_same_non_cash_payment_methods",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "source_config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_journal_exist",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "journal_code",
+     "name",
+     "company_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_pos_pm_exist",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "name",
+     "journal_id",
+     "company_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_limited_product_count",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_product_loading_info",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Return total product.template count matching the PoS domain and the configured loading limit.\n\nUsed by the frontend to warn the user before triggering a full sync when the product\ncount exceeds the configured limit or crosses the dangerous threshold (20 000+).",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_limited_partner_count",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_limited_partners_loading",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "offset"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ar_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_pe_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_pos_config_modal_edit",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_trusted_config_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_remove_trusted_config_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_payment_method",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "payment_type"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_special_products",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_discount",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "update_customer_display",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "order",
+     "device_uuid"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_display_device_ip",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_customer_display_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_cash_payment_method",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "cash_journal_vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_journal_and_payment_methods",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "cash_ref",
+     "cash_journal_vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "This should only be called at creation of a new pos.config.",
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Ensure that there is an existing bank journal. Check if chart of accounts is installed in your company.",
+        "line": 1052
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "get_record_by_ref",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "recordRefs"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_demo_data",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_demo_data_loader_methods",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_demo_data_xml_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_onboarding_clothes_scenario",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_onboarding_clothes_demo_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_onboarding_bakery_scenario",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_onboarding_bakery_demo_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_onboarding_furniture_scenario",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_onboarding_furniture_demo_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_onboarding_retail_scenario",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_suffixed_ref_name",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "ref_name"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Suffix the given ref_name with the id of the current company if it's not the main company.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_pos_kanban_view_state",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "install_pos_restaurant",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_available_pricelists",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_env_with_clean_context",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_default_pos_load_limit",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_quantities_set",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_epson_printer_ip",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "epson_printer_ip"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_setup_default_floor",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "pos_config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_onboarding_bar_scenario",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_restaurant",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_bar_demo_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_be_pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_onboarding_restaurant_scenario",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_restaurant",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_be_pos_restaurant",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_restaurant_demo_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "with_demo_data"
+    ],
+    "definitions": [
+     {
+      "package": "pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_takeaway_fiscal_position",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_be_pos_restaurant",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_downpayment_product",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_spanish",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_simplified_partner_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_ecpay_enabled",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_vn_pos_symbol",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_vn_edi_viettel_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id.l10n_vn_pos_default_symbol"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_adyen_ask_customer_for_tip",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_adyen",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "adyen_ask_customer_for_tip",
+         "iface_tipproduct",
+         "tip_product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please configure a tip product for POS %s to support tipping with Adyen.",
+        "line": 20
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_default_discount_value_on_module_install",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_discount",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_events_seats",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "events"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_minimal_employee_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_hr",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "minimal_employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_basic_employee_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_hr",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "basic_employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_advanced_employee_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_hr",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "advanced_employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_employee_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_program_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "use_coupon_code",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "code",
+     "creation_date",
+     "partner_id",
+     "pricelist_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_online_payment_methods",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Checks the journal currency with _get_online_payment_providers(..., error_if_invalid=True)",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A POS config cannot have more than one online payment method.",
+        "line": 20
+       },
+       {
+        "kind": "ValidationError",
+        "message": "To use an online payment method in a POS config, it must have at least one published payment provider supporting the currency of that POS config.",
+        "line": 22
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_cashier_online_payment_method",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_self_order_kiosk_default_languages",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_self_order_default_user",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "pos_config_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_access_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_self_order_splash_screen",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "vals_list",
+     "is_new"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_self_order_custom_btn",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_public_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_self_order",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "module_pos_restaurant"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_selection_pay_after",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_default_user",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "self_ordering_default_user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The Self-Order default user must be a POS user",
+        "line": 222
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_payment_method_ids",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "payment_method_ids",
+         "self_ordering_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot add cash payment methods in kiosk mode.",
+        "line": 227
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_qr_code_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_self_order_route",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "table_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_self_order_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "table_id"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "preview_self_order_app",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_self_ordering_attachment",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "images"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_self_data_models",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_self_data",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_data_params",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_qr_codes_list",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "floors",
+     "cols"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": ":param floors: the list of floors\n:param cols: the number of qr codes per row",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_self_ordering_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_close_kiosk_session",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_wizard",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_kiosk_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_supported_kiosk_payment_terminal",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order_qfpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "has_valid_self_payment_method",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": "Checks if the POS config has a valid payment method (terminal or online). ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_onboarding_kiosk_scenario",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_single_qr_code__",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "url"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_pos_qr_order_data",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_self_order_online_payment_method_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "self_order_online_payment_method_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The online payment method used for self-order in a POS config must have at least one published payment provider supporting the currency of that POS config.",
+        "line": 17
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_self_ordering_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_rounding_method_strategy",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The cash rounding strategy of the point of sale %(pos)s must be: '%(value)s'"
+   },
+   {
+    "operation": "_check_profit_loss_cash_journal",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You need a loss and profit account on your cash journal."
+   },
+   {
+    "operation": "_check_company_payment",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The payment methods for the point of sale %s must belong to its company."
+   },
+   {
+    "operation": "_check_currencies",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The default pricelist must be included in the available pricelists."
+   },
+   {
+    "operation": "_check_currencies",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "All available pricelists must be in the same currency as the company or as the Sales Journal set on this point of sale if you use the Accounting application."
+   },
+   {
+    "operation": "_check_currencies",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The invoice journal must be in the same currency as the Sales Journal or the company currency if that is not set."
+   },
+   {
+    "operation": "_check_currencies",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "All payment methods must be in the same currency as the Sales Journal or the company currency if that is not set."
+   },
+   {
+    "operation": "_check_payment_method_ids",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You must have at least one payment method configured to launch a session."
+   },
+   {
+    "operation": "_check_pricelists",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The default pricelist must belong to no company or the company of the point of sale."
+   },
+   {
+    "operation": "_check_companies",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The selected pricelists must belong to no company or the company of the point of sale."
+   },
+   {
+    "operation": "_check_company_has_template",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "No chart of account configured, go to the \"configuration / settings\" menu, and install one from the Invoicing tab."
+   },
+   {
+    "operation": "_check_payment_method_ids_journal",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "This cash payment method is already used in another Point of Sale.\nA new cash payment method should be created for this Point of Sale."
+   },
+   {
+    "operation": "_check_payment_method_ids_journal",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You cannot use the same journal on multiples cash payment methods."
+   },
+   {
+    "operation": "_check_trusted_config_ids_currency",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You cannot share open orders with configuration that does not use the same currency."
+   },
+   {
+    "operation": "_check_header_footer",
+    "package": "point_of_sale",
+    "kind": "AccessError",
+    "message": "Only administrators can edit receipt headers and footers"
+   },
+   {
+    "operation": "_check_company_has_fiscal_country",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "The company must have a fiscal country set."
+   },
+   {
+    "operation": "_reset_default_on_vals",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "The default tip product is missing. Please manually specify the tip product. (See Tips field.)"
+   },
+   {
+    "operation": "write",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Unable to modify this PoS Configuration because you can't modify %s while a session is open."
+   },
+   {
+    "operation": "open_ui",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You do not have permission to open a POS session. Please try opening a session with a different user"
+   },
+   {
+    "operation": "_create_journal_and_payment_methods",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Ensure that there is an existing bank journal. Check if chart of accounts is installed in your company."
+   },
+   {
+    "operation": "open_ui",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "You have to set a country in your company setting."
+   },
+   {
+    "operation": "open_ui",
+    "package": "l10n_sa_pos",
+    "kind": "UserError",
+    "message": "You have to set a country in your company setting."
+   },
+   {
+    "operation": "open_ui",
+    "package": "l10n_sa_edi_pos",
+    "kind": "RedirectWarning",
+    "message": "msg"
+   },
+   {
+    "operation": "_check_adyen_ask_customer_for_tip",
+    "package": "pos_adyen",
+    "kind": "ValidationError",
+    "message": "Please configure a tip product for POS %s to support tipping with Adyen."
+   },
+   {
+    "operation": "open_ui",
+    "package": "pos_discount",
+    "kind": "UserError",
+    "message": "A discount product is needed to use the Global Discount feature. Go to Point of Sale > Configuration > Settings to set it."
+   },
+   {
+    "operation": "_check_before_creating_new_session",
+    "package": "pos_loyalty",
+    "kind": "UserError",
+    "message": "f'{prefix_error_msg}\\n{invalid_reward_products_msg}'"
+   },
+   {
+    "operation": "_check_before_creating_new_session",
+    "package": "pos_loyalty",
+    "kind": "UserError",
+    "message": "Invalid gift card program. More than one reward."
+   },
+   {
+    "operation": "_check_before_creating_new_session",
+    "package": "pos_loyalty",
+    "kind": "UserError",
+    "message": "Invalid gift card program rule. Use 1 point per currency spent."
+   },
+   {
+    "operation": "_check_before_creating_new_session",
+    "package": "pos_loyalty",
+    "kind": "UserError",
+    "message": "Invalid gift card program reward. Use 1 currency per point discount."
+   },
+   {
+    "operation": "_check_before_creating_new_session",
+    "package": "pos_loyalty",
+    "kind": "UserError",
+    "message": "There is no email template on the gift card program and your pos is set to print them."
+   },
+   {
+    "operation": "_check_before_creating_new_session",
+    "package": "pos_loyalty",
+    "kind": "UserError",
+    "message": "There is no print report on the gift card program and your pos is set to print them."
+   },
+   {
+    "operation": "_check_before_creating_new_session",
+    "package": "pos_loyalty",
+    "kind": "UserError",
+    "message": "Invalid gift card program. More than one rule."
+   },
+   {
+    "operation": "_check_online_payment_methods",
+    "package": "pos_online_payment",
+    "kind": "ValidationError",
+    "message": "A POS config cannot have more than one online payment method."
+   },
+   {
+    "operation": "_check_online_payment_methods",
+    "package": "pos_online_payment",
+    "kind": "ValidationError",
+    "message": "To use an online payment method in a POS config, it must have at least one published payment provider supporting the currency of that POS config."
+   },
+   {
+    "operation": "_check_default_user",
+    "package": "pos_self_order",
+    "kind": "UserError",
+    "message": "The Self-Order default user must be a POS user"
+   },
+   {
+    "operation": "_onchange_payment_method_ids",
+    "package": "pos_self_order",
+    "kind": "ValidationError",
+    "message": "You cannot add cash payment methods in kiosk mode."
+   },
+   {
+    "operation": "_check_self_order_online_payment_method_id",
+    "package": "pos_online_payment_self_order",
+    "kind": "ValidationError",
+    "message": "The online payment method used for self-order in a POS config must have at least one published payment provider supporting the currency of that POS config."
+   }
+  ],
+  "state_fields": [
+   "status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_pos_config_user",
+    "package": "point_of_sale",
+    "name": "pos.config user",
+    "entity": "pos.config",
+    "group": "group_pos_user",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "point_of_sale.access_pos_config_system_user",
+    "package": "point_of_sale",
+    "name": "pos.config system",
+    "entity": "pos.config",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "point_of_sale.access_pos_config_manager",
+    "package": "point_of_sale",
+    "name": "pos.config manager",
+    "entity": "pos.config",
+    "group": "group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "point_of_sale.rule_pos_config_multi_company",
+    "package": "point_of_sale",
+    "name": "Point Of Sale Config",
+    "entity": "pos.config",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "point_of_sale.pos_config_view_form",
+    "package": "point_of_sale",
+    "name": "pos.config.form.view",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Point of Sale Configuration"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "company_has_template",
+       "invisible": "1"
+      },
+      {
+       "name": "has_active_session",
+       "invisible": "1"
+      },
+      {
+       "name": "other_devices",
+       "invisible": "1"
+      },
+      {
+       "name": "is_posbox",
+       "invisible": "1"
+      },
+      {
+       "name": "module_pos_hr",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. NYC Shop"
+      },
+      {
+       "name": "module_pos_restaurant"
+      },
+      {
+       "name": "module_pos_hr",
+       "readonly": "has_active_session"
+      },
+      {
+       "name": "other_devices"
+      },
+      {
+       "name": "epson_printer_ip",
+       "placeholder": "Epson Receipt Printer IP Address"
+      },
+      {
+       "name": "iface_cashdrawer"
+      },
+      {
+       "name": "is_posbox"
+      },
+      {
+       "name": "proxy_ip"
+      },
+      {
+       "name": "iface_scan_via_proxy"
+      },
+      {
+       "name": "iface_electronic_scale"
+      },
+      {
+       "name": "iface_print_via_proxy"
+      },
+      {
+       "name": "iface_cashdrawer"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "close_ui",
+       "type": "object",
+       "class": "btn"
+      },
+      {
+       "string": "Save",
+       "class": "btn-primary",
+       "special": "save"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "configuration",
+       "string": "Configuration",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "checklist",
+       "string": "Check list",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_config_tree",
+    "package": "point_of_sale",
+    "name": "pos.config.list.view",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Point of Sale Configuration"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "last_session_closing_date",
+       "string": "Closing"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "last_session_closing_cash",
+       "widget": "monetary",
+       "string": "Balance"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_config_search",
+    "package": "point_of_sale",
+    "name": "pos.config.search.view",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Point of Sale Config"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "picking_type_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_config_kanban",
+    "package": "point_of_sale",
+    "name": "pos.config.kanban.view",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "create": "false",
+      "can_open": "0",
+      "class": "o_pos_kanban",
+      "js_class": "pos_config_kanban_view"
+     },
+     "fields": [
+      {
+       "name": "cash_control"
+      },
+      {
+       "name": "current_session_id"
+      },
+      {
+       "name": "current_session_state"
+      },
+      {
+       "name": "access_token"
+      },
+      {
+       "name": "pos_session_state"
+      },
+      {
+       "name": "pos_session_duration"
+      },
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "statistics_for_current_session"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "pos_session_username"
+      },
+      {
+       "name": "last_session_closing_date"
+      },
+      {
+       "name": "last_session_closing_cash",
+       "widget": "monetary"
+      },
+      {
+       "name": "number_of_rescue_session"
+      },
+      {
+       "name": "current_user_id",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "open_ui",
+       "type": "object",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "open_existing_session_cb",
+       "type": "object",
+       "class": "btn btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "pos_hr.pos_config_form_view_inherit",
+    "package": "pos_hr",
+    "name": "pos.config.form.view.inherit",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_config_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@id='warning_text_employees']",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "advanced_employee_ids",
+       "widget": "many2many_tags",
+       "domain": "[('company_id', '=', company_id)]",
+       "placeholder": "Select Employee(s)"
+      },
+      {
+       "name": "basic_employee_ids",
+       "widget": "many2many_tags",
+       "domain": "[('company_id', '=', company_id)]",
+       "placeholder": "All Employees"
+      },
+      {
+       "name": "minimal_employee_ids",
+       "widget": "many2many_tags",
+       "domain": "[('company_id', '=', company_id)]",
+       "placeholder": "Select Employee(s)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 3
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[@id='warning_text_employees']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_imin.pos_config_view_form_inherit_pos_imin",
+    "package": "pos_imin",
+    "name": "pos.config.view.form.inherit.pos.imin",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.pos_config_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='iface_cashdrawer']/../..",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='iface_cashdrawer']/../..",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_sale.view_pos_config_search_inherit_pos_sale",
+    "package": "pos_sale",
+    "name": "pos.config.search.view",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_config_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "crm_team_id",
+       "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_self_order.pos_self_view_pos_config_tree",
+    "package": "pos_self_order",
+    "name": "pos.self.pos.config.list.view",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_config_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "status"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_self_order.pos_self_order_search_view",
+    "package": "pos_self_order",
+    "name": "pos.self.order.search.view",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_config_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='inactive']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_kiosk_only",
+       "string": "Kiosk",
+       "domain": "[('self_ordering_mode', '=', 'kiosk')]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='inactive']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_self_order.pos_self_order_menu_item",
+    "package": "pos_self_order",
+    "name": "pos.config.kanban.view.inherit.self_order",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_config_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='card_left']",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "self_ordering_mode",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "preview_self_order_app",
+       "type": "object",
+       "invisible": "not self_ordering_mode == 'mobile' and not self_ordering_mode == 'consultation'",
+       "class": "btn btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='card_left']",
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "point_of_sale.action_pos_config_kanban",
+    "package": "point_of_sale",
+    "name": "Point of Sale",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": "view_pos_config_search",
+    "domain": "",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a new PoS\n            </p><p>\n                Configure at least one Point of Sale.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "pos.config"
+   },
+   {
+    "external_identifier": "point_of_sale.action_pos_config_tree",
+    "package": "point_of_sale",
+    "name": "Point of Sale List",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_pos_config_search",
+    "domain": "",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a new PoS\n            </p><p>\n                Configure at least one Point of Sale.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "pos.config"
+   },
+   {
+    "external_identifier": "pos_self_order.action_pos_self_order_search_view",
+    "package": "pos_self_order",
+    "name": "Kiosk",
+    "view_mode": "kanban,list",
+    "view_id": null,
+    "search_view_id": "pos_self_order_search_view",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "pos.config"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "pos_self_order.report_self_order_qr_codes_page",
+    "package": "pos_self_order",
+    "name": "QR Codes",
+    "report_type": "qweb-pdf",
+    "report_name": "pos_self_order.qr_codes_page",
+    "report_file": "pos_self_order.qr_codes_page",
+    "print_report_name": "\"QR codes\"",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "pos.config"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

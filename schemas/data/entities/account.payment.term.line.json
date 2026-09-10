@@ -1,0 +1,352 @@
+{
+ "catalog": {
+  "name": "entity:account.payment.term.line",
+  "description": "Complete definition of entity Payment Terms Line (account.payment.term.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.payment.term.line",
+  "storage_name": "account_payment_term_line",
+  "full_name": "Payment Terms Line",
+  "kind": "persistent",
+  "description": "Payment Terms Line",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "value",
+    "type": "Selection",
+    "selection": [
+     [
+      "percent",
+      "Percent"
+     ],
+     [
+      "fixed",
+      "Fixed"
+     ]
+    ],
+    "required": true,
+    "default": "percent",
+    "help": "Select here the kind of valuation related to this payment terms line.",
+    "defined_in_package": "account",
+    "string": "Value",
+    "full_name": "Value"
+   },
+   {
+    "name": "value_amount",
+    "type": "Float",
+    "string": "Due",
+    "digits": "Payment Terms",
+    "help": "For percent enter a ratio between 0-100.",
+    "compute": "_compute_value_amount",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "account",
+    "full_name": "Due"
+   },
+   {
+    "name": "delay_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "days_after",
+      "Days after invoice date"
+     ],
+     [
+      "days_after_end_of_month",
+      "Days after end of month"
+     ],
+     [
+      "days_after_end_of_next_month",
+      "Days after end of next month"
+     ],
+     [
+      "days_end_of_month_on_the",
+      "Days end of month on the"
+     ]
+    ],
+    "required": true,
+    "default": "days_after",
+    "defined_in_package": "account",
+    "string": "Delay Type",
+    "full_name": "Delay Type"
+   },
+   {
+    "name": "display_days_next_month",
+    "type": "Boolean",
+    "compute": "_compute_display_days_next_month",
+    "defined_in_package": "account",
+    "string": "Display Days Next Month",
+    "full_name": "Display Days Next Month"
+   },
+   {
+    "name": "days_next_month",
+    "type": "Char",
+    "string": "Days on the next month",
+    "readonly": false,
+    "default": "10",
+    "size": 2,
+    "defined_in_package": "account",
+    "full_name": "Days on the next month"
+   },
+   {
+    "name": "nb_days",
+    "type": "Integer",
+    "string": "Days",
+    "readonly": false,
+    "store": true,
+    "compute": "_compute_days",
+    "defined_in_package": "account",
+    "full_name": "Days"
+   },
+   {
+    "name": "payment_id",
+    "type": "Many2one",
+    "comodel": "account.payment.term",
+    "string": "Payment Terms",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "account",
+    "full_name": "Payment Terms",
+    "target_entity": "account.payment.term"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_due_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_ref"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_valid_char_value",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "days_next_month"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The days added must be a number and has to be between 0 and 31.",
+        "line": 336
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The days added must be between 0 and 31.",
+        "line": 334
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_days_next_month",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "delay_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_percent",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "value",
+         "value_amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Percentages on the Payment Terms lines must be between 0 and 100.",
+        "line": 347
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_days",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_value_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_valid_char_value",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The days added must be a number and has to be between 0 and 31."
+   },
+   {
+    "operation": "_check_valid_char_value",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The days added must be between 0 and 31."
+   },
+   {
+    "operation": "_check_percent",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Percentages on the Payment Terms lines must be between 0 and 100."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_payment_term_line_partner_manager",
+    "package": "account",
+    "name": "account.payment.term.line partner manager",
+    "entity": "account.payment.term.line",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_payment_term_line_manager",
+    "package": "account",
+    "name": "account.payment.term.line",
+    "entity": "account.payment.term.line",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

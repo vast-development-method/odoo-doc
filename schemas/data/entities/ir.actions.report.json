@@ -1,0 +1,1805 @@
+{
+ "catalog": {
+  "name": "entity:ir.actions.report",
+  "description": "Complete definition of entity Report Action (ir.actions.report).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.actions.report",
+  "storage_name": "ir_act_report_xml",
+  "full_name": "Report Action",
+  "kind": "persistent",
+  "description": "Report Action",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "account",
+   "account_edi",
+   "account_edi_ubl_cii",
+   "sale",
+   "stock",
+   "hr_expense",
+   "l10n_din5008",
+   "l10n_ch",
+   "l10n_de",
+   "purchase",
+   "l10n_th",
+   "sale_pdf_quote_builder",
+   "snailmail"
+  ],
+  "mixins": [
+   "ir.actions.actions"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_allow_sudo_commands": false
+  },
+  "fields": [
+   {
+    "name": "type",
+    "type": "Char",
+    "default": "ir.actions.report",
+    "defined_in_package": "base",
+    "string": "Type",
+    "full_name": "Type"
+   },
+   {
+    "name": "binding_type",
+    "type": "Selection",
+    "default": "report",
+    "defined_in_package": "base",
+    "string": "Binding Type",
+    "full_name": "Binding Type"
+   },
+   {
+    "name": "model",
+    "type": "Char",
+    "required": true,
+    "string": "Model Name",
+    "defined_in_package": "base",
+    "full_name": "Model Name"
+   },
+   {
+    "name": "model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Model",
+    "compute": "_compute_model_id",
+    "search": "_search_model_id",
+    "defined_in_package": "base",
+    "full_name": "Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "report_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "qweb-html",
+      "HTML"
+     ],
+     [
+      "qweb-pdf",
+      "PDF"
+     ],
+     [
+      "qweb-text",
+      "Text"
+     ]
+    ],
+    "required": true,
+    "default": "qweb-pdf",
+    "help": "The type of the report that will be rendered, each one having its own rendering method. HTML means the report will be opened directly in your browser PDF means the report will be rendered using Wkhtmltopdf and downloaded by the user.",
+    "defined_in_package": "base",
+    "string": "Report Type",
+    "full_name": "Report Type"
+   },
+   {
+    "name": "report_name",
+    "type": "Char",
+    "string": "Template Name",
+    "required": true,
+    "defined_in_package": "base",
+    "full_name": "Template Name"
+   },
+   {
+    "name": "report_file",
+    "type": "Char",
+    "string": "Report File",
+    "required": false,
+    "readonly": false,
+    "store": true,
+    "help": "The path to the main report file (depending on Report Type) or empty if the content is in another field",
+    "defined_in_package": "base",
+    "full_name": "Report File"
+   },
+   {
+    "name": "group_ids",
+    "type": "Many2many",
+    "comodel": "res.groups",
+    "relation": "res_groups_report_rel",
+    "column1": "uid",
+    "column2": "gid",
+    "string": "Groups",
+    "defined_in_package": "base",
+    "full_name": "Groups",
+    "target_entity": "res.groups"
+   },
+   {
+    "name": "multi",
+    "type": "Boolean",
+    "string": "On Multiple Doc.",
+    "help": "If set to true, the action will not be displayed on the right toolbar of a form view.",
+    "defined_in_package": "base",
+    "full_name": "On Multiple Doc."
+   },
+   {
+    "name": "paperformat_id",
+    "type": "Many2one",
+    "comodel": "report.paperformat",
+    "string": "Paper Format",
+    "index": "btree_not_null",
+    "defined_in_package": "base",
+    "full_name": "Paper Format",
+    "target_entity": "report.paperformat"
+   },
+   {
+    "name": "print_report_name",
+    "type": "Char",
+    "string": "Printed Report Name",
+    "translate": true,
+    "help": "This is the filename of the report going to download. Keep empty to not change the report filename. You can use a python expression with the 'object' and 'time' variables.",
+    "defined_in_package": "base",
+    "full_name": "Printed Report Name"
+   },
+   {
+    "name": "attachment_use",
+    "type": "Boolean",
+    "string": "Reload from Attachment",
+    "help": "If enabled, then the second time the user prints with same attachment name, it returns the previous report.",
+    "defined_in_package": "base",
+    "full_name": "Reload from Attachment"
+   },
+   {
+    "name": "attachment",
+    "type": "Char",
+    "string": "Save as Attachment Prefix",
+    "help": "This is the filename of the attachment used to store the printing result. Keep empty to not save the printed reports. You can use a python expression with the object and time variables.",
+    "defined_in_package": "base",
+    "full_name": "Save as Attachment Prefix"
+   },
+   {
+    "name": "domain",
+    "type": "Char",
+    "string": "Filter domain",
+    "help": "If set, the action will only appear on records that matches the domain.",
+    "defined_in_package": "base",
+    "full_name": "Filter domain"
+   },
+   {
+    "name": "is_invoice_report",
+    "type": "Boolean",
+    "string": "Invoice report",
+    "copy": true,
+    "defined_in_package": "account",
+    "full_name": "Invoice report"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_model_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_model_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_readable_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "associated_view",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Used in the ir.actions.report form view in order to search naively after the view(s)\nused in the rendering.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_action",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Create a contextual action for each report. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink_action",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Remove the contextual actions created for the reports. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "retrieve_attachment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Retrieve an attachment for a specific record.\n\n:param record: The record owning of the attachment.\n:return: A recordset of length <=1 or None",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_wkhtmltopdf_state",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the current state of wkhtmltopdf: install, ok, upgrade, workers or broken.\n* install: Starting state.\n* upgrade: The binary is an older version (< 0.12.0).\n* ok: A binary was found with a recent version (>= 0.12.0).\n* workers: Not enough workers found to perform the pdf rendering process (< 2 workers).\n* broken: A binary was found but not responding.\n\n:return: wkhtmltopdf_state",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_paperformat",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_din5008",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_paperformat_by_xmlid",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "xml_id"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_layout",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_report_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "layout"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_wkhtmltopdf_args",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "paperformat_id",
+     "landscape",
+     "specific_paperformat_args",
+     "set_viewport_size"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Build arguments understandable by wkhtmltopdf bin.\n\n:param paperformat_id: A report.paperformat record.\n:param landscape: Force the report orientation to be landscape.\n:param specific_paperformat_args: A dictionary containing prioritized wkhtmltopdf arguments.\n:param set_viewport_size: Enable a viewport sized '1024x1280' or '1280x1024' depending of landscape arg.\n:return: A list of string representing the wkhtmltopdf process command args.",
+      "size_in_lines": 80,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_html",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "html",
+     "report_model"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Divide and recreate the header/footer html by merging all found in html.\nThe bodies are extracted and added to a list. Then, extract the specific_paperformat_args.\nThe idea is to put all headers/footers together. Then, we will use a javascript trick\n(see minimal_layout template) to set the right header/footer during the processing of wkhtmltopdf.\nThis allows the computation of multiple reports in a single call to wkhtmltopdf.",
+      "size_in_lines": 81,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_wkhtmltoimage",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "bodies",
+     "width",
+     "height",
+     "image_format"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": ":param str bodies: valid html documents as strings\n:param int width: width in pixels\n:param int height: height in pixels\n:param image_format: format of the image\n:type image_format: typing.Literal['jpg', 'png']",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "wkhtmltoimage 0.12.0^ is required in order to render images from html",
+        "line": 477
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_run_wkhtmltopdf",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "bodies",
+     "report_ref",
+     "header",
+     "footer",
+     "landscape",
+     "specific_paperformat_args",
+     "set_viewport_size"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Execute wkhtmltopdf as a subprocess in order to convert html given in input into a pdf\ndocument.\n\n:param Iterable[str] bodies: The html bodies of the report, one per page.\n:param report_ref: report reference that is needed to get report paperformat.\n:param str header: The html header of the report containing all headers.\n:param str footer: The html footer of the report containing all footers.\n:param landscape: Force the pdf to be rendered under a landscape format.\n:param specific_paperformat_args: dict of prioritized paperformat arguments.\n:param set_viewport_size: Enable a viewport sized '1024x1280' or '1280x1024' depending of landscape arg.\n:return: Content of the pdf as bytes\n:rtype: bytes",
+      "size_in_lines": 134,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "message",
+        "line": 642
+       },
+       {
+        "kind": "UserError",
+        "message": "Tried to convert multiple documents in wkhtmltopdf using unpatched QT",
+        "line": 628
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_report_from_name",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "report_name"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the first record of ir.actions.report having the ``report_name`` as value for\nthe field report_name.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_report",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "report_ref"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the report (with sudo) from a reference\n\n:param report_ref: can be one of\n\n    - ir.actions.report id\n    - ir.actions.report record\n    - ir.model.data reference to ir.actions.report\n    - ir.actions.report report_name",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "barcode",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "barcode_type",
+     "value",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_available_barcode_masks",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Hook for extension.\n\nThis function returns the available QR-code masks, in the form of a\nlist of (code, mask_function) elements, where code is a string identifying\nthe mask uniquely, and mask_function is a function returning a reportlab\nDrawing object with the result of the mask, and taking as parameters:\n\n    - width of the QR-code, in pixels\n    - height of the QR-code, in pixels\n    - reportlab Drawing object containing the barcode to apply the mask on",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Allow to render a QWeb template python-side. This function returns the 'ir.ui.view'\nrender but embellish it with some variables/methods used in reports.\n:param values: additional methods/variables used in the rendering\n:returns: html representation of the template\n:rtype: bytes",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_handle_merge_pdfs_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "error",
+     "error_stream"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "the system is unable to merge the generated PDFs.",
+        "line": 792
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_merge_pdfs",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "streams",
+     "handle_error"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "the system is unable to merge the generated PDFs.",
+        "line": 811
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_render_qweb_pdf_prepare_streams",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref",
+     "data",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 166,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to find Wkhtmltopdf on this system. The PDF can not be created.",
+        "line": 868
+       },
+       {
+        "kind": "UserError",
+        "message": "Report template “%s” has an issue, please contact your administrator. \n\nCannot separate file to save as attachment because the report's template does not contain the attributes 'data-oe-model' and 'data-oe-id' as part of the div with 'article' classname.",
+        "line": 884
+       }
+      ]
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No original purchase document could be found for any of the selected purchase documents.",
+        "line": 26
+       }
+      ]
+     },
+     {
+      "package": "account_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account_edi_ubl_cii",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 45,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [],
+      "documentation": "Override to add and fill headers, footers and product documents to the sale quotation.",
+      "size_in_lines": 59,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_pdf_report_attachment_vals_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "report",
+     "streams"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Hook to prepare attachment values needed for attachments creation\nduring the pdf report generation.\n\n:param report: The report (with sudo) from a reference report_ref.\n:param streams: Dict of streams for each report containing the pdf content and existing attachments.\n:return: attachment values list needed for attachments creation.",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_pre_render_qweb_pdf",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref",
+     "res_ids",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only invoices could be printed.",
+        "line": 72
+       }
+      ]
+     },
+     {
+      "package": "l10n_th",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only invoices could be printed.",
+        "line": 13
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_render_qweb_pdf",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref",
+     "res_ids",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 69,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "RedirectWarning",
+        "message": null,
+        "line": 1089
+       }
+      ]
+     },
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_qweb_text",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref",
+     "docids",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render_qweb_html",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref",
+     "docids",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rendering_context_model",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "report"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rendering_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "report",
+     "docids",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_de",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_render",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref",
+     "res_ids",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "report_action",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "docids",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return an action of type ir.actions.report.\n\n:param docids: id/ids/browse record of the records to print (if not used, pass an empty list)\n:param data:\n:param bool config:\n:rtype: bytes",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_configure_external_report_layout",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_action",
+     "xml_id"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_valid_action_reports",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "model",
+     "record_ids"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return the list of ids of actions for which the domain is\nsatisfied by at least one record in record_ids.\n:param model: the model of the records to validate\n:param record_ids: list of ids of records to validate",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_local_attachments",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attachments"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_invoice_report",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_splitted_report",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "report_ref",
+     "content",
+     "report_type"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_master_tags",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete this report (%s), it is used by the accounting PDF generation engine.",
+        "line": 90
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_is_sale_order_report",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref"
+    ],
+    "definitions": [
+     {
+      "package": "sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "apply_qr_code_ch_cross_mask",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "width",
+     "height",
+     "barcode_drawing"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_purchase_order_report",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "report_ref"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_mapping_and_add_pages_to_writer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "writer",
+     "document",
+     "form_fields_values_mapping",
+     "prefix",
+     "order",
+     "order_line"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Update the mapping with the field-value of the document, and add the doc to the writer.\n\nNote: document.ensure_one(), order.ensure_one(), order_line and order_line.ensure_one()\n\n:param PdfFileWriter writer: the writer to which pages needs to be added\n:param recordset document: the document that needs to be added to the writer and get its\n                           form fields mapped. Either a quotation.document or a\n                           product.document.\n:param dict form_fields_values_mapping: the existing prefixed form field names - values that\n                                        will be updated to add those of the current document\n:param str prefix: the prefix needed to update existing form field name, to be able to add\n                   the correct values in fields with the same name but on different\n                   documents, either customizable fields or dynamic fields of different sale\n                   order lines.\n:param recordset order: the sale order from where to take the values\n:param recordset order_line: the sale order line from where to take the values (optional)\n:return: None",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_value_from_path",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "form_field",
+     "order",
+     "order_line"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the string value by following the path indicated in the record form_field.\n\n:param recordset form_field: sale.pdf.form.field that has a valid path.\n:param recordset order: sale.order from where the values and timezone need to be taken\n:param recordset order_line: sale.order.line from where the values need to be taken\n                             (optional, only for product.document)\n:return: value that need to be shown in the final pdf. Multiple values are joined by ', '\n:rtype: str",
+      "size_in_lines": 49,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_custom_value_from_order",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "document",
+     "form_field_name",
+     "order",
+     "order_line"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the custom value of a form field directly from the order.\n\n:param recordset document: the document that needs to be added to the writer and get its\n                           form fields mapped. Either a quotation.document or a\n                           product.document.\n:param str form_field_name: the name of the form field as present in the PDF.\n:param recordset order: the sale order from where to take the existing mapping.\n:param recordset order_line: the sale order line linked to the document (optional)\n:return: value that need to be shown in the final pdf.\n:rtype: str",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_pages_to_writer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "writer",
+     "document",
+     "prefix"
+    ],
+    "definitions": [
+     {
+      "package": "sale_pdf_quote_builder",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Add a PDF doc to the writer and fill the form text fields present in the pages if needed.\n\n:param PdfFileWriter writer: the writer to which pages needs to be added\n:param bytes document: the document to add in the final pdf\n:param str prefix: the prefix needed to update existing form field name, if any, to be able\n                   to add the correct values in fields with the same name but on different\n                   documents, either customizable fields or dynamic fields of different sale\n                   order lines. (optional)\n:return: None",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_run_wkhtmltoimage",
+    "package": "base",
+    "kind": "UserError",
+    "message": "wkhtmltoimage 0.12.0^ is required in order to render images from html"
+   },
+   {
+    "operation": "_run_wkhtmltopdf",
+    "package": "base",
+    "kind": "UserError",
+    "message": "message"
+   },
+   {
+    "operation": "_run_wkhtmltopdf",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Tried to convert multiple documents in wkhtmltopdf using unpatched QT"
+   },
+   {
+    "operation": "_handle_merge_pdfs_error",
+    "package": "base",
+    "kind": "UserError",
+    "message": "the system is unable to merge the generated PDFs."
+   },
+   {
+    "operation": "_merge_pdfs",
+    "package": "base",
+    "kind": "UserError",
+    "message": "the system is unable to merge the generated PDFs."
+   },
+   {
+    "operation": "_render_qweb_pdf_prepare_streams",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Unable to find Wkhtmltopdf on this system. The PDF can not be created."
+   },
+   {
+    "operation": "_render_qweb_pdf_prepare_streams",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Report template “%s” has an issue, please contact your administrator. \n\nCannot separate file to save as attachment because the report's template does not contain the attributes 'data-oe-model' and 'data-oe-id' as part of the div with 'article' classname."
+   },
+   {
+    "operation": "_render_qweb_pdf_prepare_streams",
+    "package": "account",
+    "kind": "UserError",
+    "message": "No original purchase document could be found for any of the selected purchase documents."
+   },
+   {
+    "operation": "_pre_render_qweb_pdf",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Only invoices could be printed."
+   },
+   {
+    "operation": "_unlink_except_master_tags",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot delete this report (%s), it is used by the accounting PDF generation engine."
+   },
+   {
+    "operation": "_pre_render_qweb_pdf",
+    "package": "l10n_th",
+    "kind": "UserError",
+    "message": "Only invoices could be printed."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_actions_report_group_system",
+    "package": "base",
+    "name": "ir_actions_report_group_system",
+    "entity": "ir.actions.report",
+    "group": "group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.ir_actions_report_access_user",
+    "package": "mail",
+    "name": "ir.actions.report.access.user",
+    "entity": "ir.actions.report",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.ir_actions_report_form_inherit_account",
+    "package": "account",
+    "name": "ir.actions.report.form.inherit.account",
+    "view_type": "field",
+    "inherits_view": "base.act_report_xml_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "paperformat_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "paperformat_id",
+       "position": "after"
+      },
+      {
+       "name": "is_invoice_report",
+       "invisible": "model != 'account.move'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "base.act_report_xml_view",
+    "package": "base",
+    "name": "ir.actions.report",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Report"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "report_type"
+      },
+      {
+       "name": "paperformat_id",
+       "invisible": "report_type != 'qweb-pdf'"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "report_name"
+      },
+      {
+       "name": "print_report_name"
+      },
+      {
+       "name": "group_ids"
+      },
+      {
+       "name": "attachment_use"
+      },
+      {
+       "name": "attachment"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "create_action",
+       "type": "object",
+       "invisible": "binding_model_id",
+       "class": "oe_stat_button",
+       "icon": "fa-plus-square"
+      },
+      {
+       "name": "unlink_action",
+       "type": "object",
+       "invisible": "not binding_model_id",
+       "class": "oe_stat_button",
+       "icon": "fa-minus-square"
+      },
+      {
+       "name": "associated_view",
+       "type": "object",
+       "invisible": "report_type not in ['qweb-pdf', 'qweb-html', 'qweb-text']",
+       "class": "oe_stat_button",
+       "icon": "fa-code"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "security",
+       "string": "Visibility",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "advanced",
+       "string": "Advanced Properties",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "create_action",
+       "type": "object",
+       "invisible": "binding_model_id",
+       "icon": "fa-plus-square",
+       "help": "Display an option on related documents to print this report",
+       "class": "oe_stat_button"
+      },
+      {
+       "name": "unlink_action",
+       "type": "object",
+       "invisible": "not binding_model_id",
+       "icon": "fa-minus-square",
+       "help": "Remove the contextual action related to this report",
+       "class": "oe_stat_button"
+      },
+      {
+       "name": "associated_view",
+       "type": "object",
+       "invisible": "report_type not in ['qweb-pdf', 'qweb-html', 'qweb-text']",
+       "icon": "fa-code",
+       "class": "oe_stat_button"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "base.act_report_xml_view_tree",
+    "package": "base",
+    "name": "ir.actions.report.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Report xml"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "type"
+      },
+      {
+       "name": "report_name"
+      },
+      {
+       "name": "report_type"
+      },
+      {
+       "name": "attachment"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.act_report_xml_search_view",
+    "package": "base",
+    "name": "ir.actions.report.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Report Xml"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Report",
+       "filter_domain": "['|', '|', '|', '|', ('name','ilike',self), ('model','ilike',self), ('type','ilike',self), ('report_name','ilike',self), ('report_type','ilike',self)]"
+      },
+      {
+       "name": "model",
+       "string": "Model",
+       "filter_domain": "[('model','=', self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "report_type",
+       "string": "Report Type",
+       "domain": "[]",
+       "context": "{'group_by':'report_type'}"
+      },
+      {
+       "name": "report_model",
+       "string": "Report Model",
+       "domain": "[]",
+       "context": "{'group_by':'model'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.ir_action_report",
+    "package": "base",
+    "name": "Reports",
+    "view_mode": null,
+    "view_id": "act_report_xml_view_tree",
+    "search_view_id": "act_report_xml_search_view",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.actions.report"
+   },
+   {
+    "external_identifier": "base.reports_action",
+    "package": "base",
+    "name": "Reports",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.actions.report"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,244 @@
+{
+ "catalog": {
+  "name": "entity:stock.storage.category.capacity",
+  "description": "Complete definition of entity Storage Category Capacity (stock.storage.category.capacity).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.storage.category.capacity",
+  "storage_name": "stock_storage_category_capacity",
+  "full_name": "Storage Category Capacity",
+  "kind": "persistent",
+  "description": "Storage Category Capacity",
+  "defined_by_package": "stock",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "storage_category_id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "storage_category_id",
+    "type": "Many2one",
+    "comodel": "stock.storage.category",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "string": "Storage Category",
+    "full_name": "Storage Category",
+    "target_entity": "stock.storage.category"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "ondelete": "cascade",
+    "check_company": true,
+    "index": "btree_not_null",
+    "domain": "[('product_tmpl_id', '=', context.get('active_id', False))] if context.get('active_model') == 'product.template' else [('id', '=', context.get('default_product_id', False))] if context.get('default_product_id') else [('is_storable', '=', True)]",
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "package_type_id",
+    "type": "Many2one",
+    "comodel": "stock.package.type",
+    "string": "Package Type",
+    "ondelete": "cascade",
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "stock",
+    "full_name": "Package Type",
+    "target_entity": "stock.package.type"
+   },
+   {
+    "name": "quantity",
+    "type": "Float",
+    "string": "Quantity",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "related": "product_id.uom_id",
+    "defined_in_package": "stock",
+    "string": "Product Unit of measure",
+    "full_name": "Product Unit of measure"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "related": "storage_category_id.company_id",
+    "defined_in_package": "stock",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_positive_quantity",
+    "kind": "Constraint",
+    "definition": "CHECK(quantity > 0)",
+    "message": "Quantity should be a positive number.",
+    "defined_in_package": "stock"
+   },
+   {
+    "name": "_unique_product",
+    "kind": "Constraint",
+    "definition": "UNIQUE(product_id, storage_category_id)",
+    "message": "Multiple capacity rules for one product.",
+    "defined_in_package": "stock"
+   },
+   {
+    "name": "_unique_package_type",
+    "kind": "Constraint",
+    "definition": "UNIQUE(package_type_id, storage_category_id)",
+    "message": "Multiple capacity rules for one package type.",
+    "defined_in_package": "stock"
+   }
+  ],
+  "operations": [],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "stock.access_stock_storage_category_capacity_user",
+    "package": "stock",
+    "name": "stock.storage.category.capacity.user",
+    "entity": "stock.storage.category.capacity",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_stock_storage_category_capacity_manager",
+    "package": "stock",
+    "name": "stock.storage.category.capacity.manager",
+    "entity": "stock.storage.category.capacity",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "stock.stock_storage_category_capacity_tree",
+    "package": "stock",
+    "name": "stock.storage.category.capacity.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Storage Category Capacity",
+      "multi_edit": "1",
+      "editable": "bottom"
+     },
+     "fields": [
+      {
+       "name": "storage_category_id"
+      },
+      {
+       "name": "product_id",
+       "readonly": "package_type_id",
+       "required": "not package_type_id",
+       "column_invisible": "context.get('default_product_id')"
+      },
+      {
+       "name": "package_type_id",
+       "readonly": "product_id",
+       "required": "not product_id",
+       "column_invisible": "context.get('hide_package_type', False)",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "options": "{'no_create': True, 'no_open': True}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "package_type_id",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock.action_storage_category_capacity",
+    "package": "stock",
+    "name": "Storage Category Capacity",
+    "view_mode": "list",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "stock.storage.category.capacity"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

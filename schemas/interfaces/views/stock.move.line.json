@@ -1,0 +1,1680 @@
+{
+ "catalog": {
+  "name": "views:stock.move.line",
+  "description": "View declarations for entity stock.move.line.",
+  "record_count": 23,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "mrp.view_stock_move_line_operation_tree_finished",
+   "package": "mrp",
+   "name": "stock.move.line.operation.list.finished",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_stock_move_line_operation_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='lot_id']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='lot_id']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='lot_id']\" position=\"attributes\">\n\t\t            <attribute name=\"context\">{\n                        'active_mo_id': context.get('active_mo_id'),\n                        'active_picking_id': picking_id,\n                        'default_product_id': parent.product_id,\n                        }\n                    </attribute>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.stock_move_line_view_search",
+   "package": "mrp",
+   "name": "stock.move.line.search",
+   "entity": "stock.move.line",
+   "view_type": "filter",
+   "inherits_view": "stock.stock_move_line_view_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "manufacturing",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "manufacturing",
+      "position": "attributes"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <filter name=\"manufacturing\" position=\"attributes\">\n                    <attribute name=\"invisible\">0</attribute>\n                    <attribute name=\"domain\">[('move_id.production_id', '!=', False)]</attribute>\n                </filter>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.view_move_line_tree",
+   "package": "mrp",
+   "name": "stock.move.line.list",
+   "entity": "stock.move.line",
+   "view_type": "field",
+   "inherits_view": "stock.view_move_line_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "reference",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "reference",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"reference\" position=\"attributes\">\n                    <attribute name=\"decoration-primary\">picking_code == 'mrp_operation'</attribute>\n                </field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp_subcontracting.mrp_subcontracting_stock_move_line_tree_view",
+   "package": "mrp_subcontracting",
+   "name": "mrp.subcontracting.stock.move.line.list.view",
+   "entity": "stock.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "editable": "bottom"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "owner_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "tracking",
+      "column_invisible": "True"
+     },
+     {
+      "name": "package_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "result_package_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_dest_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "product_id",
+      "required": "1",
+      "domain": "[('id', 'in', context.get('bom_product_ids'))] if context.get('is_subcontracting_portal') else []"
+     },
+     {
+      "name": "lot_id",
+      "invisible": "tracking not in ('serial', 'lot')",
+      "required": "tracking in ('serial', 'lot')",
+      "context": "{'default_product_id': product_id}",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "groups": "uom.group_uom"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1
+    },
+    "inheritance_operations": [],
+    "editable": "bottom",
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list editable=\"bottom\">\n                <field name=\"company_id\" column_invisible=\"True\"/>\n                <field name=\"owner_id\" column_invisible=\"True\"/>\n                <field name=\"tracking\" column_invisible=\"True\"/>\n                <field name=\"package_id\" column_invisible=\"True\"/>\n                <field name=\"result_package_id\" column_invisible=\"True\"/>\n                <field name=\"location_id\" column_invisible=\"True\"/>\n                <field name=\"location_dest_id\" column_invisible=\"True\"/>\n                <field name=\"state\" column_invisible=\"True\"/>\n                \n                <field name=\"id\" column_invisible=\"True\"/>\n                <field name=\"product_id\" required=\"1\" domain=\"[('id', 'in', context.get('bom_product_ids'))] if context.get('is_subcontracting_portal') else []\"/>\n                <field name=\"lot_id\" groups=\"stock.group_production_lot\" invisible=\"tracking not in ('serial', 'lot')\" required=\"tracking in ('serial', 'lot')\" context=\"{'default_product_id': product_id}\"/>\n                <field name=\"quantity\"/>\n                <field name=\"product_uom_id\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp_subcontracting.mrp_subcontracting_portal_stock_move_line_tree_view",
+   "package": "mrp_subcontracting",
+   "name": "mrp.subcontracting.portal.stock.move.line.list.view",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "mrp_subcontracting_stock_move_line_tree_view",
+   "mode": "primary",
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='lot_id']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='lot_id']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='lot_id']\" position=\"attributes\">\n                <attribute name=\"options\">{'no_create_edit': True, 'no_open': True}</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='product_id']\" position=\"attributes\">\n                <attribute name=\"options\">{'no_open': True}</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp_subcontracting.mrp_subcontracting_view_stock_move_line_operation_tree",
+   "package": "mrp_subcontracting",
+   "name": "mrp.subcontracting.stock.move.line.operations.list",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_stock_move_line_operation_tree",
+   "mode": "primary",
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='lot_id']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='lot_id']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='lot_id']\" position=\"attributes\">\n                <attribute name=\"options\">{'no_create_edit': True, 'no_open': True}</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "product_expiry.view_stock_move_line_operation_tree_expiry",
+   "package": "product_expiry",
+   "name": "stock.move.line.inherit.list",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_stock_move_line_operation_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='lot_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "is_expired",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='lot_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='lot_id']\" position=\"after\">\n                <field name=\"is_expired\" column_invisible=\"True\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='lot_name']\" position=\"after\">\n                <field name=\"picking_type_use_existing_lots\" column_invisible=\"True\"/>\n                <field name=\"expiration_date\" force_save=\"1\" column_invisible=\"not parent.use_expiration_date\" readonly=\"picking_type_use_existing_lots\" decoration-danger=\"is_expired if state == 'done' else expiration_date &lt; context_today().strftime('%Y-%m-%d')\" decoration-bf=\"is_expired if state == 'done' else expiration_date &lt; context_today().strftime('%Y-%m-%d')\"/>\n                <field name=\"removal_date\" force_save=\"1\" column_invisible=\"not parent.use_expiration_date\" readonly=\"picking_type_use_existing_lots\" decoration-danger=\"removal_date &lt; (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')\" decoration-bf=\"removal_date &lt; (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "product_expiry.view_stock_move_line_detailed_operation_tree_expiry",
+   "package": "product_expiry",
+   "name": "stock.move.line.operations.inherit.list",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_stock_move_line_detailed_operation_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='lot_name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "picking_type_use_existing_lots",
+      "column_invisible": "True"
+     },
+     {
+      "name": "tracking",
+      "column_invisible": "True"
+     },
+     {
+      "name": "expiration_date",
+      "invisible": "tracking == 'none'",
+      "readonly": "picking_type_use_existing_lots",
+      "decoration-danger": "is_expired if state == 'done' else expiration_date < context_today().strftime('%Y-%m-%d')",
+      "decoration-bf": "is_expired if state == 'done' else expiration_date < context_today().strftime('%Y-%m-%d')",
+      "force_save": "1"
+     },
+     {
+      "name": "removal_date",
+      "invisible": "tracking == 'none'",
+      "readonly": "1",
+      "decoration-danger": "removal_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+      "decoration-bf": "removal_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+      "force_save": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='lot_name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='lot_name']\" position=\"after\">\n                <field name=\"picking_type_use_existing_lots\" column_invisible=\"True\"/>\n                <field name=\"tracking\" column_invisible=\"True\"/>\n                <field name=\"expiration_date\" decoration-danger=\"is_expired if state == 'done' else expiration_date &lt; context_today().strftime('%Y-%m-%d')\" decoration-bf=\"is_expired if state == 'done' else expiration_date &lt; context_today().strftime('%Y-%m-%d')\" force_save=\"1\" readonly=\"picking_type_use_existing_lots\" invisible=\"tracking == 'none'\"/>\n                <field name=\"removal_date\" force_save=\"1\" readonly=\"1\" invisible=\"tracking == 'none'\" decoration-danger=\"removal_date &lt; (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')\" decoration-bf=\"removal_date &lt; (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='lot_id']\" position=\"after\">\n                <field name=\"is_expired\" column_invisible=\"True\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_move_line_tree",
+   "package": "stock",
+   "name": "stock.move.line.list",
+   "entity": "stock.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Move Lines",
+     "create": "0",
+     "default_order": "id desc",
+     "action": "action_open_reference",
+     "type": "object",
+     "duplicate": "0"
+    },
+    "fields": [
+     {
+      "name": "location_usage",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_dest_usage",
+      "column_invisible": "True"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "reference",
+      "string": "Reference",
+      "column_invisible": "context.get('no_reference', False)",
+      "decoration-danger": "scrap_id",
+      "decoration-warning": "is_inventory",
+      "decoration-success": "picking_code == 'incoming'",
+      "decoration-info": "picking_code == 'outgoing'",
+      "decoration-muted": "1"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "lot_id",
+      "optional": "show",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "package_id",
+      "optional": "hide",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "result_package_id",
+      "optional": "hide",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "location_id",
+      "decoration-muted": "location_usage not in ('internal', 'transit')"
+     },
+     {
+      "name": "location_dest_id",
+      "decoration-muted": "location_dest_usage not in ('internal', 'transit')"
+     },
+     {
+      "name": "picking_partner_id",
+      "optional": "hide"
+     },
+     {
+      "name": "company_id",
+      "optional": "hide",
+      "groups": "base.group_multi_company",
+      "force_save": "1"
+     },
+     {
+      "name": "quantity",
+      "string": "Quantity",
+      "decoration-danger": "(location_usage in ('internal','transit')) and (location_dest_usage not in ('internal','transit'))",
+      "decoration-success": "(location_usage not in ('internal','transit')) and (location_dest_usage in ('internal','transit'))"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "options": "{'no_open': True, 'no_create': True}",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "optional": "show",
+      "decoration-danger": "state=='cancel'",
+      "decoration-warning": "state not in ('draft','cancel','done','assigned')",
+      "decoration-success": "state == 'done'",
+      "decoration-info": "state== 'assigned'",
+      "decoration-muted": "state == 'draft'"
+     },
+     {
+      "name": "create_uid",
+      "widget": "many2one_avatar_user",
+      "string": "Done By",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1,
+     "badge": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "0",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Move Lines\" create=\"0\" default_order=\"id desc\" action=\"action_open_reference\" type=\"object\" duplicate=\"0\">\n                <field name=\"location_usage\" column_invisible=\"True\"/>\n                <field name=\"location_dest_usage\" column_invisible=\"True\"/>\n                <field name=\"date\"/>\n                <field name=\"reference\" string=\"Reference\" class=\"fw-bolder\" column_invisible=\"context.get('no_reference', False)\" decoration-muted=\"1\" decoration-info=\"picking_code == 'outgoing'\" decoration-success=\"picking_code == 'incoming'\" decoration-warning=\"is_inventory\" decoration-danger=\"scrap_id\"/>\n                <field name=\"product_id\"/>\n                <field name=\"lot_id\" optional=\"show\" groups=\"stock.group_production_lot\"/>\n                <field name=\"package_id\" optional=\"hide\" groups=\"stock.group_tracking_lot\"/>\n                <field name=\"result_package_id\" optional=\"hide\" groups=\"stock.group_tracking_lot\"/>\n                <field name=\"location_id\" decoration-muted=\"location_usage not in ('internal', 'transit')\"/>\n                <field name=\"location_dest_id\" decoration-muted=\"location_dest_usage not in ('internal', 'transit')\"/>\n                <field name=\"picking_partner_id\" optional=\"hide\"/>\n                <field name=\"company_id\" optional=\"hide\" groups=\"base.group_multi_company\" force_save=\"1\"/>\n                <field name=\"quantity\" string=\"Quantity\" class=\"fw-bolder\" decoration-danger=\"(location_usage in ('internal','transit')) and (location_dest_usage not in ('internal','transit'))\" decoration-success=\"(location_usage not in ('internal','transit')) and (location_dest_usage in ('internal','transit'))\"/>\n                <field name=\"product_uom_id\" options=\"{'no_open': True, 'no_create': True}\" widget=\"many2one_uom\" groups=\"uom.group_uom\"/>\n                <field name=\"state\" widget=\"badge\" optional=\"show\" decoration-danger=\"state=='cancel'\" decoration-info=\"state== 'assigned'\" decoration-muted=\"state == 'draft'\" decoration-success=\"state == 'done'\" decoration-warning=\"state not in ('draft','cancel','done','assigned')\"/>\n                <field name=\"create_uid\" string=\"Done By\" widget=\"many2one_avatar_user\" optional=\"hide\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_move_line_tree_detailed",
+   "package": "stock",
+   "name": "stock.move.line.list.detailed",
+   "entity": "stock.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "25",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Move Lines",
+     "create": "0",
+     "default_order": "date",
+     "action": "action_open_reference",
+     "type": "object"
+    },
+    "fields": [
+     {
+      "name": "scheduled_date"
+     },
+     {
+      "name": "picking_id"
+     },
+     {
+      "name": "picking_partner_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "lot_id",
+      "optional": "hide",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "location_id",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "location_dest_id",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "package_id",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "quantity",
+      "string": "Quantity",
+      "optional": "show"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "options": "{'no_open': True, 'no_create': True}",
+      "optional": "show",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "company_id",
+      "optional": "hide",
+      "groups": "base.group_multi_company",
+      "force_save": "1"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "optional": "show",
+      "decoration-danger": "state=='cancel'",
+      "decoration-warning": "state not in ('draft','cancel','done','assigned')",
+      "decoration-success": "state == 'done'",
+      "decoration-info": "state== 'assigned'",
+      "decoration-muted": "state == 'draft'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "0",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Move Lines\" create=\"0\" default_order=\"date\" action=\"action_open_reference\" type=\"object\">\n                <field name=\"scheduled_date\"/>\n                <field name=\"picking_id\"/>\n                <field name=\"picking_partner_id\"/>\n                <field name=\"product_id\"/>\n                <field name=\"lot_id\" groups=\"stock.group_production_lot\" optional=\"hide\"/>\n                <field name=\"location_id\" groups=\"stock.group_stock_multi_locations\"/>\n                <field name=\"location_dest_id\" groups=\"stock.group_stock_multi_locations\"/>\n                <field name=\"package_id\" groups=\"stock.group_tracking_lot\"/>\n                <field name=\"quantity\" string=\"Quantity\" optional=\"show\"/>\n                <field name=\"product_uom_id\" options=\"{'no_open': True, 'no_create': True}\" widget=\"many2one_uom\" optional=\"show\" groups=\"uom.group_uom\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" force_save=\"1\" optional=\"hide\"/>\n                <field name=\"state\" widget=\"badge\" optional=\"show\" decoration-danger=\"state=='cancel'\" decoration-info=\"state== 'assigned'\" decoration-muted=\"state == 'draft'\" decoration-success=\"state == 'done'\" decoration-warning=\"state not in ('draft','cancel','done','assigned')\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_move_line_form",
+   "package": "stock",
+   "name": "stock.move.line.form",
+   "entity": "stock.move.line",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Move Lines",
+     "create": "0",
+     "edit": "0"
+    },
+    "fields": [
+     {
+      "name": "state",
+      "widget": "statusbar"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "picking_id",
+      "invisible": "1"
+     },
+     {
+      "name": "location_id",
+      "invisible": "1"
+     },
+     {
+      "name": "location_dest_id",
+      "invisible": "1"
+     },
+     {
+      "name": "package_id",
+      "invisible": "1"
+     },
+     {
+      "name": "tracking",
+      "invisible": "1"
+     },
+     {
+      "name": "picked",
+      "invisible": "1"
+     },
+     {
+      "name": "date",
+      "readonly": "1"
+     },
+     {
+      "name": "reference",
+      "string": "Reference"
+     },
+     {
+      "name": "origin"
+     },
+     {
+      "name": "product_id",
+      "readonly": "context.get('default_product_id')"
+     },
+     {
+      "name": "location_id",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "location_dest_id",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "options": "{'no_create': True}",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "lot_id",
+      "invisible": "tracking == 'none' or not lot_id and lot_name",
+      "context": "{'default_product_id': product_id, 'active_picking_id': picking_id}",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "lot_name",
+      "invisible": "tracking == 'none' or lot_id or not lot_name",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "package_id",
+      "string": "Source Package",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "result_package_id",
+      "string": "Destination Package",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "owner_id",
+      "string": "Owner",
+      "groups": "stock.group_tracking_owner"
+     },
+     {
+      "name": "create_uid",
+      "widget": "many2one_avatar_user",
+      "string": "Done By",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statusbar": 1,
+     "many2one_uom": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [],
+    "statusbar_field": "state",
+    "statusbar_visible": "draft,confirmed,partially_available,assigned,done",
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Move Lines\" create=\"0\" edit=\"0\">\n                <header>\n                    <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"draft,confirmed,partially_available,assigned,done\"/>\n                </header>\n                <sheet>\n                    <field name=\"company_id\" invisible=\"1\"/>\n                    <field name=\"picking_id\" invisible=\"1\"/>\n                    <field name=\"location_id\" invisible=\"1\"/>\n                    <field name=\"location_dest_id\" invisible=\"1\"/>\n                    <field name=\"package_id\" invisible=\"1\"/>\n                    <field name=\"tracking\" invisible=\"1\"/>\n                    <field name=\"picked\" invisible=\"1\"/>\n                    <group>\n                        <group>\n                            <field name=\"date\" readonly=\"1\"/>\n                            <field name=\"reference\" string=\"Reference\"/>\n                            <field name=\"origin\"/>\n                            <field name=\"product_id\" readonly=\"context.get('default_product_id')\"/>\n                            <field name=\"location_id\" options=\"{'no_create': True}\" groups=\"stock.group_stock_multi_locations\"/>\n                            <field name=\"location_dest_id\" options=\"{'no_create': True}\" groups=\"stock.group_stock_multi_locations\"/>\n                        </group>\n                        <group>\n                            <label for=\"quantity\" string=\"Quantity\"/>\n                            <div class=\"o_row\">\n                                <field name=\"quantity\"/>\n                                <field name=\"product_uom_id\" options=\"{'no_create': True}\" widget=\"many2one_uom\" groups=\"uom.group_uom\"/>\n                            </div>\n                            <field name=\"lot_id\" groups=\"stock.group_production_lot\" context=\"{'default_product_id': product_id, 'active_picking_id': picking_id}\" invisible=\"tracking == 'none' or not lot_id and lot_name\"/>\n                            <field name=\"lot_name\" groups=\"stock.group_production_lot\" invisible=\"tracking == 'none' or lot_id or not lot_name\"/>\n                            <field name=\"package_id\" string=\"Source Package\" groups=\"stock.group_tracking_lot\"/>\n                            <field name=\"result_package_id\" string=\"Destination Package\" groups=\"stock.group_tracking_lot\"/>\n                            <field name=\"owner_id\" string=\"Owner\" groups=\"stock.group_tracking_owner\"/>\n                            <field name=\"create_uid\" string=\"Done By\" widget=\"many2one_avatar_user\" optional=\"hide\"/>\n                        </group>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_move_line_mobile_form",
+   "package": "stock",
+   "name": "stock.move.line.mobile.form",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_move_line_form",
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//form",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//form",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//form\" position=\"attributes\">\n                <attribute name=\"edit\">1</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.stock_move_line_view_search",
+   "package": "stock",
+   "name": "stock.move.line.search",
+   "entity": "stock.move.line",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Stock Moves"
+    },
+    "fields": [
+     {
+      "name": "location_id",
+      "string": "Location",
+      "filter_domain": "['|',('location_id', 'ilike', self),('location_dest_id', 'ilike', self)]",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "picking_id",
+      "string": "Transfer"
+     },
+     {
+      "name": "reference",
+      "string": "Reference"
+     },
+     {
+      "name": "product_category_name",
+      "string": "Category"
+     },
+     {
+      "name": "lot_id",
+      "string": "Lot/Serial Number",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "package_id",
+      "string": "Source Package",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "result_package_id",
+      "string": "Destination Package",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "owner_id",
+      "string": "Owner",
+      "groups": "stock.group_tracking_owner"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "todo",
+      "string": "To Do",
+      "domain": "[('state', 'not in', ['done', 'draft', 'cancel'])]"
+     },
+     {
+      "name": "done",
+      "string": "Done",
+      "domain": "[('state', '=', 'done')]"
+     },
+     {
+      "name": "incoming",
+      "string": "Incoming",
+      "domain": "[('picking_id.picking_type_id.code', '=', 'incoming')]"
+     },
+     {
+      "name": "outgoing",
+      "string": "Outgoing",
+      "domain": "[('picking_id.picking_type_id.code', '=', 'outgoing')]"
+     },
+     {
+      "name": "internal",
+      "string": "Internal",
+      "domain": "[('picking_id.picking_type_id.code', '=', 'internal')]"
+     },
+     {
+      "name": "manufacturing",
+      "string": "Manufacturing",
+      "domain": "[('picking_id.picking_type_id.code', '=', 'mrp_operation')]",
+      "invisible": "1"
+     },
+     {
+      "name": "date",
+      "date": "date",
+      "default_period": "month"
+     },
+     {
+      "name": "filter_last_30_days",
+      "string": "Last 30 Days",
+      "domain": "[('date','>=', 'today -30d')]"
+     },
+     {
+      "name": "filter_last_3_months",
+      "string": "Last 3 Months",
+      "domain": "[('date','>=', 'today -3m')]"
+     },
+     {
+      "name": "filter_last_12_months",
+      "string": "Last 12 Months",
+      "domain": "[('date','>=', 'today -12m')]"
+     },
+     {
+      "name": "inventory",
+      "string": "Inventory Adjustments",
+      "domain": "[('is_inventory', '=', True)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "groupby_product_id",
+      "string": "Product",
+      "domain": "[]",
+      "context": "{'group_by': 'product_id'}"
+     },
+     {
+      "name": "by_state",
+      "string": "Status",
+      "domain": "[]",
+      "context": "{'group_by': 'state'}"
+     },
+     {
+      "name": "by_date",
+      "string": "Date",
+      "domain": "[]",
+      "context": "{'group_by': 'date'}"
+     },
+     {
+      "name": "by_picking",
+      "string": "Transfers",
+      "domain": "[]",
+      "context": "{'group_by': 'picking_id'}"
+     },
+     {
+      "name": "by_location",
+      "string": "Location",
+      "domain": "[]",
+      "context": "{'group_by': 'location_id'}"
+     },
+     {
+      "name": "by_category",
+      "string": "Category",
+      "domain": "[]",
+      "context": "{'group_by': 'product_category_name'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Stock Moves\">\n                <field name=\"location_id\" string=\"Location\" filter_domain=\"['|',('location_id', 'ilike', self),('location_dest_id', 'ilike', self)]\" groups=\"stock.group_stock_multi_locations\"/>\n                <field name=\"product_id\"/>\n                <field name=\"picking_id\" string=\"Transfer\"/>\n                <field name=\"reference\" string=\"Reference\"/>\n                <field name=\"product_category_name\" string=\"Category\"/>\n                <field name=\"lot_id\" string=\"Lot/Serial Number\" groups=\"stock.group_production_lot\"/>\n                <field name=\"package_id\" string=\"Source Package\" groups=\"stock.group_tracking_lot\"/>\n                <field name=\"result_package_id\" string=\"Destination Package\" groups=\"stock.group_tracking_lot\"/>\n                <field name=\"owner_id\" string=\"Owner\" groups=\"stock.group_tracking_owner\"/>\n                <separator/>\n                <filter string=\"To Do\" name=\"todo\" domain=\"[('state', 'not in', ['done', 'draft', 'cancel'])]\"/>\n                <filter string=\"Done\" name=\"done\" domain=\"[('state', '=', 'done')]\"/>\n                <separator/>\n                <filter string=\"Incoming\" name=\"incoming\" domain=\"[('picking_id.picking_type_id.code', '=', 'incoming')]\"/>\n                <filter string=\"Outgoing\" name=\"outgoing\" domain=\"[('picking_id.picking_type_id.code', '=', 'outgoing')]\"/>\n                <filter string=\"Internal\" name=\"internal\" domain=\"[('picking_id.picking_type_id.code', '=', 'internal')]\"/>\n                <filter string=\"Manufacturing\" name=\"manufacturing\" domain=\"[('picking_id.picking_type_id.code', '=', 'mrp_operation')]\" invisible=\"1\"/>\n                <separator/>\n                <filter name=\"date\" date=\"date\" default_period=\"month\"/>\n                <filter string=\"Last 30 Days\" name=\"filter_last_30_days\" domain=\"[('date','&gt;=', 'today -30d')]\"/>\n                <filter string=\"Last 3 Months\" name=\"filter_last_3_months\" domain=\"[('date','&gt;=', 'today -3m')]\"/>\n                <filter string=\"Last 12 Months\" name=\"filter_last_12_months\" domain=\"[('date','&gt;=', 'today -12m')]\"/>\n                <separator/>\n                <filter string=\"Inventory Adjustments\" name=\"inventory\" domain=\"[('is_inventory', '=', True)]\"/>\n                <separator/>\n                <group name=\"groupby\">\n                    <filter string=\"Product\" name=\"groupby_product_id\" domain=\"[]\" context=\"{'group_by': 'product_id'}\"/>\n                    <filter string=\"Status\" name=\"by_state\" domain=\"[]\" context=\"{'group_by': 'state'}\"/>\n                    <filter string=\"Date\" name=\"by_date\" domain=\"[]\" context=\"{'group_by': 'date'}\"/>\n                    <filter string=\"Transfers\" name=\"by_picking\" domain=\"[]\" context=\"{'group_by': 'picking_id'}\"/>\n                    <filter string=\"Location\" name=\"by_location\" domain=\"[]\" context=\"{'group_by': 'location_id'}\"/>\n                    <filter string=\"Category\" name=\"by_category\" domain=\"[]\" context=\"{'group_by': 'product_category_name'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_stock_move_line_kanban",
+   "package": "stock",
+   "name": "stock.move.line.kanban",
+   "entity": "stock.move.line",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile"
+    },
+    "fields": [
+     {
+      "name": "quant_id",
+      "invisible": "1"
+     },
+     {
+      "name": "reference"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "location_id"
+     },
+     {
+      "name": "location_dest_id"
+     },
+     {
+      "name": "lot_id",
+      "invisible": "not lot_id and lot_name"
+     },
+     {
+      "name": "lot_name",
+      "invisible": "lot_id or not lot_name"
+     },
+     {
+      "name": "quantity",
+      "string": "Quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "state",
+      "widget": "label_selection",
+      "options": "{'classes': {'draft': 'default', 'cancel': 'danger', 'waiting': 'warning', 'confirmed': 'warning', 'done': 'success'}}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1,
+     "label_selection": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\">\n                <templates>\n                    <t t-name=\"card\">\n                        \n                        <field name=\"quant_id\" invisible=\"1\"/>\n                        <div class=\"row\">\n                            <field name=\"reference\" class=\"col-6\"/>\n                            <field name=\"date\" class=\"col-6 text-end\"/>\n                        </div>\n                        <field name=\"product_id\" class=\"fw-bolder\"/>\n                        <div groups=\"stock.group_stock_multi_locations\">\n                            <field name=\"location_id\"/>\n                            →\n                            <field name=\"location_dest_id\"/>\n                        </div>\n                        <div groups=\"stock.group_production_lot\" invisible=\"not lot_id and not lot_name\">\n                            Lot/SN:\n                            <field name=\"lot_id\" invisible=\"not lot_id and lot_name\"/>\n                            <field name=\"lot_name\" invisible=\"lot_id or not lot_name\"/>\n                        </div>\n                        <div class=\"row\">\n                            <div class=\"col-6\">\n                                <field name=\"quantity\" string=\"Quantity\"/>\n                                <field name=\"product_uom_id\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n                            </div>\n                            <field class=\"col-6 text-end\" name=\"state\" widget=\"label_selection\" options=\"{'classes': {'draft': 'default', 'cancel': 'danger', 'waiting': 'warning', 'confirmed': 'warning', 'done': 'success'}}\"/>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_stock_move_line_pivot",
+   "package": "stock",
+   "name": "stock.move.line.pivot",
+   "entity": "stock.move.line",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Moves History"
+    },
+    "fields": [
+     {
+      "name": "product_category_name"
+     },
+     {
+      "name": "date"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "product_category_name",
+      "type": "col"
+     },
+     {
+      "name": "date",
+      "interval": "month",
+      "type": "row"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Moves History\">\n                <field name=\"product_category_name\" type=\"col\"/>\n                <field name=\"date\" interval=\"month\" type=\"row\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_stock_move_line_operation_tree",
+   "package": "stock",
+   "name": "stock.move.line.operations.list",
+   "entity": "stock.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "editable": "bottom",
+     "decoration-muted": "state == 'done' and is_locked == True",
+     "default_order": "result_package_id desc, location_id asc, location_dest_id asc, picking_id asc, id"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "column_invisible": "True",
+      "force_save": "1"
+     },
+     {
+      "name": "picking_id",
+      "column_invisible": "True",
+      "force_save": "1"
+     },
+     {
+      "name": "move_id",
+      "column_invisible": "True",
+      "force_save": "1"
+     },
+     {
+      "name": "product_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_dest_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "package_id",
+      "context": "{'show_src_package': 1}",
+      "column_invisible": "True"
+     },
+     {
+      "name": "result_package_id",
+      "context": "{'show_dest_package': 1}",
+      "column_invisible": "True"
+     },
+     {
+      "name": "tracking",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_type_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "quant_id",
+      "widget": "pick_from",
+      "domain": "[('product_id', '=', product_id), ('location_id', 'child_of', parent.location_id)]",
+      "context": "{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': True, 'show_src_package': 1}",
+      "options": "{'no_create': True, 'no_open': True}",
+      "column_invisible": "not parent.show_quant"
+     },
+     {
+      "name": "lot_id",
+      "domain": "[('product_id', '=', parent.product_id), '|', ('company_id', '=', company_id), ('company_id', '=', False)]",
+      "context": "{                             'active_picking_id': picking_id,                             'default_product_id': parent.product_id,                         }",
+      "column_invisible": "parent.show_quant or parent.has_tracking == 'none' or not parent.show_lots_m2o",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "lot_name",
+      "string": "Lot/Serial Number",
+      "column_invisible": "parent.has_tracking == 'none' or not parent.show_lots_text",
+      "groups": "stock.group_production_lot",
+      "placeholder": "e.g. SN000001"
+     },
+     {
+      "name": "location_dest_id",
+      "string": "Store To",
+      "domain": "[('id', 'child_of', parent.location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]",
+      "column_invisible": "parent.show_quant and parent.picking_code != 'internal'",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "package_id",
+      "readonly": "state == 'done' and is_locked",
+      "column_invisible": "1",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "result_package_id",
+      "widget": "package_m2o",
+      "readonly": "state == 'done' and is_locked",
+      "context": "{'picking_id': picking_id, 'show_dest_package': 1}",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "owner_id",
+      "column_invisible": "parent.show_quant",
+      "groups": "stock.group_tracking_owner"
+     },
+     {
+      "name": "state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_locked",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_code",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picked",
+      "column_invisible": "True"
+     },
+     {
+      "name": "quantity",
+      "readonly": "state == 'done' and is_locked",
+      "string": "Quantity",
+      "sum": "Quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "state == 'done' and id",
+      "options": "{'no_open': True, 'no_create': True}",
+      "groups": "uom.group_uom"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "pick_from": 1,
+     "package_m2o": 1,
+     "many2one_uom": 1
+    },
+    "inheritance_operations": [],
+    "editable": "bottom",
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "state == 'done' and is_locked == True"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list editable=\"bottom\" decoration-muted=\"state == 'done' and is_locked == True\" default_order=\"result_package_id desc, location_id asc, location_dest_id asc, picking_id asc, id\">\n                    <field name=\"company_id\" column_invisible=\"True\" force_save=\"1\"/>\n                    <field name=\"picking_id\" column_invisible=\"True\" force_save=\"1\"/>\n                    <field name=\"move_id\" column_invisible=\"True\" force_save=\"1\"/>\n                    <field name=\"product_id\" column_invisible=\"True\"/>\n                    <field name=\"location_id\" column_invisible=\"True\"/>\n                    <field name=\"location_dest_id\" column_invisible=\"True\"/>\n                    <field name=\"package_id\" column_invisible=\"True\" context=\"{'show_src_package': 1}\"/>\n                    <field name=\"result_package_id\" column_invisible=\"True\" context=\"{'show_dest_package': 1}\"/>\n                    <field name=\"tracking\" column_invisible=\"True\"/>\n                    <field name=\"picking_type_id\" column_invisible=\"True\"/>\n                    <field name=\"quant_id\" domain=\"[('product_id', '=', product_id), ('location_id', 'child_of', parent.location_id)]\" context=\"{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': True, 'show_src_package': 1}\" widget=\"pick_from\" column_invisible=\"not parent.show_quant\" options=\"{'no_create': True, 'no_open': True}\"/>\n                    <field name=\"lot_id\" groups=\"stock.group_production_lot\" column_invisible=\"parent.show_quant or parent.has_tracking == 'none' or not parent.show_lots_m2o\" domain=\"[('product_id', '=', parent.product_id), '|', ('company_id', '=', company_id), ('company_id', '=', False)]\" context=\"{                             'active_picking_id': picking_id,                             'default_product_id': parent.product_id,                         }\"/>\n                    <field name=\"lot_name\" string=\"Lot/Serial Number\" groups=\"stock.group_production_lot\" placeholder=\"e.g. SN000001\" column_invisible=\"parent.has_tracking == 'none' or not parent.show_lots_text\"/>\n                    <field name=\"location_dest_id\" string=\"Store To\" column_invisible=\"parent.show_quant and parent.picking_code != 'internal'\" domain=\"[('id', 'child_of', parent.location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]\" groups=\"stock.group_stock_multi_locations\"/>\n                    <field name=\"package_id\" column_invisible=\"1\" readonly=\"state == 'done' and is_locked\" groups=\"stock.group_tracking_lot\"/>\n                    <field name=\"result_package_id\" readonly=\"state == 'done' and is_locked\" widget=\"package_m2o\" groups=\"stock.group_tracking_lot\" context=\"{'picking_id': picking_id, 'show_dest_package': 1}\"/>\n                    <field name=\"owner_id\" column_invisible=\"parent.show_quant\" groups=\"stock.group_tracking_owner\"/>\n                    <field name=\"state\" column_invisible=\"True\"/>\n                    <field name=\"is_locked\" column_invisible=\"True\"/>\n                    <field name=\"picking_code\" column_invisible=\"True\"/>\n                    <field name=\"picked\" column_invisible=\"True\"/>\n                    <field name=\"quantity\" string=\"Quantity\" readonly=\"state == 'done' and is_locked\" sum=\"Quantity\"/>\n                    <field name=\"product_uom_id\" options=\"{'no_open': True, 'no_create': True}\" groups=\"uom.group_uom\" widget=\"many2one_uom\" readonly=\"state == 'done' and id\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "stock.view_stock_move_line_detailed_operation_tree",
+   "package": "stock",
+   "name": "stock.move.line.operations.list",
+   "entity": "stock.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "editable": "bottom",
+     "decoration-muted": "(state == 'done' and is_locked == True)",
+     "multi_edit": "1",
+     "default_order": "result_package_id desc, location_id asc, location_dest_id asc, picking_id asc, id"
+    },
+    "fields": [
+     {
+      "name": "product_id",
+      "readonly": "state == 'done' or move_id",
+      "required": "1",
+      "context": "{'default_is_storable': True}"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "move_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_code",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_location_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_location_dest_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_dest_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "package_id",
+      "context": "{'show_src_package': 1}",
+      "column_invisible": "True"
+     },
+     {
+      "name": "quant_id",
+      "widget": "pick_from",
+      "readonly": "state in ('done', 'cancel') and is_locked",
+      "domain": "[('product_id', '=', product_id), ('location_id', 'child_of', picking_location_id)]",
+      "context": "{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree_simple', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': False, 'show_src_package': 1}",
+      "options": "{'no_open': True}",
+      "column_invisible": "context.get('picking_code') == 'incoming'"
+     },
+     {
+      "name": "lot_id",
+      "invisible": "not lots_visible",
+      "readonly": "state in ('done', 'cancel') and is_locked",
+      "context": "{'default_product_id': product_id, 'active_picking_id': picking_id}",
+      "column_invisible": "context.get('picking_code') != 'incoming' or context.get('show_lots_text')",
+      "optional": "show",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "lot_name",
+      "invisible": "not lots_visible",
+      "readonly": "state in ('done', 'cancel') and is_locked",
+      "context": "{'default_product_id': product_id}",
+      "column_invisible": "context.get('picking_code') != 'incoming' or not context.get('show_lots_text')",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "location_dest_id",
+      "readonly": "state in ('done', 'cancel') and is_locked",
+      "domain": "[('id', 'child_of', picking_location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]",
+      "options": "{'no_create': True}",
+      "column_invisible": "context.get('picking_code') == 'outgoing'",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "result_package_id",
+      "widget": "package_m2o",
+      "readonly": "state in ('done', 'cancel') and is_locked",
+      "context": "{'show_dest_package': 1}",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "lots_visible",
+      "column_invisible": "True"
+     },
+     {
+      "name": "owner_id",
+      "readonly": "state in ('done', 'cancel') and is_locked",
+      "column_invisible": "context.get('picking_code') == 'incoming'",
+      "groups": "stock.group_tracking_owner"
+     },
+     {
+      "name": "state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_locked",
+      "column_invisible": "True"
+     },
+     {
+      "name": "quantity",
+      "readonly": "state in ('done', 'cancel') and is_locked",
+      "force_save": "1"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "state != 'draft' and id",
+      "groups": "uom.group_uom",
+      "force_save": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_put_in_pack",
+      "string": "Put in Pack",
+      "type": "object",
+      "class": "btn-primary",
+      "context": "{'force_move_lines': 1}",
+      "groups": "stock.group_tracking_lot"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "pick_from": 1,
+     "package_m2o": 1,
+     "many2one_uom": 1
+    },
+    "inheritance_operations": [],
+    "editable": "bottom",
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "(state == 'done' and is_locked == True)"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list editable=\"bottom\" decoration-muted=\"(state == 'done' and is_locked == True)\" multi_edit=\"1\" default_order=\"result_package_id desc, location_id asc, location_dest_id asc, picking_id asc, id\">\n                    <header>\n                        <button class=\"btn-primary\" name=\"action_put_in_pack\" type=\"object\" context=\"{'force_move_lines': 1}\" string=\"Put in Pack\" groups=\"stock.group_tracking_lot\"/>\n                    </header>\n                    <field name=\"product_id\" context=\"{'default_is_storable': True}\" required=\"1\" readonly=\"state == 'done' or move_id\"/>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"move_id\" column_invisible=\"True\"/>\n                    <field name=\"picking_id\" column_invisible=\"True\"/>\n                    <field name=\"picking_code\" column_invisible=\"True\"/>\n                    <field name=\"picking_location_id\" column_invisible=\"True\"/>\n                    <field name=\"picking_location_dest_id\" column_invisible=\"True\"/>\n                    <field name=\"location_id\" column_invisible=\"True\"/>\n                    <field name=\"location_dest_id\" column_invisible=\"True\"/>\n                    <field name=\"package_id\" column_invisible=\"True\" context=\"{'show_src_package': 1}\"/>\n                    <field name=\"quant_id\" column_invisible=\"context.get('picking_code') == 'incoming'\" domain=\"[('product_id', '=', product_id), ('location_id', 'child_of', picking_location_id)]\" context=\"{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree_simple', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': False, 'show_src_package': 1}\" readonly=\"state in ('done', 'cancel') and is_locked\" widget=\"pick_from\" options=\"{'no_open': True}\"/>\n                    <field name=\"lot_id\" column_invisible=\"context.get('picking_code') != 'incoming' or context.get('show_lots_text')\" groups=\"stock.group_production_lot\" invisible=\"not lots_visible\" readonly=\"state in ('done', 'cancel') and is_locked\" context=\"{'default_product_id': product_id, 'active_picking_id': picking_id}\" optional=\"show\"/>\n                    <field name=\"lot_name\" column_invisible=\"context.get('picking_code') != 'incoming' or not context.get('show_lots_text')\" groups=\"stock.group_production_lot\" invisible=\"not lots_visible\" readonly=\"state in ('done', 'cancel') and is_locked\" context=\"{'default_product_id': product_id}\"/>\n                    <field name=\"location_dest_id\" options=\"{'no_create': True}\" column_invisible=\"context.get('picking_code') == 'outgoing'\" readonly=\"state in ('done', 'cancel') and is_locked\" groups=\"stock.group_stock_multi_locations\" domain=\"[('id', 'child_of', picking_location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id), ('usage', '!=', 'view')]\"/>\n                    <field name=\"result_package_id\" readonly=\"state in ('done', 'cancel') and is_locked\" widget=\"package_m2o\" context=\"{'show_dest_package': 1}\" groups=\"stock.group_tracking_lot\"/>\n                    <field name=\"lots_visible\" column_invisible=\"True\"/>\n                    <field name=\"owner_id\" groups=\"stock.group_tracking_owner\" column_invisible=\"context.get('picking_code') == 'incoming'\" readonly=\"state in ('done', 'cancel') and is_locked\"/>\n                    <field name=\"state\" column_invisible=\"True\"/>\n                    <field name=\"is_locked\" column_invisible=\"True\"/>\n                    <field name=\"quantity\" readonly=\"state in ('done', 'cancel') and is_locked\" force_save=\"1\"/>\n                    <field name=\"product_uom_id\" force_save=\"1\" readonly=\"state != 'draft' and id\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "stock_delivery.view_move_line_tree_detailed_delivery",
+   "package": "stock_delivery",
+   "name": "stock.move.line.list.detailed",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_move_line_tree_detailed",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='picking_partner_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "destination_country_code",
+      "optional": "hide"
+     },
+     {
+      "name": "carrier_id",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='picking_partner_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='picking_partner_id']\" position=\"after\">\n                    <field name=\"destination_country_code\" optional=\"hide\"/>\n                    <field name=\"carrier_id\" optional=\"hide\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "stock_delivery.stock_move_line_view_search_delivery",
+   "package": "stock_delivery",
+   "name": "stock.move.line.search.delivery",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.stock_move_line_view_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='owner_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "carrier_id",
+      "invisible": "1",
+      "string": "Carrier name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='owner_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='owner_id']\" position=\"after\">\n                <field name=\"carrier_id\" invisible=\"1\" string=\"Carrier name\"/>\n            </xpath>\n            <xpath expr=\"//group[@name='groupby']\" position=\"inside\">\n                <filter string=\"Carrier\" name=\"by_carrier\" context=\"{'group_by': 'carrier_id'}\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_picking_batch.view_move_line_tree",
+   "package": "stock_picking_batch",
+   "name": "stock_picking_batch.move.line.list",
+   "entity": "stock.move.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "editable": "top",
+     "decoration-muted": "state == 'cancel'",
+     "string": "Move Lines",
+     "default_order": "location_id"
+    },
+    "fields": [
+     {
+      "name": "tracking",
+      "column_invisible": "True"
+     },
+     {
+      "name": "state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "product_id",
+      "readonly": "id",
+      "required": "1",
+      "context": "{'default_is_storable': True}"
+     },
+     {
+      "name": "picking_id",
+      "readonly": "id",
+      "required": "1",
+      "domain": "[('id', 'in', context.get('picking_ids', []))]",
+      "options": "{'no_create_edit': True}"
+     },
+     {
+      "name": "lot_id",
+      "readonly": "tracking not in ['lot', 'serial']",
+      "column_invisible": "context.get('picking_code') != 'incoming' or context.get('show_lots_text')",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "lot_name",
+      "readonly": "tracking not in ['lot', 'serial']",
+      "string": "Lot/Serial Number",
+      "column_invisible": "context.get('picking_code') != 'incoming' or not context.get('show_lots_text')",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "package_id",
+      "context": "{'show_src_package': 1}",
+      "column_invisible": "True",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "quant_id",
+      "widget": "pick_from",
+      "readonly": "state in ('done', 'cancel') and is_locked",
+      "domain": "[('product_id', '=', product_id), ('location_id', 'child_of', picking_location_id)]",
+      "context": "{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree_simple', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': False, 'show_src_package': 1}",
+      "options": "{'no_open': True}",
+      "column_invisible": "context.get('picking_code') == 'incoming'"
+     },
+     {
+      "name": "location_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_dest_id"
+     },
+     {
+      "name": "result_package_id",
+      "widget": "package_m2o",
+      "context": "{'show_dest_package': 1}",
+      "groups": "stock.group_tracking_lot"
+     },
+     {
+      "name": "quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "1",
+      "options": "{'no_create': True}",
+      "groups": "uom.group_uom",
+      "force_save": "1"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company",
+      "force_save": "1"
+     },
+     {
+      "name": "is_locked",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_location_id",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_put_in_pack",
+      "string": "Put in Pack",
+      "type": "object",
+      "class": "btn-primary",
+      "groups": "stock.group_tracking_lot"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "pick_from": 1,
+     "package_m2o": 1,
+     "many2one_uom": 1
+    },
+    "inheritance_operations": [],
+    "editable": "top",
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "state == 'cancel'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list editable=\"top\" decoration-muted=\"state == 'cancel'\" string=\"Move Lines\" default_order=\"location_id\">\n                <header>\n                    <button class=\"btn-primary\" name=\"action_put_in_pack\" type=\"object\" string=\"Put in Pack\" groups=\"stock.group_tracking_lot\"/>\n                </header>\n                <field name=\"tracking\" column_invisible=\"True\"/>\n                <field name=\"state\" column_invisible=\"True\"/>\n                <field name=\"company_id\" column_invisible=\"True\"/>\n                <field name=\"product_id\" context=\"{'default_is_storable': True}\" required=\"1\" readonly=\"id\"/>\n                <field name=\"picking_id\" required=\"1\" readonly=\"id\" options=\"{'no_create_edit': True}\" domain=\"[('id', 'in', context.get('picking_ids', []))]\"/>\n                <field name=\"lot_id\" groups=\"stock.group_production_lot\" readonly=\"tracking not in ['lot', 'serial']\" column_invisible=\"context.get('picking_code') != 'incoming' or context.get('show_lots_text')\"/>\n                <field name=\"lot_name\" string=\"Lot/Serial Number\" groups=\"stock.group_production_lot\" readonly=\"tracking not in ['lot', 'serial']\" column_invisible=\"context.get('picking_code') != 'incoming' or not context.get('show_lots_text')\"/>\n                <field name=\"package_id\" groups=\"stock.group_tracking_lot\" column_invisible=\"True\" context=\"{'show_src_package': 1}\"/>\n                <field name=\"quant_id\" column_invisible=\"context.get('picking_code') == 'incoming'\" domain=\"[('product_id', '=', product_id), ('location_id', 'child_of', picking_location_id)]\" context=\"{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree_simple', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': False, 'show_src_package': 1}\" readonly=\"state in ('done', 'cancel') and is_locked\" widget=\"pick_from\" options=\"{'no_open': True}\"/>\n                <field name=\"location_id\" column_invisible=\"True\"/>\n                <field name=\"location_dest_id\"/>\n                <field name=\"result_package_id\" groups=\"stock.group_tracking_lot\" widget=\"package_m2o\" context=\"{'show_dest_package': 1}\"/>\n                <field name=\"quantity\"/>\n                <field name=\"product_uom_id\" options=\"{'no_create': True}\" widget=\"many2one_uom\" groups=\"uom.group_uom\" readonly=\"1\" force_save=\"1\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" force_save=\"1\"/>\n                <field name=\"is_locked\" column_invisible=\"True\"/>\n                <field name=\"picking_location_id\" column_invisible=\"True\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_picking_batch.view_move_line_tree_inherit_stock_picking_batch",
+   "package": "stock_picking_batch",
+   "name": "stock.move.line.list.stock_picking_batch",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_move_line_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='state']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "batch_id",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='state']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='state']\" position=\"after\">\n                <field name=\"batch_id\" optional=\"hide\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_picking_batch.stock_move_line_view_search_inherit_stock_picking_batch",
+   "package": "stock_picking_batch",
+   "name": "stock.move.line.search.stock_picking_batch",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.stock_move_line_view_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='groupby']",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [
+     {
+      "name": "by_batch_id",
+      "string": "Batch Transfer",
+      "context": "{'group_by': 'batch_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='groupby']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//group[@name='groupby']\" position=\"inside\">\n                <filter string=\"Batch Transfer\" name=\"by_batch_id\" context=\"{'group_by': 'batch_id'}\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_picking_batch.view_move_line_tree_detailed_wave",
+   "package": "stock_picking_batch",
+   "name": "stock_picking_wave.move.line.list.wave",
+   "entity": "stock.move.line",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_move_line_tree_detailed",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [
+     {
+      "name": "action_open_add_to_wave",
+      "string": "Add to Wave",
+      "type": "object"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list\" position=\"inside\">\n                <header>\n                    <button name=\"action_open_add_to_wave\" type=\"object\" string=\"Add to Wave\"/>\n                </header>\n            </xpath>\n            <xpath expr=\"//field[@name='picking_id']\" position=\"after\">\n                <field name=\"batch_id\" optional=\"show\"/>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

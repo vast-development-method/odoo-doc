@@ -1,0 +1,851 @@
+{
+ "catalog": {
+  "name": "entity:ir.model.data",
+  "description": "Complete definition of entity Model Data (ir.model.data).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.model.data",
+  "storage_name": "ir_model_data",
+  "full_name": "Model Data",
+  "kind": "persistent",
+  "description": "Model Data",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "website"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "module, model, name",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_allow_sudo_commands": false
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "External Identifier",
+    "required": true,
+    "help": "External Key/Identifier that can be used for data integration with third-party systems",
+    "defined_in_package": "base",
+    "full_name": "External Identifier"
+   },
+   {
+    "name": "complete_name",
+    "type": "Char",
+    "compute": "_compute_complete_name",
+    "string": "Complete ID",
+    "defined_in_package": "base",
+    "full_name": "Complete identifier"
+   },
+   {
+    "name": "model",
+    "type": "Char",
+    "string": "Model Name",
+    "required": true,
+    "defined_in_package": "base",
+    "full_name": "Model Name"
+   },
+   {
+    "name": "module",
+    "type": "Char",
+    "default": "",
+    "required": true,
+    "defined_in_package": "base",
+    "string": "Module",
+    "full_name": "Module"
+   },
+   {
+    "name": "res_id",
+    "type": "Many2oneReference",
+    "string": "Record ID",
+    "help": "ID of the target record in the database",
+    "model_field": "model",
+    "defined_in_package": "base",
+    "full_name": "Record identifier"
+   },
+   {
+    "name": "noupdate",
+    "type": "Boolean",
+    "string": "Non Updatable",
+    "default": false,
+    "defined_in_package": "base",
+    "full_name": "Non Updatable"
+   },
+   {
+    "name": "reference",
+    "type": "Char",
+    "string": "Reference",
+    "compute": "_compute_reference",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "base",
+    "full_name": "Reference"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_name_nospaces",
+    "kind": "Constraint",
+    "definition": "CHECK(name NOT LIKE '% %')",
+    "message": "External IDs cannot contain spaces",
+    "defined_in_package": "base"
+   },
+   {
+    "name": "_module_name_uniq_index",
+    "kind": "UniqueIndex",
+    "definition": "(module, name)",
+    "message": null,
+    "defined_in_package": "base"
+   },
+   {
+    "name": "_model_res_id_index",
+    "kind": "Index",
+    "definition": "(model, res_id)",
+    "message": null,
+    "defined_in_package": "base"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_complete_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "module",
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reference",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model",
+         "res_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_id",
+         "model",
+         "complete_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_xmlid_lookup",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "xmlid"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "tools.ormcache",
+        "arguments": [
+         "xmlid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Low level xmlid lookup\nReturn (res_model, res_id) or raise ValueError if not found",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_xmlid_to_res_model_res_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "xmlid",
+     "raise_if_not_found"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return (res_model, res_id)",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_xmlid_to_res_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "xmlid",
+     "raise_if_not_found"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns res_id ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_object_reference",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "module",
+     "xml_id",
+     "raise_on_access_error"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns (model, res_id) corresponding to a given module and xml_id (cached), if and only if the user has the necessary access rights\nto see that object, otherwise raise a ValueError if raise_on_access_error is True or returns a tuple (model found, False)",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Not enough access rights on the external ID \"%(module)s.%(xml_id)s\"",
+        "line": 2318
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Regular unlink method, but make sure to clear the caches. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_lookup_xmlids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "xml_ids",
+     "model"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Look up the given XML ids of the given model. ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_xmlids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data_list",
+     "update"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create or update the given XML ids.\n\n:param data_list: list of dicts with keys `xml_id` (XMLID to\n    assign), `noupdate` (flag on XMLID), `record` (target record).\n:param update: should be ``True`` when upgrading a module",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_insert_xmlids_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_update_xmlids_query",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sub_rows",
+     "update"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_xmlid",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "xml_id"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Simply mark the given XML id as being loaded, and return the\ncorresponding record.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_module_data_uninstall",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "modules_to_remove"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Deletes all the records referenced by the ir.model.data entries\n``ids`` along with their corresponding database backed (including\ndropping tables, columns, FKs, etc, as long as there is no other\nir.model.data entry holding a reference to them (which indicates that\nthey are still owned by another module).\nAttempts to perform the deletion in an appropriate order to maximize\nthe chance of gracefully deleting all records.\nThis step is performed as part of the full uninstallation of a module.",
+      "size_in_lines": 172,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Administrator access is required to uninstall a module",
+        "line": 2477
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_process_end_unlink_record",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_end",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "modules"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Clear records removed from updated module data.\nThis method is called at the end of the module loading process.\nIt is meant to removed records that are no longer present in the\nupdated data. Such records are recognised as the one with an xml id\nand a module in ir_model_data and noupdate set to false, but not\npresent in self.pool.loaded_xmlids.",
+      "size_in_lines": 78,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "toggle_noupdate",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "model",
+     "res_id"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Toggle the noupdate flag on the external id of the record ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "check_object_reference",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "Not enough access rights on the external ID \"%(module)s.%(xml_id)s\""
+   },
+   {
+    "operation": "_module_data_uninstall",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "Administrator access is required to uninstall a module"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_model_data_group_erp_manager",
+    "package": "base",
+    "name": "ir_model_data group_erp_manager",
+    "entity": "ir.model.data",
+    "group": "group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "base.access_ir_model_data_user",
+    "package": "base",
+    "name": "ir_model_data user",
+    "entity": "ir.model.data",
+    "group": "base.group_user",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.view_model_data_form",
+    "package": "base",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "External Identifiers"
+     },
+     "fields": [
+      {
+       "name": "complete_name"
+      },
+      {
+       "name": "module"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "noupdate"
+      },
+      {
+       "name": "write_date"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "res_id",
+       "widget": "many2one_reference_integer"
+      },
+      {
+       "name": "reference",
+       "widget": "reference",
+       "string": "Record"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_reference_integer": 1,
+      "reference": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.view_model_data_list",
+    "package": "base",
+    "name": null,
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "External Identifiers"
+     },
+     "fields": [
+      {
+       "name": "complete_name"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "model",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "res_id",
+       "widget": "many2one_reference_integer"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_reference_integer": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.view_model_data_search",
+    "package": "base",
+    "name": null,
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "External Identifiers"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "External Identifier",
+       "filter_domain": "[('name','ilike',self)]"
+      },
+      {
+       "name": "module"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "noupdate"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "updatable",
+       "string": "Updatable",
+       "domain": "[('noupdate', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_module",
+       "string": "Module",
+       "domain": "[]",
+       "context": "{'group_by':'module'}"
+      },
+      {
+       "name": "group_by_object",
+       "string": "Model",
+       "domain": "[]",
+       "context": "{'group_by':'model'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.action_model_data",
+    "package": "base",
+    "name": "External Identifiers",
+    "view_mode": null,
+    "view_id": "view_model_data_list",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.model.data"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

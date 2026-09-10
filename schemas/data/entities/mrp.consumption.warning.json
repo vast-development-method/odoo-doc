@@ -1,0 +1,375 @@
+{
+ "catalog": {
+  "name": "entity:mrp.consumption.warning",
+  "description": "Complete definition of entity Wizard in case of consumption in warning/strict and more component has been used for a manufacturing order (related to the bom) (mrp.consumption.warning).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mrp.consumption.warning",
+  "storage_name": "mrp_consumption_warning",
+  "full_name": "Wizard in case of consumption in warning/strict and more component has been used for a manufacturing order (related to the bom)",
+  "kind": "transient",
+  "description": "Wizard in case of consumption in warning/strict and more component has been used for a MO (related to the bom)",
+  "defined_by_package": "mrp",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "mrp_production_ids",
+    "type": "Many2many",
+    "comodel": "mrp.production",
+    "defined_in_package": "mrp",
+    "string": "Manufacturing Production",
+    "full_name": "Manufacturing Production",
+    "target_entity": "mrp.production"
+   },
+   {
+    "name": "mrp_production_count",
+    "type": "Integer",
+    "compute": "_compute_mrp_production_count",
+    "defined_in_package": "mrp",
+    "string": "Manufacturing Production Count",
+    "full_name": "Manufacturing Production Count"
+   },
+   {
+    "name": "consumption",
+    "type": "Selection",
+    "selection": [
+     [
+      "flexible",
+      "Allowed"
+     ],
+     [
+      "warning",
+      "Allowed with warning"
+     ],
+     [
+      "strict",
+      "Blocked"
+     ]
+    ],
+    "compute": "_compute_consumption",
+    "defined_in_package": "mrp",
+    "string": "Consumption",
+    "full_name": "Consumption"
+   },
+   {
+    "name": "mrp_consumption_warning_line_ids",
+    "type": "One2many",
+    "comodel": "mrp.consumption.warning.line",
+    "inverse_name": "mrp_consumption_warning_id",
+    "defined_in_package": "mrp",
+    "string": "Manufacturing Consumption Warning Line",
+    "full_name": "Manufacturing Consumption Warning Line",
+    "target_entity": "mrp.consumption.warning.line"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_mrp_production_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mrp_production_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_consumption",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mrp_consumption_warning_line_ids.consumption"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_confirm",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_qty",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Values cannot be set and validated because a Lot/Serial Number needs to be specified for a tracked product that is having its consumed amount increased:%(products)s",
+        "line": 68
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_set_qty",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "Values cannot be set and validated because a Lot/Serial Number needs to be specified for a tracked product that is having its consumed amount increased:%(products)s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_mrp_consumption_warning",
+    "package": "mrp",
+    "name": "access.mrp.consumption.warning",
+    "entity": "mrp.consumption.warning",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "mrp_subcontracting.access_subcontracting_portal_consumption_warning",
+    "package": "mrp_subcontracting",
+    "name": "subcontracting.portal.consumption.warning",
+    "entity": "mrp.consumption.warning",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mrp_subcontracting.consumption_warning_subcontractor_rule",
+    "package": "mrp_subcontracting",
+    "name": "MRP Consumption Warnings Subcontractor",
+    "entity": "mrp.consumption.warning",
+    "domain": "[('mrp_production_ids', 'in', user.partner_id.commercial_partner_id.production_ids.ids)]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mrp.view_mrp_consumption_warning_form",
+    "package": "mrp",
+    "name": "Consumption Warning",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Consumption Warning"
+     },
+     "fields": [
+      {
+       "name": "mrp_production_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "consumption",
+       "invisible": "1"
+      },
+      {
+       "name": "mrp_production_count",
+       "invisible": "1"
+      },
+      {
+       "name": "mrp_consumption_warning_line_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "mrp_production_id",
+       "column_invisible": "parent.mrp_production_count == 1",
+       "force_save": "1"
+      },
+      {
+       "name": "consumption",
+       "column_invisible": "True",
+       "force_save": "1"
+      },
+      {
+       "name": "product_id",
+       "force_save": "1"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "product_expected_qty_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "product_consumed_qty_uom",
+       "force_save": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_confirm",
+       "string": "Force",
+       "type": "object",
+       "invisible": "consumption != 'strict'",
+       "class": "btn-primary",
+       "groups": "mrp.group_mrp_manager",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_confirm",
+       "string": "Confirm",
+       "type": "object",
+       "invisible": "consumption == 'strict'",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_set_qty",
+       "string": "Set Quantities & Validate",
+       "type": "object",
+       "invisible": "'is_subcontracting_portal' in context",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Discard",
+       "type": "object",
+       "class": "btn-secondary",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mrp.action_mrp_consumption_warning",
+    "package": "mrp",
+    "name": "Consumption Warning",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mrp.consumption.warning"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

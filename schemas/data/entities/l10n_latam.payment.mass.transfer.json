@@ -1,0 +1,347 @@
+{
+ "catalog": {
+  "name": "entity:l10n_latam.payment.mass.transfer",
+  "description": "Complete definition of entity Checks Mass Transfers (l10n_latam.payment.mass.transfer).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_latam.payment.mass.transfer",
+  "storage_name": "l10n_latam_payment_mass_transfer",
+  "full_name": "Checks Mass Transfers",
+  "kind": "transient",
+  "description": "Checks Mass Transfers",
+  "defined_by_package": "l10n_latam_check",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "payment_date",
+    "type": "Date",
+    "string": "Payment Date",
+    "required": true,
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "l10n_latam_check",
+    "full_name": "Payment Date"
+   },
+   {
+    "name": "destination_journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Destination Journal",
+    "check_company": true,
+    "domain": "[('type', 'in', ('bank', 'cash')), ('id', '!=', journal_id)]",
+    "defined_in_package": "l10n_latam_check",
+    "full_name": "Destination Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "communication",
+    "type": "Char",
+    "string": "Memo",
+    "defined_in_package": "l10n_latam_check",
+    "full_name": "Memo"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "check_company": true,
+    "compute": "_compute_journal_company",
+    "defined_in_package": "l10n_latam_check",
+    "string": "Journal",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "compute": "_compute_journal_company",
+    "defined_in_package": "l10n_latam_check",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "check_ids",
+    "type": "Many2many",
+    "comodel": "l10n_latam.check",
+    "relation": "latam_tranfer_check_reltransfer_id",
+    "column1": "check_id",
+    "check_company": true,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Check",
+    "full_name": "Check",
+    "target_entity": "l10n_latam.check"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_journal_company",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "check_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "All selected checks must be on the same journal and on hand",
+        "line": 44
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The register payment wizard should only be called on account.payment records.",
+        "line": 53
+       },
+       {
+        "kind": "UserError",
+        "message": "You have selected payments which are not checks. Please call this action from the Third Party Checks menu",
+        "line": 56
+       },
+       {
+        "kind": "UserError",
+        "message": "All the selected checks must use the same currency",
+        "line": 61
+       },
+       {
+        "kind": "UserError",
+        "message": "All the selected checks must be posted",
+        "line": 58
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_payments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": "This is nedeed because we would like to create a payment of type internal transfer for each check with the\ncounterpart journal and then, when posting a second payment will be created automatically ",
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_payments",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_compute_journal_company",
+    "package": "l10n_latam_check",
+    "kind": "UserError",
+    "message": "All selected checks must be on the same journal and on hand"
+   },
+   {
+    "operation": "default_get",
+    "package": "l10n_latam_check",
+    "kind": "UserError",
+    "message": "The register payment wizard should only be called on account.payment records."
+   },
+   {
+    "operation": "default_get",
+    "package": "l10n_latam_check",
+    "kind": "UserError",
+    "message": "You have selected payments which are not checks. Please call this action from the Third Party Checks menu"
+   },
+   {
+    "operation": "default_get",
+    "package": "l10n_latam_check",
+    "kind": "UserError",
+    "message": "All the selected checks must use the same currency"
+   },
+   {
+    "operation": "default_get",
+    "package": "l10n_latam_check",
+    "kind": "UserError",
+    "message": "All the selected checks must be posted"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_latam_check.access_l10n_latam_payment_mass_transfer",
+    "package": "l10n_latam_check",
+    "name": "access_l10n_latam_payment_mass_transfer",
+    "entity": "l10n_latam.payment.mass.transfer",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_latam_check.view_l10n_latam_payment_mass_transfer_form",
+    "package": "l10n_latam_check",
+    "name": "l10n_latam.payment.mass.transfer.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "check_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "journal_id",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "destination_journal_id",
+       "required": "1",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "payment_date"
+      },
+      {
+       "name": "communication"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_create_payments",
+       "string": "Create Transfers",
+       "type": "object",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "l10n_latam_check.action_view_l10n_latam_payment_mass_transfer",
+    "package": "l10n_latam_check",
+    "name": "Check Transfer",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "l10n_latam.payment.mass.transfer"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

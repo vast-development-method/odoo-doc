@@ -1,0 +1,1673 @@
+{
+ "catalog": {
+  "name": "entity:mail.template",
+  "description": "Complete definition of entity Email Templates (mail.template).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.template",
+  "storage_name": "mail_template",
+  "full_name": "Email Templates",
+  "kind": "persistent",
+  "description": "Email Templates",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "account",
+   "event",
+   "pos_self_order"
+  ],
+  "mixins": [
+   "mail.render.mixin",
+   "template.reset.mixin",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "user_id, name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_unrestricted_rendering": true
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "translate": true,
+    "defined_in_package": "mail",
+    "full_name": "Name"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Template Description",
+    "translate": true,
+    "help": "This field is used for internal description of the template's usage.",
+    "defined_in_package": "mail",
+    "full_name": "Template Description"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "mail",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "template_category",
+    "type": "Selection",
+    "selection": [
+     [
+      "base_template",
+      "Base Template"
+     ],
+     [
+      "hidden_template",
+      "Hidden Template"
+     ],
+     [
+      "custom_template",
+      "Custom Template"
+     ]
+    ],
+    "compute": "_compute_template_category",
+    "search": "_search_template_category",
+    "defined_in_package": "mail",
+    "string": "Template Category",
+    "full_name": "Template Category"
+   },
+   {
+    "name": "model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Applies to",
+    "ondelete": "cascade",
+    "domain": {
+     "dynamic": "_get_non_abstract_models_domain"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Applies to",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "model",
+    "type": "Char",
+    "string": "Related Document Model",
+    "related": "model_id.model",
+    "index": true,
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Related Document Model"
+   },
+   {
+    "name": "subject",
+    "type": "Char",
+    "string": "Subject",
+    "translate": true,
+    "prefetch": true,
+    "help": "Subject (placeholders may be used here)",
+    "defined_in_package": "mail",
+    "full_name": "Subject"
+   },
+   {
+    "name": "email_from",
+    "type": "Char",
+    "string": "Send From",
+    "help": "Sender address (placeholders may be used here). If not set, the default value will be the author's email alias if configured, or email address.",
+    "defined_in_package": "mail",
+    "full_name": "Send From"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Owner",
+    "domain": "[('share', '=', False)]",
+    "defined_in_package": "mail",
+    "full_name": "Owner",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "use_default_to",
+    "type": "Boolean",
+    "string": "Default Recipients",
+    "default": true,
+    "help": "Default recipients of the record:\n- partner (using id on a partner or the partner_id field) OR\n- email (using email_from or email field)",
+    "defined_in_package": "mail",
+    "full_name": "Default Recipients"
+   },
+   {
+    "name": "email_to",
+    "type": "Char",
+    "string": "To (Emails)",
+    "help": "Comma-separated recipient addresses (placeholders may be used here)",
+    "defined_in_package": "mail",
+    "full_name": "To (Emails)"
+   },
+   {
+    "name": "partner_to",
+    "type": "Char",
+    "string": "To (Partners)",
+    "help": "Comma-separated ids of recipient partners (placeholders may be used here)",
+    "defined_in_package": "mail",
+    "full_name": "To (Partners)"
+   },
+   {
+    "name": "email_cc",
+    "type": "Char",
+    "string": "Cc",
+    "help": "Carbon copy recipients (placeholders may be used here)",
+    "defined_in_package": "mail",
+    "full_name": "Cc"
+   },
+   {
+    "name": "reply_to",
+    "type": "Char",
+    "string": "Reply To",
+    "help": "Email address to which replies will be redirected when sending emails in mass; only used when the reply is not logged in the original discussion thread.",
+    "defined_in_package": "mail",
+    "full_name": "Reply To"
+   },
+   {
+    "name": "body_html",
+    "type": "Html",
+    "string": "Body",
+    "render_engine": "qweb",
+    "render_options": {
+     "post_process": true
+    },
+    "prefetch": true,
+    "translate": true,
+    "sanitize": "email_outgoing",
+    "defined_in_package": "mail",
+    "full_name": "Body"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "relation": "email_template_attachment_rel",
+    "column1": "email_template_id",
+    "column2": "attachment_id",
+    "string": "Attachments",
+    "bypass_search_access": true,
+    "defined_in_package": "mail",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "report_template_ids",
+    "type": "Many2many",
+    "comodel": "ir.actions.report",
+    "relation": "mail_template_ir_actions_report_rel",
+    "column1": "mail_template_id",
+    "column2": "ir_actions_report_id",
+    "string": "Dynamic Reports",
+    "domain": "[('model', '=', model)]",
+    "defined_in_package": "mail",
+    "full_name": "Dynamic Reports",
+    "target_entity": "ir.actions.report"
+   },
+   {
+    "name": "email_layout_xmlid",
+    "type": "Char",
+    "string": "Email Notification Layout",
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Email Notification Layout"
+   },
+   {
+    "name": "mail_server_id",
+    "type": "Many2one",
+    "comodel": "ir.mail_server",
+    "string": "Outgoing Mail Server",
+    "readonly": false,
+    "index": "btree_not_null",
+    "help": "Optional preferred server for outgoing mails. If not set, the highest priority one will be used.",
+    "defined_in_package": "mail",
+    "full_name": "Outgoing Mail Server",
+    "target_entity": "ir.mail_server"
+   },
+   {
+    "name": "scheduled_date",
+    "type": "Char",
+    "string": "Scheduled Date",
+    "help": "If set, the queue manager will send the email after the date. If not set, the email will be send as soon as possible. You can use dynamic expression.",
+    "defined_in_package": "mail",
+    "full_name": "Scheduled Date"
+   },
+   {
+    "name": "auto_delete",
+    "type": "Boolean",
+    "string": "Auto Delete",
+    "default": true,
+    "help": "This option permanently removes any track of email after it's been sent, including from the Technical menu in the Settings, in order to preserve storage space of your the system database.",
+    "defined_in_package": "mail",
+    "full_name": "Auto Delete"
+   },
+   {
+    "name": "ref_ir_act_window",
+    "type": "Many2one",
+    "comodel": "ir.actions.act_window",
+    "string": "Sidebar action",
+    "readonly": true,
+    "copy": false,
+    "help": "Sidebar action to make this template available on records of the related document model",
+    "defined_in_package": "mail",
+    "full_name": "Sidebar action",
+    "target_entity": "ir.actions.act_window"
+   },
+   {
+    "name": "can_write",
+    "type": "Boolean",
+    "compute": "_compute_can_write",
+    "help": "The current user can edit the template.",
+    "defined_in_package": "mail",
+    "string": "Can Write",
+    "full_name": "Can Write"
+   },
+   {
+    "name": "is_template_editor",
+    "type": "Boolean",
+    "compute": "_compute_is_template_editor",
+    "defined_in_package": "mail",
+    "string": "Is Template Editor",
+    "full_name": "Is Template Editor"
+   },
+   {
+    "name": "has_dynamic_reports",
+    "type": "Boolean",
+    "compute": "_compute_has_dynamic_reports",
+    "defined_in_package": "mail",
+    "string": "Has Dynamic Reports",
+    "full_name": "Has Dynamic Reports"
+   },
+   {
+    "name": "has_mail_server",
+    "type": "Boolean",
+    "compute": "_compute_has_mail_server",
+    "defined_in_package": "mail",
+    "string": "Has Mail Server",
+    "full_name": "Has Mail Server"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_non_abstract_models_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_dynamic_reports",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_mail_server",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_write",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_template_editor",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_template_category",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "active",
+         "description"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Base templates (or master templates) are active templates having\na description and an XML ID. User defined templates (no xml id),\ntemplates without description or archived templates are not\nbase templates anymore. ",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_template_category",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_model",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fix_attachment_ownership",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_abstract_models",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You may not define a template on an abstract model: %s",
+        "line": 206
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_can_be_rendered",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "fnames",
+     "render_options"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Oops! We couldn't save your template due to an issue.\n\nError: %(error_details)s\n\nCorrect it and try again.",
+        "line": 226
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_dynamic_field_names",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink_action",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_action",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_mail_preview",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_template_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "render_fields",
+     "render_results"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Render attachments of template 'self', returning values for records\ngiven by 'res_ids'. Note that ``report_template_ids`` returns values for\n'attachments', as we have a list of tuple (report_name, base64 value)\nfor those reports. It is considered as being the job of callers to\ntransform those attachments into valid ``ir.attachment`` records.\n\n:param list res_ids: list of record IDs on which template is rendered;\n:param list render_fields: list of fields to render on template which\n  are specific to attachments, e.g. attachment_ids or report_template_ids;\n:param dict render_results: res_ids-based dictionary of render values.\n  For each res_id, a dict of values based on render_fields is given\n\n:return: updated (or new) render_results;",
+      "size_in_lines": 74,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unsupported report type %s found.",
+        "line": 373
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_generate_template_recipients",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "render_fields",
+     "allow_suggested",
+     "find_or_create_partners",
+     "render_results"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Render recipients of the template 'self', returning values for records\ngiven by 'res_ids'. Default values can be generated instead of the template\nvalues if requested by template (see 'use_default_to' field). Email fields\n('email_cc', 'email_to') are transformed into partners if requested\n(finding or creating partners). 'partner_to' field is transformed into\n'partner_ids' field.\n\nNote: for performance reason, information from records are transferred to\ncreated partners no matter the company. For example, if we have a record of\ncompany A and one of B with the same email and no related partner, a partner\nwill be created with company A or B but populated with information from the 2\nrecords. So some info might be leaked from one company to the other through\nthe partner.\n\n:param list res_ids: list of record IDs on which template is rendered;\n:param list render_fields: list of fields to render on template which\n  are specific to recipients, e.g. email_cc, email_to, partner_to);\n:param boolean allow_suggested: when computing default recipients,\n  include suggested recipients in addition to minimal defaults;\n:param boolean find_or_create_partners: transform emails into partners\n  (calling ``find_or_create`` on partner model);\n:param dict render_results: res_ids-based dictionary of render values.\n  For each res_id, a dict of values based on render_fields is given;\n\n:return: updated (or new) render_results. It holds a 'partner_ids' key\n  holding partners given by ``_message_get_default_recipients`` and/or\n  generated based on 'partner_to'. If ``find_or_create_partners`` is\n  False emails are present, otherwise they are included as partners\n  contained in ``partner_ids``.",
+      "size_in_lines": 104,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_template_scheduled_date",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "render_results"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Render scheduled date based on template 'self'. Specific parsing is\ndone to ensure value matches ORM expected value: UTC but without\ntimezone set in value.\n\n:param list res_ids: list of record IDs on which template is rendered;\n:param dict render_results: res_ids-based dictionary of render values.\n  For each res_id, a dict of values based on render_fields is given;\n\n:return: updated (or new) render_results;",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_template_static_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "render_fields",
+     "render_results"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return values based on template 'self'. Those are not rendered nor\ndynamic, just static values used for configuration of emails.\n\n:param list res_ids: list of record IDs on which template is rendered;\n:param list render_fields: list of fields to render, currently limited\n  to a subset (i.e. auto_delete, mail_server_id, model, res_id);\n:param dict render_results: res_ids-based dictionary of render values.\n  For each res_id, a dict of values based on render_fields is given;\n\n:return: updated (or new) render_results;",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "render_fields",
+     "recipients_allow_suggested",
+     "find_or_create_partners"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Render values from template 'self' on records given by 'res_ids'.\nThose values are generally used to create a mail.mail or a mail.message.\nModel of records is the one defined on template.\n\n:param list res_ids: list of record IDs on which template is rendered;\n:param list render_fields: list of fields to render on template;\n\n# recipients generation\n:param boolean recipients_allow_suggested: when computing default\n  recipients, include suggested recipients in addition to minimal\n  defaults;\n:param boolean find_or_create_partners: transform emails into partners\n  (see ``_generate_template_recipients``);\n\n:returns: a dict of (res_ids, values) where values contains all rendered\n  fields asked in ``render_fields``. Asking for attachments adds an\n  'attachments' key using the format [(report_name, data)] where data\n  is base64 encoded. Asking for recipients adds a 'partner_ids' key.\n  Note that 2many fields contain a list of IDs, not commands.",
+      "size_in_lines": 86,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_partner_to",
+    "kind": "internal_rule",
+    "arguments": [
+     "cls",
+     "partner_to"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "classmethod",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_check_access",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send_mail",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "res_id",
+     "force_send",
+     "raise_exception",
+     "email_values",
+     "email_layout_xmlid"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Generates a new mail.mail. Template is rendered on record given by\nres_id and model coming from template.\n\n:param int res_id: id of the record to render the template\n:param bool force_send: send email immediately; otherwise use the mail\n    queue (recommended);\n:param dict email_values: update generated mail with those values to further\n    customize the mail;\n:param str email_layout_xmlid: optional notification layout to encapsulate the\n    generated email;\n:returns: id of the mail.mail that was created ",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send_mail_batch",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "res_ids",
+     "force_send",
+     "raise_exception",
+     "email_values",
+     "email_layout_xmlid"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Generates new mail.mails. Batch version of 'send_mail'.'\n\n:param list res_ids: IDs of modelrecords on which template will be rendered\n\n:returns: newly created mail.mail",
+      "size_in_lines": 109,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_unsafe_expression_template_qweb",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "source",
+     "model",
+     "fname"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_unsafe_expression_template_inline_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "source",
+     "model",
+     "fname"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_expression_is_default",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "source",
+     "model",
+     "fname"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_master_mail_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete this mail template, it is used in the invoice sending flow.",
+        "line": 16
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_search",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "*args",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Context-based hack to filter reference field in a m2o search box to emulate a domain the ORM currently does not support.\n\nAs we can not specify a domain on a reference field, we added a context\nkey `filter_template_on_event` on the template reference field. If this\nkey is set, we add our domain in the `domain` in the `_search`\nmethod to filtrate the mail templates.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_abstract_models",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "You may not define a template on an abstract model: %s"
+   },
+   {
+    "operation": "_check_can_be_rendered",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Oops! We couldn't save your template due to an issue.\n\nError: %(error_details)s\n\nCorrect it and try again."
+   },
+   {
+    "operation": "_generate_template_attachments",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Unsupported report type %s found."
+   },
+   {
+    "operation": "_unlink_except_master_mail_template",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot delete this mail template, it is used in the invoice sending flow."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_template",
+    "package": "mail",
+    "name": "mail.template",
+    "entity": "mail.template",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.access_mail_template_editor",
+    "package": "mail",
+    "name": "mail.template_editor",
+    "entity": "mail.template",
+    "group": "mail.group_mail_template_editor",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.access_mail_template_system",
+    "package": "mail",
+    "name": "mail.template_system",
+    "entity": "mail.template",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mail.mail_template_employee_rule",
+    "package": "mail",
+    "name": "Employees can only modify templates they have created or been assigned",
+    "entity": "mail.template",
+    "domain": "['|', ('create_uid', '=', user.id), ('user_id', '=', user.id)]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "mail.mail_template_editor_rule",
+    "package": "mail",
+    "name": "Mail Template Editors - Edit All Templates",
+    "entity": "mail.template",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('group_mail_template_editor')), Command.link(ref('base.group_system'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mail.email_template_form",
+    "package": "mail",
+    "name": "email.template.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Templates",
+      "class": "o_mail_template_form_view"
+     },
+     "fields": [
+      {
+       "name": "ref_ir_act_window",
+       "invisible": "1"
+      },
+      {
+       "name": "template_fs",
+       "invisible": "1"
+      },
+      {
+       "name": "is_template_editor",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "required": "1",
+       "string": "Template Name",
+       "placeholder": "e.g. \"Welcome email\""
+      },
+      {
+       "name": "model_id",
+       "invisible": "context.get('default_model')",
+       "required": "1",
+       "options": "{'no_create': True}",
+       "groups": "!base.group_no_one",
+       "placeholder": "e.g. Contact"
+      },
+      {
+       "name": "model_id",
+       "required": "1",
+       "options": "{'no_create': True}",
+       "groups": "base.group_no_one",
+       "placeholder": "e.g. Contact"
+      },
+      {
+       "name": "subject",
+       "options": "{'dynamic_placeholder': true}",
+       "placeholder": "e.g. \"Welcome to MyCompany\" or \"Nice to meet you, {{ object.name }}\""
+      },
+      {
+       "name": "model",
+       "invisible": "1"
+      },
+      {
+       "name": "can_write",
+       "invisible": "1"
+      },
+      {
+       "name": "body_html",
+       "widget": "html_mail",
+       "readonly": "not can_write and id",
+       "options": "{'codeview': true, 'dynamic_placeholder': true, 'allowCommandVideo': false}",
+       "placeholder": "Write your message here..."
+      },
+      {
+       "name": "email_from",
+       "placeholder": "Sender's email"
+      },
+      {
+       "name": "use_default_to"
+      },
+      {
+       "name": "email_to",
+       "invisible": "use_default_to",
+       "placeholder": "Comma-separated recipient addresses"
+      },
+      {
+       "name": "partner_to",
+       "invisible": "use_default_to",
+       "placeholder": "Comma-separated ids of recipient partners"
+      },
+      {
+       "name": "email_cc",
+       "invisible": "use_default_to",
+       "placeholder": "Comma-separated carbon copy of recipients addresses"
+      },
+      {
+       "name": "reply_to",
+       "placeholder": "Capture replies in the chatter"
+      },
+      {
+       "name": "lang",
+       "options": "{'dynamic_placeholder': true}",
+       "placeholder": "Main partner's language"
+      },
+      {
+       "name": "has_mail_server",
+       "invisible": "1"
+      },
+      {
+       "name": "mail_server_id",
+       "invisible": "not has_mail_server",
+       "placeholder": "By order of server priority"
+      },
+      {
+       "name": "auto_delete"
+      },
+      {
+       "name": "scheduled_date",
+       "string": "Scheduled Send Date",
+       "options": "{'dynamic_placeholder': true}",
+       "placeholder": "Send Instantly"
+      },
+      {
+       "name": "has_dynamic_reports",
+       "invisible": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "many2many_binary"
+      },
+      {
+       "name": "report_template_ids",
+       "widget": "many2many_tags",
+       "invisible": "not has_dynamic_reports",
+       "domain": "[('model','=',model)]",
+       "options": "{'no_create': True}",
+       "placeholder": "None"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "invisible": "not is_template_editor",
+       "readonly": "not is_template_editor",
+       "placeholder": "Shared with all users"
+      },
+      {
+       "name": "description",
+       "placeholder": "Describe when this template should be used"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_mail_preview",
+       "string": "Preview",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "name": "%(mail_template_reset_action)d",
+       "string": "Reset Template",
+       "type": "action",
+       "invisible": "not template_fs",
+       "groups": "mail.group_mail_template_editor"
+      },
+      {
+       "name": "create_action",
+       "string": "Add Context Action",
+       "type": "object",
+       "invisible": "ref_ir_act_window",
+       "class": "btn btn-secondary",
+       "groups": "base.group_system"
+      },
+      {
+       "name": "unlink_action",
+       "string": "Remove Context Action",
+       "type": "object",
+       "invisible": "not ref_ir_act_window",
+       "class": "btn btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "content",
+       "string": "Body",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "email_configuration",
+       "string": "Settings",
+       "invisible": null,
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "email_settings",
+       "string": "Options",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "html_mail": 1,
+      "many2many_binary": 1,
+      "many2many_tags": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Preview",
+       "name": "action_open_mail_preview",
+       "type": "object",
+       "class": "btn-primary",
+       "target": "new"
+      },
+      {
+       "string": "Reset Template",
+       "name": "%(mail_template_reset_action)d",
+       "type": "action",
+       "groups": "mail.group_mail_template_editor",
+       "invisible": "not template_fs"
+      }
+     ],
+     "statusbar_field": "ref_ir_act_window",
+     "statusbar_visible": null,
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.email_template_tree",
+    "package": "mail",
+    "name": "email.template.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Templates"
+     },
+     "fields": [
+      {
+       "name": "mail_server_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "model_id",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "optional": "show"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "subject",
+       "optional": "hidden"
+      },
+      {
+       "name": "email_from",
+       "optional": "hidden"
+      },
+      {
+       "name": "email_to",
+       "optional": "hidden"
+      },
+      {
+       "name": "partner_to",
+       "optional": "hidden"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.view_email_template_search",
+    "package": "mail",
+    "name": "email.template.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Templates"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Templates",
+       "filter_domain": "['|', '|', ('name','ilike',self), ('subject','ilike',self), ('email_to','ilike',self)]"
+      },
+      {
+       "name": "lang"
+      },
+      {
+       "name": "model",
+       "filter_domain": "[('model', '=', raw_value)]"
+      },
+      {
+       "name": "model_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_templates",
+       "string": "My Templates",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "base_templates",
+       "string": "Base Templates",
+       "domain": "[('template_category', '=', 'base_template')]"
+      },
+      {
+       "name": "custom_templates",
+       "string": "Custom Templates",
+       "domain": "[('template_category', '=', 'custom_template')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "smtpserver",
+       "string": "SMTP Server",
+       "domain": "[]",
+       "context": "{'group_by':'mail_server_id'}"
+      },
+      {
+       "name": "group_by_model_id",
+       "string": "Model",
+       "domain": "[]",
+       "context": "{'group_by':'model_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "product_email_template.email_template_form_simplified",
+    "package": "product_email_template",
+    "name": "mail.template.form.simplified",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Email Template"
+     },
+     "fields": [
+      {
+       "name": "subject",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "invisible": "1"
+      },
+      {
+       "name": "model",
+       "invisible": "1"
+      },
+      {
+       "name": "body_html",
+       "widget": "html_mail",
+       "nolabel": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "many2many_binary",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "html_mail": 1,
+      "many2many_binary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.action_email_template_tree_all",
+    "package": "mail",
+    "name": "Email Templates",
+    "view_mode": "form,list",
+    "view_id": "email_template_tree",
+    "search_view_id": "view_email_template_search",
+    "domain": null,
+    "context": "{'search_default_base_templates': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.template"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

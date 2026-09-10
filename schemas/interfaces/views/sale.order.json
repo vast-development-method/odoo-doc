@@ -1,0 +1,3496 @@
+{
+ "catalog": {
+  "name": "views:sale.order",
+  "description": "View declarations for entity sale.order.",
+  "record_count": 54,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "delivery.view_order_form_with_carrier",
+   "package": "delivery",
+   "name": "delivery.sale.order.form.view.with_carrier",
+   "entity": "sale.order",
+   "view_type": "header",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "header",
+    "root_attributes": {
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "recompute_delivery_price",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "header",
+      "attributes": {
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <header position=\"inside\">\n                \n                <field name=\"recompute_delivery_price\" invisible=\"1\"/>\n            </header>\n            <div name=\"so_button_below_order_lines\" position=\"inside\">\n                <button string=\"Add shipping\" name=\"action_open_delivery_wizard\" type=\"object\" invisible=\"is_all_service or not order_line or delivery_set\"/>\n                <button string=\"Update shipping cost\" name=\"action_open_delivery_wizard\" context=\"{'carrier_recompute':True}\" type=\"object\" class=\"text-warning btn-secondary\" invisible=\"is_all_service or not recompute_delivery_price or not delivery_set\"/>\n                <button string=\"Update shipping cost\" name=\"action_open_delivery_wizard\" context=\"{'carrier_recompute':True}\" type=\"object\" invisible=\"is_all_service or recompute_delivery_price or not delivery_set\"/>\n            </div>\n            <xpath expr=\"//field[@name='order_line']/list\" position=\"attributes\">\n                <attribute name=\"decoration-warning\" add=\"(recompute_delivery_price and is_delivery)\" separator=\"or\"/>\n            </xpath>\n            <label for=\"commitment_date\" position=\"before\">\n                <field name=\"shipping_weight\" readonly=\"True\"/>\n            </label>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_booth_sale.sale_order_view_form",
+   "package": "event_booth_sale",
+   "name": "sale.order.view.form.inherit.event.booth.sale",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "event_sale.sale_order_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_attendee_list",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "event_booth_count",
+      "widget": "statinfo",
+      "string": "Booths"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_attendee_list",
+      "position": "after"
+     },
+     {
+      "name": "action_view_booth_list",
+      "type": "object",
+      "invisible": "event_booth_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-university"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_attendee_list\" position=\"after\">\n                <button name=\"action_view_booth_list\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-university\" invisible=\"event_booth_count == 0\">\n                    <field name=\"event_booth_count\" widget=\"statinfo\" string=\"Booths\"/>\n                </button>\n            </button>\n            <xpath expr=\"//field[@name='order_line']//list//field[@name='event_ticket_id']\" position=\"after\">\n                <field name=\"event_booth_category_id\" column_invisible=\"True\"/>\n                <field name=\"event_booth_pending_ids\" column_invisible=\"True\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='order_line']//list//field[@name='product_uom_qty']\" position=\"attributes\">\n                <attribute name=\"readonly\" separator=\"or\" add=\"service_tracking == 'event_booth'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_sale.sale_order_view_form",
+   "package": "event_sale",
+   "name": "sale.order.form.inherit.event.sale",
+   "entity": "sale.order",
+   "view_type": "div",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "name": "button_box",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "attendee_count",
+      "widget": "statinfo",
+      "string": "Attendees"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_attendee_list",
+      "type": "object",
+      "invisible": "attendee_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-users"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "name": "button_box",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div name=\"button_box\" position=\"inside\">\n                <button name=\"action_view_attendee_list\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-users\" invisible=\"attendee_count == 0\">\n                    <field name=\"attendee_count\" widget=\"statinfo\" string=\"Attendees\"/>\n                </button>\n            </div>\n            <xpath expr=\"//field[@name='order_line']//form//field[@name='product_id']\" position=\"after\">\n                <field name=\"event_id\" domain=\"[                         ('event_ticket_ids.product_id','=', product_id),                         ('date_end','&gt;=',time.strftime('%Y-%m-%d 00:00:00')),                         '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)                     ]\" invisible=\"service_tracking != 'event'\" required=\"service_tracking == 'event'\" options=\"{'no_open': True, 'no_create': True}\"/>\n                <field name=\"event_slot_id\" domain=\"[('event_id','=', event_id)]\" invisible=\"not is_multi_slots or service_tracking != 'event'\" required=\"is_multi_slots and service_tracking == 'event'\" options=\"{'no_open': True, 'no_create': True}\"/>\n                <field name=\"event_ticket_id\" domain=\"[                         ('event_id', '=', event_id), ('product_id','=',product_id),                          '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)                     ]\" invisible=\"service_tracking != 'event' or not event_id\" required=\"service_tracking == 'event' and event_id\" options=\"{'no_open': True, 'no_create': True}\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='order_line']//list//field[@name='product_template_id']\" position=\"after\">\n                <field name=\"event_id\" column_invisible=\"True\" domain=\"[                         ('event_ticket_ids.product_id','=', product_id),                         ('date_end','&gt;=',time.strftime('%Y-%m-%d 00:00:00')),                         '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)                     ]\" required=\"service_tracking == 'event'\" options=\"{'no_open': True, 'no_create': True}\" placeholder=\"All Events\"/>\n                <field name=\"event_slot_id\" column_invisible=\"True\" domain=\"[('event_id','=', event_id)]\" required=\"is_multi_slots and service_tracking == 'event'\" options=\"{'no_open': True, 'no_create': True}\"/>\n                <field name=\"event_ticket_id\" column_invisible=\"True\" domain=\"[                         ('event_id', '=', event_id), ('product_id','=',product_id),                          '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)                     ]\" required=\"service_tracking == 'event' and event_id\" options=\"{'no_open': True, 'no_create': True}\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_ec_sale.view_order_form_inherit_l10n_ec_sale",
+   "package": "l10n_ec_sale",
+   "name": "sale.order.form.inherit.l10n_ec_sale",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "journal_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "journal_id",
+      "position": "after"
+     },
+     {
+      "name": "l10n_ec_sri_payment_id",
+      "invisible": "country_code != 'EC'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"journal_id\" position=\"after\">\n                <field name=\"l10n_ec_sri_payment_id\" invisible=\"country_code != 'EC'\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_in_sale.view_order_form_inherit_l10n_in_sale",
+   "package": "l10n_in_sale",
+   "name": "sale.order.form.inherit.l10n.in.sale",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "position": "after"
+     },
+     {
+      "name": "l10n_in_reseller_partner_id",
+      "invisible": "country_code != 'IN'",
+      "readonly": "state not in ['draft', 'sent']",
+      "groups": "l10n_in.group_l10n_in_reseller"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"partner_id\" position=\"after\">\n                <field name=\"l10n_in_reseller_partner_id\" groups=\"l10n_in.group_l10n_in_reseller\" invisible=\"country_code != 'IN'\" readonly=\"state not in ['draft', 'sent']\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_it_edi_doi.view_sales_order_filter",
+   "package": "l10n_it_edi_doi",
+   "name": "sale.order.list.select",
+   "entity": "sale.order",
+   "view_type": "filter",
+   "inherits_view": "sale.view_sales_order_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "my_sale_orders_filter",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_sale_orders_filter",
+      "position": "after"
+     },
+     {
+      "name": "l10n_it_edi_doi_declaration_of_intent_exceeded",
+      "string": "Exceeded Declaration of Intent",
+      "domain": "[('l10n_it_edi_doi_id.remaining','<', 0)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"my_sale_orders_filter\" position=\"after\">\n                <filter string=\"Exceeded Declaration of Intent\" name=\"l10n_it_edi_doi_declaration_of_intent_exceeded\" domain=\"[('l10n_it_edi_doi_id.remaining','&lt;', 0)]\"/>\n            </filter>\n            <xpath expr=\"//search/group\" position=\"inside\">\n                <filter string=\"Declaration of Intent\" name=\"l10n_it_edi_doi_declaration_of_intent\" context=\"{'group_by': 'l10n_it_edi_doi_id'}\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_it_edi_doi.view_quotation_tree",
+   "package": "l10n_it_edi_doi",
+   "name": "sale.order.list",
+   "entity": "sale.order",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "class": "o_sale_order",
+     "string": "Sales Orders",
+     "sample": "1",
+     "decoration-muted": "state == 'cancel'"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Number"
+     },
+     {
+      "name": "date_order",
+      "widget": "date"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-success": "state == 'sale'",
+      "decoration-info": "state == 'draft'"
+     },
+     {
+      "name": "l10n_it_edi_doi_not_yet_invoiced",
+      "string": "Not Yet Invoiced Amount",
+      "sum": "Total",
+      "decoration-bf": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "date": 1,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "state == 'cancel'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list class=\"o_sale_order\" string=\"Sales Orders\" sample=\"1\" decoration-muted=\"state == 'cancel'\">\n                <field name=\"name\" string=\"Number\"/>\n                <field name=\"date_order\" widget=\"date\"/>\n                <field name=\"partner_id\"/>\n                <field name=\"currency_id\" column_invisible=\"True\"/>\n                <field name=\"state\" decoration-success=\"state == 'sale'\" decoration-info=\"state == 'draft'\" decoration-primary=\"state == 'sent'\" widget=\"badge\"/>\n                <field name=\"l10n_it_edi_doi_not_yet_invoiced\" decoration-bf=\"1\" sum=\"Total\" string=\"Not Yet Invoiced Amount\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_it_edi_doi.view_order_form",
+   "package": "l10n_it_edi_doi",
+   "name": "sale.order.form",
+   "entity": "sale.order",
+   "view_type": "div",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "name": "button_box",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [
+     {
+      "name": "action_open_declaration_of_intent",
+      "type": "object",
+      "invisible": "not l10n_it_edi_doi_id",
+      "class": "oe_stat_button",
+      "groups": "account.group_account_invoice",
+      "icon": "fa-list"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "name": "button_box",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div name=\"button_box\" position=\"inside\">\n                <button groups=\"account.group_account_invoice\" type=\"object\" class=\"oe_stat_button\" name=\"action_open_declaration_of_intent\" icon=\"fa-list\" invisible=\"not l10n_it_edi_doi_id\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_text\">Declaration of Intent</span>\n                    </div>\n                </button>\n            </div>\n            <header position=\"after\">\n                <div class=\"alert alert-warning mb-0\" role=\"alert\" invisible=\"not l10n_it_edi_doi_warning\">\n                    <field name=\"l10n_it_edi_doi_warning\"/>\n                </div>\n            </header>\n            <xpath expr=\"//label[@for='fiscal_position_id']\" position=\"before\">\n                <field name=\"l10n_it_edi_doi_use\" invisible=\"True\"/>\n                <field name=\"l10n_it_edi_doi_id\" invisible=\"not l10n_it_edi_doi_use\" options=\"{&quot;no_quick_create&quot;: True}\" domain=\"[                            ('state', '!=', 'draft'),                            ('company_id', '=', company_id),                            ('currency_id', '=', currency_id),                            ('partner_id', 'parent_of', partner_id)]\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_it_edi_sale.view_order_form_inherit_l10n_it_edi_sale",
+   "package": "l10n_it_edi_sale",
+   "name": "order.form.inherit.l10n.it.edi.sale",
+   "entity": "sale.order",
+   "view_type": "xpath",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='sale_reporting']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_it_partner_pa",
+      "invisible": "1"
+     },
+     {
+      "name": "l10n_it_origin_document_type"
+     },
+     {
+      "name": "l10n_it_origin_document_name"
+     },
+     {
+      "name": "l10n_it_origin_document_date"
+     },
+     {
+      "name": "l10n_it_cig"
+     },
+     {
+      "name": "l10n_it_cup"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='sale_reporting']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//group[@name='sale_reporting']\" position=\"after\">\n                <field name=\"l10n_it_partner_pa\" invisible=\"1\"/>\n                <group name=\"it_edi_sale_order\" string=\"Italian Electronic Invoicing\" invisible=\"country_code != 'IT' or not l10n_it_partner_pa\">\n                    <field name=\"l10n_it_origin_document_type\"/>\n                    <field name=\"l10n_it_origin_document_name\"/>\n                    <field name=\"l10n_it_origin_document_date\"/>\n                    <field name=\"l10n_it_cig\"/>\n                    <field name=\"l10n_it_cup\"/>\n                </group>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_tw_edi_ecpay_website_sale.view_order_form",
+   "package": "l10n_tw_edi_ecpay_website_sale",
+   "name": "ecpay_sale_order_form_inherit",
+   "entity": "sale.order",
+   "view_type": "group",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "group",
+    "root_attributes": {
+     "name": "sale_info",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_tw_edi_is_print",
+      "readonly": "1"
+     },
+     {
+      "name": "l10n_tw_edi_love_code",
+      "readonly": "1"
+     },
+     {
+      "name": "l10n_tw_edi_carrier_type",
+      "readonly": "1"
+     },
+     {
+      "name": "l10n_tw_edi_carrier_number",
+      "invisible": "l10n_tw_edi_carrier_type not in ['2', '3', '4', '5']",
+      "readonly": "1"
+     },
+     {
+      "name": "l10n_tw_edi_carrier_number_2",
+      "invisible": "l10n_tw_edi_carrier_type not in ['4', '5']",
+      "readonly": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "group",
+      "attributes": {
+       "name": "sale_info",
+       "position": "after"
+      },
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <group name=\"sale_info\" position=\"after\">\n                <group string=\"ECpay invoice Information\" invisible=\"country_code != 'TW'\">\n                    <field name=\"l10n_tw_edi_is_print\" readonly=\"1\"/>\n                    <field name=\"l10n_tw_edi_love_code\" readonly=\"1\"/>\n                    <field name=\"l10n_tw_edi_carrier_type\" readonly=\"1\"/>\n                    <field name=\"l10n_tw_edi_carrier_number\" invisible=\"l10n_tw_edi_carrier_type not in ['2', '3', '4', '5']\" readonly=\"1\"/>\n                    <field name=\"l10n_tw_edi_carrier_number_2\" invisible=\"l10n_tw_edi_carrier_type not in ['4', '5']\" readonly=\"1\"/>\n                </group>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_sale.view_order_form_inherit_pos_sale",
+   "package": "pos_sale",
+   "name": "sale.order.form.pos.sale",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_invoice",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "pos_order_count",
+      "widget": "statinfo",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_invoice",
+      "position": "before"
+     },
+     {
+      "name": "action_view_pos_order",
+      "type": "object",
+      "invisible": "pos_order_count == 0",
+      "class": "oe_stat_button",
+      "groups": "point_of_sale.group_pos_user",
+      "icon": "fa-shopping-basket"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_invoice\" position=\"before\">\n                <button type=\"object\" name=\"action_view_pos_order\" class=\"oe_stat_button\" icon=\"fa-shopping-basket\" invisible=\"pos_order_count == 0\" groups=\"point_of_sale.group_pos_user\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_value d-flex\">\n                            <field name=\"pos_order_count\" widget=\"statinfo\" nolabel=\"1\" class=\"mr4\"/> Transferred<br/>\n                            to POS\n                        </span>\n                    </div>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "repair.view_sale_order_form_inherit_repair",
+   "package": "repair",
+   "name": "sale.order.form.inherit.repair",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_invoice",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "repair_count",
+      "widget": "statinfo",
+      "string": "Repairs"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_invoice",
+      "position": "after"
+     },
+     {
+      "name": "action_show_repair",
+      "type": "object",
+      "invisible": "repair_count == 0",
+      "class": "oe_stat_button",
+      "groups": "stock.group_stock_user",
+      "icon": "fa-wrench"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_invoice\" position=\"after\">\n                <button name=\"action_show_repair\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-wrench\" invisible=\"repair_count == 0\" groups=\"stock.group_stock_user\">\n                    <field name=\"repair_count\" widget=\"statinfo\" string=\"Repairs\"/>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.sale_order_view_activity",
+   "package": "sale",
+   "name": "sale.order.activity",
+   "entity": "sale.order",
+   "view_type": "activity",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "activity",
+    "root_attributes": {
+     "string": "Sales Order"
+    },
+    "fields": [
+     {
+      "name": "currency_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "amount_total",
+      "widget": "monetary"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-success": "state == 'sale'",
+      "decoration-info": "state == 'draft'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "monetary": 1,
+     "badge": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <activity string=\"Sales Order\">\n                <field name=\"currency_id\"/>\n                <templates>\n                    <div t-name=\"activity-box\" class=\"d-block\">\n                        <div class=\"d-flex justify-content-between\">\n                            <field name=\"name\" display=\"full\" class=\"o_text_block o_text_bold\"/>\n                            <div class=\"m-1\"/>\n                            <field name=\"amount_total\" widget=\"monetary\"/>\n                        </div>\n                        <div class=\"d-flex justify-content-between\">\n                            <field name=\"partner_id\" muted=\"1\" display=\"full\" class=\"o_text_block\"/>\n                            <div class=\"m-1\"/>\n                            <field name=\"state\" widget=\"badge\" decoration-info=\"state == 'draft'\" decoration-success=\"state == 'sale'\"/>\n                        </div>\n                    </div>\n                </templates>\n            </activity>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_sale_order_calendar",
+   "package": "sale",
+   "name": "sale.order.calendar",
+   "entity": "sale.order",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "string": "Sales Orders",
+     "create": "0",
+     "mode": "month",
+     "date_start": "activity_date_deadline",
+     "color": "state",
+     "event_limit": "5",
+     "quick_create": "0"
+    },
+    "fields": [
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "invisible": "1"
+     },
+     {
+      "name": "activity_ids",
+      "invisible": "not activity_ids",
+      "options": "{'icon': 'fa fa-clock-o'}"
+     },
+     {
+      "name": "partner_id",
+      "options": "{'icon': 'fa fa-users'}"
+     },
+     {
+      "name": "amount_total",
+      "widget": "monetary"
+     },
+     {
+      "name": "payment_term_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "monetary": 1
+    },
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "activity_date_deadline",
+     "date_stop": null,
+     "date_delay": null,
+     "color": "state",
+     "mode": "month",
+     "quick_create": "0",
+     "event_open_popup": null,
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <calendar string=\"Sales Orders\" create=\"0\" mode=\"month\" date_start=\"activity_date_deadline\" color=\"state\" event_limit=\"5\" quick_create=\"0\">\n                <field name=\"currency_id\" invisible=\"1\"/>\n                <field name=\"state\" filters=\"1\" invisible=\"1\"/>\n                <field name=\"activity_ids\" options=\"{'icon': 'fa fa-clock-o'}\" invisible=\"not activity_ids\"/>\n                <field name=\"partner_id\" avatar_field=\"avatar_128\" options=\"{'icon': 'fa fa-users'}\"/>\n                <field name=\"amount_total\" widget=\"monetary\"/>\n                <field name=\"payment_term_id\"/>\n            </calendar>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_sale_order_graph",
+   "package": "sale",
+   "name": "sale.order.graph",
+   "entity": "sale.order",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Sales Orders",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "amount_total"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "amount_total",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Sales Orders\" sample=\"1\">\n                <field name=\"partner_id\"/>\n                <field name=\"amount_total\" type=\"measure\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_sale_order_pivot",
+   "package": "sale",
+   "name": "sale.order.pivot",
+   "entity": "sale.order",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Sales Orders",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date_order"
+     },
+     {
+      "name": "amount_total"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date_order",
+      "type": "row"
+     },
+     {
+      "name": "amount_total",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Sales Orders\" sample=\"1\">\n                <field name=\"date_order\" type=\"row\"/>\n                <field name=\"amount_total\" type=\"measure\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_sale_order_kanban",
+   "package": "sale",
+   "name": "sale.order.kanban",
+   "entity": "sale.order",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "sample": "1",
+     "quick_create": "false"
+    },
+    "fields": [
+     {
+      "name": "currency_id"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "amount_total",
+      "widget": "monetary"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "date_order"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "kanban_activity"
+     },
+     {
+      "name": "state",
+      "widget": "label_selection",
+      "options": "{'classes': {'draft': 'info', 'cancel': 'default', 'sale': 'success'}}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "monetary": 1,
+     "kanban_activity": 1,
+     "label_selection": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": "false",
+    "progressbar": [
+     {
+      "field": "activity_state",
+      "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\" sample=\"1\" quick_create=\"false\">\n                <field name=\"currency_id\"/>\n                <progressbar field=\"activity_state\" colors=\"{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}\"/>\n                <templates>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex align-items-baseline mb-2\">\n                            <field name=\"partner_id\" class=\"fw-bolder fs-5 me-2\"/>\n                            <field name=\"amount_total\" widget=\"monetary\" class=\"fw-bolder ms-auto flex-shrink-0\"/>\n                        </div>\n                        <footer class=\"align-items-end\">\n                            <div class=\"d-flex flex-wrap gap-1 text-muted text-nowrap\">\n                                <field name=\"name\"/>\n                                <field name=\"date_order\"/>\n                                <field name=\"activity_ids\" widget=\"kanban_activity\"/>\n                            </div>\n                            <field name=\"state\" widget=\"label_selection\" options=\"{'classes': {'draft': 'info', 'cancel': 'default', 'sale': 'success'}}\" class=\"ms-auto\"/>\n                        </footer>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.sale_order_kanban_upload",
+   "package": "sale",
+   "name": "sale.order.kanban.upload (orders)",
+   "entity": "sale.order",
+   "view_type": "kanban",
+   "inherits_view": "view_sale_order_kanban",
+   "mode": "primary",
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "kanban",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban position=\"attributes\">\n                <attribute name=\"js_class\">sale_file_upload_kanban</attribute>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.sale_order_tree",
+   "package": "sale",
+   "name": "sale.order.list",
+   "entity": "sale.order",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "class": "o_sale_order",
+     "string": "Sales Orders",
+     "sample": "1",
+     "decoration-muted": "state == 'cancel'"
+    },
+    "fields": [
+     {
+      "name": "message_needaction",
+      "column_invisible": "True"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "name",
+      "readonly": "1",
+      "string": "Number",
+      "decoration-bf": "1"
+     },
+     {
+      "name": "date_order",
+      "readonly": "state in ['cancel', 'sale']",
+      "optional": "show"
+     },
+     {
+      "name": "commitment_date",
+      "optional": "hide"
+     },
+     {
+      "name": "expected_date",
+      "optional": "hide"
+     },
+     {
+      "name": "partner_id",
+      "readonly": "1"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "optional": "show"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "list_activity",
+      "optional": "show"
+     },
+     {
+      "name": "team_id",
+      "optional": "hide"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True",
+      "groups": "!base.group_multi_company"
+     },
+     {
+      "name": "company_id",
+      "readonly": "1",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "amount_untaxed",
+      "widget": "monetary",
+      "optional": "hide",
+      "sum": "Total Tax Excluded"
+     },
+     {
+      "name": "amount_tax",
+      "widget": "monetary",
+      "optional": "hide",
+      "sum": "Tax Total"
+     },
+     {
+      "name": "amount_total",
+      "widget": "monetary",
+      "optional": "show",
+      "sum": "Total Tax Included",
+      "decoration-info": "invoice_status == 'to invoice'",
+      "decoration-bf": "1"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}",
+      "optional": "hide"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "optional": "hide",
+      "decoration-success": "state == 'sale'",
+      "decoration-info": "state == 'draft'"
+     },
+     {
+      "name": "invoice_status",
+      "widget": "badge",
+      "optional": "show",
+      "decoration-warning": "invoice_status == 'upselling'",
+      "decoration-success": "invoice_status == 'invoiced'",
+      "decoration-info": "invoice_status == 'to invoice'"
+     },
+     {
+      "name": "client_order_ref",
+      "optional": "hide"
+     },
+     {
+      "name": "validity_date",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(sale.action_view_sale_advance_payment_inv)d",
+      "string": "Create Invoices",
+      "type": "action",
+      "class": "btn-secondary"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "list_activity": 1,
+     "monetary": 3,
+     "many2many_tags": 1,
+     "badge": 2
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "state == 'cancel'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list class=\"o_sale_order\" string=\"Sales Orders\" sample=\"1\" decoration-muted=\"state == 'cancel'\">\n                <header>\n                    <button string=\"Create Invoices\" name=\"%(sale.action_view_sale_advance_payment_inv)d\" type=\"action\" class=\"btn-secondary\"/>\n                </header>\n                <field name=\"message_needaction\" column_invisible=\"True\"/>\n                <field name=\"currency_id\" column_invisible=\"True\"/>\n\n                <field name=\"name\" string=\"Number\" readonly=\"1\" decoration-bf=\"1\"/>\n                <field name=\"date_order\" optional=\"show\" readonly=\"state in ['cancel', 'sale']\"/>\n                <field name=\"commitment_date\" optional=\"hide\"/>\n                <field name=\"expected_date\" optional=\"hide\"/>\n                <field name=\"partner_id\" readonly=\"1\"/>\n                <field name=\"user_id\" widget=\"many2one_avatar_user\" optional=\"show\"/>\n                <field name=\"activity_ids\" widget=\"list_activity\" optional=\"show\"/>\n                <field name=\"team_id\" optional=\"hide\"/>\n                <field name=\"company_id\" groups=\"!base.group_multi_company\" column_invisible=\"True\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"show\" readonly=\"1\"/>\n                <field name=\"amount_untaxed\" sum=\"Total Tax Excluded\" widget=\"monetary\" optional=\"hide\"/>\n                <field name=\"amount_tax\" sum=\"Tax Total\" widget=\"monetary\" optional=\"hide\"/>\n                <field name=\"amount_total\" sum=\"Total Tax Included\" widget=\"monetary\" decoration-bf=\"1\" decoration-info=\"invoice_status == 'to invoice'\" optional=\"show\"/>\n                <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\" optional=\"hide\"/>\n                <field name=\"state\" decoration-success=\"state == 'sale'\" decoration-info=\"state == 'draft'\" decoration-primary=\"state == 'sent'\" widget=\"badge\" optional=\"hide\"/>\n                <field name=\"invoice_status\" decoration-success=\"invoice_status == 'invoiced'\" decoration-info=\"invoice_status == 'to invoice'\" decoration-warning=\"invoice_status == 'upselling'\" widget=\"badge\" optional=\"show\"/>\n                <field name=\"client_order_ref\" optional=\"hide\"/>\n                <field name=\"validity_date\" optional=\"hide\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_order_tree",
+   "package": "sale",
+   "name": "sale.order.list (orders)",
+   "entity": "sale.order",
+   "view_type": "list",
+   "inherits_view": "sale_order_tree",
+   "mode": "primary",
+   "priority": "2",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "list",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            \n            <list position=\"attributes\">\n                <attribute name=\"string\">Sales Orders</attribute>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.sale_order_list_upload",
+   "package": "sale",
+   "name": "sale.order.tree.upload (orders)",
+   "entity": "sale.order",
+   "view_type": "list",
+   "inherits_view": "view_order_tree",
+   "mode": "primary",
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "list",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list position=\"attributes\">\n                <attribute name=\"js_class\">sale_file_upload_list</attribute>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_quotation_tree",
+   "package": "sale",
+   "name": "sale.order.list (quotes)",
+   "entity": "sale.order",
+   "view_type": "list",
+   "inherits_view": "sale_order_tree",
+   "mode": "primary",
+   "priority": "4",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "list",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list position=\"attributes\">\n                <attribute name=\"string\">Quotations</attribute>\n            </list>\n            <field name=\"date_order\" position=\"replace\">\n                <field name=\"create_date\" string=\"Creation Date\" optional=\"show\"/>\n            </field>\n            <field name=\"state\" position=\"attributes\">\n                <attribute name=\"optional\">show</attribute>\n            </field>\n            <field name=\"invoice_status\" position=\"attributes\">\n                <attribute name=\"optional\">hide</attribute>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_quotation_tree_with_onboarding",
+   "package": "sale",
+   "name": "sale.order.list",
+   "entity": "sale.order",
+   "view_type": "list",
+   "inherits_view": "view_quotation_tree",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "list",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list position=\"attributes\">\n                <attribute name=\"js_class\">sale_onboarding_list</attribute>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_quotation_kanban_with_onboarding",
+   "package": "sale",
+   "name": "sale.order.kanban",
+   "entity": "sale.order",
+   "view_type": "kanban",
+   "inherits_view": "view_sale_order_kanban",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "kanban",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban position=\"attributes\">\n                <attribute name=\"js_class\">sale_onboarding_kanban</attribute>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_order_form",
+   "package": "sale",
+   "name": "sale.order.form",
+   "entity": "sale.order",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Sales Order",
+     "class": "o_sale_order"
+    },
+    "fields": [
+     {
+      "name": "state",
+      "widget": "statusbar"
+     },
+     {
+      "name": "sale_warning_text"
+     },
+     {
+      "name": "partner_credit_warning"
+     },
+     {
+      "name": "duplicated_order_ids",
+      "widget": "x2many_buttons",
+      "string": "Duplicated Documents"
+     },
+     {
+      "name": "invoice_count",
+      "widget": "statinfo",
+      "string": "Invoices"
+     },
+     {
+      "name": "name",
+      "readonly": "1"
+     },
+     {
+      "name": "partner_id",
+      "widget": "res_partner_many2one",
+      "readonly": "state in ['cancel', 'sale']",
+      "context": "{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}",
+      "placeholder": "Type to find a customer..."
+     },
+     {
+      "name": "partner_invoice_id",
+      "readonly": "state == 'cancel' or locked",
+      "context": "{'default_type': 'invoice', 'show_address': False, 'show_vat': False, 'default_parent_id': partner_id}",
+      "options": "{'no_quick_create': True}",
+      "groups": "account.group_delivery_invoice_address"
+     },
+     {
+      "name": "partner_shipping_id",
+      "readonly": "state == 'cancel' or locked",
+      "context": "{'default_type': 'delivery', 'show_address': False, 'show_vat': False, 'default_parent_id': partner_id}",
+      "options": "{'no_quick_create': True}",
+      "groups": "account.group_delivery_invoice_address"
+     },
+     {
+      "name": "validity_date",
+      "invisible": "state == 'sale'",
+      "readonly": "state in ['cancel', 'sale']"
+     },
+     {
+      "name": "date_order",
+      "invisible": "state in ['sale', 'cancel']",
+      "readonly": "state in ['cancel', 'sale']",
+      "groups": "base.group_no_one",
+      "nolabel": "1"
+     },
+     {
+      "name": "date_order",
+      "invisible": "state in ['draft', 'sent']",
+      "readonly": "state in ['cancel', 'sale']",
+      "nolabel": "1"
+     },
+     {
+      "name": "show_update_pricelist",
+      "invisible": "1"
+     },
+     {
+      "name": "pricelist_id",
+      "readonly": "state in ['cancel', 'sale']",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "pricelist_id",
+      "invisible": "1",
+      "readonly": "state in ['cancel', 'sale']",
+      "groups": "!product.group_product_pricelist"
+     },
+     {
+      "name": "payment_term_id",
+      "options": "{'no_open': True, 'no_create': True}",
+      "placeholder": "Immediate"
+     },
+     {
+      "name": "order_line",
+      "widget": "sol_o2m",
+      "readonly": "state == 'cancel' or locked",
+      "options": "{'hide_composition': True, 'hide_prices': True, 'subsections': True}",
+      "mode": "list,kanban"
+     },
+     {
+      "name": "technical_price_unit",
+      "invisible": "1"
+     },
+     {
+      "name": "sequence",
+      "invisible": "1"
+     },
+     {
+      "name": "display_type",
+      "invisible": "1"
+     },
+     {
+      "name": "product_id",
+      "widget": "many2one_barcode",
+      "readonly": "not product_updatable",
+      "required": "not display_type and not is_downpayment",
+      "context": "{                                                     'default_uom_id': product_uom_id,                                                     'partner_id': parent.partner_id,                                                 }",
+      "force_save": "1"
+     },
+     {
+      "name": "product_uom_qty"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "product_uom_readonly",
+      "required": "not display_type and not is_downpayment",
+      "groups": "uom.group_uom",
+      "force_save": "1"
+     },
+     {
+      "name": "qty_delivered",
+      "readonly": "qty_delivered_method != 'manual'"
+     },
+     {
+      "name": "qty_invoiced"
+     },
+     {
+      "name": "price_unit"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "readonly": "qty_invoiced > 0",
+      "context": "{'search_view_ref': 'account.account_tax_view_search'}",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "discount"
+     },
+     {
+      "name": "customer_lead",
+      "readonly": "product_type != 'consu'"
+     },
+     {
+      "name": "analytic_distribution",
+      "widget": "analytic_distribution",
+      "options": "{'product_field': 'product_id', 'business_domain': 'sale_order'}",
+      "groups": "analytic.group_analytic_accounting"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "collapse_composition",
+      "invisible": "display_type not in ['line_section', 'line_subsection']",
+      "readonly": "1"
+     },
+     {
+      "name": "collapse_prices",
+      "invisible": "display_type not in ['line_section', 'line_subsection']",
+      "readonly": "1"
+     },
+     {
+      "name": "invoice_lines"
+     },
+     {
+      "name": "display_type",
+      "column_invisible": "True"
+     },
+     {
+      "name": "product_custom_attribute_value_ids",
+      "column_invisible": "1"
+     },
+     {
+      "name": "custom_product_template_attribute_value_id"
+     },
+     {
+      "name": "custom_value"
+     },
+     {
+      "name": "product_no_variant_attribute_value_ids",
+      "column_invisible": "1"
+     },
+     {
+      "name": "technical_price_unit",
+      "column_invisible": "1"
+     },
+     {
+      "name": "linked_line_id",
+      "column_invisible": "1"
+     },
+     {
+      "name": "combo_item_id",
+      "column_invisible": "1"
+     },
+     {
+      "name": "selected_combo_items",
+      "column_invisible": "1"
+     },
+     {
+      "name": "virtual_id",
+      "column_invisible": "1"
+     },
+     {
+      "name": "linked_virtual_id",
+      "column_invisible": "1"
+     },
+     {
+      "name": "collapse_composition",
+      "column_invisible": "1"
+     },
+     {
+      "name": "collapse_prices",
+      "column_invisible": "1"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "sequence",
+      "widget": "handle",
+      "invisible": "combo_item_id"
+     },
+     {
+      "name": "product_id",
+      "widget": "sol_product_many2one",
+      "readonly": "not product_updatable",
+      "required": "not display_type and not is_downpayment",
+      "string": "Product Variant",
+      "context": "{                                         'default_lst_price': price_unit,                                         'default_uom_id': product_uom_id,                                         'partner_id': parent.partner_id,                                     }",
+      "options": "{                                         'show_label_warning': True                                     }",
+      "optional": "hide",
+      "force_save": "1"
+     },
+     {
+      "name": "product_template_id",
+      "widget": "sol_product_many2one",
+      "readonly": "id and not product_updatable",
+      "required": "not display_type and not is_downpayment",
+      "string": "Product",
+      "context": "{                                         'default_list_price': price_unit,                                         'default_uom_id': product_uom_id,                                         'partner_id': parent.partner_id,                                     }",
+      "options": "{                                         'show_label_warning': True                                     }",
+      "optional": "show",
+      "placeholder": "Type to find a product..."
+     },
+     {
+      "name": "name",
+      "widget": "sol_text",
+      "optional": "show"
+     },
+     {
+      "name": "analytic_distribution",
+      "widget": "analytic_distribution",
+      "options": "{                                         'product_field': 'product_id',                                         'business_domain': 'sale_order',                                         'amount_field': 'price_subtotal',                                     }",
+      "optional": "hide",
+      "groups": "analytic.group_analytic_accounting"
+     },
+     {
+      "name": "product_uom_qty",
+      "readonly": "is_downpayment",
+      "decoration-info": "(not display_type and invoice_status == 'to invoice')",
+      "decoration-bf": "(not display_type and invoice_status == 'to invoice')"
+     },
+     {
+      "name": "qty_delivered",
+      "readonly": "qty_delivered_method != 'manual' or is_downpayment",
+      "string": "Delivered",
+      "column_invisible": "parent.state != 'sale'",
+      "optional": "show",
+      "decoration-info": "(not display_type and invoice_status == 'to invoice')",
+      "decoration-bf": "(not display_type and invoice_status == 'to invoice')"
+     },
+     {
+      "name": "qty_invoiced",
+      "string": "Invoiced",
+      "column_invisible": "parent.state != 'sale'",
+      "optional": "show",
+      "decoration-info": "(not display_type and invoice_status == 'to invoice')",
+      "decoration-bf": "(not display_type and invoice_status == 'to invoice')"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "product_uom_readonly",
+      "required": "not display_type and not is_downpayment",
+      "options": "{\"no_open\": True, \"no_create\": True}",
+      "optional": "show",
+      "groups": "uom.group_uom",
+      "force_save": "1"
+     },
+     {
+      "name": "customer_lead",
+      "readonly": "parent.state not in ['draft', 'sent', 'sale'] or is_downpayment or product_type != 'consu'",
+      "optional": "hide"
+     },
+     {
+      "name": "price_unit",
+      "readonly": "qty_invoiced > 0"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "readonly": "qty_invoiced > 0 or is_downpayment",
+      "context": "{'active_test': True}",
+      "options": "{'no_create': True}",
+      "optional": "show"
+     },
+     {
+      "name": "discount",
+      "string": "Disc.%",
+      "optional": "show",
+      "groups": "sale.group_discount_per_so_line"
+     },
+     {
+      "name": "price_subtotal",
+      "invisible": "is_downpayment",
+      "string": "Amount",
+      "column_invisible": "parent.company_price_include == 'tax_included'"
+     },
+     {
+      "name": "price_total",
+      "invisible": "is_downpayment",
+      "string": "Amount",
+      "column_invisible": "parent.company_price_include == 'tax_excluded'"
+     },
+     {
+      "name": "price_total",
+      "invisible": "is_downpayment",
+      "string": "Tax Incl.",
+      "column_invisible": "parent.company_price_include == 'tax_included'",
+      "optional": "hide"
+     },
+     {
+      "name": "price_subtotal",
+      "invisible": "is_downpayment",
+      "string": "Tax Excl.",
+      "column_invisible": "parent.company_price_include == 'tax_excluded'",
+      "optional": "hide"
+     },
+     {
+      "name": "display_type"
+     },
+     {
+      "name": "currency_id"
+     },
+     {
+      "name": "product_id",
+      "widget": "image",
+      "options": "{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "price_subtotal",
+      "widget": "monetary"
+     },
+     {
+      "name": "product_uom_qty"
+     },
+     {
+      "name": "product_uom_id"
+     },
+     {
+      "name": "price_unit"
+     },
+     {
+      "name": "discount"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "note",
+      "nolabel": "1",
+      "placeholder": "Terms and conditions..."
+     },
+     {
+      "name": "tax_totals",
+      "widget": "account-tax-totals-field",
+      "readonly": "1",
+      "nolabel": "1"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "team_id",
+      "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "require_signature",
+      "readonly": "state in ['cancel', 'sale']"
+     },
+     {
+      "name": "require_payment",
+      "readonly": "state in ['cancel', 'sale']"
+     },
+     {
+      "name": "prepayment_percent",
+      "widget": "percentage",
+      "invisible": "not require_payment",
+      "readonly": "state in ['cancel', 'sale']"
+     },
+     {
+      "name": "reference",
+      "invisible": "not reference",
+      "readonly": "1"
+     },
+     {
+      "name": "client_order_ref"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color', 'no_create_edit': True}"
+     },
+     {
+      "name": "show_update_fpos",
+      "invisible": "1"
+     },
+     {
+      "name": "fiscal_position_id",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "preferred_payment_method_line_id"
+     },
+     {
+      "name": "partner_invoice_id",
+      "invisible": "1",
+      "groups": "!account.group_delivery_invoice_address"
+     },
+     {
+      "name": "journal_id",
+      "readonly": "invoice_count != 0 and state == 'sale'",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "invoice_status",
+      "invisible": "state != 'sale'",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "invoice_status",
+      "invisible": "1",
+      "groups": "!base.group_no_one"
+     },
+     {
+      "name": "commitment_date",
+      "readonly": "state == 'cancel' or locked"
+     },
+     {
+      "name": "expected_date"
+     },
+     {
+      "name": "origin"
+     },
+     {
+      "name": "campaign_id",
+      "options": "{'create_name_field': 'title'}"
+     },
+     {
+      "name": "medium_id"
+     },
+     {
+      "name": "source_id"
+     },
+     {
+      "name": "signed_by",
+      "readonly": "signature"
+     },
+     {
+      "name": "signed_on",
+      "readonly": "signature"
+     },
+     {
+      "name": "signature",
+      "widget": "image"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "payment_action_capture",
+      "string": "Capture Transaction",
+      "type": "object",
+      "invisible": "not has_authorized_transaction_ids",
+      "class": "oe_highlight",
+      "data-hotkey": "shift+g"
+     },
+     {
+      "name": "payment_action_void",
+      "string": "Void Transaction",
+      "type": "object",
+      "invisible": "not has_authorized_transaction_ids",
+      "confirm": "Are you sure you want to void the authorized transaction? This action can't be undone.",
+      "data-hotkey": "shift+v"
+     },
+     {
+      "name": "%(sale.action_view_sale_advance_payment_inv)d",
+      "string": "Create Invoice",
+      "type": "action",
+      "invisible": "invoice_status != 'to invoice'",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "%(sale.action_view_sale_advance_payment_inv)d",
+      "string": "Create Invoice",
+      "type": "action",
+      "invisible": "invoice_status != 'no' or state != 'sale'",
+      "context": "{'default_advance_payment_method': 'percentage'}",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "action_quotation_send",
+      "string": "Send",
+      "type": "object",
+      "invisible": "state != 'draft'",
+      "class": "btn-primary",
+      "context": "{'validate_analytic': True, 'check_document_layout': True}",
+      "data-hotkey": "g"
+     },
+     {
+      "name": "action_quotation_send",
+      "string": "Send PRO-FORMA Invoice",
+      "type": "object",
+      "invisible": "state != 'draft' or invoice_count >= 1",
+      "class": "btn-primary",
+      "context": "{'proforma': True, 'validate_analytic': True}",
+      "groups": "sale.group_proforma_sales"
+     },
+     {
+      "name": "action_confirm",
+      "string": "Confirm",
+      "type": "object",
+      "invisible": "state != 'sent'",
+      "class": "btn-primary",
+      "context": "{'validate_analytic': True}",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "sale.action_report_saleorder",
+      "string": "Print",
+      "type": "action",
+      "invisible": "state == 'sale'",
+      "data-hotkey": "i"
+     },
+     {
+      "name": "action_confirm",
+      "string": "Confirm",
+      "type": "object",
+      "invisible": "state != 'draft'",
+      "context": "{'validate_analytic': True}",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "action_quotation_send",
+      "string": "Send PRO-FORMA Invoice",
+      "type": "object",
+      "invisible": "state == 'draft' or invoice_count >= 1",
+      "context": "{'proforma': True, 'validate_analytic': True}",
+      "groups": "sale.group_proforma_sales"
+     },
+     {
+      "name": "action_quotation_send",
+      "string": "Send",
+      "type": "object",
+      "invisible": "state not in ('sent', 'sale')",
+      "context": "{'validate_analytic': True, 'check_document_layout': True}",
+      "data-hotkey": "g"
+     },
+     {
+      "name": "action_unlock",
+      "string": "Unlock",
+      "type": "object",
+      "invisible": "not locked",
+      "groups": "sales_team.group_sale_manager"
+     },
+     {
+      "name": "action_preview_sale_order",
+      "string": "Preview",
+      "type": "object",
+      "class": "btn-secondary"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "state not in ['draft', 'sent', 'sale'] or not id or locked",
+      "confirm": "Are you sure you want to cancel this order? This may affect related documents or processes.",
+      "data-hotkey": "x"
+     },
+     {
+      "name": "action_draft",
+      "string": "Set to Quotation",
+      "type": "object",
+      "invisible": "state != 'cancel'",
+      "data-hotkey": "w"
+     },
+     {
+      "name": "action_lock",
+      "string": "Lock",
+      "type": "object",
+      "invisible": "locked or state != 'sale'",
+      "groups": "sales_team.group_sale_manager"
+     },
+     {
+      "name": "action_view_invoice",
+      "type": "object",
+      "invisible": "invoice_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-pencil-square-o"
+     },
+     {
+      "name": "action_update_prices",
+      "string": "Update Prices",
+      "type": "object",
+      "invisible": "not show_update_pricelist or state in ['sale', 'cancel']",
+      "class": "btn-link mb-1 px-0",
+      "confirm": "This will update the unit price of all products based on the new pricelist.",
+      "icon": "fa-refresh"
+     },
+     {
+      "name": "action_add_from_catalog",
+      "string": "Catalog",
+      "type": "object",
+      "class": "px-4 btn-link",
+      "context": "{'order_id': parent.id}"
+     },
+     {
+      "name": "action_add_from_catalog",
+      "string": "Catalog",
+      "type": "object",
+      "class": "btn-secondary",
+      "context": "{'order_id': parent.id}"
+     },
+     {
+      "name": "action_open_discount_wizard",
+      "string": "Discount",
+      "type": "object",
+      "invisible": "locked or state == 'cancel'",
+      "class": "btn btn-secondary",
+      "groups": "sale.group_discount_per_so_line"
+     },
+     {
+      "name": "action_open_discount_wizard",
+      "string": "Discounts",
+      "type": "object",
+      "invisible": "not (locked or state == 'cancel')",
+      "class": "btn btn-secondary",
+      "groups": "sale.group_discount_per_so_line"
+     },
+     {
+      "name": "action_update_taxes",
+      "string": "Update Taxes",
+      "type": "object",
+      "invisible": "not show_update_fpos or state in ['sale', 'cancel']",
+      "class": "btn-link mb-1 px-0",
+      "confirm": "This will update all taxes based on the currently selected fiscal position.",
+      "icon": "fa-refresh"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "order_lines",
+      "string": "Order Lines",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "other_information",
+      "string": "Other Info",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "customer_signature",
+      "string": "Customer Signature",
+      "invisible": "1",
+      "groups": "base.group_no_one"
+     }
+    ],
+    "widgets": {
+     "statusbar": 1,
+     "x2many_buttons": 1,
+     "statinfo": 1,
+     "res_partner_many2one": 1,
+     "sol_o2m": 1,
+     "many2one_barcode": 1,
+     "many2one_uom": 2,
+     "many2many_tax_tags": 2,
+     "analytic_distribution": 2,
+     "handle": 1,
+     "sol_product_many2one": 2,
+     "sol_text": 1,
+     "image": 2,
+     "monetary": 1,
+     "account-tax-totals-field": 1,
+     "many2one_avatar_user": 1,
+     "percentage": 1,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "string": "Capture Transaction",
+      "name": "payment_action_capture",
+      "type": "object",
+      "data-hotkey": "shift+g",
+      "class": "oe_highlight",
+      "invisible": "not has_authorized_transaction_ids"
+     },
+     {
+      "string": "Void Transaction",
+      "name": "payment_action_void",
+      "type": "object",
+      "data-hotkey": "shift+v",
+      "confirm": "Are you sure you want to void the authorized transaction? This action can't be undone.",
+      "invisible": "not has_authorized_transaction_ids"
+     },
+     {
+      "string": "Create Invoice",
+      "id": "create_invoice",
+      "name": "%(sale.action_view_sale_advance_payment_inv)d",
+      "type": "action",
+      "class": "btn-primary",
+      "data-hotkey": "q",
+      "invisible": "invoice_status != 'to invoice'"
+     },
+     {
+      "string": "Create Invoice",
+      "id": "create_invoice_percentage",
+      "name": "%(sale.action_view_sale_advance_payment_inv)d",
+      "type": "action",
+      "context": "{'default_advance_payment_method': 'percentage'}",
+      "data-hotkey": "q",
+      "invisible": "invoice_status != 'no' or state != 'sale'"
+     },
+     {
+      "string": "Send",
+      "id": "quotation_send_primary",
+      "name": "action_quotation_send",
+      "type": "object",
+      "context": "{'validate_analytic': True, 'check_document_layout': True}",
+      "class": "btn-primary",
+      "data-hotkey": "g",
+      "invisible": "state != 'draft'"
+     },
+     {
+      "string": "Send PRO-FORMA Invoice",
+      "id": "send_proforma_primary",
+      "name": "action_quotation_send",
+      "type": "object",
+      "context": "{'proforma': True, 'validate_analytic': True}",
+      "class": "btn-primary",
+      "groups": "sale.group_proforma_sales",
+      "invisible": "state != 'draft' or invoice_count >= 1"
+     },
+     {
+      "string": "Confirm",
+      "id": "action_confirm",
+      "name": "action_confirm",
+      "type": "object",
+      "context": "{'validate_analytic': True}",
+      "class": "btn-primary",
+      "data-hotkey": "q",
+      "invisible": "state != 'sent'"
+     },
+     {
+      "string": "Print",
+      "name": "sale.action_report_saleorder",
+      "type": "action",
+      "data-hotkey": "i",
+      "invisible": "state == 'sale'"
+     },
+     {
+      "string": "Confirm",
+      "name": "action_confirm",
+      "type": "object",
+      "context": "{'validate_analytic': True}",
+      "data-hotkey": "q",
+      "invisible": "state != 'draft'"
+     },
+     {
+      "string": "Send PRO-FORMA Invoice",
+      "id": "send_proforma",
+      "name": "action_quotation_send",
+      "type": "object",
+      "context": "{'proforma': True, 'validate_analytic': True}",
+      "invisible": "state == 'draft' or invoice_count >= 1",
+      "groups": "sale.group_proforma_sales"
+     },
+     {
+      "string": "Send",
+      "id": "quotation_send",
+      "name": "action_quotation_send",
+      "type": "object",
+      "context": "{'validate_analytic': True, 'check_document_layout': True}",
+      "data-hotkey": "g",
+      "invisible": "state not in ('sent', 'sale')"
+     },
+     {
+      "string": "Unlock",
+      "name": "action_unlock",
+      "type": "object",
+      "invisible": "not locked",
+      "groups": "sales_team.group_sale_manager"
+     },
+     {
+      "string": "Preview",
+      "name": "action_preview_sale_order",
+      "type": "object",
+      "class": "btn-secondary"
+     },
+     {
+      "string": "Cancel",
+      "name": "action_cancel",
+      "type": "object",
+      "confirm": "Are you sure you want to cancel this order? This may affect related documents or processes.",
+      "data-hotkey": "x",
+      "invisible": "state not in ['draft', 'sent', 'sale'] or not id or locked"
+     },
+     {
+      "string": "Set to Quotation",
+      "name": "action_draft",
+      "type": "object",
+      "data-hotkey": "w",
+      "invisible": "state != 'cancel'"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": "draft,sent,sale",
+    "chatter": true,
+    "button_box": [
+     {
+      "name": "action_view_invoice",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-pencil-square-o",
+      "invisible": "invoice_count == 0"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Sales Order\" class=\"o_sale_order\">\n            <header>\n                <button string=\"Capture Transaction\" name=\"payment_action_capture\" type=\"object\" data-hotkey=\"shift+g\" class=\"oe_highlight\" invisible=\"not has_authorized_transaction_ids\"/>\n                <button string=\"Void Transaction\" name=\"payment_action_void\" type=\"object\" data-hotkey=\"shift+v\" confirm=\"Are you sure you want to void the authorized transaction? This action can't be undone.\" invisible=\"not has_authorized_transaction_ids\"/>\n                <button string=\"Create Invoice\" id=\"create_invoice\" name=\"%(sale.action_view_sale_advance_payment_inv)d\" type=\"action\" class=\"btn-primary\" data-hotkey=\"q\" invisible=\"invoice_status != 'to invoice'\"/>\n                <button string=\"Create Invoice\" id=\"create_invoice_percentage\" name=\"%(sale.action_view_sale_advance_payment_inv)d\" type=\"action\" context=\"{'default_advance_payment_method': 'percentage'}\" data-hotkey=\"q\" invisible=\"invoice_status != 'no' or state != 'sale'\"/>\n                <button string=\"Send\" id=\"quotation_send_primary\" name=\"action_quotation_send\" type=\"object\" context=\"{'validate_analytic': True, 'check_document_layout': True}\" class=\"btn-primary\" data-hotkey=\"g\" invisible=\"state != 'draft'\"/>\n                <button string=\"Send PRO-FORMA Invoice\" id=\"send_proforma_primary\" name=\"action_quotation_send\" type=\"object\" context=\"{'proforma': True, 'validate_analytic': True}\" class=\"btn-primary\" groups=\"sale.group_proforma_sales\" invisible=\"state != 'draft' or invoice_count &gt;= 1\"/>\n                <button string=\"Confirm\" id=\"action_confirm\" name=\"action_confirm\" type=\"object\" context=\"{'validate_analytic': True}\" class=\"btn-primary\" data-hotkey=\"q\" invisible=\"state != 'sent'\"/>\n                <button string=\"Print\" name=\"sale.action_report_saleorder\" type=\"action\" data-hotkey=\"i\" invisible=\"state == 'sale'\"/>\n                <button string=\"Confirm\" name=\"action_confirm\" type=\"object\" context=\"{'validate_analytic': True}\" data-hotkey=\"q\" invisible=\"state != 'draft'\"/>\n                <button string=\"Send PRO-FORMA Invoice\" id=\"send_proforma\" name=\"action_quotation_send\" type=\"object\" context=\"{'proforma': True, 'validate_analytic': True}\" invisible=\"state == 'draft' or invoice_count &gt;= 1\" groups=\"sale.group_proforma_sales\"/>\n                <button string=\"Send\" id=\"quotation_send\" name=\"action_quotation_send\" type=\"object\" context=\"{'validate_analytic': True, 'check_document_layout': True}\" data-hotkey=\"g\" invisible=\"state not in ('sent', 'sale')\"/>\n\n                \n                <button string=\"Unlock\" name=\"action_unlock\" type=\"object\" invisible=\"not locked\" groups=\"sales_team.group_sale_manager\"/>\n                <button string=\"Preview\" name=\"action_preview_sale_order\" type=\"object\" class=\"btn-secondary\"/>\n                <button string=\"Cancel\" name=\"action_cancel\" type=\"object\" confirm=\"Are you sure you want to cancel this order? This may affect related documents or processes.\" data-hotkey=\"x\" invisible=\"state not in ['draft', 'sent', 'sale'] or not id or locked\"/>\n                <button string=\"Set to Quotation\" name=\"action_draft\" type=\"object\" data-hotkey=\"w\" invisible=\"state != 'cancel'\"/>\n                <t groups=\"sale.group_auto_done_setting\">\n                    <button string=\"Lock\" name=\"action_lock\" type=\"object\" help=\"If the sale is locked, you can not modify it anymore. However, you will still be able to invoice or deliver.\" invisible=\"locked or state != 'sale'\" groups=\"sales_team.group_sale_manager\"/>\n                </t>\n                <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"draft,sent,sale\"/>\n            </header>\n            <div class=\"alert alert-warning\" role=\"alert\" invisible=\"not sale_warning_text\">\n                <field name=\"sale_warning_text\" class=\"fw-bold\"/>\n            </div>\n            <div class=\"alert alert-warning\" role=\"alert\" invisible=\"partner_credit_warning == ''\">\n                <field name=\"partner_credit_warning\"/>\n            </div>\n            <div class=\"alert alert-warning p-3 text-center\" role=\"alert\" invisible=\"state not in ['draft', 'sent'] or not has_archived_products\">\n                <span>Warning: This quote contains archived product(s)</span>\n            </div>\n            <div class=\"alert alert-warning w-100 d-flex align-items-center gap-1\" invisible=\"state != 'draft' or not duplicated_order_ids\" role=\"alert\">\n                <span>Warning: this order might be a duplicate of</span>\n                <field name=\"duplicated_order_ids\" widget=\"x2many_buttons\" string=\"Duplicated Documents\"/>\n            </div>\n            <sheet>\n                <div class=\"oe_button_box\" name=\"button_box\">\n                    <button name=\"action_view_invoice\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-pencil-square-o\" invisible=\"invoice_count == 0\">\n                        <field name=\"invoice_count\" widget=\"statinfo\" string=\"Invoices\"/>\n                    </button>\n                </div>\n                <div class=\"badge rounded-pill text-bg-secondary float-end fs-6 border-0\" invisible=\"not locked\">\n                    <i class=\"fa fa-lock\"/>\n                    Locked\n                </div>\n                <div class=\"oe_title\">\n                    <h1>\n                        <field name=\"name\" readonly=\"1\"/>\n                    </h1>\n                </div>\n                <group name=\"sale_header\">\n                    <group name=\"partner_details\">\n                        <field name=\"partner_id\" widget=\"res_partner_many2one\" context=\"{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_vat': True}\" placeholder=\"Type to find a customer...\" readonly=\"state in ['cancel', 'sale']\"/>\n                        <field name=\"partner_invoice_id\" groups=\"account.group_delivery_invoice_address\" options=\"{'no_quick_create': True}\" context=\"{'default_type': 'invoice', 'show_address': False, 'show_vat': False, 'default_parent_id': partner_id}\" readonly=\"state == 'cancel' or locked\"/>\n                        <field name=\"partner_shipping_id\" groups=\"account.group_delivery_invoice_address\" options=\"{'no_quick_create': True}\" context=\"{'default_type': 'delivery', 'show_address': False, 'show_vat': False, 'default_parent_id': partner_id}\" readonly=\"state == 'cancel' or locked\"/>\n                    </group>\n                    <group name=\"order_details\">\n                        <field name=\"validity_date\" invisible=\"state == 'sale'\" readonly=\"state in ['cancel', 'sale']\"/>\n                        <div class=\"o_td_label\" groups=\"base.group_no_one\" invisible=\"state in ['sale', 'cancel']\">\n                            <label for=\"date_order\" string=\"Quotation Date\"/>\n                        </div>\n                        <field name=\"date_order\" nolabel=\"1\" groups=\"base.group_no_one\" invisible=\"state in ['sale', 'cancel']\" readonly=\"state in ['cancel', 'sale']\"/>\n                        <div class=\"o_td_label\" invisible=\"state in ['draft', 'sent']\">\n                            <label for=\"date_order\" string=\"Order Date\"/>\n                        </div>\n                        <field name=\"date_order\" nolabel=\"1\" invisible=\"state in ['draft', 'sent']\" readonly=\"state in ['cancel', 'sale']\"/>\n                        <field name=\"show_update_pricelist\" invisible=\"1\"/>\n                        <label for=\"pricelist_id\" groups=\"product.group_product_pricelist\" invisible=\"not has_active_pricelist\"/>\n                        <div groups=\"product.group_product_pricelist\" class=\"o_row\" invisible=\"not has_active_pricelist\">\n                            <field name=\"pricelist_id\" options=\"{'no_open': True, 'no_create': True}\" readonly=\"state in ['cancel', 'sale']\"/>\n                            <button name=\"action_update_prices\" type=\"object\" string=\"Update Prices\" help=\"Recompute all prices based on this pricelist\" class=\"btn-link mb-1 px-0\" icon=\"fa-refresh\" confirm=\"This will update the unit price of all products based on the new pricelist.\" invisible=\"not show_update_pricelist or state in ['sale', 'cancel']\"/>\n                        </div>\n                        <field name=\"currency_id\" invisible=\"1\"/>\n                        <field name=\"pricelist_id\" invisible=\"1\" readonly=\"state in ['cancel', 'sale']\" groups=\"!product.group_product_pricelist\"/>\n                        <field name=\"payment_term_id\" placeholder=\"Immediate\" options=\"{'no_open': True, 'no_create': True}\"/>\n                    </group>\n                </group>\n                <notebook>\n                    <page string=\"Order Lines\" name=\"order_lines\">\n                        <field name=\"order_line\" widget=\"sol_o2m\" mode=\"list,kanban\" readonly=\"state == 'cancel' or locked\" aggregated_fields=\"price_subtotal,price_total\" options=\"{'hide_composition': True, 'hide_prices': True, 'subsections': True}\">\n                            <form>\n                                <field name=\"technical_price_unit\" invisible=\"1\"/>\n                                \n                                <field name=\"sequence\" invisible=\"1\"/>\n                                \n                                <field name=\"display_type\" invisible=\"1\"/>\n                                <group>\n                                    <group invisible=\"display_type\">\n                                        <label for=\"product_id\"/>\n                                        <div class=\"d-flex align-items-baseline\">\n                                            <span class=\"fa fa-exclamation-triangle text-warning me-1\" title=\"This product is archived\" invisible=\"state not in ['draft', 'sent'] or not is_product_archived\"/>\n                                            <field name=\"product_id\" context=\"{                                                     'default_uom_id': product_uom_id,                                                     'partner_id': parent.partner_id,                                                 }\" readonly=\"not product_updatable\" required=\"not display_type and not is_downpayment\" force_save=\"1\" widget=\"many2one_barcode\"/>\n                                        </div>\n                                        <label for=\"product_uom_qty\"/>\n                                        <div class=\"o_row\" name=\"ordered_qty\">\n                                            <field name=\"product_uom_qty\"/>\n                                            <field name=\"product_uom_id\" force_save=\"1\" groups=\"uom.group_uom\" class=\"oe_no_button\" widget=\"many2one_uom\" readonly=\"product_uom_readonly\" required=\"not display_type and not is_downpayment\"/>\n                                        </div>\n                                        <label for=\"qty_delivered\" string=\"Delivered\" invisible=\"parent.state != 'sale'\"/>\n                                        <div name=\"delivered_qty\" invisible=\"parent.state != 'sale'\">\n                                            <field name=\"qty_delivered\" readonly=\"qty_delivered_method != 'manual'\"/>\n                                        </div>\n                                        <label for=\"qty_invoiced\" string=\"Invoiced\" invisible=\"parent.state != 'sale'\"/>\n                                        <div name=\"invoiced_qty\" invisible=\"parent.state != 'sale'\">\n                                            <field name=\"qty_invoiced\"/>\n                                        </div>\n                                        <field name=\"price_unit\"/>\n                                        <field name=\"tax_ids\" widget=\"many2many_tax_tags\" options=\"{'no_create': True}\" context=\"{'search_view_ref': 'account.account_tax_view_search'}\" readonly=\"qty_invoiced &gt; 0\"/>\n                                        <t groups=\"sale.group_discount_per_so_line\">\n                                            <label for=\"discount\"/>\n                                            <div name=\"discount\">\n                                                <field name=\"discount\" class=\"oe_inline\"/> %\n                                            </div>\n                                        </t>\n                                    </group>\n                                    <group invisible=\"display_type\">\n                                        <label for=\"customer_lead\"/>\n                                        <div name=\"lead\">\n                                            <field name=\"customer_lead\" class=\"oe_inline\" readonly=\"product_type != 'consu'\"/> days\n                                        </div>\n                                        <field name=\"analytic_distribution\" widget=\"analytic_distribution\" groups=\"analytic.group_analytic_accounting\" options=\"{'product_field': 'product_id', 'business_domain': 'sale_order'}\"/>\n                                    </group>\n                                </group>\n                                <label for=\"name\" string=\"Description\" invisible=\"display_type\"/>\n                                <label for=\"name\" string=\"Section Name (eg. Products, Services)\" invisible=\"display_type != 'line_section'\"/>\n                                <label for=\"name\" string=\"Subsection Name\" invisible=\"display_type != 'line_subsection'\"/>\n                                <label for=\"name\" string=\"Note\" invisible=\"display_type != 'line_note'\"/>\n                                <field name=\"name\"/>\n                                <group>\n                                    <field name=\"collapse_composition\" invisible=\"display_type not in ['line_section', 'line_subsection']\" readonly=\"1\"/>\n                                    <field name=\"collapse_prices\" invisible=\"display_type not in ['line_section', 'line_subsection']\" readonly=\"1\"/>\n                                </group>\n                                <div name=\"invoice_lines\" groups=\"base.group_no_one\" invisible=\"display_type\">\n                                    <label for=\"invoice_lines\"/>\n                                    <field name=\"invoice_lines\"/>\n                                </div>\n                            </form>\n                            <list string=\"Sales Order Lines\" editable=\"bottom\" limit=\"200\" decoration-warning=\"(state in ['draft', 'sent'] and is_product_archived) or sale_line_warn_msg\">\n                                <control>\n                                    <create name=\"add_product_control\" string=\"Add a product\"/>\n                                    <create name=\"add_section_control\" string=\"Add a section\" context=\"{'default_display_type': 'line_section'}\"/>\n                                    <create name=\"add_note_control\" string=\"Add a note\" context=\"{'default_display_type': 'line_note'}\"/>\n                                    <button string=\"Catalog\" name=\"action_add_from_catalog\" type=\"object\" class=\"px-4 btn-link\" context=\"{'order_id': parent.id}\"/>\n                                </control>\n\n                                \n                                <field name=\"display_type\" column_invisible=\"True\"/>\n                                <field name=\"product_custom_attribute_value_ids\" column_invisible=\"1\">\n                                    <list>\n                                        <field name=\"custom_product_template_attribute_value_id\"/>\n                                        <field name=\"custom_value\"/>\n                                    </list>\n                                </field>\n                                <field name=\"product_no_variant_attribute_value_ids\" column_invisible=\"1\"/>\n                                <field name=\"technical_price_unit\" column_invisible=\"1\"/>\n                                <field name=\"linked_line_id\" column_invisible=\"1\"/>\n                                <field name=\"combo_item_id\" column_invisible=\"1\"/>\n                                <field name=\"selected_combo_items\" column_invisible=\"1\"/>\n                                <field name=\"virtual_id\" column_invisible=\"1\"/>\n                                <field name=\"linked_virtual_id\" column_invisible=\"1\"/>\n                                <field name=\"collapse_composition\" column_invisible=\"1\"/>\n                                <field name=\"collapse_prices\" column_invisible=\"1\"/>\n\n                                \n                                <field name=\"currency_id\" column_invisible=\"True\"/>\n\n                                \n                                <field name=\"sequence\" invisible=\"combo_item_id\" widget=\"handle\"/>\n                                <field name=\"product_id\" string=\"Product Variant\" readonly=\"not product_updatable\" required=\"not display_type and not is_downpayment\" force_save=\"1\" context=\"{                                         'default_lst_price': price_unit,                                         'default_uom_id': product_uom_id,                                         'partner_id': parent.partner_id,                                     }\" options=\"{                                         'show_label_warning': True                                     }\" optional=\"hide\" widget=\"sol_product_many2one\"/>\n                                <field name=\"product_template_id\" string=\"Product\" readonly=\"id and not product_updatable\" required=\"not display_type and not is_downpayment\" context=\"{                                         'default_list_price': price_unit,                                         'default_uom_id': product_uom_id,                                         'partner_id': parent.partner_id,                                     }\" options=\"{                                         'show_label_warning': True                                     }\" optional=\"show\" widget=\"sol_product_many2one\" placeholder=\"Type to find a product...\"/>\n                                <field name=\"name\" widget=\"sol_text\" optional=\"show\"/>\n                                <field name=\"analytic_distribution\" widget=\"analytic_distribution\" options=\"{                                         'product_field': 'product_id',                                         'business_domain': 'sale_order',                                         'amount_field': 'price_subtotal',                                     }\" optional=\"hide\" groups=\"analytic.group_analytic_accounting\"/>\n                                <field name=\"product_uom_qty\" decoration-info=\"(not display_type and invoice_status == 'to invoice')\" decoration-bf=\"(not display_type and invoice_status == 'to invoice')\" readonly=\"is_downpayment\"/>\n                                <field name=\"qty_delivered\" string=\"Delivered\" decoration-info=\"(not display_type and invoice_status == 'to invoice')\" decoration-bf=\"(not display_type and invoice_status == 'to invoice')\" column_invisible=\"parent.state != 'sale'\" readonly=\"qty_delivered_method != 'manual' or is_downpayment\" optional=\"show\"/>\n                                <field name=\"qty_invoiced\" string=\"Invoiced\" decoration-info=\"(not display_type and invoice_status == 'to invoice')\" decoration-bf=\"(not display_type and invoice_status == 'to invoice')\" column_invisible=\"parent.state != 'sale'\" optional=\"show\"/>\n                                <field name=\"product_uom_id\" force_save=\"1\" readonly=\"product_uom_readonly\" required=\"not display_type and not is_downpayment\" widget=\"many2one_uom\" groups=\"uom.group_uom\" options=\"{&quot;no_open&quot;: True, &quot;no_create&quot;: True}\" width=\"60px\" optional=\"show\"/>\n                                <field name=\"customer_lead\" optional=\"hide\" width=\"80px\" readonly=\"parent.state not in ['draft', 'sent', 'sale'] or is_downpayment or product_type != 'consu'\"/>\n                                <field name=\"price_unit\" readonly=\"qty_invoiced &gt; 0\"/>\n                                <field name=\"tax_ids\" widget=\"many2many_tax_tags\" options=\"{'no_create': True}\" context=\"{'active_test': True}\" readonly=\"qty_invoiced &gt; 0 or is_downpayment\" optional=\"show\"/>\n                                <field name=\"discount\" string=\"Disc.%\" groups=\"sale.group_discount_per_so_line\" width=\"50px\" optional=\"show\"/>\n                                <field name=\"price_subtotal\" string=\"Amount\" column_invisible=\"parent.company_price_include == 'tax_included'\" invisible=\"is_downpayment\"/>\n                                <field name=\"price_total\" string=\"Amount\" column_invisible=\"parent.company_price_include == 'tax_excluded'\" invisible=\"is_downpayment\"/>\n                                \n                                <field name=\"price_total\" string=\"Tax Incl.\" column_invisible=\"parent.company_price_include == 'tax_included'\" invisible=\"is_downpayment\" optional=\"hide\"/>\n                                <field name=\"price_subtotal\" string=\"Tax Excl.\" column_invisible=\"parent.company_price_include == 'tax_excluded'\" invisible=\"is_downpayment\" optional=\"hide\"/>\n                            </list>\n                            <kanban class=\"o_kanban_mobile\">\n                                <field name=\"display_type\"/>\n                                <field name=\"currency_id\"/>\n                                <control>\n                                    <create name=\"add_product_control\" string=\"Add product\"/>\n                                    <create name=\"add_section_control\" string=\"Add section\" context=\"{'default_display_type': 'line_section'}\"/>\n                                    <create name=\"add_note_control\" string=\"Add note\" context=\"{'default_display_type': 'line_note'}\"/>\n                                    <button string=\"Catalog\" name=\"action_add_from_catalog\" type=\"object\" class=\"btn-secondary\" context=\"{'order_id': parent.id}\"/>\n                                </control>\n                                <templates>\n                                    <t t-name=\"card\" class=\"row g-0 ps-0 pe-0\">\n                                        <t t-if=\"!record.display_type.raw_value\">\n                                            <aside class=\"col-2 p-1\">\n                                                <span t-att-title=\"record.product_id.value\">\n                                                    <field name=\"product_id\" widget=\"image\" options=\"{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}\"/>\n                                                </span>\n                                            </aside>\n                                            <main class=\"col\">\n                                                <div class=\"row\">\n                                                    <div class=\"col\">\n                                                        <span class=\"fa fa-exclamation-triangle text-warning me-1\" title=\"This product is archived\" invisible=\"state not in ['draft', 'sent'] or not is_product_archived\"/>\n                                                        <field name=\"product_id\" class=\"fw-bold\"/>\n                                                    </div>\n                                                    <div class=\"col-auto\">\n                                                        <field name=\"price_subtotal\" class=\"fw-bolder float-end pe-1\" widget=\"monetary\"/>\n                                                    </div>\n                                                </div>\n                                                <div class=\"text-muted\">\n                                                    Quantity:\n                                                    <field name=\"product_uom_qty\"/> <field name=\"product_uom_id\"/>\n                                                </div>\n                                                <div class=\"text-muted\">\n                                                    Unit Price:\n                                                    <field name=\"price_unit\"/>\n                                                </div>\n                                                <t t-if=\"record.discount?.raw_value\">\n                                                    <div class=\"text-muted\">\n                                                        Discount:\n                                                        <field name=\"discount\"/>%\n                                                    </div>\n                                                </t>\n                                            </main>\n                                        </t>\n                                        <t t-if=\"['line_section', 'line_subsection', 'line_note'].includes(record.display_type.raw_value)\">\n                                            <div t-att-class=\"{                                                 'fw-bolder': record.display_type.raw_value === 'line_section',                                                 'fw-bold': record.display_type.raw_value === 'line_subsection',                                                 'fst-italic': record.display_type.raw_value === 'line_note',                                             }\">\n                                                <field name=\"name\"/>\n                                            </div>\n                                        </t>\n                                    </t>\n                                </templates>\n                            </kanban>\n                        </field>\n                        <div class=\"float-end d-flex d-print-none gap-1 mb-2\" name=\"so_button_below_order_lines\">\n                            <button string=\"Discount\" name=\"action_open_discount_wizard\" type=\"object\" class=\"btn btn-secondary\" groups=\"sale.group_discount_per_so_line\" invisible=\"locked or state == 'cancel'\"/>\n                            <button string=\"Discounts\" name=\"action_open_discount_wizard\" type=\"object\" class=\"btn btn-secondary\" groups=\"sale.group_discount_per_so_line\" disabled=\"1\" invisible=\"not (locked or state == 'cancel')\"/>\n                        </div>\n                        <group name=\"note_group\" col=\"6\" class=\"mt-2 mt-md-0\">\n                            <group colspan=\"4\" class=\"order-1 order-lg-0\">\n                                <field colspan=\"2\" name=\"note\" nolabel=\"1\" placeholder=\"Terms and conditions...\"/>\n                            </group>\n                            <group class=\"oe_subtotal_footer d-flex order-0 order-lg-1 flex-column gap-0 gap-sm-3\" colspan=\"2\" name=\"sale_total\">\n                                <field name=\"tax_totals\" widget=\"account-tax-totals-field\" nolabel=\"1\" readonly=\"1\"/>\n                            </group>\n                        </group>\n                    </page>\n                    <page string=\"Other Info\" name=\"other_information\">\n                        <group>\n                            <group name=\"sales_person\" string=\"Sales\">\n                                <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                                <field name=\"team_id\" context=\"{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}\" options=\"{'no_create': True}\"/>\n                                <field name=\"company_id\" options=\"{'no_create': True}\" groups=\"base.group_multi_company\"/>\n                                <field name=\"require_signature\" readonly=\"state in ['cancel', 'sale']\"/>\n                                <label for=\"require_payment\"/>\n                                <div id=\"require_payment\">\n                                    <field name=\"require_payment\" readonly=\"state in ['cancel', 'sale']\"/>\n                                    <span class=\"mx-3\" invisible=\"not require_payment\">of</span>\n                                    <field name=\"prepayment_percent\" readonly=\"state in ['cancel', 'sale']\" invisible=\"not require_payment\" widget=\"percentage\" style=\"width: 3rem\"/>\n                                </div>\n                                <field name=\"reference\" readonly=\"1\" invisible=\"not reference\"/>\n                                <field name=\"client_order_ref\"/>\n                                <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color', 'no_create_edit': True}\"/>\n                            </group>\n                            <group name=\"sale_info\" string=\"Invoicing\">\n                                <field name=\"show_update_fpos\" invisible=\"1\"/>\n                                <label for=\"fiscal_position_id\"/>\n                                <div class=\"o_row\">\n                                    <field name=\"fiscal_position_id\" options=\"{'no_create': True}\"/>\n                                    <button string=\"Update Taxes\" name=\"action_update_taxes\" type=\"object\" help=\"Recompute all taxes based on this fiscal position\" class=\"btn-link mb-1 px-0\" icon=\"fa-refresh\" confirm=\"This will update all taxes based on the currently selected fiscal position.\" invisible=\"not show_update_fpos or state in ['sale', 'cancel']\"/>\n                                </div>\n                                <field name=\"preferred_payment_method_line_id\"/>\n                                <field name=\"partner_invoice_id\" groups=\"!account.group_delivery_invoice_address\" invisible=\"1\"/>\n                                <field name=\"journal_id\" groups=\"base.group_no_one\" readonly=\"invoice_count != 0 and state == 'sale'\"/>\n                                <field name=\"invoice_status\" invisible=\"state != 'sale'\" groups=\"base.group_no_one\"/>\n                                \n                                <field name=\"invoice_status\" invisible=\"1\" groups=\"!base.group_no_one\"/>\n                            </group>\n                            <group name=\"sale_shipping\" string=\"Shipping\">\n                                <label for=\"commitment_date\" string=\"Delivery Date\"/>\n                                <div name=\"commitment_date_div\" class=\"o_row\">\n                                    <field name=\"commitment_date\" readonly=\"state == 'cancel' or locked\"/>\n                                    <span name=\"expected_date_span\" invisible=\"not expected_date\" class=\"text-muted\">Expected: <field name=\"expected_date\" class=\"oe_inline\"/></span>\n                                </div>\n                            </group>\n                            <group name=\"sale_reporting\" string=\"Tracking\">\n                                <field name=\"origin\"/>\n                                <field name=\"campaign_id\" options=\"{'create_name_field': 'title'}\"/>\n                                <field name=\"medium_id\"/>\n                                <field name=\"source_id\"/>\n                            </group>\n                        </group>\n                    </page>\n                    <page groups=\"base.group_no_one\" string=\"Customer Signature\" name=\"customer_signature\" invisible=\"1\">\n                        <group>\n                            <field name=\"signed_by\" readonly=\"signature\"/>\n                            <field name=\"signed_on\" readonly=\"signature\"/>\n                            <field name=\"signature\" widget=\"image\"/>\n                        </group>\n                    </page>\n                </notebook>\n            </sheet>\n            <chatter/>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_sales_order_filter",
+   "package": "sale",
+   "name": "sale.order.list.select",
+   "entity": "sale.order",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "15",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Sales Order"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Order",
+      "filter_domain": "['|', '|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self), ('partner_id', 'child_of', self)]"
+     },
+     {
+      "name": "partner_id",
+      "operator": "child_of"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "team_id",
+      "string": "Sales Team"
+     },
+     {
+      "name": "order_line",
+      "string": "Product",
+      "filter_domain": "[('order_line.product_id', 'ilike', self)]"
+     },
+     {
+      "name": "activity_user_id",
+      "string": "Activities of"
+     },
+     {
+      "name": "activity_type_id",
+      "string": "Activity type"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "my_sale_orders_filter",
+      "string": "My Orders",
+      "domain": "[('user_id', '=', uid)]"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "salesperson",
+      "string": "Salesperson",
+      "context": "{'group_by': 'user_id'}"
+     },
+     {
+      "name": "customer",
+      "string": "Customer",
+      "context": "{'group_by': 'partner_id'}"
+     },
+     {
+      "name": "order_month",
+      "string": "Order Date",
+      "context": "{'group_by': 'date_order'}"
+     },
+     {
+      "name": "preferred_payment_method_line_groupby",
+      "string": "Payment Method",
+      "context": "{'group_by': 'preferred_payment_method_line_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Sales Order\">\n                <field name=\"name\" string=\"Order\" filter_domain=\"['|', '|', ('name', 'ilike', self), ('client_order_ref', 'ilike', self), ('partner_id', 'child_of', self)]\"/>\n                <field name=\"partner_id\" operator=\"child_of\"/>\n                <field name=\"user_id\"/>\n                <field name=\"team_id\" string=\"Sales Team\"/>\n                <field name=\"order_line\" string=\"Product\" filter_domain=\"[('order_line.product_id', 'ilike', self)]\"/>\n                <field name=\"activity_user_id\" string=\"Activities of\"/>\n                <field name=\"activity_type_id\" string=\"Activity type\"/>\n                \n                <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                <separator invisible=\"1\"/>\n                <filter name=\"my_sale_orders_filter\" string=\"My Orders\" domain=\"[('user_id', '=', uid)]\"/>\n                <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')]\"/>\n                <group>\n                    <filter name=\"salesperson\" string=\"Salesperson\" context=\"{'group_by': 'user_id'}\"/>\n                    <filter name=\"customer\" string=\"Customer\" context=\"{'group_by': 'partner_id'}\"/>\n                    <filter name=\"order_month\" string=\"Order Date\" context=\"{'group_by': 'date_order'}\"/>\n                    <filter name=\"preferred_payment_method_line_groupby\" string=\"Payment Method\" context=\"{'group_by': 'preferred_payment_method_line_id'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.sale_order_view_search_inherit_quotation",
+   "package": "sale",
+   "name": "sale.order.search.inherit.quotation",
+   "entity": "sale.order",
+   "view_type": "filter",
+   "inherits_view": "sale.view_sales_order_filter",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "my_sale_orders_filter",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "campaign_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_sale_orders_filter",
+      "position": "replace"
+     },
+     {
+      "name": "my_quotation",
+      "string": "My Quotations",
+      "domain": "[('user_id', '=', uid)]"
+     },
+     {
+      "name": "draft",
+      "string": "Quotations",
+      "domain": "[('state', 'in', ('draft', 'sent'))]"
+     },
+     {
+      "name": "sales",
+      "string": "Sales Orders",
+      "domain": "[('state', '=', 'sale')]"
+     },
+     {
+      "name": "filter_create_date",
+      "string": "Create Date",
+      "date": "create_date"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"my_sale_orders_filter\" position=\"replace\">\n                <field name=\"campaign_id\"/>\n                <separator/>\n                <filter string=\"My Quotations\" name=\"my_quotation\" domain=\"[('user_id', '=', uid)]\"/>\n                <separator/>\n                <filter string=\"Quotations\" name=\"draft\" domain=\"[('state', 'in', ('draft', 'sent'))]\"/>\n                <filter string=\"Sales Orders\" name=\"sales\" domain=\"[('state', '=', 'sale')]\"/>\n                <separator/>\n                <filter string=\"Create Date\" name=\"filter_create_date\" date=\"create_date\"/>\n            </filter>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.sale_order_view_search_inherit_sale",
+   "package": "sale",
+   "name": "sale.order.search.inherit.sale",
+   "entity": "sale.order",
+   "view_type": "filter",
+   "inherits_view": "sale.view_sales_order_filter",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "my_sale_orders_filter",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_sale_orders_filter",
+      "position": "after"
+     },
+     {
+      "name": "sales",
+      "string": "Sales Orders",
+      "domain": "[('state', '=', 'sale')]",
+      "invisible": "1"
+     },
+     {
+      "name": "to_invoice",
+      "string": "To Invoice",
+      "domain": "[('invoice_status','=','to invoice')]"
+     },
+     {
+      "name": "upselling",
+      "string": "To Upsell",
+      "domain": "[('invoice_status','=','upselling')]"
+     },
+     {
+      "name": "order_date",
+      "string": "Order Date",
+      "date": "date_order"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"my_sale_orders_filter\" position=\"after\">\n                <filter invisible=\"1\" string=\"Sales Orders\" name=\"sales\" domain=\"[('state', '=', 'sale')]\"/>\n                <separator/>\n                <filter string=\"To Invoice\" name=\"to_invoice\" domain=\"[('invoice_status','=','to invoice')]\"/>\n                <filter string=\"To Upsell\" name=\"upselling\" domain=\"[('invoice_status','=','upselling')]\"/>\n                <separator/>\n                <filter string=\"Order Date\" name=\"order_date\" date=\"date_order\"/>\n            </filter>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_crm.sale_view_inherit123",
+   "package": "sale_crm",
+   "name": "sale.order.form.inherit.sale",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "origin",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "origin",
+      "position": "after"
+     },
+     {
+      "name": "opportunity_id",
+      "context": "{                     'default_campaign_id': campaign_id,                     'default_company_id': company_id,                     'default_medium_id': medium_id,                     'default_partner_id': partner_id,                     'default_source_id': source_id,                     'default_tag_ids': tag_ids,                     'default_type': 'opportunity',                 }",
+      "groups": "sales_team.group_sale_salesman"
+     },
+     {
+      "name": "opportunity_id",
+      "context": "{                     'default_campaign_id': campaign_id,                     'default_company_id': company_id,                     'default_medium_id': medium_id,                     'default_partner_id': partner_id,                     'default_source_id': source_id,                     'default_type': 'opportunity',                 }",
+      "groups": "!sales_team.group_sale_salesman"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"origin\" position=\"after\">\n                <field name=\"opportunity_id\" groups=\"sales_team.group_sale_salesman\" context=\"{                     'default_campaign_id': campaign_id,                     'default_company_id': company_id,                     'default_medium_id': medium_id,                     'default_partner_id': partner_id,                     'default_source_id': source_id,                     'default_tag_ids': tag_ids,                     'default_type': 'opportunity',                 }\"/>\n                <field name=\"opportunity_id\" groups=\"!sales_team.group_sale_salesman\" context=\"{                     'default_campaign_id': campaign_id,                     'default_company_id': company_id,                     'default_medium_id': medium_id,                     'default_partner_id': partner_id,                     'default_source_id': source_id,                     'default_type': 'opportunity',                 }\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_expense.sale_order_form_view_inherit",
+   "package": "sale_expense",
+   "name": "sale.order.form.inherit.sale.expense",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_invoice",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "expense_count",
+      "widget": "statinfo",
+      "string": "Expenses"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_invoice",
+      "position": "before"
+     },
+     {
+      "name": "%(sale_expense.hr_expense_action_from_sale_order)d",
+      "type": "action",
+      "invisible": "expense_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-money"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_invoice\" position=\"before\">\n                <button name=\"%(sale_expense.hr_expense_action_from_sale_order)d\" type=\"action\" class=\"oe_stat_button\" icon=\"fa-money\" invisible=\"expense_count == 0\">\n                    <field name=\"expense_count\" widget=\"statinfo\" string=\"Expenses\"/>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_expense.sale_order_reinvoice_tree_view",
+   "package": "sale_expense",
+   "name": "sale.order.list.reinvoice.expense",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.sale_order_tree",
+   "mode": "primary",
+   "priority": "18",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "amount_untaxed",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "amount_untaxed",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"amount_untaxed\" position=\"attributes\">\n                <attribute name=\"groups\">sales_team.group_sale_salesman,account.group_account_invoice,account.group_account_readonly</attribute>\n            </field>\n            <field name=\"amount_tax\" position=\"attributes\">\n                <attribute name=\"groups\">sales_team.group_sale_salesman,account.group_account_invoice,account.group_account_readonly</attribute>\n            </field>\n            <field name=\"amount_total\" position=\"attributes\">\n                <attribute name=\"groups\">sales_team.group_sale_salesman,account.group_account_invoice,account.group_account_readonly</attribute>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_loyalty.sale_order_view_form_inherit_sale_loyalty",
+   "package": "sale_loyalty",
+   "name": "sale.order.view.form.inherit.sale.loyalty",
+   "entity": "sale.order",
+   "view_type": "div",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "name": "button_box",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "gift_card_count",
+      "widget": "statinfo",
+      "string": "Gift Cards"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_gift_cards",
+      "type": "object",
+      "invisible": "gift_card_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-gift"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "name": "button_box",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div name=\"button_box\" position=\"inside\">\n                <button name=\"action_view_gift_cards\" class=\"oe_stat_button\" type=\"object\" icon=\"fa-gift\" invisible=\"gift_card_count == 0\">\n                    <field string=\"Gift Cards\" name=\"gift_card_count\" widget=\"statinfo\"/>\n                </button>\n            </div>\n            <button name=\"action_open_discount_wizard\" position=\"before\">\n                <button string=\"Coupon Code\" name=\"%(sale_loyalty.sale_loyalty_coupon_wizard_action)d\" type=\"action\" class=\"btn btn-secondary\" invisible=\"locked or state == 'cancel'\"/>\n                <button string=\"Coupon Code\" name=\"%(sale_loyalty.sale_loyalty_coupon_wizard_action)d\" type=\"action\" class=\"btn btn-secondary\" disabled=\"1\" invisible=\"not (locked or state == 'cancel')\"/>\n                <button string=\"Reward\" name=\"action_open_reward_wizard\" type=\"object\" class=\"btn btn-secondary\" help=\"Update current promotional lines and select new rewards if applicable.\" invisible=\"locked or state == 'cancel'\"/>\n                <button string=\"Reward\" name=\"action_open_reward_wizard\" type=\"object\" class=\"btn btn-secondary\" help=\"Update current promotional lines and select new rewards if applicable.\" disabled=\"1\" invisible=\"not (locked or state == 'cancel')\"/>\n            </button>\n            <xpath expr=\"//list//field[@name='product_uom_qty']\" position=\"before\">\n                <field name=\"is_reward_line\" column_invisible=\"True\"/>\n            </xpath>\n            <xpath expr=\"//list//field[@name='product_uom_qty']\" position=\"attributes\">\n                <attribute name=\"readonly\" add=\"is_reward_line\" separator=\" or \"/>\n            </xpath>\n            <xpath expr=\"//list//field[@name='price_unit']\" position=\"attributes\">\n                <attribute name=\"readonly\" add=\"is_reward_line\" separator=\" or \"/>\n            </xpath>\n            <xpath expr=\"//list//field[@name='tax_ids']\" position=\"attributes\">\n                <attribute name=\"readonly\" add=\"is_reward_line and state in ['draft', 'sent']\" separator=\" or \"/>\n            </xpath>\n            <group name=\"note_group\" position=\"after\">\n                <group class=\"d-flex flex-row-reverse oe_subtotal_footer border-0\">\n                    <field name=\"loyalty_data\" widget=\"loyalty_data_field\" nolabel=\"1\" readonly=\"1\"/>\n                </group>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_management.sale_order_form_quote",
+   "package": "sale_management",
+   "name": "sale.order.form.inherit.sale_management",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_shipping_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "partner_shipping_id",
+      "position": "after"
+     },
+     {
+      "name": "sale_order_template_id",
+      "readonly": "state in ['cancel', 'sale']",
+      "options": "{'no_create': True}",
+      "groups": "sale_management.group_sale_order_template"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"partner_shipping_id\" position=\"after\">\n                <field name=\"sale_order_template_id\" options=\"{'no_create': True}\" readonly=\"state in ['cancel', 'sale']\" groups=\"sale_management.group_sale_order_template\"/>\n            </field>\n\n            <xpath expr=\"//form//div[@name='invoice_lines']\" position=\"before\">\n                <group>\n                    <field name=\"is_optional\" invisible=\"display_type not in ['line_section', 'line_subsection']\" readonly=\"1\"/>\n                </group>\n            </xpath>\n            <xpath expr=\"//list/field[@name='linked_virtual_id']\" position=\"after\">\n                <field name=\"is_optional\" column_invisible=\"True\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_margin.sale_margin_sale_order",
+   "package": "sale_margin",
+   "name": "sale.order.margin.view.form",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": "15",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "tax_totals",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "tax_totals",
+      "position": "after"
+     },
+     {
+      "name": "margin"
+     },
+     {
+      "name": "amount_untaxed",
+      "invisible": "1"
+     },
+     {
+      "name": "margin_percent",
+      "widget": "percentage",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "percentage": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"tax_totals\" position=\"after\">\n                <div class=\"d-flex float-end\" colspan=\"2\">\n                    <label for=\"margin\"/>\n                    <div>\n                        <field name=\"margin\" class=\"oe_inline\"/>\n                        <field name=\"amount_untaxed\" invisible=\"1\"/>\n                        <span class=\"oe_inline\" invisible=\"amount_untaxed == 0\">\n                            (<field name=\"margin_percent\" nolabel=\"1\" class=\"oe_inline\" widget=\"percentage\"/>)\n                        </span>\n                    </div>\n                </div>\n            </field>\n            <xpath expr=\"//field[@name='order_line']//form//field[@name='price_unit']\" position=\"after\">\n                <field name=\"purchase_price\" groups=\"base.group_user\"/>\n            </xpath>\n           <xpath expr=\"//field[@name='order_line']//list//field[@name='price_unit']\" position=\"after\">\n                <field name=\"purchase_price\" optional=\"hide\"/>\n                <field name=\"margin\" optional=\"hide\"/>\n                <field name=\"margin_percent\" invisible=\"price_subtotal == 0\" optional=\"hide\" widget=\"percentage\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_margin.sale_margin_sale_order_pivot",
+   "package": "sale_margin",
+   "name": "sale.order.margin.view.pivot",
+   "entity": "sale.order",
+   "view_type": "pivot",
+   "inherits_view": "sale.view_sale_order_pivot",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "margin_percent",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "pivot",
+      "attributes": {
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ],
+    "measures": [
+     {
+      "name": "margin_percent",
+      "invisible": "1"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot position=\"inside\">\n                <field name=\"margin_percent\" invisible=\"1\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_margin.sale_margin_sale_order_graph",
+   "package": "sale_margin",
+   "name": "sale.order.margin.view.graph",
+   "entity": "sale.order",
+   "view_type": "graph",
+   "inherits_view": "sale.view_sale_order_graph",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "margin_percent",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "graph",
+      "attributes": {
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ],
+    "measures": [
+     {
+      "name": "margin_percent",
+      "invisible": "1"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph position=\"inside\">\n                <field name=\"margin_percent\" invisible=\"1\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_mrp.sale_order_form_mrp",
+   "package": "sale_mrp",
+   "name": "sale.order.inherited.form.mrp",
+   "entity": "sale.order",
+   "view_type": "div",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "name": "button_box",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "mrp_production_count",
+      "widget": "statinfo",
+      "string": "Manufacturing"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_mrp_production",
+      "type": "object",
+      "invisible": "mrp_production_count == 0",
+      "class": "oe_stat_button",
+      "groups": "mrp.group_mrp_user",
+      "icon": "fa-wrench"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "name": "button_box",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div name=\"button_box\" position=\"inside\">\n                <button name=\"action_view_mrp_production\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-wrench\" invisible=\"mrp_production_count == 0\" groups=\"mrp.group_mrp_user\">\n                    <field name=\"mrp_production_count\" widget=\"statinfo\" string=\"Manufacturing\"/>\n                </button>\n            </div>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_pdf_quote_builder.sale_order_form_inherit_sale_pdf_quote_builder",
+   "package": "sale_pdf_quote_builder",
+   "name": "sale.order.form.pdf.quote.builder",
+   "entity": "sale.order",
+   "view_type": "xpath",
+   "inherits_view": "sale_management.sale_order_form_quote",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='order_line']/list",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "product_document_ids",
+      "column_invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='order_line']/list",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            \n            \n            <xpath expr=\"//field[@name='order_line']/list\" position=\"inside\">\n                <field name=\"product_document_ids\" column_invisible=\"1\"/>\n            </xpath>\n            \n            <xpath expr=\"//field[@name='order_line']/kanban\" position=\"inside\">\n                <field name=\"product_document_ids\" column_invisible=\"1\"/>\n            </xpath>\n            <page name=\"order_lines\" position=\"after\">\n                <page name=\"pdf_quote_builder\" string=\"Quote Builder\" groups=\"sales_team.group_sale_salesman\" invisible=\"not (partner_id and is_pdf_quote_builder_available) or context.get('hide_pdf_quote_builder')\">\n                    \n                    <field name=\"quotation_document_ids\" invisible=\"1\"/>\n                    <field name=\"customizable_pdf_form_fields\" invisible=\"1\"/>\n                    <widget name=\"customContentKanbanLikeWidget\" class=\"d-inline\"/>\n                </page>\n            </page>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_product_matrix.view_order_form_with_variant_grid",
+   "package": "sale_product_matrix",
+   "name": "sale.order.grid",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "position": "after"
+     },
+     {
+      "name": "grid",
+      "invisible": "1"
+     },
+     {
+      "name": "grid_product_tmpl_id",
+      "invisible": "1"
+     },
+     {
+      "name": "grid_update",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"partner_id\" position=\"after\">\n                \n                <field name=\"grid\" invisible=\"1\"/>\n                <field name=\"grid_product_tmpl_id\" invisible=\"1\"/>\n                <field name=\"grid_update\" invisible=\"1\"/>\n            </field>\n            <group name=\"sales_person\" position=\"inside\">\n                <field name=\"report_grids\" groups=\"base.group_no_one\"/>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.view_order_form_inherit_sale_project",
+   "package": "sale_project",
+   "name": "sale.order.form.sale.project",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_invoice",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "project_count"
+     },
+     {
+      "name": "tasks_count"
+     },
+     {
+      "name": "milestone_count",
+      "widget": "statinfo",
+      "string": "Milestones"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_invoice",
+      "position": "before"
+     },
+     {
+      "name": "action_view_project_ids",
+      "type": "object",
+      "invisible": "not show_project_button",
+      "class": "oe_stat_button",
+      "groups": "project.group_project_user",
+      "icon": "fa-puzzle-piece"
+     },
+     {
+      "name": "action_view_milestone",
+      "type": "object",
+      "invisible": "not is_product_milestone or not project_ids or state == 'draft'",
+      "class": "oe_stat_button",
+      "groups": "project.group_project_milestone",
+      "icon": "fa-check-square-o"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_invoice\" position=\"before\">\n                <button name=\"action_view_project_ids\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-puzzle-piece\" invisible=\"not show_project_button\" groups=\"project.group_project_user\">\n                    <div class=\"o_stat_info\">\n                        <div class=\"o_row\">\n                            <span class=\"o_stat_value order-first\">\n                                <field name=\"project_count\"/>\n                            </span>\n                            <span class=\"o_stat_text\"> Projects</span>\n                        </div>\n                        <div class=\"o_row\">\n                            <span class=\"o_stat_value order-first\">\n                                <field name=\"tasks_count\"/>\n                            </span>\n                            <span class=\"o_stat_text\"> Tasks</span>\n                        </div>\n                    </div>\n                </button>\n                <button name=\"action_view_milestone\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-check-square-o\" invisible=\"not is_product_milestone or not project_ids or state == 'draft'\" groups=\"project.group_project_milestone\">\n                    <field name=\"milestone_count\" widget=\"statinfo\" string=\"Milestones\"/>\n                </button>\n            </button>\n            <field name=\"journal_id\" position=\"before\">\n                <field name=\"project_id\" groups=\"project.group_project_user\" context=\"{'default_allow_billable': True, 'default_partner_id': partner_id, 'order_id': id, 'order_state' : state}\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.view_sales_order_filter_inherit_sale_project",
+   "package": "sale_project",
+   "name": "sale.order.list.select.inherit.sale_project",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.view_sales_order_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "order_line",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "order_line",
+      "position": "after"
+     },
+     {
+      "name": "project_id",
+      "groups": "project.group_project_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"order_line\" position=\"after\">\n                <field name=\"project_id\" groups=\"project.group_project_user\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.view_order_simple_form",
+   "package": "sale_project",
+   "name": "sale.order.form.from.task",
+   "entity": "sale.order",
+   "view_type": "header",
+   "inherits_view": "sale.view_order_form",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "header",
+    "root_attributes": {
+     "position": "replace"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "header",
+      "attributes": {
+       "position": "replace"
+      },
+      "position": "replace"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <header position=\"replace\"/>\n            <sheet position=\"after\">\n                <footer>\n                    <button string=\"Confirm &amp; Close\" special=\"save\" class=\"btn btn-primary\"/>\n                    <button string=\"Discard\" special=\"cancel\" class=\"btn btn-secondary\"/>\n                </footer>\n            </sheet>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_purchase.sale_order_inherited_form_purchase",
+   "package": "sale_purchase",
+   "name": "sale.order.inherited.form.purchase",
+   "entity": "sale.order",
+   "view_type": "div",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "name": "button_box",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "purchase_order_count",
+      "widget": "statinfo",
+      "string": "Purchase"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_purchase_orders",
+      "type": "object",
+      "invisible": "purchase_order_count == 0",
+      "class": "oe_stat_button",
+      "groups": "purchase.group_purchase_user",
+      "icon": "fa-credit-card"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "name": "button_box",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div name=\"button_box\" position=\"inside\">\n                <button name=\"action_view_purchase_orders\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-credit-card\" invisible=\"purchase_order_count == 0\" groups=\"purchase.group_purchase_user\">\n                    <field name=\"purchase_order_count\" widget=\"statinfo\" string=\"Purchase\"/>\n                </button>\n            </div>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_stock.view_order_form_inherit_sale_stock",
+   "package": "sale_stock",
+   "name": "sale.order.form.sale.stock",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_invoice",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "delivery_count",
+      "widget": "statinfo",
+      "string": "Delivery"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_invoice",
+      "position": "before"
+     },
+     {
+      "name": "action_view_delivery",
+      "type": "object",
+      "invisible": "delivery_count == 0",
+      "class": "oe_stat_button",
+      "groups": "stock.group_stock_user",
+      "icon": "fa-truck"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_invoice\" position=\"before\">\n                <button name=\"action_view_delivery\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-truck\" invisible=\"delivery_count == 0\" groups=\"stock.group_stock_user\">\n                    <field name=\"delivery_count\" widget=\"statinfo\" string=\"Delivery\"/>\n                </button>\n            </button>\n            <group name=\"sale_shipping\" position=\"attributes\">\n                <attribute name=\"groups\"/>\n                <attribute name=\"string\">Delivery</attribute>\n            </group>\n            <label for=\"commitment_date\" position=\"before\">\n                <field name=\"warehouse_id\" options=\"{'no_create': True}\" force_save=\"1\" readonly=\"state == 'sale'\"/>\n                <field name=\"incoterm\" options=\"{'no_open': True, 'no_create': True}\"/>\n                <field name=\"incoterm_location\"/>\n                <field name=\"picking_policy\" required=\"True\" readonly=\"state not in ['draft', 'sent']\"/>\n            </label>\n            <span name=\"expected_date_span\" position=\"attributes\">\n                <attribute name=\"invisible\">effective_date and commitment_date</attribute>\n            </span>\n            <div name=\"commitment_date_div\" position=\"replace\">\n                <div class=\"o_row\">\n                    <field name=\"commitment_date\"/>\n                    <span class=\"text-muted\" invisible=\"not expected_date or (effective_date and commitment_date)\">Expected: <field name=\"expected_date\" class=\"oe_inline\"/></span>\n                </div>\n                <field name=\"effective_date\" invisible=\"not effective_date\"/>\n                <field name=\"delivery_status\" invisible=\"state != 'sale'\"/>\n            </div>\n            <xpath expr=\"//page[@name='other_information']//field[@name='expected_date']\" position=\"after\">\n                <field string=\" \" name=\"json_popover\" widget=\"stock_rescheduling_popover\" invisible=\"not show_json_popover\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='order_line']//form//field[@name='analytic_distribution']\" position=\"before\">\n                <field name=\"route_ids\" widget=\"many2many_tags\" groups=\"stock.group_adv_location\" options=\"{'no_create': True}\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='order_line']//form//field[@name='product_uom_id']\" position=\"after\">\n                <widget name=\"qty_at_date_widget\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='order_line']//list//field[@name='analytic_distribution']\" position=\"after\">\n                <field name=\"route_ids\" widget=\"many2many_tags\" groups=\"stock.group_adv_location\" options=\"{'no_create': True}\" optional=\"hide\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='order_line']//list//field[@name='qty_delivered']\" position=\"after\">\n                <widget name=\"qty_at_date_widget\" width=\"20px\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_stock.sale_order_tree",
+   "package": "sale_stock",
+   "name": "sale.order.list.inherit.sale.stock",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.sale_order_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "tag_ids",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "tag_ids",
+      "position": "after"
+     },
+     {
+      "name": "warehouse_id",
+      "readonly": "state == 'sale'",
+      "options": "{'no_create': True}",
+      "optional": "hide",
+      "groups": "stock.group_stock_multi_warehouses"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"tag_ids\" position=\"after\">\n                <field name=\"warehouse_id\" options=\"{'no_create': True}\" readonly=\"state == 'sale'\" groups=\"stock.group_stock_multi_warehouses\" optional=\"hide\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_stock.view_order_tree",
+   "package": "sale_stock",
+   "name": "sale.order.list.inherit.sale.stock",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.view_order_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "commitment_date",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "commitment_date",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"commitment_date\" position=\"attributes\">\n                <attribute name=\"decoration-danger\">\n                    (\n                        (\n                            commitment_date &lt; effective_date\n                            or commitment_date &lt; datetime.datetime.combine(\n                                datetime.date.today(),\n                                datetime.time(0,0,0)\n                            ).to_utc().strftime('%Y-%m-%d %H:%M:%S')\n                        )\n                        and delivery_status in ['pending', 'started']\n                        and effective_date &lt;= commitment_date\n                        or delivery_status == 'partial'\n                    )\n                </attribute>\n            </field>\n            <field name=\"invoice_status\" position=\"before\">\n                <field name=\"delivery_status\" decoration-success=\"delivery_status == 'full'\" decoration-warning=\"delivery_status == 'partial'\" decoration-info=\"delivery_status in ['pending', 'started']\" widget=\"badge\" optional=\"hide\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_stock.sale_stock_sale_order_view_search_inherit",
+   "package": "sale_stock",
+   "name": "sale_stock.sale.order.search.inherit",
+   "entity": "sale.order",
+   "view_type": "filter",
+   "inherits_view": "sale.sale_order_view_search_inherit_sale",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "order_date",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "order_date",
+      "position": "after"
+     },
+     {
+      "name": "late_availability",
+      "string": "Late Availability",
+      "domain": "[('late_availability', '=', True)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"order_date\" position=\"after\">\n                <filter string=\"Late Availability\" name=\"late_availability\" domain=\"[('late_availability', '=', True)]\"/>\n            </filter>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.view_order_form_inherit_sale_timesheet",
+   "package": "sale_timesheet",
+   "name": "sale.order.form.sale.timesheet",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "sale_project.view_order_form_inherit_sale_project",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_milestone",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "timesheet_total_duration"
+     },
+     {
+      "name": "timesheet_encode_uom_id",
+      "options": "{'no_open': True}"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_milestone",
+      "position": "before"
+     },
+     {
+      "name": "action_view_timesheet",
+      "type": "object",
+      "invisible": "not show_hours_recorded_button",
+      "class": "oe_stat_button",
+      "groups": "hr_timesheet.group_hr_timesheet_user",
+      "icon": "fa-clock-o"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_milestone\" position=\"before\">\n                <button name=\"action_view_timesheet\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-clock-o\" invisible=\"not show_hours_recorded_button\" groups=\"hr_timesheet.group_hr_timesheet_user\">\n                    <div class=\"o_stat_info\">\n                        <span class=\"o_stat_value\">\n                            <field name=\"timesheet_total_duration\" class=\"mr4\"/>\n                            <field name=\"timesheet_encode_uom_id\" options=\"{'no_open': True}\"/>\n                        </span>\n                        <span class=\"o_stat_text\">Recorded</span>\n                    </div>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_dropshipping.view_order_form_inherit_sale_stock",
+   "package": "stock_dropshipping",
+   "name": "sale.order.form.sale.dropshipping",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "sale_stock.view_order_form_inherit_sale_stock",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_view_delivery",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "dropship_picking_count",
+      "widget": "statinfo",
+      "string": "Dropship"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_delivery",
+      "position": "before"
+     },
+     {
+      "name": "action_view_dropship",
+      "type": "object",
+      "invisible": "dropship_picking_count == 0",
+      "class": "oe_stat_button",
+      "groups": "stock.group_stock_user",
+      "icon": "fa-truck"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_view_delivery\" position=\"before\">\n                <t groups=\"purchase.group_purchase_user\">\n                    <button name=\"action_view_dropship\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-truck\" invisible=\"dropship_picking_count == 0\" groups=\"stock.group_stock_user\">\n                        <field name=\"dropship_picking_count\" widget=\"statinfo\" string=\"Dropship\"/>\n                    </button>\n                </t>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale.view_sales_order_filter_ecommerce",
+   "package": "website_sale",
+   "name": "sale.order.ecommerce.search.view",
+   "entity": "sale.order",
+   "view_type": "filter",
+   "inherits_view": "sale.view_sales_order_filter",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "my_sale_orders_filter",
+     "position": "before"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_sale_orders_filter",
+      "position": "before"
+     },
+     {
+      "name": "order_confirmed",
+      "string": "Confirmed",
+      "domain": "[('state', '=', 'sale')]"
+     },
+     {
+      "name": "order_unpaid",
+      "string": "Unpaid",
+      "domain": "[('state', '=', 'sent')]"
+     },
+     {
+      "name": "order_abandoned",
+      "string": "Abandoned",
+      "domain": "[('is_abandoned_cart', '=', True)]"
+     },
+     {
+      "name": "order_date",
+      "string": "Order Date",
+      "date": "date_order"
+     },
+     {
+      "name": "from_website",
+      "string": "From Website",
+      "domain": "[('website_id', '!=', False)]"
+     },
+     {
+      "name": "week",
+      "string": "Last Week",
+      "domain": "[('date_order', '>', 'today -7d')]",
+      "invisible": "1"
+     },
+     {
+      "name": "month",
+      "string": "Last Month",
+      "domain": "[('date_order', '>', 'today -30d')]",
+      "invisible": "1"
+     },
+     {
+      "name": "year",
+      "string": "Last Year",
+      "domain": "[('date_order', '>', 'today -365d')]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"my_sale_orders_filter\" position=\"before\">\n                <filter string=\"Confirmed\" name=\"order_confirmed\" domain=\"[('state', '=', 'sale')]\"/>\n                <filter string=\"Unpaid\" name=\"order_unpaid\" domain=\"[('state', '=', 'sent')]\"/>\n                <filter string=\"Abandoned\" name=\"order_abandoned\" domain=\"[('is_abandoned_cart', '=', True)]\"/>\n                <separator/>\n                <filter string=\"Order Date\" name=\"order_date\" date=\"date_order\"/>\n                <separator/>\n                <filter string=\"From Website\" name=\"from_website\" domain=\"[('website_id', '!=', False)]\"/>\n                <separator/>\n                \n                <filter string=\"Last Week\" invisible=\"1\" name=\"week\" domain=\"[('date_order', '&gt;', 'today -7d')]\"/>\n                <filter string=\"Last Month\" invisible=\"1\" name=\"month\" domain=\"[('date_order', '&gt;', 'today -30d')]\"/>\n                <filter string=\"Last Year\" invisible=\"1\" name=\"year\" domain=\"[('date_order', '&gt;', 'today -365d')]\"/>\n            </filter>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale.view_sales_order_filter_ecommerce_unpaid",
+   "package": "website_sale",
+   "name": "sale.order.ecommerce.search.unpaid.view",
+   "entity": "sale.order",
+   "view_type": "filter",
+   "inherits_view": "sale.view_sales_order_filter",
+   "mode": "primary",
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "my_sale_orders_filter",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_sale_orders_filter",
+      "position": "attributes"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"my_sale_orders_filter\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </filter>\n            <filter name=\"my_sale_orders_filter\" position=\"before\">\n                <filter string=\"Order Date\" name=\"order_date\" date=\"date_order\"/>\n                <separator/>\n            </filter>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale.view_sales_order_filter_ecommerce_abondand",
+   "package": "website_sale",
+   "name": "sale.order.ecommerce.abandonned.view",
+   "entity": "sale.order",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Abandoned Sales Orders"
+    },
+    "fields": [
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "creation_date",
+      "string": "Creation Date",
+      "date": "create_date"
+     },
+     {
+      "name": "recovery_email",
+      "string": "Recovery Email to Send",
+      "domain": "[('cart_recovery_email_sent', '=', False)]"
+     },
+     {
+      "name": "recovery_email_set",
+      "string": "Recovery Email Sent",
+      "domain": "[('cart_recovery_email_sent', '=', True)]"
+     },
+     {
+      "name": "week",
+      "string": "Last Week",
+      "domain": "[('date_order','>', 'today -7d')]",
+      "invisible": "1"
+     },
+     {
+      "name": "month",
+      "string": "Last Month",
+      "domain": "[('date_order','>', 'today -30d')]",
+      "invisible": "1"
+     },
+     {
+      "name": "year",
+      "string": "Last Year",
+      "domain": "[('date_order','>', 'today -365d')]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "order_date",
+      "string": "Order Date",
+      "context": "{'group_by':'date_order'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Abandoned Sales Orders\">\n                <field name=\"name\"/>\n                <filter string=\"Creation Date\" name=\"creation_date\" date=\"create_date\"/>\n                <separator/>\n                <filter string=\"Recovery Email to Send\" name=\"recovery_email\" domain=\"[('cart_recovery_email_sent', '=', False)]\"/>\n                <filter string=\"Recovery Email Sent\" name=\"recovery_email_set\" domain=\"[('cart_recovery_email_sent', '=', True)]\"/>\n                <group>\n                    <filter string=\"Order Date\" name=\"order_date\" context=\"{'group_by':'date_order'}\"/>\n                </group>\n                \n                <filter string=\"Last Week\" invisible=\"1\" name=\"week\" domain=\"[('date_order','&gt;', 'today -7d')]\"/>\n                <filter string=\"Last Month\" invisible=\"1\" name=\"month\" domain=\"[('date_order','&gt;', 'today -30d')]\"/>\n                <filter string=\"Last Year\" invisible=\"1\" name=\"year\" domain=\"[('date_order','&gt;', 'today -365d')]\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale.sale_order_view_form",
+   "package": "website_sale",
+   "name": "sale.order.form",
+   "entity": "sale.order",
+   "view_type": "button",
+   "inherits_view": "sale.view_order_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_quotation_send",
+     "id": "quotation_send_primary",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [
+     {
+      "name": "action_quotation_send",
+      "position": "attributes"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_quotation_send\" id=\"quotation_send_primary\" position=\"attributes\">\n                <attribute name=\"invisible\" separator=\"or\" add=\"is_abandoned_cart and not cart_recovery_email_sent\"/>\n            </button>\n            <button name=\"action_quotation_send\" position=\"after\">\n                <button name=\"action_recovery_email_send\" type=\"object\" string=\"Send a Recovery Email\" class=\"btn-primary\" data-hotkey=\"l\" invisible=\"not is_abandoned_cart or cart_recovery_email_sent\"/>\n            </button>\n            <button name=\"action_quotation_send\" id=\"quotation_send\" position=\"after\">\n                <button name=\"action_quotation_send\" id=\"send_by_email_bis\" string=\"Send by Email\" type=\"object\" invisible=\"not is_abandoned_cart or cart_recovery_email_sent or state != 'draft'\"/>\n            </button>\n            <field name=\"partner_id\" position=\"attributes\">\n                <attribute name=\"context\">{\n                    'display_website': True,\n                    'res_partner_search_mode': 'customer',\n                    'show_address': 1,\n                    'show_vat': True,\n                }</attribute>\n            </field>\n            <field name=\"team_id\" position=\"after\">\n                <field name=\"website_id\" invisible=\"not website_id\" groups=\"website.group_multi_website\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale.sale_order_tree",
+   "package": "website_sale",
+   "name": "sale.order.list.inherit.website.sale",
+   "entity": "sale.order",
+   "view_type": "field",
+   "inherits_view": "sale.sale_order_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "user_id",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "user_id",
+      "position": "before"
+     },
+     {
+      "name": "website_id",
+      "optional": "show",
+      "groups": "website.group_multi_website"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"user_id\" position=\"before\">\n                <field name=\"website_id\" groups=\"website.group_multi_website\" optional=\"show\"/>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

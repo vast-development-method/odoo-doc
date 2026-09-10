@@ -1,0 +1,620 @@
+{
+ "catalog": {
+  "name": "entity:applicant.get.refuse.reason",
+  "description": "Complete definition of entity Get Refuse Reason (applicant.get.refuse.reason).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "applicant.get.refuse.reason",
+  "storage_name": "applicant_get_refuse_reason",
+  "full_name": "Get Refuse Reason",
+  "kind": "transient",
+  "description": "Get Refuse Reason",
+  "defined_by_package": "hr_recruitment",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.composer.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "refuse_reason_id",
+    "type": "Many2one",
+    "comodel": "hr.applicant.refuse.reason",
+    "string": "Refuse Reason",
+    "required": true,
+    "default": {
+     "dynamic": "_default_refuse_reason_id"
+    },
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Refuse Reason",
+    "target_entity": "hr.applicant.refuse.reason"
+   },
+   {
+    "name": "applicant_ids",
+    "type": "Many2many",
+    "comodel": "hr.applicant",
+    "defined_in_package": "hr_recruitment",
+    "string": "Applicant",
+    "full_name": "Applicant",
+    "target_entity": "hr.applicant"
+   },
+   {
+    "name": "send_mail",
+    "type": "Boolean",
+    "string": "Send Email",
+    "compute": "_compute_send_mail",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Send Email"
+   },
+   {
+    "name": "template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "string": "Email Template",
+    "compute": "_compute_template_id",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "domain": "[('model', '=', 'hr.applicant')]",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Email Template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "applicant_without_email",
+    "type": "Text",
+    "compute": "_compute_applicant_without_email",
+    "string": "Applicant(s) not having email",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Applicant(s) not having email"
+   },
+   {
+    "name": "duplicates",
+    "type": "Boolean",
+    "string": "Refuse Duplicate Applications",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Refuse Duplicate Applications"
+   },
+   {
+    "name": "duplicates_count",
+    "type": "Integer",
+    "string": "Duplicates Count",
+    "compute": "_compute_duplicate_applicant_ids_domain",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Duplicates Count"
+   },
+   {
+    "name": "duplicate_applicant_ids",
+    "type": "Many2many",
+    "comodel": "hr.applicant",
+    "relation": "applicant_get_refuse_reason_duplicate_applicants_rel",
+    "string": "Duplicate Applications",
+    "compute": "_compute_duplicate_applicant_ids",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Duplicate Applications",
+    "target_entity": "hr.applicant"
+   },
+   {
+    "name": "duplicate_applicant_ids_domain",
+    "type": "Binary",
+    "compute": "_compute_duplicate_applicant_ids_domain",
+    "defined_in_package": "hr_recruitment",
+    "string": "Duplicate Applicant Identifiers Domain",
+    "full_name": "Duplicate Applicant Identifiers Domain"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "string": "Attachments",
+    "compute": "_compute_from_template_id",
+    "readonly": false,
+    "store": true,
+    "bypass_search_access": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "scheduled_date",
+    "type": "Char",
+    "string": "Scheduled Date",
+    "compute": "_compute_from_template_id",
+    "readonly": false,
+    "store": true,
+    "help": "send emails after that date. This date is considered as being in UTC timezone.",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Scheduled Date"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_refuse_reason_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_send_mail",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "refuse_reason_id",
+         "applicant_without_email",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_applicant_without_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "applicant_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duplicate_applicant_ids_domain",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "applicant_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duplicate_applicant_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "duplicates",
+         "duplicate_applicant_ids_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "refuse_reason_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_template_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "refuse_reason_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_from_template_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_refuse_reason_apply",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to post message, please configure the sender's email address.",
+        "line": 118
+       },
+       {
+        "kind": "UserError",
+        "message": "At least one applicant doesn't have a email; you can't use send email option.",
+        "line": 120
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_related_original_applicants",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_send_refusal_mails",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mail_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "applicant"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": "Create mail specific for recipient ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_refuse_reason_apply",
+    "package": "hr_recruitment",
+    "kind": "UserError",
+    "message": "Unable to post message, please configure the sender's email address."
+   },
+   {
+    "operation": "action_refuse_reason_apply",
+    "package": "hr_recruitment",
+    "kind": "UserError",
+    "message": "At least one applicant doesn't have a email; you can't use send email option."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_recruitment.access_applicant_get_refuse_reason",
+    "package": "hr_recruitment",
+    "name": "access.applicant.get.refuse.reason",
+    "entity": "applicant.get.refuse.reason",
+    "group": "hr_recruitment.group_hr_recruitment_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_recruitment.access_applicant_get_refuse_reason_interviewer",
+    "package": "hr_recruitment",
+    "name": "access.applicant.get.refuse.reason.interviewer",
+    "entity": "applicant.get.refuse.reason",
+    "group": "hr_recruitment.group_hr_recruitment_interviewer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_recruitment.applicant_get_refuse_reason_view_form",
+    "package": "hr_recruitment",
+    "name": "applicant.get.refuse.reason.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Refuse Reason",
+      "disable_autofocus": "true"
+     },
+     "fields": [
+      {
+       "name": "refuse_reason_id",
+       "widget": "selection_badge",
+       "string": "Reason",
+       "options": "{'horizontal': true, 'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "duplicates",
+       "widget": "boolean_toggle",
+       "invisible": "duplicates_count == 0",
+       "options": "{'autosave': False}"
+      },
+      {
+       "name": "duplicate_applicant_ids",
+       "widget": "applicant_line_many2many",
+       "invisible": "not duplicates",
+       "domain": "duplicate_applicant_ids_domain"
+      },
+      {
+       "name": "send_mail",
+       "widget": "boolean_toggle",
+       "options": "{'autosave': False}"
+      },
+      {
+       "name": "applicant_ids",
+       "widget": "many2many_tags",
+       "required": "send_mail",
+       "options": "{'no_create': True}",
+       "placeholder": "Specify Refused Applicants..."
+      },
+      {
+       "name": "lang",
+       "invisible": "1"
+      },
+      {
+       "name": "render_model",
+       "invisible": "1"
+      },
+      {
+       "name": "subject",
+       "required": "send_mail",
+       "placeholder": "Subject..."
+      },
+      {
+       "name": "can_edit_body",
+       "invisible": "1"
+      },
+      {
+       "name": "body",
+       "widget": "html_mail",
+       "readonly": "not can_edit_body",
+       "nolabel": "1",
+       "placeholder": "Email Body...",
+       "force_save": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "many2many_binary",
+       "invisible": "not can_edit_body"
+      },
+      {
+       "name": "applicant_without_email"
+      },
+      {
+       "name": "template_id",
+       "widget": "mail_composer_template_selector"
+      },
+      {
+       "name": "scheduled_date",
+       "widget": "text_scheduled_date"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_refuse_reason_apply",
+       "string": "Refuse",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "selection_badge": 1,
+      "boolean_toggle": 2,
+      "applicant_line_many2many": 1,
+      "many2many_tags": 1,
+      "html_mail": 1,
+      "many2many_binary": 1,
+      "mail_composer_template_selector": 1,
+      "text_scheduled_date": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_recruitment.applicant_get_refuse_reason_action",
+    "package": "hr_recruitment",
+    "name": "Refuse Reason",
+    "view_mode": "form",
+    "view_id": "applicant_get_refuse_reason_view_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "applicant.get.refuse.reason"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

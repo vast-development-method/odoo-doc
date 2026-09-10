@@ -1,0 +1,714 @@
+{
+ "catalog": {
+  "name": "entity:ir.filters",
+  "description": "Complete definition of entity Filters (ir.filters).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.filters",
+  "storage_name": "ir_filters",
+  "full_name": "Filters",
+  "kind": "persistent",
+  "description": "Filters",
+  "defined_by_package": "base",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "model_id, name, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Filter Name",
+    "required": true,
+    "defined_in_package": "base",
+    "full_name": "Filter Name"
+   },
+   {
+    "name": "user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "string": "Users",
+    "ondelete": "cascade",
+    "help": "The users the filter is shared with. If empty, the filter is shared with all users.",
+    "context": {
+     "active_test": false
+    },
+    "defined_in_package": "base",
+    "full_name": "Users",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "domain",
+    "type": "Text",
+    "default": "[]",
+    "required": true,
+    "defined_in_package": "base",
+    "string": "Domain",
+    "full_name": "Domain"
+   },
+   {
+    "name": "context",
+    "type": "Text",
+    "default": "{}",
+    "required": true,
+    "defined_in_package": "base",
+    "string": "Context",
+    "full_name": "Context"
+   },
+   {
+    "name": "sort",
+    "type": "Char",
+    "default": "[]",
+    "required": true,
+    "defined_in_package": "base",
+    "string": "Sort",
+    "full_name": "Sort"
+   },
+   {
+    "name": "model_id",
+    "type": "Selection",
+    "string": "Model",
+    "required": true,
+    "selection_method": "_list_all_models",
+    "defined_in_package": "base",
+    "full_name": "Model"
+   },
+   {
+    "name": "is_default",
+    "type": "Boolean",
+    "string": "Default Filter",
+    "defined_in_package": "base",
+    "full_name": "Default Filter"
+   },
+   {
+    "name": "action_id",
+    "type": "Many2one",
+    "comodel": "ir.actions.actions",
+    "string": "Action",
+    "ondelete": "cascade",
+    "help": "The menu action this filter applies to. When left empty the filter applies to all menus for this model.",
+    "defined_in_package": "base",
+    "full_name": "Action",
+    "target_entity": "ir.actions.actions"
+   },
+   {
+    "name": "embedded_action_id",
+    "type": "Many2one",
+    "comodel": "ir.embedded.actions",
+    "help": "The embedded action this filter is applied to",
+    "ondelete": "cascade",
+    "index": "btree_not_null",
+    "defined_in_package": "base",
+    "string": "Embedded Action",
+    "full_name": "Embedded Action",
+    "target_entity": "ir.embedded.actions"
+   },
+   {
+    "name": "embedded_parent_res_id",
+    "type": "Integer",
+    "help": "id of the record the filter should be applied to. Only used in combination with embedded actions",
+    "defined_in_package": "base",
+    "string": "Embedded Parent Resource",
+    "full_name": "Embedded Parent Resource"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "base",
+    "string": "Active",
+    "full_name": "Active"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_get_filters_index",
+    "kind": "Index",
+    "definition": "(model_id, action_id, embedded_action_id, embedded_parent_res_id)",
+    "message": null,
+    "defined_in_package": "base"
+   },
+   {
+    "name": "_check_res_id_only_when_embedded_action",
+    "kind": "Constraint",
+    "definition": "CHECK(NOT (embedded_parent_res_id IS NOT NULL AND embedded_action_id IS NULL))",
+    "message": "Constraint to ensure that the embedded_parent_res_id is only defined when a top_action_id is defined.",
+    "defined_in_package": "base"
+   },
+   {
+    "name": "_check_sort_json",
+    "kind": "Constraint",
+    "definition": "CHECK(sort IS NULL OR jsonb_typeof(sort::jsonb) = 'array')",
+    "message": "Invalid sort definition",
+    "defined_in_package": "base"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_list_all_models",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_eval_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_action_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "action_id",
+     "embedded_action_id",
+     "embedded_parent_res_id"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return a domain component for matching filters that are visible in the\nsame context (menu/view) as the given action.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_filters",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "model",
+     "action_id",
+     "embedded_action_id",
+     "embedded_parent_res_id"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Obtain the list of filters available for the user on the given model.\n\n:param int model: id of model to find filters for\n:param action_id: optional ID of action to restrict filters to this action\n    plus global filters. If missing only global filters are returned.\n    The action does not have to correspond to the model, it may only be\n    a contextual action.\n:return: list of :meth:`~osv.read`-like dicts containing the\n    ``name``, ``is_default``, ``domain``, ``user_ids`` (m2m),\n    ``action_id`` (m2o tuple), ``embedded_action_id`` (m2o tuple), ``embedded_parent_res_id``\n    and ``context`` of the matching ``ir.filters``.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_filter",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_filter_erp_manager",
+    "package": "base",
+    "name": "ir_filters all",
+    "entity": "ir.filters",
+    "group": "group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "base.access_ir_filter_user",
+    "package": "base",
+    "name": "ir_filters all",
+    "entity": "ir.filters",
+    "group": "group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "base.access_ir_filter_portal",
+    "package": "base",
+    "name": "ir_filters all",
+    "entity": "ir.filters",
+    "group": "group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "base.access_ir_filter_public",
+    "package": "base",
+    "name": "ir_filters all",
+    "entity": "ir.filters",
+    "group": "group_public",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "base.ir_filters_admin_all_rights_rule",
+    "package": "base",
+    "name": "ir.filters.admin.all.rights",
+    "entity": "ir.filters",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('base.group_erp_manager'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "base.ir_filters_employee_rule",
+    "package": "base",
+    "name": "ir.filter: owner or global",
+    "entity": "ir.filters",
+    "domain": "[('user_ids','in',[False,user.id])]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "base.ir_filters_portal_public_rule",
+    "package": "base",
+    "name": "ir.filter: portal/public",
+    "entity": "ir.filters",
+    "domain": "[('user_ids', 'in', user.ids)]",
+    "groups": "[Command.link(ref('base.group_portal')), Command.link(ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "base.ir_filters_view_form",
+    "package": "base",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Filters"
+     },
+     "fields": [
+      {
+       "name": "model_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "user_ids",
+       "widget": "many2many_tags_avatar",
+       "string": "Shared with",
+       "placeholder": "All users"
+      },
+      {
+       "name": "is_default",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "model_id",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "action_id",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "domain",
+       "widget": "domain",
+       "options": "{'foldable': True, 'model': 'model_id', 'allow_expressions':True}"
+      },
+      {
+       "name": "context",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "sort",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags_avatar": 1,
+      "boolean_toggle": 1,
+      "domain": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.ir_filters_view_edit_form",
+    "package": "base",
+    "name": null,
+    "view_type": "xpath",
+    "inherits_view": "base.ir_filters_view_form",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "base.ir_filters_view_tree",
+    "package": "base",
+    "name": null,
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Filters"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "user_ids",
+       "widget": "many2many_tags_avatar"
+      },
+      {
+       "name": "is_default"
+      },
+      {
+       "name": "action_id"
+      },
+      {
+       "name": "domain",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "context",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "sort",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags_avatar": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.ir_filters_view_search",
+    "package": "base",
+    "name": null,
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Filters"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Filter Name"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "user_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "shared",
+       "string": "Global",
+       "domain": "[('user_ids','=',False)]",
+       "help": "Filters shared with all users"
+      },
+      {
+       "name": "my_filters",
+       "string": "My filters",
+       "domain": "[('user_ids','in',[uid])]",
+       "help": "Filters shared with myself"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "user",
+       "string": "User",
+       "domain": "[]",
+       "context": "{'group_by':'user_ids'}"
+      },
+      {
+       "name": "model",
+       "string": "Model",
+       "domain": "[]",
+       "context": "{'group_by':'model_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.ir_filters_view_form",
+    "package": "mail",
+    "name": "ir.filters.view.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "base.ir_filters_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='user_ids']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='user_ids']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.ir_filters_view_tree",
+    "package": "mail",
+    "name": "ir.filters.view.tree.inherit",
+    "view_type": "xpath",
+    "inherits_view": "base.ir_filters_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='user_ids']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='user_ids']",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.actions_ir_filters_view",
+    "package": "base",
+    "name": "User-defined Filters",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.filters"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

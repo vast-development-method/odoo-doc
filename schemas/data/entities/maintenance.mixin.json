@@ -1,0 +1,247 @@
+{
+ "catalog": {
+  "name": "entity:maintenance.mixin",
+  "description": "Complete definition of entity Maintenance Maintained Item (maintenance.mixin).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "maintenance.mixin",
+  "storage_name": "maintenance_mixin",
+  "full_name": "Maintenance Maintained Item",
+  "kind": "abstract",
+  "description": "Maintenance Maintained Item",
+  "defined_by_package": "maintenance",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "maintenance",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "effective_date",
+    "type": "Date",
+    "string": "Effective Date",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "required": true,
+    "help": "This date will be used to compute the Mean Time Between Failure.",
+    "defined_in_package": "maintenance",
+    "full_name": "Effective Date"
+   },
+   {
+    "name": "maintenance_team_id",
+    "type": "Many2one",
+    "comodel": "maintenance.team",
+    "string": "Maintenance Team",
+    "compute": "_compute_maintenance_team_id",
+    "store": true,
+    "readonly": false,
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "maintenance",
+    "full_name": "Maintenance Team",
+    "target_entity": "maintenance.team"
+   },
+   {
+    "name": "technician_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Technician",
+    "tracking": true,
+    "defined_in_package": "maintenance",
+    "full_name": "Technician",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "maintenance_ids",
+    "type": "One2many",
+    "comodel": "maintenance.request",
+    "defined_in_package": "maintenance",
+    "string": "Maintenance",
+    "full_name": "Maintenance",
+    "target_entity": "maintenance.request"
+   },
+   {
+    "name": "maintenance_count",
+    "type": "Integer",
+    "compute": "_compute_maintenance_count",
+    "string": "Maintenance Count",
+    "store": true,
+    "defined_in_package": "maintenance",
+    "full_name": "Maintenance Count"
+   },
+   {
+    "name": "maintenance_open_count",
+    "type": "Integer",
+    "compute": "_compute_maintenance_count",
+    "string": "Current Maintenance",
+    "store": true,
+    "defined_in_package": "maintenance",
+    "full_name": "Current Maintenance"
+   },
+   {
+    "name": "expected_mtbf",
+    "type": "Integer",
+    "string": "Expected MTBF",
+    "help": "Expected Mean Time Between Failure",
+    "defined_in_package": "maintenance",
+    "full_name": "Expected MTBF"
+   },
+   {
+    "name": "mtbf",
+    "type": "Integer",
+    "compute": "_compute_maintenance_request",
+    "string": "MTBF",
+    "help": "Mean Time Between Failure, computed based on done corrective maintenances.",
+    "defined_in_package": "maintenance",
+    "full_name": "MTBF"
+   },
+   {
+    "name": "mttr",
+    "type": "Integer",
+    "compute": "_compute_maintenance_request",
+    "string": "MTTR",
+    "help": "Mean Time To Repair",
+    "defined_in_package": "maintenance",
+    "full_name": "MTTR"
+   },
+   {
+    "name": "estimated_next_failure",
+    "type": "Date",
+    "compute": "_compute_maintenance_request",
+    "string": "Estimated time before next failure (in days)",
+    "help": "Computed as Latest Failure Date + MTBF",
+    "defined_in_package": "maintenance",
+    "full_name": "Estimated time before next failure (in days)"
+   },
+   {
+    "name": "latest_failure_date",
+    "type": "Date",
+    "compute": "_compute_maintenance_request",
+    "string": "Latest Failure Date",
+    "defined_in_package": "maintenance",
+    "full_name": "Latest Failure Date"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_maintenance_team_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "maintenance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_maintenance_request",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "maintenance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "effective_date",
+         "maintenance_ids.stage_id",
+         "maintenance_ids.close_date",
+         "maintenance_ids.request_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_maintenance_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "maintenance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "maintenance_ids.stage_id.done",
+         "maintenance_ids.archive"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

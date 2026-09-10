@@ -1,0 +1,356 @@
+{
+ "catalog": {
+  "name": "entity:forum.post.vote",
+  "description": "Complete definition of entity Post Vote (forum.post.vote).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "forum.post.vote",
+  "storage_name": "forum_post_vote",
+  "full_name": "Post Vote",
+  "kind": "persistent",
+  "description": "Post Vote",
+  "defined_by_package": "website_forum",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "create_date desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "post_id",
+    "type": "Many2one",
+    "comodel": "forum.post",
+    "string": "Post",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Post",
+    "target_entity": "forum.post"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.uid"
+    },
+    "ondelete": "cascade",
+    "defined_in_package": "website_forum",
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "vote",
+    "type": "Selection",
+    "selection": [
+     [
+      "1",
+      "1"
+     ],
+     [
+      "-1",
+      "-1"
+     ],
+     [
+      "0",
+      "0"
+     ]
+    ],
+    "string": "Vote",
+    "required": true,
+    "default": "1",
+    "defined_in_package": "website_forum",
+    "full_name": "Vote"
+   },
+   {
+    "name": "create_date",
+    "type": "Datetime",
+    "string": "Create Date",
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Create Date"
+   },
+   {
+    "name": "forum_id",
+    "type": "Many2one",
+    "comodel": "forum.forum",
+    "string": "Forum",
+    "related": "post_id.forum_id",
+    "store": true,
+    "readonly": false,
+    "index": "btree_not_null",
+    "defined_in_package": "website_forum",
+    "full_name": "Forum",
+    "target_entity": "forum.forum"
+   },
+   {
+    "name": "recipient_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "To",
+    "related": "post_id.create_uid",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "website_forum",
+    "full_name": "To",
+    "target_entity": "res.users"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_vote_uniq",
+    "kind": "Constraint",
+    "definition": "unique (post_id, user_id)",
+    "message": "Vote already exists!",
+    "defined_in_package": "website_forum"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_get_karma_value",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "old_vote",
+     "new_vote",
+     "up_karma",
+     "down_karma"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": "Return the karma to add / remove based on the old vote and on the new vote.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_general_rights",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "It is not allowed to vote for its own post.",
+        "line": 88
+       },
+       {
+        "kind": "UserError",
+        "message": "It is not allowed to modify someone else's vote.",
+        "line": 91
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_karma_rights",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "upvote"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to upvote.",
+        "line": 96
+       },
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to downvote.",
+        "line": 98
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_vote_update_karma",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "old_vote",
+     "new_vote"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_general_rights",
+    "package": "website_forum",
+    "kind": "UserError",
+    "message": "It is not allowed to vote for its own post."
+   },
+   {
+    "operation": "_check_general_rights",
+    "package": "website_forum",
+    "kind": "UserError",
+    "message": "It is not allowed to modify someone else's vote."
+   },
+   {
+    "operation": "_check_karma_rights",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to upvote."
+   },
+   {
+    "operation": "_check_karma_rights",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to downvote."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_forum.access_forum_post_vote_portal",
+    "package": "website_forum",
+    "name": "orum.post.vote.portal",
+    "entity": "forum.post.vote",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_forum.access_forum_post_vote_user",
+    "package": "website_forum",
+    "name": "forum.post.vote.user",
+    "entity": "forum.post.vote",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_forum.website_forum_post_vote_own",
+    "package": "website_forum",
+    "name": "Website forum vote: own votes only",
+    "entity": "forum.post.vote",
+    "domain": "[('user_id', '=', user.id)]",
+    "groups": "[(4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_forum.website_forum_post_vote_all",
+    "package": "website_forum",
+    "name": "Website forum vote: all votes",
+    "entity": "forum.post.vote",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('base.group_erp_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

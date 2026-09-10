@@ -1,0 +1,4445 @@
+{
+ "catalog": {
+  "name": "entity:res.partner.bank",
+  "description": "Complete definition of entity Bank Accounts (res.partner.bank).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "res.partner.bank",
+  "storage_name": "res_partner_bank",
+  "full_name": "Bank Accounts",
+  "kind": "persistent",
+  "description": "Bank Accounts",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "account",
+   "account_qr_code_emv",
+   "base_iban",
+   "account_qr_code_sepa",
+   "hr",
+   "l10n_ar",
+   "l10n_au",
+   "l10n_br",
+   "l10n_ch",
+   "l10n_hk",
+   "l10n_id",
+   "l10n_kh",
+   "l10n_mx",
+   "l10n_sg",
+   "l10n_th",
+   "l10n_us",
+   "l10n_vn"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": "acc_number",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "account"
+    ],
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "acc_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "lambda x: x.env['res.partner.bank'].get_supported_account_types()"
+    },
+    "compute": "_compute_acc_type",
+    "string": "Type",
+    "help": "Bank account type: Normal or IBAN. Inferred from the bank account number.",
+    "defined_in_package": "base",
+    "full_name": "Type"
+   },
+   {
+    "name": "acc_number",
+    "type": "Char",
+    "string": "Account Number",
+    "required": true,
+    "search": "_search_acc_number",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "account"
+    ],
+    "full_name": "Account Number"
+   },
+   {
+    "name": "clearing_number",
+    "type": "Char",
+    "string": "Clearing Number",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "account"
+    ],
+    "full_name": "Clearing Number"
+   },
+   {
+    "name": "sanitized_acc_number",
+    "type": "Char",
+    "compute": "_compute_sanitized_acc_number",
+    "string": "Sanitized Account Number",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "base",
+    "full_name": "Sanitized Account Number"
+   },
+   {
+    "name": "acc_holder_name",
+    "type": "Char",
+    "string": "Account Holder Name",
+    "help": "Account holder name, in case it is different than the name of the Account Holder",
+    "compute": "_compute_account_holder_name",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "account"
+    ],
+    "full_name": "Account Holder Name"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Account Holder",
+    "ondelete": "cascade",
+    "index": true,
+    "domain": [
+     "|",
+     [
+      "is_company",
+      "=",
+      true
+     ],
+     [
+      "parent_id",
+      "=",
+      false
+     ]
+    ],
+    "required": true,
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "account"
+    ],
+    "full_name": "Account Holder",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "allow_out_payment",
+    "type": "Boolean",
+    "string": "Send Money",
+    "help": "Sending fake invoices with a fraudulent account number is a common phishing practice. To protect yourself, always verify new bank account numbers, preferably by calling the vendor, as phishing usually happens when their emails are compromised. Once verified, you can activate the ability to send money.",
+    "default": false,
+    "copy": false,
+    "readonly": false,
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "account"
+    ],
+    "full_name": "Send Money"
+   },
+   {
+    "name": "bank_id",
+    "type": "Many2one",
+    "comodel": "res.bank",
+    "string": "Bank",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "account"
+    ],
+    "full_name": "Bank",
+    "target_entity": "res.bank"
+   },
+   {
+    "name": "bank_name",
+    "type": "Char",
+    "related": "bank_id.name",
+    "readonly": false,
+    "defined_in_package": "base",
+    "string": "Bank Name",
+    "full_name": "Bank Name"
+   },
+   {
+    "name": "bank_bic",
+    "type": "Char",
+    "related": "bank_id.bic",
+    "readonly": false,
+    "defined_in_package": "base",
+    "string": "Bank Bank identifier code",
+    "full_name": "Bank Bank identifier code"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "base",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "defined_in_package": "base",
+    "tracking": true,
+    "extended_in_packages": [
+     "account"
+    ],
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "related": "partner_id.company_id",
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "base",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "partner_id.country_code",
+    "string": "Country Code",
+    "defined_in_package": "base",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "note",
+    "type": "Text",
+    "string": "Notes",
+    "defined_in_package": "base",
+    "full_name": "Notes"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "compute": "_compute_color",
+    "defined_in_package": "base",
+    "string": "Color",
+    "full_name": "Color"
+   },
+   {
+    "name": "journal_id",
+    "type": "One2many",
+    "comodel": "account.journal",
+    "inverse_name": "bank_account_id",
+    "domain": [
+     [
+      "type",
+      "=",
+      "bank"
+     ]
+    ],
+    "string": "Account Journal",
+    "readonly": true,
+    "check_company": true,
+    "help": "The accounting journal corresponding to this bank account.",
+    "defined_in_package": "account",
+    "full_name": "Account Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "has_iban_warning",
+    "type": "Boolean",
+    "compute": "_compute_display_account_warning",
+    "help": "Technical field used to display a warning if the IBAN country is different than the holder country.",
+    "store": true,
+    "defined_in_package": "account",
+    "string": "Has International bank account number Warning",
+    "full_name": "Has International bank account number Warning"
+   },
+   {
+    "name": "partner_country_name",
+    "type": "Char",
+    "related": "partner_id.country_id.name",
+    "defined_in_package": "account",
+    "string": "Partner Country Name",
+    "full_name": "Partner Country Name"
+   },
+   {
+    "name": "has_money_transfer_warning",
+    "type": "Boolean",
+    "compute": "_compute_display_account_warning",
+    "help": "Technical field used to display a warning if the account is a transfer service account.",
+    "store": true,
+    "defined_in_package": "account",
+    "string": "Has Money Transfer Warning",
+    "full_name": "Has Money Transfer Warning"
+   },
+   {
+    "name": "money_transfer_service",
+    "type": "Char",
+    "compute": "_compute_money_transfer_service_name",
+    "defined_in_package": "account",
+    "string": "Money Transfer Service",
+    "full_name": "Money Transfer Service"
+   },
+   {
+    "name": "partner_supplier_rank",
+    "type": "Integer",
+    "related": "partner_id.supplier_rank",
+    "defined_in_package": "account",
+    "string": "Partner Supplier Rank",
+    "full_name": "Partner Supplier Rank"
+   },
+   {
+    "name": "partner_customer_rank",
+    "type": "Integer",
+    "related": "partner_id.customer_rank",
+    "defined_in_package": "account",
+    "string": "Partner Customer Rank",
+    "full_name": "Partner Customer Rank"
+   },
+   {
+    "name": "related_moves",
+    "type": "One2many",
+    "comodel": "account.move",
+    "inverse_name": "partner_bank_id",
+    "defined_in_package": "account",
+    "string": "Related Moves",
+    "full_name": "Related Moves",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "user_has_group_validate_bank_account",
+    "type": "Boolean",
+    "compute": "_compute_user_has_group_validate_bank_account",
+    "defined_in_package": "account",
+    "string": "User Has Group Validate Bank Account",
+    "full_name": "User Has Group Validate Bank Account"
+   },
+   {
+    "name": "lock_trust_fields",
+    "type": "Boolean",
+    "compute": "_compute_lock_trust_fields",
+    "defined_in_package": "account",
+    "string": "Lock Trust Fields",
+    "full_name": "Lock Trust Fields"
+   },
+   {
+    "name": "duplicate_bank_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "compute": "_compute_duplicate_bank_partner_ids",
+    "defined_in_package": "account",
+    "string": "Duplicate Bank Partner",
+    "full_name": "Duplicate Bank Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "display_qr_setting",
+    "type": "Boolean",
+    "compute": "_compute_display_qr_setting",
+    "defined_in_package": "account_qr_code_emv",
+    "string": "Display Quick response Setting",
+    "full_name": "Display Quick response Setting"
+   },
+   {
+    "name": "include_reference",
+    "type": "Boolean",
+    "string": "Include Reference",
+    "help": "Include the reference in the QR code.",
+    "defined_in_package": "account_qr_code_emv",
+    "full_name": "Include Reference"
+   },
+   {
+    "name": "proxy_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "none",
+      "None"
+     ],
+     [
+      "email",
+      "Email Address"
+     ],
+     [
+      "mobile",
+      "Mobile Number"
+     ],
+     [
+      "br_cpf_cnpj",
+      "CPF/CNPJ (BR)"
+     ],
+     [
+      "br_random",
+      "Random Key (BR)"
+     ],
+     [
+      "id",
+      "FPS ID"
+     ],
+     [
+      "bakong_id_solo",
+      "Bakong Account ID (Solo Merchant)"
+     ],
+     [
+      "bakong_id_merchant",
+      "Bakong Account ID (Corporate Merchant)"
+     ],
+     [
+      "uen",
+      "UEN"
+     ],
+     [
+      "ewallet_id",
+      "Ewallet ID"
+     ],
+     [
+      "merchant_tax_id",
+      "Merchant Tax ID"
+     ],
+     [
+      "merchant_id",
+      "Merchant ID"
+     ],
+     [
+      "payment_service",
+      "Payment Service"
+     ],
+     [
+      "atm_card",
+      "ATM Card Number"
+     ],
+     [
+      "bank_acc",
+      "Bank Account"
+     ]
+    ],
+    "string": "Proxy Type",
+    "default": "none",
+    "defined_in_package": "account_qr_code_emv",
+    "selection_added_by": [
+     "l10n_br",
+     "l10n_hk",
+     "l10n_kh",
+     "l10n_sg",
+     "l10n_th",
+     "l10n_vn"
+    ],
+    "ondelete": {
+     "merchant_id": "set default",
+     "payment_service": "set default",
+     "atm_card": "set default",
+     "bank_acc": "set default"
+    },
+    "extended_in_packages": [
+     "l10n_br",
+     "l10n_hk",
+     "l10n_kh",
+     "l10n_sg",
+     "l10n_th",
+     "l10n_vn"
+    ],
+    "full_name": "Proxy Type"
+   },
+   {
+    "name": "country_proxy_keys",
+    "type": "Char",
+    "compute": "_compute_country_proxy_keys",
+    "defined_in_package": "account_qr_code_emv",
+    "string": "Country Proxy Keys",
+    "full_name": "Country Proxy Keys"
+   },
+   {
+    "name": "proxy_value",
+    "type": "Char",
+    "string": "Proxy Value",
+    "defined_in_package": "account_qr_code_emv",
+    "full_name": "Proxy Value"
+   },
+   {
+    "name": "bank_street",
+    "type": "Char",
+    "related": "bank_id.street",
+    "readonly": false,
+    "defined_in_package": "hr",
+    "string": "Bank Street",
+    "full_name": "Bank Street"
+   },
+   {
+    "name": "bank_street2",
+    "type": "Char",
+    "related": "bank_id.street2",
+    "readonly": false,
+    "defined_in_package": "hr",
+    "string": "Bank Street2",
+    "full_name": "Bank Street2"
+   },
+   {
+    "name": "bank_zip",
+    "type": "Char",
+    "related": "bank_id.zip",
+    "readonly": false,
+    "defined_in_package": "hr",
+    "string": "Bank Zip",
+    "full_name": "Bank Zip"
+   },
+   {
+    "name": "bank_city",
+    "type": "Char",
+    "related": "bank_id.city",
+    "readonly": false,
+    "defined_in_package": "hr",
+    "string": "Bank City",
+    "full_name": "Bank City"
+   },
+   {
+    "name": "bank_state",
+    "type": "Many2one",
+    "related": "bank_id.state",
+    "readonly": false,
+    "defined_in_package": "hr",
+    "string": "Bank State",
+    "full_name": "Bank State"
+   },
+   {
+    "name": "bank_country",
+    "type": "Many2one",
+    "related": "bank_id.country",
+    "readonly": false,
+    "defined_in_package": "hr",
+    "string": "Bank Country",
+    "full_name": "Bank Country"
+   },
+   {
+    "name": "bank_email",
+    "type": "Char",
+    "related": "bank_id.email",
+    "readonly": false,
+    "defined_in_package": "hr",
+    "string": "Bank Email",
+    "full_name": "Bank Email"
+   },
+   {
+    "name": "bank_phone",
+    "type": "Char",
+    "related": "bank_id.phone",
+    "readonly": false,
+    "defined_in_package": "hr",
+    "string": "Bank Phone",
+    "full_name": "Bank Phone"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2many",
+    "comodel": "hr.employee",
+    "relation": "Employee",
+    "compute": "_compute_employee_id",
+    "search": "_search_employee_id",
+    "defined_in_package": "hr",
+    "string": "Employee",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "employee_salary_amount",
+    "type": "Float",
+    "string": "Salary Allocation",
+    "compute": "_compute_salary_amount",
+    "digits": [
+     16,
+     4
+    ],
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "hr",
+    "full_name": "Salary Allocation"
+   },
+   {
+    "name": "employee_salary_amount_is_percentage",
+    "type": "Boolean",
+    "compute": "_compute_salary_amount",
+    "readonly": true,
+    "store": false,
+    "defined_in_package": "hr",
+    "string": "Employee Salary Amount Is Percentage",
+    "full_name": "Employee Salary Amount Is Percentage"
+   },
+   {
+    "name": "currency_symbol",
+    "type": "Char",
+    "related": "currency_id.symbol",
+    "defined_in_package": "hr",
+    "string": "Currency Symbol",
+    "full_name": "Currency Symbol"
+   },
+   {
+    "name": "employee_has_multiple_bank_accounts",
+    "type": "Boolean",
+    "related": "employee_id.has_multiple_bank_accounts",
+    "defined_in_package": "hr",
+    "string": "Employee Has Multiple Bank Accounts",
+    "full_name": "Employee Has Multiple Bank Accounts"
+   },
+   {
+    "name": "aba_bsb",
+    "type": "Char",
+    "string": "BSB",
+    "help": "Bank State Branch code - needed if payment is to be made using ABA files",
+    "defined_in_package": "l10n_au",
+    "full_name": "BSB"
+   },
+   {
+    "name": "l10n_ch_qr_iban",
+    "type": "Char",
+    "string": "QR-IBAN",
+    "compute": "_compute_l10n_ch_qr_iban",
+    "store": true,
+    "readonly": false,
+    "help": "Put the QR-IBAN here for your own bank accounts.  That way, you can still use the main IBAN in the Account Number while you will see the QR-IBAN for the barcode.  ",
+    "defined_in_package": "l10n_ch",
+    "full_name": "quick response-international bank account number"
+   },
+   {
+    "name": "l10n_ch_display_qr_bank_options",
+    "type": "Boolean",
+    "compute": "_compute_l10n_ch_display_qr_bank_options",
+    "defined_in_package": "l10n_ch",
+    "string": "Localization Ch Display Quick response Bank Options",
+    "full_name": "Localization Ch Display Quick response Bank Options"
+   },
+   {
+    "name": "l10n_id_qris_api_key",
+    "type": "Char",
+    "string": "QRIS API Key",
+    "groups": "base.group_system",
+    "defined_in_package": "l10n_id",
+    "full_name": "QRIS application programming interface Key"
+   },
+   {
+    "name": "l10n_id_qris_mid",
+    "type": "Char",
+    "string": "QRIS Merchant ID",
+    "groups": "base.group_system",
+    "defined_in_package": "l10n_id",
+    "full_name": "QRIS Merchant identifier"
+   },
+   {
+    "name": "l10n_kh_merchant_id",
+    "type": "Char",
+    "string": "Merchant ID",
+    "defined_in_package": "l10n_kh",
+    "full_name": "Merchant identifier"
+   },
+   {
+    "name": "l10n_mx_edi_clabe",
+    "type": "Char",
+    "string": "CLABE",
+    "help": "Standardized banking cipher for Mexico. More info wikipedia.org/wiki/CLABE",
+    "defined_in_package": "l10n_mx",
+    "full_name": "CLABE"
+   },
+   {
+    "name": "fiscal_country_codes",
+    "type": "Char",
+    "store": false,
+    "default": {
+     "dynamic": "_get_fiscal_country_codes"
+    },
+    "defined_in_package": "l10n_mx",
+    "string": "Fiscal Country Codes",
+    "full_name": "Fiscal Country Codes"
+   },
+   {
+    "name": "show_aba_routing",
+    "type": "Boolean",
+    "compute": "_compute_show_aba_routing",
+    "defined_in_package": "l10n_us",
+    "string": "Show Aba Routing",
+    "full_name": "Show Aba Routing"
+   },
+   {
+    "name": "l10n_us_bank_account_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "checking",
+      "Checking"
+     ],
+     [
+      "savings",
+      "Savings"
+     ]
+    ],
+    "string": "Bank Account Type",
+    "default": "checking",
+    "required": true,
+    "defined_in_package": "l10n_us",
+    "full_name": "Bank Account Type"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_number",
+    "kind": "Constraint",
+    "definition": "unique(sanitized_acc_number, partner_id)",
+    "message": "The combination Account Number/Partner must be unique.",
+    "defined_in_package": "base"
+   }
+  ],
+  "operations": [
+   {
+    "name": "get_supported_account_types",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_supported_account_types",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "base_iban",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Add new account type named cbu used in Argentina ",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_au",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sanitized_acc_number",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "acc_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_acc_number",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_acc_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "acc_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_au",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "acc_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Criteria to be an ABA account:\n- Spaces, hypens, digits are valid.\n- Total length must be 9 or less.\n- Cannot be only spaces, zeros or hyphens (must have at least one digit in range 1-9)",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_holder_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "retrieve_acc_type",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "acc_number"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "To be overridden by subclasses in order to support other account_types.\n        ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "base_iban",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ar",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "acc_number",
+         "bank_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allow_out_payment",
+         "acc_number",
+         "bank_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "display_account_trust"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_color",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allow_out_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sanitize_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "A bank account with Account Number %(number)s already exists for Partner %(partner)s, but is archived. Please unarchive it instead.",
+        "line": 299
+       }
+      ]
+     },
+     {
+      "package": "base_iban",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 58,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot modify the account number or partner of an account that has been trusted.",
+        "line": 347
+       },
+       {
+        "kind": "UserError",
+        "message": "You do not have the rights to trust or un-trust accounts.",
+        "line": 350
+       }
+      ]
+     },
+     {
+      "package": "base_iban",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_archive_bank",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Custom archive function because the basic action_archive don't trigger a re-rendering of the page, so\nthe archived value is still visible in the view.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Instead of deleting a bank account, we want to archive it since we cannot delete bank account that is linked\nto any entries",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_user_can_trust",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_or_create_bank_account",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "account_number",
+     "partner",
+     "company",
+     "allow_company_account_creation",
+     "extra_create_vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Find a bank account for the given partner and number. Create it if it doesn't exist.\n\nManage different corner cases:\n\n- make sure that we don't try to create the bank number if we look for it but it exists restricted in another\n  company; because of the unique constraint\n- make sure that we don't create a bank account number for one of the database's companies, unless\n  `allow_company_account_creation` is specified\n\n:param account_number: the bank account number to search for (or to create)\n:param partner: the partner linked to the account number\n:param company: the company that the bank needs to be accessible from (only for searching)\n:param allow_company_account_creation: whether we disable the protection to create an account for our own\n        companies\n:param extra_create_vals: values to be added when creating the account, but not to write if the account was\n        found and e.g. modified manually beforehands",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please add your own bank account manually: %(account_number)s (%(partner)s)",
+        "line": 210
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_journal_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A bank account can belong to only one journal.",
+        "line": 59
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_allow_out_payment",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Block enabling the setting, but it can be set to false without the group. (For example, at creation) ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You do not have the right to trust or un-trust a bank account.",
+        "line": 65
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_duplicate_bank_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "acc_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_account_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id.country_id",
+         "sanitized_acc_number",
+         "allow_out_payment",
+         "acc_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_money_transfer_service_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sanitized_acc_number",
+         "allow_out_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_money_transfer_services",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_has_group_validate_bank_account",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "acc_number"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lock_trust_fields",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "allow_out_payment"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_qr_code_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "free_communication",
+     "structured_communication",
+     "currency",
+     "debtor_partner",
+     "qr_method",
+     "silent_errors"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Returns the QR-code vals needed to generate the QR-code report link to pay this account with the given parameters,\nor None if no QR-code could be generated.\n\n:param amount: The amount to be paid\n:param free_communication: Free communication to add to the payment when generating one with the QR-code\n:param structured_communication: Structured communication to add to the payment when generating one with the QR-code\n:param currency: The currency in which amount is expressed\n:param debtor_partner: The partner to which this QR-code is aimed (so the one who will have to pay)\n:param qr_method: The QR generation method to be used to make the QR-code. If None, the first one giving a result will be used.\n:param silent_errors: If true, forbids errors to be raised if some tested QR-code format can't be generated because of incorrect data.",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Currency must always be provided in order to generate a QR-code",
+        "line": 154
+       },
+       {
+        "kind": "UserError",
+        "message": "The following error prevented '%(candidate)s' QR-code to be generated though it was detected as eligible: ",
+        "line": 174
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "build_qr_code_url",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "amount",
+     "free_communication",
+     "structured_communication",
+     "currency",
+     "debtor_partner",
+     "qr_method",
+     "silent_errors"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "build_qr_code_base64",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "amount",
+     "free_communication",
+     "structured_communication",
+     "currency",
+     "debtor_partner",
+     "qr_method",
+     "silent_errors"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_qr_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qr_method",
+     "amount",
+     "currency",
+     "debtor_partner",
+     "free_communication",
+     "structured_communication"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_sepa",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_id",
+      "decorators": [],
+      "documentation": "Getting content for the QR through calling QRIS API and storing the QRIS transaction as a record",
+      "size_in_lines": 57,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "response.get('data')",
+        "line": 95
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_qr_code_generation_params",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qr_method",
+     "amount",
+     "currency",
+     "debtor_partner",
+     "free_communication",
+     "structured_communication"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_sepa",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_id",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_qr_code_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qr_method",
+     "amount",
+     "currency",
+     "debtor_partner",
+     "free_communication",
+     "structured_communication"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Hook for extension, to support the different QR generation methods.\nThis function uses the provided qr_method to try generation a QR-code for\nthe given data. It it succeeds, it returns the report URL to make this\nQR-code; else None.\n\n:param qr_method: The QR generation method to be used to make the QR-code.\n:param amount: The amount to be paid\n:param currency: The currency in which amount is expressed\n:param debtor_partner: The partner to which this QR-code is aimed (so the one who will have to pay)\n:param free_communication: Free communication to add to the payment when generating one with the QR-code\n:param structured_communication: Structured communication to add to the payment when generating one with the QR-code",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_qr_code_base64",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qr_method",
+     "amount",
+     "currency",
+     "debtor_partner",
+     "free_communication",
+     "structured_communication"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Hook for extension, to support the different QR generation methods.\nThis function uses the provided qr_method to try generation a QR-code for\nthe given data. It it succeeds, it returns QR code in base64 url; else None.\n\n:param qr_method: The QR generation method to be used to make the QR-code.\n:param amount: The amount to be paid\n:param currency: The currency in which amount is expressed\n:param debtor_partner: The partner to which this QR-code is aimed (so the one who will have to pay)\n:param free_communication: Free communication to add to the payment when generating one with the QR-code\n:param structured_communication: Structured communication to add to the payment when generating one with the QR-code",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_available_qr_methods",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns the QR-code generation methods that are available on this db,\nin the form of a list of (code, name, sequence) elements, where\n'code' is a unique string identifier, 'name' the name to display\nto the user to designate the method, and 'sequence' is a positive integer\nindicating the order in which those mehtods need to be checked, to avoid\nshadowing between them (lower sequence means more prioritary).",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_sepa",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_id",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_available_qr_methods_in_sequence",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Same as _get_available_qr_methods but without returning the sequence,\nand using it directly to order the returned list.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_error_messages_for_qr",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qr_method",
+     "debtor_partner",
+     "currency"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Tells whether or not the criteria to apply QR-generation\nmethod qr_method are met for a payment on this account, in the\ngiven currency, by debtor_partner. This does not impeach generation errors,\nit only checks that this type of QR-code *should be* possible to generate.\nIf not, returns an adequate error message to be displayed to the user if need be.\nConsistency of the required field needs then to be checked by _check_for_qr_code_errors().\n:returns:  None if the qr method is eligible, or the error message",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": "Return an error for emv_qr if the account's country does no match any methods found in inheriting modules.",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_sepa",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [],
+      "documentation": "Override.",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hk",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_id",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_kh",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sg",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_th",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_for_qr_code_errors",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "qr_method",
+     "amount",
+     "currency",
+     "debtor_partner",
+     "free_communication",
+     "structured_communication"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Checks the data before generating a QR-code for the specified qr_method\n(this method must have been checked for eligbility by _get_error_messages_for_qr() first).\n\nReturns None if no error was found, or a string describing the first error encountered\nso that it can be reported to the user.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account_qr_code_sepa",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [],
+      "documentation": "Override.",
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hk",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_id",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_kh",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sg",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_th",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_business_doc",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_serialize",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "header",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_remove_accents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "string"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_country_proxy_keys",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hk",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_kh",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sg",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_th",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_qr_setting",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Override.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hk",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_kh",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sg",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_th",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_crc16",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "data",
+     "poly",
+     "init"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_merchant_account_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [],
+      "documentation": "Override.",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hk",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_kh",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sg",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_th",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_additional_data_field",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "comment"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [],
+      "documentation": "Override.",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hk",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_kh",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sg",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_merchant_category_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_kh",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_qr_code_vals_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qr_method",
+     "amount",
+     "currency",
+     "debtor_partner",
+     "free_communication",
+     "structured_communication"
+    ],
+    "definitions": [
+     {
+      "package": "account_qr_code_emv",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [],
+      "documentation": "Override. Force the amount field to always have two decimals. Uppercase the merchant name and merchant city.\nAlthough not specified explicitly in the spec, not uppercasing causes errors when scanning the code. Also ensure\nthere is always some comment set.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_kh",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_bban",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base_iban",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cannot compute the BBAN because the account number is not an IBAN.",
+        "line": 107
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_iban",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base_iban",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "acc_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_iban",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "iban"
+    ],
+    "definitions": [
+     {
+      "package": "base_iban",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_salary_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id.salary_distribution"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_employee_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_allocation_wizard",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_employee_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_aba_bsb",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_au",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "aba_bsb"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "BSB is not valid (expected format is \"NNN-NNN\"). Please rectify.",
+        "line": 27
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_br_proxy",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_br",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "proxy_type",
+         "proxy_value",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The proxy type must be Email Address, Mobile Number, CPF/CNPJ (BR) or Random Key (BR) for Pix code generation.",
+        "line": 32
+       },
+       {
+        "kind": "ValidationError",
+        "message": "%s is not a valid email.",
+        "line": 40
+       },
+       {
+        "kind": "ValidationError",
+        "message": "%s is not a valid CPF or CNPJ (don't include periods or dashes).",
+        "line": 45
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The mobile number %s is invalid. It must start with +55, contain a 2 digit territory or state code followed by a 9 digit number.",
+        "line": 48
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The random key %s is invalid, the format looks like this: 71d6c6e1-64ea-4a11-9560-a10870c40ca2",
+        "line": 57
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_ch_display_qr_bank_options",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_ch_qr_iban",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "acc_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_ch_filter_text",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_ch_get_qr_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "currency",
+     "debtor_partner",
+     "free_communication",
+     "structured_communication"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_address_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partner"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": "Retrieves the partner's address fields, truncated to respect the line specs.\n:returns: tuple(street, street_number, zip, city)",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_qr_reference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reference"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Checks whether the given reference is a QR-reference, i.e. it is\nmade of 27 digits, the 27th being a mod10r check on the 26 previous ones.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_iso11649_reference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reference"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Checks whether the given reference is a ISO11649 (SCOR) reference.\n        ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_ch_qr_debtor_check",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "debtor_partner"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ch",
+      "decorators": [],
+      "documentation": "This method should be used in _get_error_messages_for_qr and _check_for_qr_code_errors\nIt allows is to permit to set this qr method if a partner is not yet provided when executing _get_error_messages_for_qr\nwhile preventing to print qr code when executing _check_for_qr_code_errors if the partner is not provided",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_hk_proxy",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_hk",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "proxy_type",
+         "proxy_value",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The FPS Type must be either ID, Mobile or Email to generate a FPS QR code for account number %s.",
+        "line": 21
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Invalid FPS ID! Please enter a valid FPS ID with length 7 or 9 for account number %s.",
+        "line": 23
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Invalid Mobile! Please enter a valid mobile number with format +852-67891234 for account number %s.",
+        "line": 25
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Invalid Email! Please enter a valid email address for account number %s.",
+        "line": 27
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_l10n_id_qris_fetch_status",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "qr_data"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_id",
+      "decorators": [],
+      "documentation": "using self and the given data, fetches the status of a specific QR code generated by QRIS\nExpected values in the qr_data dict are:\n    - invoice_id returned when generating a QR code\n    - the amount present in the qr code\n    - the datetime at which the QR code was generated",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_kh_proxy",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_kh",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "proxy_type",
+         "proxy_value"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The proxy type must be Bakong Account ID",
+        "line": 26
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Please enter a valid Bakong Account ID.",
+        "line": 28
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Merchant ID is missing.",
+        "line": 30
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_fiscal_country_codes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_mx",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_sg_proxy",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sg",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "proxy_type",
+         "proxy_value",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The PayNow Type must be either Mobile or UEN to generate a PayNow QR code for account number %s.",
+        "line": 17
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_th_proxy",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_th",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "proxy_type",
+         "proxy_value",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The QR Code Type must be either Ewallet ID, Merchant Tax ID or Mobile Number to generate a Thailand Bank QR code for account number %s.",
+        "line": 22
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The Merchant Tax ID must be in the format 1234567890123 for account number %s.",
+        "line": 24
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The Mobile Number must be in the format 0812345678 for account number %s.",
+        "line": 26
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_aba_routing",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_us",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_code",
+         "acc_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_clearing_number_us",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_us",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "clearing_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "ABA/Routing should only contain numbers (maximum 9 digits).",
+        "line": 35
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_vn_proxy",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_vn",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "proxy_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The QR Code Type must be either Merchant ID, ATM Card Number or Bank Account to generate a Vietnam Bank QR code for account number %s.",
+        "line": 22
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_find_or_create_bank_account",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Please add your own bank account manually: %(account_number)s (%(partner)s)"
+   },
+   {
+    "operation": "_check_journal_id",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "A bank account can belong to only one journal."
+   },
+   {
+    "operation": "_check_allow_out_payment",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "You do not have the right to trust or un-trust a bank account."
+   },
+   {
+    "operation": "_build_qr_code_vals",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Currency must always be provided in order to generate a QR-code"
+   },
+   {
+    "operation": "_build_qr_code_vals",
+    "package": "account",
+    "kind": "UserError",
+    "message": "The following error prevented '%(candidate)s' QR-code to be generated though it was detected as eligible: "
+   },
+   {
+    "operation": "create",
+    "package": "account",
+    "kind": "UserError",
+    "message": "A bank account with Account Number %(number)s already exists for Partner %(partner)s, but is archived. Please unarchive it instead."
+   },
+   {
+    "operation": "write",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot modify the account number or partner of an account that has been trusted."
+   },
+   {
+    "operation": "write",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You do not have the rights to trust or un-trust accounts."
+   },
+   {
+    "operation": "get_bban",
+    "package": "base_iban",
+    "kind": "UserError",
+    "message": "Cannot compute the BBAN because the account number is not an IBAN."
+   },
+   {
+    "operation": "_validate_aba_bsb",
+    "package": "l10n_au",
+    "kind": "ValidationError",
+    "message": "BSB is not valid (expected format is \"NNN-NNN\"). Please rectify."
+   },
+   {
+    "operation": "_check_br_proxy",
+    "package": "l10n_br",
+    "kind": "ValidationError",
+    "message": "The proxy type must be Email Address, Mobile Number, CPF/CNPJ (BR) or Random Key (BR) for Pix code generation."
+   },
+   {
+    "operation": "_check_br_proxy",
+    "package": "l10n_br",
+    "kind": "ValidationError",
+    "message": "%s is not a valid email."
+   },
+   {
+    "operation": "_check_br_proxy",
+    "package": "l10n_br",
+    "kind": "ValidationError",
+    "message": "%s is not a valid CPF or CNPJ (don't include periods or dashes)."
+   },
+   {
+    "operation": "_check_br_proxy",
+    "package": "l10n_br",
+    "kind": "ValidationError",
+    "message": "The mobile number %s is invalid. It must start with +55, contain a 2 digit territory or state code followed by a 9 digit number."
+   },
+   {
+    "operation": "_check_br_proxy",
+    "package": "l10n_br",
+    "kind": "ValidationError",
+    "message": "The random key %s is invalid, the format looks like this: 71d6c6e1-64ea-4a11-9560-a10870c40ca2"
+   },
+   {
+    "operation": "_check_hk_proxy",
+    "package": "l10n_hk",
+    "kind": "ValidationError",
+    "message": "The FPS Type must be either ID, Mobile or Email to generate a FPS QR code for account number %s."
+   },
+   {
+    "operation": "_check_hk_proxy",
+    "package": "l10n_hk",
+    "kind": "ValidationError",
+    "message": "Invalid FPS ID! Please enter a valid FPS ID with length 7 or 9 for account number %s."
+   },
+   {
+    "operation": "_check_hk_proxy",
+    "package": "l10n_hk",
+    "kind": "ValidationError",
+    "message": "Invalid Mobile! Please enter a valid mobile number with format +852-67891234 for account number %s."
+   },
+   {
+    "operation": "_check_hk_proxy",
+    "package": "l10n_hk",
+    "kind": "ValidationError",
+    "message": "Invalid Email! Please enter a valid email address for account number %s."
+   },
+   {
+    "operation": "_get_qr_vals",
+    "package": "l10n_id",
+    "kind": "ValidationError",
+    "message": "response.get('data')"
+   },
+   {
+    "operation": "_check_kh_proxy",
+    "package": "l10n_kh",
+    "kind": "ValidationError",
+    "message": "The proxy type must be Bakong Account ID"
+   },
+   {
+    "operation": "_check_kh_proxy",
+    "package": "l10n_kh",
+    "kind": "ValidationError",
+    "message": "Please enter a valid Bakong Account ID."
+   },
+   {
+    "operation": "_check_kh_proxy",
+    "package": "l10n_kh",
+    "kind": "ValidationError",
+    "message": "Merchant ID is missing."
+   },
+   {
+    "operation": "_check_sg_proxy",
+    "package": "l10n_sg",
+    "kind": "ValidationError",
+    "message": "The PayNow Type must be either Mobile or UEN to generate a PayNow QR code for account number %s."
+   },
+   {
+    "operation": "_check_th_proxy",
+    "package": "l10n_th",
+    "kind": "ValidationError",
+    "message": "The QR Code Type must be either Ewallet ID, Merchant Tax ID or Mobile Number to generate a Thailand Bank QR code for account number %s."
+   },
+   {
+    "operation": "_check_th_proxy",
+    "package": "l10n_th",
+    "kind": "ValidationError",
+    "message": "The Merchant Tax ID must be in the format 1234567890123 for account number %s."
+   },
+   {
+    "operation": "_check_th_proxy",
+    "package": "l10n_th",
+    "kind": "ValidationError",
+    "message": "The Mobile Number must be in the format 0812345678 for account number %s."
+   },
+   {
+    "operation": "_check_clearing_number_us",
+    "package": "l10n_us",
+    "kind": "ValidationError",
+    "message": "ABA/Routing should only contain numbers (maximum 9 digits)."
+   },
+   {
+    "operation": "_check_vn_proxy",
+    "package": "l10n_vn",
+    "kind": "ValidationError",
+    "message": "The QR Code Type must be either Merchant ID, ATM Card Number or Bank Account to generate a Vietnam Bank QR code for account number %s."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_res_partner_bank_group_user",
+    "package": "base",
+    "name": "res_partner_bank group_user",
+    "entity": "res.partner.bank",
+    "group": "group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "base.access_res_partner_bank_group_partner_manager",
+    "package": "base",
+    "name": "res_partner_bank group_partner_manager",
+    "entity": "res.partner.bank",
+    "group": "group_partner_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.ir_rule_res_partner_bank_billing_officers",
+    "package": "account",
+    "name": "Billing: Allow accessing employee bank accounts",
+    "entity": "res.partner.bank",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('account.group_account_invoice'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "base.res_partner_bank_rule",
+    "package": "base",
+    "name": "Partner bank company rule",
+    "entity": "res.partner.bank",
+    "domain": "['|', ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr.ir_rule_res_partner_bank_internal_users",
+    "package": "hr",
+    "name": "HR: Prevent non HR officers from accessing employee bank accounts",
+    "entity": "res.partner.bank",
+    "domain": "[('partner_id.employee_ids', '=', False)]",
+    "groups": "[(4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr.ir_rule_res_partner_bank_employees",
+    "package": "hr",
+    "name": "HR: Allow HR officers from accessing employee bank accounts",
+    "entity": "res.partner.bank",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('hr.group_hr_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.view_partner_bank_form_inherit_account",
+    "package": "account",
+    "name": "res.partner.bank.form.inherit.account",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": "primary",
+    "priority": "14",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//sheet",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "duplicate_bank_partner_ids",
+       "widget": "x2many_buttons",
+       "string": "Partners with same bank"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "x2many_buttons": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//sheet",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.view_partner_bank_search_inherit",
+    "package": "account",
+    "name": "res.partner.bank.search.inherit",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//search",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "trusted",
+       "string": "Trusted",
+       "domain": "[('allow_out_payment', '=', True)]"
+      },
+      {
+       "name": "untrusted",
+       "string": "Untrusted",
+       "domain": "[('allow_out_payment', '=', False)]"
+      },
+      {
+       "name": "to_validate",
+       "string": "To validate",
+       "domain": "[('allow_out_payment', '=', False), ('related_moves', '!=', False)]"
+      },
+      {
+       "name": "customer",
+       "string": "Customers",
+       "domain": "[('partner_customer_rank','>', 0)]"
+      },
+      {
+       "name": "supplier",
+       "string": "Vendors",
+       "domain": "[('partner_supplier_rank','>', 0)]"
+      },
+      {
+       "name": "high_phishing_risk",
+       "string": "Phishing risk: High",
+       "domain": "[('has_money_transfer_warning', '!=', False)]"
+      },
+      {
+       "name": "medium_phishing_risk",
+       "string": "Phishing risk: Medium",
+       "domain": "[('has_iban_warning', '!=', False)]"
+      },
+      {
+       "name": "create_date",
+       "string": "Created On",
+       "date": "create_date"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_create_date",
+       "string": "Created On",
+       "context": "{'group_by': 'create_date'}"
+      },
+      {
+       "name": "groupby_create_by",
+       "string": "Created By",
+       "context": "{'group_by': 'create_uid'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//search",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account_qr_code_emv.view_partner_bank_form_inherit_account",
+    "package": "account_qr_code_emv",
+    "name": "res.partner.bank.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//page[@name='internal_notes']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "display_qr_setting",
+       "invisible": "1"
+      },
+      {
+       "name": "country_proxy_keys",
+       "invisible": "1"
+      },
+      {
+       "name": "proxy_type",
+       "widget": "dynamic_selection",
+       "options": "{'available_field': 'country_proxy_keys'}"
+      },
+      {
+       "name": "proxy_value"
+      },
+      {
+       "name": "include_reference"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "emv_qr_settings",
+       "string": "EMV QR Settings",
+       "invisible": "not display_qr_setting",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "dynamic_selection": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//page[@name='internal_notes']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "base.view_partner_bank_form",
+    "package": "base",
+    "name": "res.partner.bank.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "15",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Bank account",
+      "name": "bank_account_form"
+     },
+     "fields": [
+      {
+       "name": "acc_number"
+      },
+      {
+       "name": "clearing_number"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "acc_holder_name"
+      },
+      {
+       "name": "bank_id"
+      },
+      {
+       "name": "allow_out_payment",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "currency_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "note",
+       "nolabel": "1",
+       "placeholder": "Internal notes..."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_archive_bank",
+       "string": "Archive",
+       "type": "object",
+       "class": "btn btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "internal_notes",
+       "string": "Note",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.view_partner_bank_tree",
+    "package": "base",
+    "name": "res.partner.bank.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Bank Accounts",
+      "multi_edit": "1",
+      "decoration-muted": "(not active)"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "acc_number"
+      },
+      {
+       "name": "partner_id",
+       "optional": "hide"
+      },
+      {
+       "name": "bank_name",
+       "string": "Bank",
+       "optional": "show"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "allow_out_payment",
+       "widget": "boolean_toggle",
+       "optional": "show"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "boolean_toggle": 2
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "(not active)"
+     }
+    }
+   },
+   {
+    "external_identifier": "base.view_partner_bank_search",
+    "package": "base",
+    "name": "res.partner.bank.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Bank Accounts"
+     },
+     "fields": [
+      {
+       "name": "bank_name",
+       "string": "Bank Name",
+       "filter_domain": "['|', ('bank_name','ilike',self), ('acc_number','ilike',self)]"
+      },
+      {
+       "name": "company_id",
+       "invisible": "context.get('company_hide', True)"
+      },
+      {
+       "name": "partner_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]",
+       "help": "Show inactive bank account"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "base_iban.view_partner_property_iban_form",
+    "package": "base_iban",
+    "name": "res.partner.bank.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "account.view_partner_bank_form_inherit_account",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='acc_number']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='acc_number']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr.view_partner_bank_form_inherit_hr",
+    "package": "hr",
+    "name": "res.partner.bank.form.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='allow_out_payment']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "employee_has_multiple_bank_accounts",
+       "invisible": "1"
+      },
+      {
+       "name": "employee_salary_amount"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "employee_salary_amount_is_percentage",
+       "readonly": "True"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2many_avatar_employee",
+       "invisible": "not employee_id",
+       "groups": "hr.group_hr_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_avatar_employee": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='allow_out_payment']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_au.view_partner_bank_form",
+    "package": "l10n_au",
+    "name": "aba.res.partner.bank.form",
+    "view_type": "field",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "partner_id",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "partner_id",
+       "position": "before"
+      },
+      {
+       "name": "aba_bsb"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_br.view_partner_bank_form_inherit_account",
+    "package": "l10n_br",
+    "name": "res.partner.bank.form.inherit",
+    "view_type": "field",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "include_reference",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "include_reference",
+       "position": "after"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_ch.isr_partner_bank_form",
+    "package": "l10n_ch",
+    "name": "l10n_ch.res.partner.bank.form",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='acc_number']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_ch_qr_iban",
+       "invisible": "not l10n_ch_display_qr_bank_options"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='acc_number']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_hk.view_partner_bank_form_inherit_account",
+    "package": "l10n_hk",
+    "name": "res.partner.bank.form.inherit",
+    "view_type": "field",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "include_reference",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "include_reference",
+       "position": "after"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_id.view_partner_bank_form_inherit_account",
+    "package": "l10n_id",
+    "name": "res.partner.bank.form.inherit.account",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='allow_out_payment']/parent::group",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "l10n_id_qris_api_key",
+       "invisible": "country_code != 'ID'"
+      },
+      {
+       "name": "l10n_id_qris_mid",
+       "invisible": "country_code != 'ID'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='allow_out_payment']/parent::group",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_kh.view_partner_bank_form_inherit_account",
+    "package": "l10n_kh",
+    "name": "res.partner.bank.form.inherit",
+    "view_type": "field",
+    "inherits_view": "account_qr_code_emv.view_partner_bank_form_inherit_account",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "proxy_value",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "proxy_value",
+       "position": "after"
+      },
+      {
+       "name": "l10n_kh_merchant_id",
+       "invisible": "proxy_type != 'bakong_id_merchant'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_mx.view_res_partner_bank_inherit_l10n_mx_edi_bank",
+    "package": "l10n_mx",
+    "name": "view.res.partner.bank.inherit.l10n_mx_edi_bank",
+    "view_type": "xpath",
+    "inherits_view": "account.view_partner_bank_form_inherit_account",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='acc_number']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_mx_edi_clabe",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='acc_number']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_mx.view_partner_bank_form_l10n_mx_edi_bank",
+    "package": "l10n_mx",
+    "name": "view.partner.bank.form.mx.inherit",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='bank_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "fiscal_country_codes",
+       "invisible": "1"
+      },
+      {
+       "name": "l10n_mx_edi_clabe",
+       "invisible": "'MX' not in fiscal_country_codes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='bank_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_mx.view_partner_bank_tree_l10n_mx_edi_bank",
+    "package": "l10n_mx",
+    "name": "view.partner.bank.list.mx.inherit",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='bank_name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_mx_edi_clabe",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='bank_name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_sg.view_partner_bank_form_inherit_account",
+    "package": "l10n_sg",
+    "name": "res.partner.bank.form.inherit",
+    "view_type": "field",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "include_reference",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "include_reference",
+       "position": "after"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_us.view_partner_bank_form_inherit_l10n_us",
+    "package": "l10n_us",
+    "name": "res.partner.bank.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='clearing_number']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='clearing_number']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_vn.view_partner_bank_form_inherit_account",
+    "package": "l10n_vn",
+    "name": "res.partner.bank.form.inherit",
+    "view_type": "field",
+    "inherits_view": "base.view_partner_bank_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "include_reference",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "include_reference",
+       "position": "after"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_account_supplier_accounts",
+    "package": "account",
+    "name": "Bank Accounts",
+    "view_mode": "list,form",
+    "view_id": "base.view_partner_bank_tree",
+    "search_view_id": "view_partner_bank_search_inherit",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a new bank account\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "res.partner.bank"
+   },
+   {
+    "external_identifier": "base.action_res_partner_bank_account_form",
+    "package": "base",
+    "name": "Bank Accounts",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a Bank Account\n              </p><p>\n                From here you can manage all bank accounts linked to you and your contacts.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "res.partner.bank"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "contacts.menu_action_res_partner_bank_form",
+    "package": "contacts",
+    "name": null,
+    "parent_id": "menu_config_bank_accounts",
+    "action": "base.action_res_partner_bank_account_form",
+    "sequence": "2",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

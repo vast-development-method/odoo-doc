@@ -1,0 +1,412 @@
+{
+ "catalog": {
+  "name": "entity:event.registration.answer",
+  "description": "Complete definition of entity Event Registration Answer (event.registration.answer).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.registration.answer",
+  "storage_name": "event_registration_answer",
+  "full_name": "Event Registration Answer",
+  "kind": "persistent",
+  "description": "Event Registration Answer",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "pos_event"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "value_answer_id",
+   "value_text_box"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "question_id",
+    "type": "Many2one",
+    "comodel": "event.question",
+    "ondelete": "restrict",
+    "required": true,
+    "domain": "[('event_ids', 'in', event_id)]",
+    "defined_in_package": "event",
+    "string": "Question",
+    "full_name": "Question",
+    "target_entity": "event.question"
+   },
+   {
+    "name": "registration_id",
+    "type": "Many2one",
+    "comodel": "event.registration",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "event",
+    "string": "Registration",
+    "full_name": "Registration",
+    "target_entity": "event.registration"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "related": "registration_id.partner_id",
+    "defined_in_package": "event",
+    "string": "Partner",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "related": "registration_id.event_id",
+    "defined_in_package": "event",
+    "string": "Event",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "question_type",
+    "type": "Selection",
+    "related": "question_id.question_type",
+    "defined_in_package": "event",
+    "string": "Question Type",
+    "full_name": "Question Type"
+   },
+   {
+    "name": "value_answer_id",
+    "type": "Many2one",
+    "comodel": "event.question.answer",
+    "string": "Suggested answer",
+    "defined_in_package": "event",
+    "full_name": "Suggested answer",
+    "target_entity": "event.question.answer"
+   },
+   {
+    "name": "value_text_box",
+    "type": "Text",
+    "string": "Text answer",
+    "defined_in_package": "event",
+    "full_name": "Text answer"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_value_check",
+    "kind": "Constraint",
+    "definition": "CHECK(value_answer_id IS NOT NULL OR COALESCE(value_text_box, '') <> '')",
+    "message": "There must be a suggested value or a text value.",
+    "defined_in_package": "event"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "value_answer_id",
+         "question_type",
+         "value_text_box"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_registration_answer",
+    "package": "event",
+    "name": "event.registration.answer",
+    "entity": "event.registration.answer",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "event.event_registration_answer_view_search",
+    "package": "event",
+    "name": "event.registration.answer.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "value_text_box"
+      },
+      {
+       "name": "value_answer_id"
+      },
+      {
+       "name": "question_id"
+      },
+      {
+       "name": "event_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event.event_registration_answer_view_tree",
+    "package": "event",
+    "name": "event.registration.answer.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Answer Breakdown",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "registration_id",
+       "optional": "show"
+      },
+      {
+       "name": "partner_id",
+       "optional": "hide"
+      },
+      {
+       "name": "question_id",
+       "optional": "show"
+      },
+      {
+       "name": "value_text_box"
+      },
+      {
+       "name": "value_answer_id",
+       "string": "Selected answer"
+      },
+      {
+       "name": "event_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.event_registration_answer_view_graph",
+    "package": "event",
+    "name": "event.registration.answer.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Answer Breakdown",
+      "sample": "1",
+      "type": "bar"
+     },
+     "fields": [
+      {
+       "name": "value_answer_id"
+      },
+      {
+       "name": "event_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "value_answer_id",
+       "type": "col"
+      },
+      {
+       "name": "event_id",
+       "type": "row"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event.event_registration_answer_view_pivot",
+    "package": "event",
+    "name": "event.registration.answer.view.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Answer Breakdown",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "registration_id"
+      },
+      {
+       "name": "value_answer_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "registration_id",
+       "type": "row"
+      },
+      {
+       "name": "value_answer_id",
+       "type": "col"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event.action_event_registration_report",
+    "package": "event",
+    "name": "Answer Breakdown",
+    "view_mode": "list,graph,pivot",
+    "view_id": null,
+    "search_view_id": "event_registration_answer_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Answers yet!\n            </p><p>\n                Come back once you have registrations to overview answers.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.registration.answer"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

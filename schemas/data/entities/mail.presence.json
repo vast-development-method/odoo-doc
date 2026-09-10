@@ -1,0 +1,327 @@
+{
+ "catalog": {
+  "name": "entity:mail.presence",
+  "description": "Complete definition of entity User/Guest Presence (mail.presence).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.presence",
+  "storage_name": "mail_presence",
+  "full_name": "User/Guest Presence",
+  "kind": "persistent",
+  "description": "User/Guest Presence",
+  "defined_by_package": "mail",
+  "extended_by_packages": [],
+  "mixins": [
+   "bus.listener.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": false,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Users",
+    "ondelete": "cascade",
+    "defined_in_package": "mail",
+    "full_name": "Users",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "guest_id",
+    "type": "Many2one",
+    "comodel": "mail.guest",
+    "string": "Guest",
+    "ondelete": "cascade",
+    "defined_in_package": "mail",
+    "full_name": "Guest",
+    "target_entity": "mail.guest"
+   },
+   {
+    "name": "last_poll",
+    "type": "Datetime",
+    "string": "Last Poll",
+    "default": {
+     "dynamic": "lambda self: fields.Datetime.now()"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Last Poll"
+   },
+   {
+    "name": "last_presence",
+    "type": "Datetime",
+    "string": "Last Presence",
+    "default": {
+     "dynamic": "lambda self: fields.Datetime.now()"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Last Presence"
+   },
+   {
+    "name": "status",
+    "type": "Selection",
+    "selection": [
+     [
+      "online",
+      "Online"
+     ],
+     [
+      "away",
+      "Away"
+     ],
+     [
+      "offline",
+      "Offline"
+     ]
+    ],
+    "string": "IM Status",
+    "default": "offline",
+    "defined_in_package": "mail",
+    "full_name": "IM Status"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_guest_unique",
+    "kind": "UniqueIndex",
+    "definition": "(guest_id) WHERE guest_id IS NOT NULL",
+    "message": null,
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_user_unique",
+    "kind": "UniqueIndex",
+    "definition": "(user_id) WHERE user_id IS NOT NULL",
+    "message": null,
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_partner_or_guest_exists",
+    "kind": "Constraint",
+    "definition": "CHECK((user_id IS NOT NULL AND guest_id IS NULL) OR (user_id IS NULL AND guest_id IS NOT NULL))",
+    "message": "A mail presence must have a user or a guest.",
+    "defined_in_package": "mail"
+   }
+  ],
+  "operations": [
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_try_update_presence",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user_or_guest",
+     "inactivity_period"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Updates the last_poll and last_presence of the current user\n:param inactivity_period: duration in milliseconds",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_presence",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user_or_guest",
+     "inactivity_period"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_presence",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "im_status",
+     "bus_target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Send notification related to bus presence update.\n\n:param im_status: 'online', 'away' or 'offline'",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_status_updated_notification",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "guest_or_user",
+     "status",
+     "bus_target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_bus_presence",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_presence",
+    "package": "mail",
+    "name": "mail.presence",
+    "entity": "mail.presence",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

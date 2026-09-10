@@ -1,0 +1,515 @@
+{
+ "catalog": {
+  "name": "entity:hr.leave.allocation.generate.multi.wizard",
+  "description": "Complete definition of entity Generate time off allocations for multiple employees (hr.leave.allocation.generate.multi.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.leave.allocation.generate.multi.wizard",
+  "storage_name": "hr_leave_allocation_generate_multi_wizard",
+  "full_name": "Generate time off allocations for multiple employees",
+  "kind": "transient",
+  "description": "Generate time off allocations for multiple employees",
+  "defined_by_package": "hr_holidays",
+  "extended_by_packages": [],
+  "mixins": [
+   "hr.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Description",
+    "compute": "_compute_name",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Description"
+   },
+   {
+    "name": "duration",
+    "type": "Float",
+    "string": "Allocation",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocation"
+   },
+   {
+    "name": "holiday_status_id",
+    "type": "Many2one",
+    "comodel": "hr.leave.type",
+    "string": "Time Off Type",
+    "required": true,
+    "domain": {
+     "dynamic": "_domain_holiday_status_id"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Type",
+    "target_entity": "hr.leave.type"
+   },
+   {
+    "name": "request_unit",
+    "type": "Selection",
+    "related": "holiday_status_id.request_unit",
+    "defined_in_package": "hr_holidays",
+    "string": "Request Unit",
+    "full_name": "Request Unit"
+   },
+   {
+    "name": "allocation_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "employee",
+      "By Employee"
+     ],
+     [
+      "company",
+      "By Company"
+     ],
+     [
+      "department",
+      "By Department"
+     ],
+     [
+      "category",
+      "By Employee Tag"
+     ]
+    ],
+    "string": "Allocation Mode",
+    "readonly": false,
+    "required": true,
+    "default": "employee",
+    "help": "Allow to create requests in batchs:\n- By Employee: for a specific employee\n- By Company: all employees of the specified company\n- By Department: all employees of the specified department\n- By Employee Tag: all employees of the specific employee group category",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocation Mode"
+   },
+   {
+    "name": "employee_ids",
+    "type": "Many2many",
+    "comodel": "hr.employee",
+    "string": "Employees",
+    "domain": {
+     "dynamic": "lambda self: self._get_employee_domain()"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Employees",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "defined_in_package": "hr_holidays",
+    "string": "Department",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "category_id",
+    "type": "Many2one",
+    "comodel": "hr.employee.category",
+    "string": "Employee Tag",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Employee Tag",
+    "target_entity": "hr.employee.category"
+   },
+   {
+    "name": "allocation_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "regular",
+      "Regular Allocation"
+     ],
+     [
+      "accrual",
+      "Based on Accrual Plan"
+     ]
+    ],
+    "string": "Allocation Type",
+    "default": "regular",
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocation Type"
+   },
+   {
+    "name": "accrual_plan_id",
+    "type": "Many2one",
+    "comodel": "hr.leave.accrual.plan",
+    "domain": "['|', ('time_off_type_id', '=', False), ('time_off_type_id', '=', holiday_status_id)]",
+    "defined_in_package": "hr_holidays",
+    "string": "Accrual Plan",
+    "full_name": "Accrual Plan",
+    "target_entity": "hr.leave.accrual.plan"
+   },
+   {
+    "name": "date_from",
+    "type": "Date",
+    "string": "Start Date",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_to",
+    "type": "Date",
+    "string": "End Date",
+    "defined_in_package": "hr_holidays",
+    "full_name": "End Date"
+   },
+   {
+    "name": "notes",
+    "type": "Text",
+    "string": "Reasons",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Reasons"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_employee_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_holiday_status_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "holiday_status_id",
+         "duration"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_title",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_employees_from_allocation_mode",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_allocation_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "employees"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_generate_allocations",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_allocation_mode",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "allocation_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "As Time Off Responsible, you can only use the allocation mode 'By Employee'.",
+        "line": 147
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_allocation_mode",
+    "package": "hr_holidays",
+    "kind": "AccessError",
+    "message": "As Time Off Responsible, you can only use the allocation mode 'By Employee'."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_holidays.access_hr_leave_allocation_generate_multi_wizard",
+    "package": "hr_holidays",
+    "name": "access_hr_leave_allocation_generate_multi_wizard",
+    "entity": "hr.leave.allocation.generate.multi.wizard",
+    "group": "hr_holidays.group_hr_holidays_responsible",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_holidays.hr_leave_allocation_generate_multi_wizard_view_form",
+    "package": "hr_holidays",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Generate time off allocations for multiple employees"
+     },
+     "fields": [
+      {
+       "name": "allocation_mode",
+       "string": "Grant",
+       "groups": "hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "employee_ids",
+       "widget": "many2many_avatar_employee",
+       "invisible": "allocation_mode != 'employee'",
+       "placeholder": "All Employees"
+      },
+      {
+       "name": "company_id",
+       "invisible": "allocation_mode != 'company'"
+      },
+      {
+       "name": "department_id",
+       "invisible": "allocation_mode != 'department'",
+       "required": "allocation_mode == 'department'"
+      },
+      {
+       "name": "category_id",
+       "invisible": "allocation_mode != 'category'",
+       "required": "allocation_mode == 'category'"
+      },
+      {
+       "name": "holiday_status_id"
+      },
+      {
+       "name": "allocation_type",
+       "widget": "radio"
+      },
+      {
+       "name": "request_unit",
+       "invisible": "1"
+      },
+      {
+       "name": "accrual_plan_id",
+       "invisible": "allocation_type == 'regular'",
+       "required": "allocation_type == 'accrual'"
+      },
+      {
+       "name": "date_from",
+       "nolabel": "1"
+      },
+      {
+       "name": "date_to",
+       "nolabel": "1",
+       "placeholder": "No Limit"
+      },
+      {
+       "name": "duration",
+       "nolabel": "1"
+      },
+      {
+       "name": "notes",
+       "nolabel": "1",
+       "placeholder": "Add a reason..."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_generate_allocations",
+       "string": "Allocate Time Off",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "string": "Discard",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_avatar_employee": 1,
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_holidays.action_hr_leave_allocation_generate_multi_wizard",
+    "package": "hr_holidays",
+    "name": "New Group Allocation",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.leave.allocation.generate.multi.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

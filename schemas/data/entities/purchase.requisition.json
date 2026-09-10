@@ -1,0 +1,1257 @@
+{
+ "catalog": {
+  "name": "entity:purchase.requisition",
+  "description": "Complete definition of entity Purchase Requisition (purchase.requisition).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "purchase.requisition",
+  "storage_name": "purchase_requisition",
+  "full_name": "Purchase Requisition",
+  "kind": "persistent",
+  "description": "Purchase Requisition",
+  "defined_by_package": "purchase_requisition",
+  "extended_by_packages": [
+   "purchase_requisition_stock"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Agreement",
+    "copy": false,
+    "readonly": true,
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: _('New')"
+    },
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Agreement"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Active"
+   },
+   {
+    "name": "reference",
+    "type": "Char",
+    "string": "Reference",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Reference"
+   },
+   {
+    "name": "order_count",
+    "type": "Integer",
+    "compute": "_compute_orders_number",
+    "string": "Number of Orders",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Number of Orders"
+   },
+   {
+    "name": "vendor_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Vendor",
+    "check_company": true,
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "requisition_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "blanket_order",
+      "Blanket Order"
+     ],
+     [
+      "purchase_template",
+      "Purchase Template"
+     ]
+    ],
+    "string": "Agreement Type",
+    "required": true,
+    "default": "blanket_order",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Agreement Type"
+   },
+   {
+    "name": "date_start",
+    "type": "Date",
+    "string": "Start Date",
+    "tracking": true,
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_end",
+    "type": "Date",
+    "string": "End Date",
+    "tracking": true,
+    "defined_in_package": "purchase_requisition",
+    "full_name": "End Date"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Purchase Representative",
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "check_company": true,
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Purchase Representative",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "defined_in_package": "purchase_requisition",
+    "string": "Description",
+    "full_name": "Description"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "purchase_ids",
+    "type": "One2many",
+    "comodel": "purchase.order",
+    "inverse_name": "requisition_id",
+    "string": "Purchase Orders",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Purchase Orders",
+    "target_entity": "purchase.order"
+   },
+   {
+    "name": "line_ids",
+    "type": "One2many",
+    "comodel": "purchase.requisition.line",
+    "inverse_name": "requisition_id",
+    "string": "Products to Purchase",
+    "copy": true,
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Products to Purchase",
+    "target_entity": "purchase.requisition.line"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "related": "line_ids.product_id",
+    "string": "Product",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "confirmed",
+      "Confirmed"
+     ],
+     [
+      "done",
+      "Closed"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "tracking": true,
+    "required": true,
+    "copy": false,
+    "default": "draft",
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Status"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "required": true,
+    "precompute": true,
+    "compute": "_compute_currency_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "purchase_requisition",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "warehouse_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse",
+    "string": "Warehouse",
+    "domain": "[('company_id', '=', company_id)]",
+    "defined_in_package": "purchase_requisition_stock",
+    "full_name": "Warehouse",
+    "target_entity": "stock.warehouse"
+   },
+   {
+    "name": "picking_type_id",
+    "type": "Many2one",
+    "comodel": "stock.picking.type",
+    "string": "Operation Type",
+    "required": true,
+    "default": {
+     "dynamic": "_default_picking_type_id"
+    },
+    "domain": "['|',('warehouse_id', '=', False), ('warehouse_id.company_id', '=', company_id)]",
+    "defined_in_package": "purchase_requisition_stock",
+    "full_name": "Operation Type",
+    "target_entity": "stock.picking.type"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_onchange_vendor",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "vendor_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "vendor_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_orders_number",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "purchase_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_dates",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date_start",
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "End date cannot be earlier than start date. Please check dates for agreements: %s",
+        "line": 81
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot change the Agreement Type or Company of a not draft purchase agreement.",
+        "line": 106
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_confirm",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot confirm agreement '%(agreement)s' because it does not contain any product lines.",
+        "line": 132
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot confirm a blanket order with lines missing a price.",
+        "line": 136
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot confirm a blanket order with lines missing a quantity.",
+        "line": 138
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_draft",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [],
+      "documentation": "Generate all purchase order based on selected lines, should only be called on one agreement at a time",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "To close this purchase requisition, cancel related Requests for Quotation.\n\nImagine the mess if someone confirms these duplicates: double the order, double the trouble :)",
+        "line": 151
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_draft_or_cancel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only delete draft or cancelled requisitions.",
+        "line": 161
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_default_picking_type_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_requisition_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_dates",
+    "package": "purchase_requisition",
+    "kind": "ValidationError",
+    "message": "End date cannot be earlier than start date. Please check dates for agreements: %s"
+   },
+   {
+    "operation": "write",
+    "package": "purchase_requisition",
+    "kind": "UserError",
+    "message": "You cannot change the Agreement Type or Company of a not draft purchase agreement."
+   },
+   {
+    "operation": "action_confirm",
+    "package": "purchase_requisition",
+    "kind": "UserError",
+    "message": "You cannot confirm agreement '%(agreement)s' because it does not contain any product lines."
+   },
+   {
+    "operation": "action_confirm",
+    "package": "purchase_requisition",
+    "kind": "UserError",
+    "message": "You cannot confirm a blanket order with lines missing a price."
+   },
+   {
+    "operation": "action_confirm",
+    "package": "purchase_requisition",
+    "kind": "UserError",
+    "message": "You cannot confirm a blanket order with lines missing a quantity."
+   },
+   {
+    "operation": "action_done",
+    "package": "purchase_requisition",
+    "kind": "UserError",
+    "message": "To close this purchase requisition, cancel related Requests for Quotation.\n\nImagine the mess if someone confirms these duplicates: double the order, double the trouble :)"
+   },
+   {
+    "operation": "_unlink_if_draft_or_cancel",
+    "package": "purchase_requisition",
+    "kind": "UserError",
+    "message": "You can only delete draft or cancelled requisitions."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "purchase_requisition.access_purchase_requisition",
+    "package": "purchase_requisition",
+    "name": "purchase.requisition",
+    "entity": "purchase.requisition",
+    "group": "purchase.group_purchase_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "purchase_requisition.access_purchase_requisition_manager",
+    "package": "purchase_requisition",
+    "name": "purchase.requisition manager",
+    "entity": "purchase.requisition",
+    "group": "purchase.group_purchase_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase_requisition_stock.access_purchase_requisition_stock_manager",
+    "package": "purchase_requisition_stock",
+    "name": "purchase.requisition",
+    "entity": "purchase.requisition",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": false,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "purchase_requisition.purchase_requisition_comp_rule",
+    "package": "purchase_requisition",
+    "name": "Purchase Requisition multi-company",
+    "entity": "purchase.requisition",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "purchase_requisition.view_purchase_requisition_form",
+    "package": "purchase_requisition",
+    "name": "purchase.requisition.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Purchase Agreements"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "requisition_type == 'purchase_template'"
+      },
+      {
+       "name": "order_count",
+       "widget": "statinfo",
+       "string": "RFQs/Orders"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "vendor_id",
+       "readonly": "state in ['confirmed', 'done'] and requisition_type == 'blanket_order'",
+       "required": "requisition_type == 'blanket_order'",
+       "context": "{'res_partner_search_mode': 'supplier'}"
+      },
+      {
+       "name": "user_id",
+       "readonly": "state != 'draft'",
+       "string": "Buyer",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "requisition_type",
+       "readonly": "state != 'draft'",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "currency_id",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "date_start",
+       "widget": "date",
+       "readonly": "state not in ('draft', 'confirmed')"
+      },
+      {
+       "name": "date_end",
+       "widget": "date",
+       "readonly": "state not in ('draft', 'confirmed')"
+      },
+      {
+       "name": "reference",
+       "placeholder": "e.g. PO0025"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state != 'draft'",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "line_ids",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "product_id",
+       "domain": "[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+      },
+      {
+       "name": "product_description_variants",
+       "invisible": "product_description_variants == ''"
+      },
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "qty_ordered",
+       "column_invisible": "parent.requisition_type == 'purchase_template'",
+       "optional": "show"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "required": "product_id",
+       "optional": "show",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "options": "{'product_field': 'product_id', 'business_domain': 'purchase_order'}",
+       "optional": "hide",
+       "groups": "analytic.group_analytic_accounting"
+      },
+      {
+       "name": "price_unit"
+      },
+      {
+       "name": "product_id",
+       "domain": "[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+      },
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "qty_ordered"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "options": "{'product_field': 'product_id', 'business_domain': 'purchase_order'}",
+       "groups": "analytic.group_analytic_accounting"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "description"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(action_purchase_requisition_to_so)d",
+       "string": "New Quotation",
+       "type": "action",
+       "invisible": "state != 'confirmed'",
+       "class": "btn-primary",
+       "context": "{'default_currency_id': currency_id, 'default_user_id': user_id}"
+      },
+      {
+       "name": "action_confirm",
+       "string": "Confirm",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_done",
+       "string": "Close",
+       "type": "object",
+       "invisible": "state != 'confirmed' or requisition_type == 'purchase_template'",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_draft",
+       "string": "Reset to Draft",
+       "type": "object",
+       "invisible": "state != 'cancel'"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state not in ('draft', 'confirmed')"
+      },
+      {
+       "name": "%(action_purchase_requisition_list)d",
+       "type": "action",
+       "invisible": "state == 'draft'",
+       "class": "oe_stat_button",
+       "context": "{'default_currency_id': currency_id}",
+       "icon": "fa-list-alt"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "products",
+       "string": "Products",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 1,
+      "date": 2,
+      "many2one_uom": 2,
+      "analytic_distribution": 2
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "%(action_purchase_requisition_to_so)d",
+       "type": "action",
+       "string": "New Quotation",
+       "class": "btn-primary",
+       "context": "{'default_currency_id': currency_id, 'default_user_id': user_id}",
+       "invisible": "state != 'confirmed'"
+      },
+      {
+       "name": "action_confirm",
+       "invisible": "state != 'draft'",
+       "string": "Confirm",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_done",
+       "invisible": "state != 'confirmed' or requisition_type == 'purchase_template'",
+       "string": "Close",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_draft",
+       "invisible": "state != 'cancel'",
+       "string": "Reset to Draft",
+       "type": "object"
+      },
+      {
+       "name": "action_cancel",
+       "invisible": "state not in ('draft', 'confirmed')",
+       "string": "Cancel",
+       "type": "object"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,confirmed,done",
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "%(action_purchase_requisition_list)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-list-alt",
+       "invisible": "state == 'draft'",
+       "context": "{'default_currency_id': currency_id}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition.view_purchase_requisition_tree",
+    "package": "purchase_requisition",
+    "name": "purchase.requisition.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Purchase Agreements",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "message_needaction",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "vendor_id",
+       "optional": "show"
+      },
+      {
+       "name": "requisition_type",
+       "optional": "show"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "optional": "show"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "date_start",
+       "optional": "show"
+      },
+      {
+       "name": "date_end",
+       "widget": "remaining_days",
+       "invisible": "state in ('done', 'cancel')",
+       "optional": "show",
+       "decoration-danger": "date_end and date_end<current_date"
+      },
+      {
+       "name": "reference",
+       "optional": "show"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "optional": "show",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state not in ('done', 'cancel')"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "remaining_days": 1,
+      "badge": 1,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition.view_purchase_requisition_kanban",
+    "package": "purchase_requisition",
+    "name": "purchase.requisition.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "readonly": "1",
+       "options": "{'classes': {'draft': 'default', 'done': 'success', 'close': 'danger'}}"
+      },
+      {
+       "name": "requisition_type"
+      },
+      {
+       "name": "vendor_id"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "label_selection": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition.view_purchase_requisition_filter",
+    "package": "purchase_requisition",
+    "name": "purchase.requisition.list.select",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Purchase Agreements"
+     },
+     "fields": [
+      {
+       "name": "vendor_id"
+      },
+      {
+       "name": "name",
+       "string": "Reference",
+       "filter_domain": "['|', ('name', 'ilike', self), ('reference', 'ilike', self)]"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "product_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_agreements",
+       "string": "My Agreements",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "blanket_order",
+       "string": "Blanket Orders",
+       "domain": "[('requisition_type', '=', 'blanket_order')]"
+      },
+      {
+       "name": "purchase_template",
+       "string": "Purchase Templates",
+       "domain": "[('requisition_type', '=', 'purchase_template')]"
+      },
+      {
+       "name": "draft",
+       "string": "Draft",
+       "domain": "[('state', '=', 'draft')]",
+       "help": "New Agreements"
+      },
+      {
+       "name": "done",
+       "string": "Done",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "representative",
+       "string": "Purchase Representative",
+       "domain": "[]",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "status",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "date_start",
+       "string": "Ordering Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date_start'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "purchase_requisition_stock.view_purchase_requisition_form_inherit",
+    "package": "purchase_requisition_stock",
+    "name": "purchase.requisition.form.inherit",
+    "view_type": "field",
+    "inherits_view": "purchase_requisition.view_purchase_requisition_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "reference",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "reference",
+       "position": "after"
+      },
+      {
+       "name": "picking_type_id",
+       "readonly": "state != 'draft'",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "stock.group_adv_location"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "purchase_requisition.action_purchase_requisition",
+    "package": "purchase_requisition",
+    "name": "Purchase Agreements",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "view_purchase_requisition_filter",
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Start a new purchase agreement\n          </p><p>\n            An example of a purchase agreement is a blanket order.\n          </p><p>\n            For a blanket order, you can record an agreement for a specific period\n            (e.g. a year) and you order products within this agreement to benefit\n            from the negotiated prices.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "purchase.requisition"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "purchase_requisition.action_report_purchase_requisitions",
+    "package": "purchase_requisition",
+    "name": "Purchase Agreements",
+    "report_type": "qweb-pdf",
+    "report_name": "purchase_requisition.report_purchaserequisitions",
+    "report_file": "purchase_requisition.report.report_purchaserequisitions",
+    "print_report_name": "'Purchase Agreement - %s' % (object.name)",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_purchase_requisition",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "purchase.requisition"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

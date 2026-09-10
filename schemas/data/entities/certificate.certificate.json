@@ -1,0 +1,1655 @@
+{
+ "catalog": {
+  "name": "entity:certificate.certificate",
+  "description": "Complete definition of entity Certificate (certificate.certificate).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "certificate.certificate",
+  "storage_name": "certificate_certificate",
+  "full_name": "Certificate",
+  "kind": "persistent",
+  "description": "Certificate",
+  "defined_by_package": "certificate",
+  "extended_by_packages": [
+   "l10n_es_edi_facturae",
+   "l10n_es_edi_sii",
+   "l10n_es_edi_tbai",
+   "l10n_es_edi_verifactu",
+   "l10n_sa_edi"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "date_end DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "defined_in_package": "certificate",
+    "full_name": "Name"
+   },
+   {
+    "name": "content",
+    "type": "Binary",
+    "string": "Certificate",
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "certificate",
+    "full_name": "Certificate"
+   },
+   {
+    "name": "pkcs12_password",
+    "type": "Char",
+    "string": "Certificate Password",
+    "help": "Password to decrypt the PKS file.",
+    "defined_in_package": "certificate",
+    "full_name": "Certificate Password"
+   },
+   {
+    "name": "private_key_id",
+    "type": "Many2one",
+    "string": "Private Key",
+    "comodel": "certificate.key",
+    "check_company": true,
+    "domain": [
+     [
+      "public",
+      "=",
+      false
+     ]
+    ],
+    "compute": "_compute_private_key",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "certificate",
+    "full_name": "Private Key",
+    "target_entity": "certificate.key"
+   },
+   {
+    "name": "public_key_id",
+    "type": "Many2one",
+    "string": "Public Key",
+    "comodel": "certificate.key",
+    "check_company": true,
+    "domain": [
+     [
+      "public",
+      "=",
+      true
+     ]
+    ],
+    "help": "Used to set a public key in case the one self-contained in the certificate is erroneus.\n                When a public key is set this way, it will be used instead of the one in the certificate.\n             ",
+    "defined_in_package": "certificate",
+    "full_name": "Public Key",
+    "target_entity": "certificate.key"
+   },
+   {
+    "name": "scope",
+    "type": "Selection",
+    "string": "Certificate scope",
+    "selection": [
+     [
+      "general",
+      "General"
+     ],
+     [
+      "facturae",
+      "Facturae"
+     ],
+     [
+      "sii",
+      "SII"
+     ],
+     [
+      "tbai",
+      "TBAI"
+     ],
+     [
+      "verifactu",
+      "Veri*Factu"
+     ]
+    ],
+    "defined_in_package": "certificate",
+    "selection_added_by": [
+     "l10n_es_edi_facturae",
+     "l10n_es_edi_sii",
+     "l10n_es_edi_tbai",
+     "l10n_es_edi_verifactu"
+    ],
+    "extended_in_packages": [
+     "l10n_es_edi_facturae",
+     "l10n_es_edi_sii",
+     "l10n_es_edi_tbai",
+     "l10n_es_edi_verifactu"
+    ],
+    "full_name": "Certificate scope"
+   },
+   {
+    "name": "content_format",
+    "type": "Selection",
+    "selection": [
+     [
+      "der",
+      "DER"
+     ],
+     [
+      "pem",
+      "PEM"
+     ],
+     [
+      "pkcs12",
+      "PKCS12"
+     ]
+    ],
+    "string": "Original certificate format",
+    "compute": "_compute_pem_certificate",
+    "store": true,
+    "defined_in_package": "certificate",
+    "full_name": "Original certificate format"
+   },
+   {
+    "name": "pem_certificate",
+    "type": "Binary",
+    "string": "Certificate in PEM format",
+    "compute": "_compute_pem_certificate",
+    "store": true,
+    "defined_in_package": "certificate",
+    "full_name": "Certificate in PEM format"
+   },
+   {
+    "name": "subject_common_name",
+    "type": "Char",
+    "string": "Subject Name",
+    "compute": "_compute_pem_certificate",
+    "store": true,
+    "defined_in_package": "certificate",
+    "full_name": "Subject Name"
+   },
+   {
+    "name": "serial_number",
+    "type": "Char",
+    "string": "Serial number",
+    "help": "The serial number to add to electronic documents",
+    "compute": "_compute_pem_certificate",
+    "store": true,
+    "defined_in_package": "certificate",
+    "full_name": "Serial number"
+   },
+   {
+    "name": "date_start",
+    "type": "Datetime",
+    "string": "Available date",
+    "help": "The date on which the certificate starts to be valid",
+    "compute": "_compute_pem_certificate",
+    "store": true,
+    "defined_in_package": "certificate",
+    "full_name": "Available date"
+   },
+   {
+    "name": "date_end",
+    "type": "Datetime",
+    "string": "Expiration date",
+    "help": "The date on which the certificate expires",
+    "compute": "_compute_pem_certificate",
+    "store": true,
+    "defined_in_package": "certificate",
+    "full_name": "Expiration date"
+   },
+   {
+    "name": "loading_error",
+    "type": "Text",
+    "string": "Loading error",
+    "compute": "_compute_pem_certificate",
+    "store": true,
+    "defined_in_package": "certificate",
+    "full_name": "Loading error"
+   },
+   {
+    "name": "is_valid",
+    "type": "Boolean",
+    "string": "Valid",
+    "compute": "_compute_is_valid",
+    "search": "_search_is_valid",
+    "defined_in_package": "certificate",
+    "full_name": "Valid"
+   },
+   {
+    "name": "Active",
+    "type": "Boolean",
+    "help": "Set active to false to archive the certificate",
+    "default": true,
+    "defined_in_package": "certificate",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "ondelete": "cascade",
+    "defined_in_package": "certificate",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_id.country_code",
+    "depends": [
+     "company_id"
+    ],
+    "defined_in_package": "certificate",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "issuer_cert_id",
+    "type": "Many2one",
+    "comodel": "certificate.certificate",
+    "string": "Issuer Certificate",
+    "compute": "_compute_issuer_cert_id",
+    "check_company": true,
+    "defined_in_package": "certificate",
+    "full_name": "Issuer Certificate",
+    "target_entity": "certificate.certificate"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_issuer_cert_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pem_certificate",
+         "subject_common_name",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_private_key",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pem_certificate"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_pem_certificate",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "content",
+         "pkcs12_password"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_valid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_start",
+         "date_end",
+         "loading_error"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_valid",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constrains_certificate_key_compatibility",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "pem_certificate",
+         "private_key_id",
+         "public_key_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "certificate.private_key_id.loading_error",
+        "line": 288
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The certificate and private key are not compatible.",
+        "line": 293
+       },
+       {
+        "kind": "ValidationError",
+        "message": "certificate.public_key_id.loading_error",
+        "line": 297
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The certificate and public key are not compatible.",
+        "line": 302
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_constrains_certificate_loaded",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "content",
+         "pem_certificate"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "certificate.loading_error or _('This certificate could not be loaded. Please provide the certificate password.')",
+        "line": 307
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_subject_key_identifier",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "x509_cert"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper to safely extract the Subject Key Identifier (SKI) ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_authority_key_identifier",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "x509_cert"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper to safely extract the Authority Key Identifier (AKI) ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_common_name",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "cert",
+     "issuer"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper to safely extract the common name from a certificate's subject (or issuer). ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_issued_by",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "x509_certificate",
+     "x509_issuer_certificate"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Cryptographically check that ``certificate`` was directly issued by\n``issuer_certificate``: the issuer distinguished name must match and the\nsignature must verify against the issuer's public key.\n\n:return: ``True`` if the issuance is cryptographically proven, ``False`` if it\n    is disproven, and ``None`` if it could not be checked (unsupported scheme or\n    parameters).\n:rtype: bool | None",
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_pem_certificate_bundle",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "decoded_content",
+     "password"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Parses a PEM-encoded bundle to extract individual certificate blocks and\norders them based on the provided private key.\n\nThe function attempts to load a private key from the bundle. If successful,\nit compares public keys to identify the main target certificate. The first\ncertificate in the returned list is guaranteed to be the leaf certificate,\nfollowed by the rest of the CA chain. If no private key is found, it returns\nthe certificates in their original order.",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_certificate_content",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "content",
+     "password"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extract_and_filter_chain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "content_bytes",
+     "password"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Parses a bundle and returns only the certificates forming the leaf's chain ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_chain_missing_ca_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Parses the certificate content to extract its CA chain and identifies which\nCertificate Authorities are missing from the database.\n\n:return: A list of field dictionaries ready to be passed to `create()` for the missing CAs.",
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_der_certificate_bytes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "formatting"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": "Get the DER bytes of the certificate.\n\n:param optional,default='encodebytes' formatting: The formatting of the returned bytes\n    - 'encodebytes' returns a base64-encoded block of 76 characters lines\n    - 'base64' returns the raw base64-encoded data\n    - other returns non-encoded data\n:return: The formatted DER bytes of the certificate\n:rtype: bytes",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fingerprint_bytes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "hashing_algorithm",
+     "formatting"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": "Get the fingerprint bytes of the certificate.\n\n:param optional,default='sha256' hashing_algorithm: The digest algorithm to use. Currently, only 'sha1' and 'sha256' are available.\n:param optional,default='encodebytes' formatting: The formatting of the returned bytes\n    - 'encodebytes' returns a base64-encoded block of 76 characters lines\n    - 'base64' returns the raw base64-encoded data\n    - other returns non-encoded data\n:return: The formatted fingerprint bytes of the certificate\n:rtype: bytes",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "f\"Unsupported hashing algorithm '{hashing_algorithm}'. Currently supported: sha1 and sha256.\"",
+        "line": 596
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_signature_bytes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "formatting"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": "Get the signature bytes of the certificate.\n\n:param optional,default='encodebytes' formatting: The formatting of the returned bytes\n    - 'encodebytes' returns a base64-encoded block of 76 characters lines\n    - 'base64' returns the raw base64-encoded data\n    - other returns non-encoded data\n:return: The formatted signature bytes of the certificate\n:rtype: bytes",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_public_key_numbers_bytes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "formatting"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": "Get the certificate public key's public numbers bytes.\n\n:param optional,default='encodebytes' formatting: The formatting of the returned bytes\n    - 'encodebytes' returns a base64-encoded block of 76 characters lines\n    - 'base64' returns the raw base64-encoded data\n    - other returns non-encoded data\n:return: A tuple containing the formatted public number bytes of the certificate's public key\n\n:rtype: tuple(bytes,bytes)",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_public_key_bytes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "encoding",
+     "formatting"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": "Get the certificate's public key bytes.\n\n:param optional,default='der' encoding: The formatting of the returned bytes\n    - 'der' returns DER public key bytes\n    - other returns PEM public key bytes\n:param optional,default='encodebytes' formatting: The formatting of the returned bytes\n    - 'encodebytes' returns a base64-encoded block of 76 characters lines\n    - 'base64' returns the raw base64-encoded data\n    - other returns non-encoded data\n:return: The formatted certificate public key bytes in the corresponding format\n:rtype: bytes",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The public key from the certificate could not be loaded.",
+        "line": 656
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_sign",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "hashing_algorithm",
+     "formatting"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": "Compute and return the message's signature.\n\n:param str|bytes message: The message to sign\n:param optional,default='sha256' hashing_algorithm: The digest algorithm to use. Currently, only 'sha1' and 'sha256' are available.\n:param optional,default='encodebytes' formatting: The formatting of the returned bytes\n    - 'encodebytes' returns a base64-encoded block of 76 characters lines\n    - 'base64' returns the raw base64-encoded data\n    - other returns non-encoded data\n:return: The formatted signature bytes of the message\n:rtype: bytes",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "self.loading_error or _('This certificate is not valid, its validity has expired.')",
+        "line": 682
+       },
+       {
+        "kind": "UserError",
+        "message": "No private key linked to the certificate, it is required to sign documents.",
+        "line": 684
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_certificate_chain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "certificate",
+      "decorators": [],
+      "documentation": "Retrieves the full certificate chain as a recordset, starting from the current\ncertificate and walking up the issuer_cert_id links.\n\n:return: A recordset of certificate.certificate objects ordered from Leaf to Root.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_facturae_get_issuer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_facturae",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_tbai_get_issuer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_es_edi_verifactu_is_sello_certificate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_sa_get_issuer_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_sa_get_csr_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "journal"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa_edi",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_sa_validate_csr_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "journal"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa_edi",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please make sure the following fields are shorter than %(max_length)d bytes (note that Arabic or special characters take more space): %(error_fields_msg)s",
+        "line": 97
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_l10n_sa_get_csr_str",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "journal"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa_edi",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return a string representation of a ZATCA compliant CSR that will be sent to the Compliance API in order to get back\na signed X509 certificate",
+      "size_in_lines": 64,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constrains_certificate_key_compatibility",
+    "package": "certificate",
+    "kind": "ValidationError",
+    "message": "certificate.private_key_id.loading_error"
+   },
+   {
+    "operation": "_constrains_certificate_key_compatibility",
+    "package": "certificate",
+    "kind": "ValidationError",
+    "message": "The certificate and private key are not compatible."
+   },
+   {
+    "operation": "_constrains_certificate_key_compatibility",
+    "package": "certificate",
+    "kind": "ValidationError",
+    "message": "certificate.public_key_id.loading_error"
+   },
+   {
+    "operation": "_constrains_certificate_key_compatibility",
+    "package": "certificate",
+    "kind": "ValidationError",
+    "message": "The certificate and public key are not compatible."
+   },
+   {
+    "operation": "_constrains_certificate_loaded",
+    "package": "certificate",
+    "kind": "ValidationError",
+    "message": "certificate.loading_error or _('This certificate could not be loaded. Please provide the certificate password.')"
+   },
+   {
+    "operation": "_get_fingerprint_bytes",
+    "package": "certificate",
+    "kind": "UserError",
+    "message": "f\"Unsupported hashing algorithm '{hashing_algorithm}'. Currently supported: sha1 and sha256.\""
+   },
+   {
+    "operation": "_get_public_key_bytes",
+    "package": "certificate",
+    "kind": "UserError",
+    "message": "The public key from the certificate could not be loaded."
+   },
+   {
+    "operation": "_sign",
+    "package": "certificate",
+    "kind": "UserError",
+    "message": "self.loading_error or _('This certificate is not valid, its validity has expired.')"
+   },
+   {
+    "operation": "_sign",
+    "package": "certificate",
+    "kind": "UserError",
+    "message": "No private key linked to the certificate, it is required to sign documents."
+   },
+   {
+    "operation": "_l10n_sa_validate_csr_vals",
+    "package": "l10n_sa_edi",
+    "kind": "UserError",
+    "message": "Please make sure the following fields are shorter than %(max_length)d bytes (note that Arabic or special characters take more space): %(error_fields_msg)s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "certificate.certificate.access_certificate_admin",
+    "package": "certificate",
+    "name": "certificate.access_certificate",
+    "entity": "certificate.certificate",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "certificate.certificate_rule_company",
+    "package": "certificate",
+    "name": "Certificate multi-company",
+    "entity": "certificate.certificate",
+    "domain": "['|', ('company_id', '=', False), ('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "certificate.certificate_certificate_view_form",
+    "package": "certificate",
+    "name": "certificate.certificate.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "certificate form"
+     },
+     "fields": [
+      {
+       "name": "loading_error"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. New Certificate"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "content",
+       "widget": "binary"
+      },
+      {
+       "name": "pkcs12_password"
+      },
+      {
+       "name": "subject_common_name",
+       "invisible": "not pem_certificate"
+      },
+      {
+       "name": "private_key_id",
+       "invisible": "not pem_certificate",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "public_key_id",
+       "invisible": "not pem_certificate",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "scope",
+       "widget": "radio",
+       "invisible": "1"
+      },
+      {
+       "name": "date_start",
+       "widget": "remaining_days"
+      },
+      {
+       "name": "date_end",
+       "widget": "remaining_days"
+      },
+      {
+       "name": "serial_number"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "binary": 1,
+      "radio": 1,
+      "remaining_days": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "certificate.certificate_certificate_view_list",
+    "package": "certificate",
+    "name": "certificate.certificate.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "certificate list"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Certificate"
+      },
+      {
+       "name": "subject_common_name",
+       "string": "Subject Name"
+      },
+      {
+       "name": "is_valid",
+       "string": "Validity"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "certificate.certificate_certificate_view_search",
+    "package": "certificate",
+    "name": "certificate.certificate.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "certificate search"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "scope"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "scope_general",
+       "string": "General",
+       "domain": "[('scope','=','general')]",
+       "help": "General certificates"
+      },
+      {
+       "name": "valid",
+       "string": "Valid",
+       "domain": "[('is_valid','=',True)]",
+       "help": "Valid certificates"
+      },
+      {
+       "name": "not_valid",
+       "string": "Invalid",
+       "domain": "[('is_valid','=',False)]",
+       "help": "Not valid certificates"
+      },
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('active','=',False)]",
+       "help": "Archived certificates"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_facturae.certificate_certificate_view_search",
+    "package": "l10n_es_edi_facturae",
+    "name": "certificate_certificate_view_search.inherit.l10n_es_edi_facturae",
+    "view_type": "filter",
+    "inherits_view": "certificate.certificate_certificate_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "filter",
+     "root_attributes": {
+      "name": "scope_general",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "scope_general",
+       "position": "after"
+      },
+      {
+       "name": "scope_facturae",
+       "string": "Facturae",
+       "domain": "[('scope','=','facturae')]",
+       "help": "Facturae certificates"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_facturae.certificate_certificate_view_form",
+    "package": "l10n_es_edi_facturae",
+    "name": "certificate_certificate_view_form.inherit.l10n_es_edi_facturae",
+    "view_type": "field",
+    "inherits_view": "certificate.certificate_certificate_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "scope",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "scope",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_sii.certificate_certificate_view_search",
+    "package": "l10n_es_edi_sii",
+    "name": "certificate_certificate_view_search.inherit.l10n_es_edi_sii",
+    "view_type": "filter",
+    "inherits_view": "certificate.certificate_certificate_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "filter",
+     "root_attributes": {
+      "name": "scope_general",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "scope_general",
+       "position": "after"
+      },
+      {
+       "name": "scope_sii",
+       "string": "SII",
+       "domain": "[('scope','=','sii')]",
+       "help": "SII certificates"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_sii.certificate_certificate_view_form",
+    "package": "l10n_es_edi_sii",
+    "name": "certificate_certificate_view_form.inherit.l10n_es_edi_sii",
+    "view_type": "field",
+    "inherits_view": "certificate.certificate_certificate_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "scope",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "scope",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_tbai.certificate_certificate_view_search",
+    "package": "l10n_es_edi_tbai",
+    "name": "certificate_certificate_view_search.inherit.l10n_es_edi_tbai",
+    "view_type": "filter",
+    "inherits_view": "certificate.certificate_certificate_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "filter",
+     "root_attributes": {
+      "name": "scope_general",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "scope_general",
+       "position": "after"
+      },
+      {
+       "name": "scope_tbai",
+       "string": "TBAI",
+       "domain": "[('scope','=','tbai')]",
+       "help": "TBAI certificates"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_tbai.certificate_certificate_view_form",
+    "package": "l10n_es_edi_tbai",
+    "name": "certificate_certificate_view_form.inherit.l10n_es_edi_tbai",
+    "view_type": "field",
+    "inherits_view": "certificate.certificate_certificate_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "scope",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "scope",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu.certificate_certificate_view_search",
+    "package": "l10n_es_edi_verifactu",
+    "name": "certificate_certificate_view_search.inherit.l10n_es_edi_verifactu",
+    "view_type": "filter",
+    "inherits_view": "certificate.certificate_certificate_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "filter",
+     "root_attributes": {
+      "name": "scope_general",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "scope_general",
+       "position": "after"
+      },
+      {
+       "name": "scope_verifactu",
+       "string": "Veri*Factu",
+       "domain": "[('scope','=','verifactu')]",
+       "help": "Veri*Factu certificates"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu.certificate_certificate_view_form",
+    "package": "l10n_es_edi_verifactu",
+    "name": "certificate_certificate_view_form.inherit.l10n_es_edi_verifactu",
+    "view_type": "field",
+    "inherits_view": "certificate.certificate_certificate_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "scope",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "scope",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "certificate.certificate_certificate_action_view_list",
+    "package": "certificate",
+    "name": "Certificates",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">Create a first certificate</p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "certificate.certificate"
+   },
+   {
+    "external_identifier": "l10n_es_edi_facturae.l10n_es_edi_facturae_certificate_action",
+    "package": "l10n_es_edi_facturae",
+    "name": "Certificates for Facturae EDI invoices on Spain",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'scope': 'facturae', 'search_default_scope_facturae': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"oe_view_nocontent_create\">Create the first certificate</p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "certificate.certificate"
+   },
+   {
+    "external_identifier": "l10n_es_edi_sii.l10n_es_edi_sii_certificate_action",
+    "package": "l10n_es_edi_sii",
+    "name": "Certificates for SII EDI invoices on Spain",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'scope': 'sii', 'search_default_scope_sii': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"oe_view_nocontent_create\">Create the first certificate</p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "certificate.certificate"
+   },
+   {
+    "external_identifier": "l10n_es_edi_tbai.l10n_es_edi_tbai_certificate_action",
+    "package": "l10n_es_edi_tbai",
+    "name": "Certificates for EDI TicketBAI invoices on Spain",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'scope': 'tbai', 'search_default_scope_tbai': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"oe_view_nocontent_create\">Create the first certificate</p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "certificate.certificate"
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu.l10n_es_edi_verifactu_certificate_action",
+    "package": "l10n_es_edi_verifactu",
+    "name": "Certificates for Veri*Factu",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'scope': 'verifactu', 'search_default_scope_verifactu': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"oe_view_nocontent_create\">Create the first certificate</p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "certificate.certificate"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

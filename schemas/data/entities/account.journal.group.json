@@ -1,0 +1,277 @@
+{
+ "catalog": {
+  "name": "entity:account.journal.group",
+  "description": "Complete definition of entity Account Journal Group (account.journal.group).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.journal.group",
+  "storage_name": "account_journal_group",
+  "full_name": "Account Journal Group",
+  "kind": "persistent",
+  "description": "Account Journal Group",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Ledger group",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "account",
+    "full_name": "Ledger group"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "help": "Define which company can select the multi-ledger in report filters. If none is provided, available for all companies",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "excluded_journal_ids",
+    "type": "Many2many",
+    "comodel": "account.journal",
+    "domain": "company_id and [(\"company_id\", \"parent_of\", company_id)] or []",
+    "string": "Excluded Journals",
+    "context": {
+     "active_test": false
+    },
+    "defined_in_package": "account",
+    "full_name": "Excluded Journals",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "account",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_uniq_name",
+    "kind": "Constraint",
+    "definition": "unique(company_id, name)",
+    "message": "A Ledger group name must be unique per company.",
+    "defined_in_package": "account"
+   }
+  ],
+  "operations": [],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_journal_group_invoice",
+    "package": "account",
+    "name": "account.journal.group invoice",
+    "entity": "account.journal.group",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_journal_group_readonly",
+    "package": "account",
+    "name": "account.journal.group readonly",
+    "entity": "account.journal.group",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_journal_group_manager",
+    "package": "account",
+    "name": "account.journal.group manager",
+    "entity": "account.journal.group",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.journal_group_comp_rule",
+    "package": "account",
+    "name": "Multi-ledger multi-company",
+    "entity": "account.journal.group",
+    "domain": "['|', ('company_id', '=', False), ('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.view_account_journal_group_tree",
+    "package": "account",
+    "name": "account.journal.group.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "bottom"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. GAAP, IFRS, ..."
+      },
+      {
+       "name": "excluded_journal_ids",
+       "widget": "many2many_tags_journals",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags_journals": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "account.view_account_journal_group_form",
+    "package": "account",
+    "name": "account.journal.group.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Multi-ledger"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. GAAP, IFRS, ..."
+      },
+      {
+       "name": "excluded_journal_ids",
+       "widget": "many2many_tags_journals",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "sequence",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags_journals": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_account_journal_group_list",
+    "package": "account",
+    "name": "Multi-ledger",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_multi_ledger\"></p>\n                <h2 class=\"d-md-block\">Ledger group allows managing multiple accounting standards.</h2>\n                <p>\n                    Create as many ledger groups as needed to maintain separate ledgers for local GAAP, IFRS, or fiscal\n                    adjustments, ensuring compliance with diverse regulations.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.journal.group"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

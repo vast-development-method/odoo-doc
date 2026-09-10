@@ -1,0 +1,342 @@
+{
+ "catalog": {
+  "name": "entity:stock.quant.relocate",
+  "description": "Complete definition of entity Stock Quantity Relocation (stock.quant.relocate).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.quant.relocate",
+  "storage_name": "stock_quant_relocate",
+  "full_name": "Stock Quantity Relocation",
+  "kind": "transient",
+  "description": "Stock Quantity Relocation",
+  "defined_by_package": "stock",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "quant_ids",
+    "type": "Many2many",
+    "comodel": "stock.quant",
+    "defined_in_package": "stock",
+    "string": "Quant",
+    "full_name": "Quant",
+    "target_entity": "stock.quant"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "quant_ids.company_id",
+    "defined_in_package": "stock",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "dest_location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "domain": "[('usage', '=', 'internal'), ('company_id', '=', company_id)]",
+    "defined_in_package": "stock",
+    "string": "Dest Location",
+    "full_name": "Dest Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "dest_package_id_domain",
+    "type": "Char",
+    "compute": "_compute_dest_package_id_domain",
+    "defined_in_package": "stock",
+    "string": "Dest Package Identifier Domain",
+    "full_name": "Dest Package Identifier Domain"
+   },
+   {
+    "name": "dest_package_id",
+    "type": "Many2one",
+    "comodel": "stock.package",
+    "domain": "dest_package_id_domain",
+    "compute": "_compute_dest_package_id",
+    "store": true,
+    "defined_in_package": "stock",
+    "string": "Dest Package",
+    "full_name": "Dest Package",
+    "target_entity": "stock.package"
+   },
+   {
+    "name": "message",
+    "type": "Text",
+    "string": "Reason for relocation",
+    "defined_in_package": "stock",
+    "full_name": "Reason for relocation"
+   },
+   {
+    "name": "is_partial_package",
+    "type": "Boolean",
+    "compute": "_compute_is_partial_package",
+    "defined_in_package": "stock",
+    "string": "Is Partial Package",
+    "full_name": "Is Partial Package"
+   },
+   {
+    "name": "partial_package_names",
+    "type": "Char",
+    "compute": "_compute_is_partial_package",
+    "defined_in_package": "stock",
+    "string": "Partial Package Names",
+    "full_name": "Partial Package Names"
+   },
+   {
+    "name": "is_multi_location",
+    "type": "Boolean",
+    "compute": "_compute_is_multi_location",
+    "defined_in_package": "stock",
+    "string": "Is Multi Location",
+    "full_name": "Is Multi Location"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_is_partial_package",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quant_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_multi_location",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "dest_location_id",
+         "quant_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dest_package_id_domain",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "dest_location_id",
+         "quant_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dest_package_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "dest_package_id_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_relocate_quants",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "stock.access_stock_quant_relocate",
+    "package": "stock",
+    "name": "access.stock.quant.relocate",
+    "entity": "stock.quant.relocate",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "stock.stock_quant_relocate_view_form",
+    "package": "stock",
+    "name": "Stock Relocation",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Relocate your stock"
+     },
+     "fields": [
+      {
+       "name": "quant_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "dest_location_id",
+       "string": "To Location",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "dest_package_id_domain",
+       "invisible": "1"
+      },
+      {
+       "name": "dest_package_id",
+       "widget": "package_m2o",
+       "readonly": "is_multi_location",
+       "string": "To Package",
+       "context": "{'show_src_package': 1}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "message",
+       "placeholder": "Product Relocated"
+      },
+      {
+       "name": "is_partial_package",
+       "invisible": "1"
+      },
+      {
+       "name": "is_multi_location",
+       "invisible": "1"
+      },
+      {
+       "name": "partial_package_names"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_relocate_quants",
+       "string": "Confirm",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "package_m2o": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

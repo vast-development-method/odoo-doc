@@ -1,0 +1,1798 @@
+{
+ "catalog": {
+  "name": "entity:hr.leave.type",
+  "description": "Complete definition of entity Time Off Type (hr.leave.type).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.leave.type",
+  "storage_name": "hr_leave_type",
+  "full_name": "Time Off Type",
+  "kind": "persistent",
+  "description": "Time Off Type",
+  "defined_by_package": "hr_holidays",
+  "extended_by_packages": [
+   "hr_holidays_attendance",
+   "hr_work_entry_holidays",
+   "l10n_in_hr_holidays"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Time Off Type",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Type"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 100,
+    "help": "The type with the smallest sequence is the default value in time off request",
+    "defined_in_package": "hr_holidays",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "create_calendar_meeting",
+    "type": "Boolean",
+    "string": "Display Time Off in Calendar",
+    "default": true,
+    "help": "If this field is checked, every leave request of this type will have a corresponding entry in the calendar application. There will be no entry if this stays unchecked.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Display Time Off in Calendar"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "help": "The color selected here will be used in every screen with the time off type.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Color"
+   },
+   {
+    "name": "icon_id",
+    "type": "Many2one",
+    "comodel": "ir.attachment",
+    "string": "Cover Image",
+    "domain": "[('res_model', '=', 'hr.leave.type'), ('res_field', '=', 'icon_id')]",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Cover Image",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "help": "If the active field is set to false, it will allow you to hide the time off type without removing it.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Active"
+   },
+   {
+    "name": "hide_on_dashboard",
+    "type": "Boolean",
+    "default": false,
+    "string": "Hide On Dashboard",
+    "help": "Non-visible allocations can still be selected when taking a leave, but will simply not be displayed on the leave dashboard.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Hide On Dashboard"
+   },
+   {
+    "name": "max_leaves",
+    "type": "Float",
+    "compute": "_compute_leaves",
+    "string": "Maximum Allowed",
+    "search": "_search_max_leaves",
+    "help": "This value is given by the sum of all time off requests with a positive value.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Maximum Allowed"
+   },
+   {
+    "name": "leaves_taken",
+    "type": "Float",
+    "compute": "_compute_leaves",
+    "string": "Time off Already Taken",
+    "help": "This value is given by the sum of all time off requests with a negative value.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time off Already Taken"
+   },
+   {
+    "name": "virtual_remaining_leaves",
+    "type": "Float",
+    "compute": "_compute_leaves",
+    "search": "_search_virtual_remaining_leaves",
+    "string": "Virtual Remaining Time Off",
+    "help": "Maximum Time Off Allowed - Time Off Already Taken - Time Off Waiting Approval",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Virtual Remaining Time Off"
+   },
+   {
+    "name": "allocation_count",
+    "type": "Integer",
+    "compute": "_compute_allocation_count",
+    "string": "Allocations",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocations"
+   },
+   {
+    "name": "group_days_leave",
+    "type": "Float",
+    "compute": "_compute_group_days_leave",
+    "string": "Group Time Off",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Group Time Off"
+   },
+   {
+    "name": "is_used",
+    "type": "Boolean",
+    "compute": "_compute_is_used",
+    "defined_in_package": "hr_holidays",
+    "string": "Is Used",
+    "full_name": "Is Used"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "domain": {
+     "dynamic": "lambda self: [('id', 'in', self.env.companies.ids)]"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Country",
+    "default": {
+     "dynamic": "lambda self: self.env.company.country_id"
+    },
+    "compute": "_compute_country_id",
+    "store": true,
+    "domain": {
+     "dynamic": "lambda self: [('id', 'in', self.env.companies.country_id.ids)]"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "country_id.code",
+    "depends": [
+     "country_id"
+    ],
+    "readonly": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "responsible_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "relation": "hr_leave_type_res_users_rel",
+    "column1": "hr_leave_type_id",
+    "column2": "res_users_id",
+    "string": "Notify HR",
+    "domain": {
+     "dynamic": "lambda self: [('all_group_ids', 'in', self.env.ref('hr_holidays.group_hr_holidays_user').id), ('share', '=', False), ('company_ids', 'in', self.env.company.id)]"
+    },
+    "help": "Choose the Time Off Officers who will be notified to approve allocation or Time Off Request. If empty, nobody will be notified",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Notify human resources",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "leave_validation_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "no_validation",
+      "None needed"
+     ],
+     [
+      "hr",
+      "By Time Off Officer"
+     ],
+     [
+      "manager",
+      "By Employee's Approver"
+     ],
+     [
+      "both",
+      "By Employee's Approver and Time Off Officer"
+     ]
+    ],
+    "default": "hr",
+    "string": "Time Off Validation",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Validation"
+   },
+   {
+    "name": "requires_allocation",
+    "type": "Boolean",
+    "default": true,
+    "required": true,
+    "string": "Requires allocation",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Requires allocation"
+   },
+   {
+    "name": "employee_requests",
+    "type": "Boolean",
+    "default": false,
+    "required": true,
+    "string": "Allow Employee Requests",
+    "help": "Extra Days Requests Allowed: User can request an allocation for himself.\n\n        Not Allowed: User cannot request an allocation.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allow Employee Requests"
+   },
+   {
+    "name": "allocation_validation_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "no_validation",
+      "None needed"
+     ],
+     [
+      "hr",
+      "By Time Off Officer"
+     ],
+     [
+      "manager",
+      "By Employee's Approver"
+     ],
+     [
+      "both",
+      "By Employee's Approver and Time Off Officer"
+     ]
+    ],
+    "default": "hr",
+    "string": "Approval",
+    "help": "Select the level of approval needed in case of request by employee\n            #     - No validation needed: The employee's request is automatically approved.\n            #     - Approved by Time Off Officer: The employee's request need to be manually approved\n            #       by the Time Off Officer, Employee's Approver or both.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Approval"
+   },
+   {
+    "name": "has_valid_allocation",
+    "type": "Boolean",
+    "compute": "_compute_valid",
+    "search": "_search_valid",
+    "help": "This indicates if it is still possible to use this type of leave",
+    "defined_in_package": "hr_holidays",
+    "string": "Has Valid Allocation",
+    "full_name": "Has Valid Allocation"
+   },
+   {
+    "name": "time_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "other",
+      "Worked Time"
+     ],
+     [
+      "leave",
+      "Absence"
+     ]
+    ],
+    "default": "leave",
+    "string": "Kind of Time Off",
+    "help": "The distinction between working time (ex. Attendance) and absence (ex. Training) will be used in the computation of Accrual's plan rate.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Kind of Time Off"
+   },
+   {
+    "name": "request_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "day",
+      "Day"
+     ],
+     [
+      "half_day",
+      "Half-Day"
+     ],
+     [
+      "hour",
+      "Hours"
+     ]
+    ],
+    "default": "day",
+    "string": "Duration Type",
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Duration Type"
+   },
+   {
+    "name": "unpaid",
+    "type": "Boolean",
+    "string": "Is Unpaid",
+    "default": false,
+    "defined_in_package": "hr_holidays",
+    "full_name": "Is Unpaid"
+   },
+   {
+    "name": "include_public_holidays_in_duration",
+    "type": "Boolean",
+    "string": "Ignore Public Holidays",
+    "default": false,
+    "help": "Public holidays should be counted in the leave duration when applying for leaves",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Ignore Public Holidays"
+   },
+   {
+    "name": "leave_notif_subtype_id",
+    "type": "Many2one",
+    "comodel": "mail.message.subtype",
+    "string": "Time Off Notification Subtype",
+    "default": {
+     "dynamic": "lambda self: self.env.ref('hr_holidays.mt_leave', raise_if_not_found=False)"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Notification Subtype",
+    "target_entity": "mail.message.subtype"
+   },
+   {
+    "name": "allocation_notif_subtype_id",
+    "type": "Many2one",
+    "comodel": "mail.message.subtype",
+    "string": "Allocation Notification Subtype",
+    "default": {
+     "dynamic": "lambda self: self.env.ref('hr_holidays.mt_leave_allocation', raise_if_not_found=False)"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocation Notification Subtype",
+    "target_entity": "mail.message.subtype"
+   },
+   {
+    "name": "support_document",
+    "type": "Boolean",
+    "string": "Supporting Document",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Supporting Document"
+   },
+   {
+    "name": "allow_request_on_top",
+    "type": "Boolean",
+    "string": "Allow Request on Top",
+    "default": false,
+    "help": "If checked, users can request another leave on top of the ones of this type.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allow Request on Top"
+   },
+   {
+    "name": "elligible_for_accrual_rate",
+    "type": "Boolean",
+    "string": "Eligible for Accrual Rate",
+    "compute": "_compute_eligible_for_accrual_rate",
+    "store": true,
+    "readonly": false,
+    "help": "If checked, this time off type will be taken into account for accruals computation.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Eligible for Accrual Rate"
+   },
+   {
+    "name": "accruals_ids",
+    "type": "One2many",
+    "comodel": "hr.leave.accrual.plan",
+    "inverse_name": "time_off_type_id",
+    "defined_in_package": "hr_holidays",
+    "string": "Accruals",
+    "full_name": "Accruals",
+    "target_entity": "hr.leave.accrual.plan"
+   },
+   {
+    "name": "accrual_count",
+    "type": "Float",
+    "compute": "_compute_accrual_count",
+    "string": "Accruals count",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Accruals count"
+   },
+   {
+    "name": "allows_negative",
+    "type": "Boolean",
+    "string": "Allow Negative Cap",
+    "help": "If checked, users request can exceed the allocated days and balance can go in negative.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allow Negative Cap"
+   },
+   {
+    "name": "max_allowed_negative",
+    "type": "Integer",
+    "string": "Maximum Excess Amount",
+    "help": "Define the maximum level of negative days this kind of time off can reach. Value must be at least 1.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Maximum Excess Amount"
+   },
+   {
+    "name": "overtime_deductible",
+    "type": "Boolean",
+    "string": "Deduct Extra Hours",
+    "default": false,
+    "help": "Once a time off of this type is approved, extra hours in attendances will be deducted.",
+    "defined_in_package": "hr_holidays_attendance",
+    "full_name": "Deduct Extra Hours"
+   },
+   {
+    "name": "work_entry_type_id",
+    "type": "Many2one",
+    "comodel": "hr.work.entry.type",
+    "string": "Work Entry Type",
+    "index": "btree_not_null",
+    "defined_in_package": "hr_work_entry_holidays",
+    "full_name": "Work Entry Type",
+    "target_entity": "hr.work.entry.type"
+   },
+   {
+    "name": "l10n_in_is_sandwich_leave",
+    "type": "Boolean",
+    "help": "If a leave is covering holidays, the holiday period will be included in the requested time.\n        The time took in addition will have the same treatment (allocation, pay, reports) as the initial request.\n        Holidays includes public holidays, national days, paid holidays and week-ends.",
+    "defined_in_package": "l10n_in_hr_holidays",
+    "string": "Localization In Is Sandwich Leave",
+    "full_name": "Localization In Is Sandwich Leave"
+   },
+   {
+    "name": "l10n_in_is_limited_to_optional_days",
+    "type": "Boolean",
+    "help": "Enable this option to restrict Flexi Leave to specific days, ensuring that only days marked as\n        Optional Holidays can be selected. This helps validate that employees can only choose days from the designated\n        Optional Holiday list for their Flexi Leave.",
+    "defined_in_package": "l10n_in_hr_holidays",
+    "string": "Localization In Is Limited To Optional Days",
+    "full_name": "Localization In Is Limited To Optional Days"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_negative",
+    "kind": "Constraint",
+    "definition": "CHECK(NOT allows_negative OR max_allowed_negative > 0)",
+    "message": "The maximum excess amount should be greater than 0. If you want to set 0, disable the negative cap instead.",
+    "defined_in_package": "hr_holidays"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_model_sorting_key",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "leave_type"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_valid",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns leave_type ids for which a valid allocation exists\nor that don't need an allocation\nreturn [('id', domain_operator, [x['id'] for x in res])]",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_allow_request_on_top",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "allow_request_on_top"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot allow requests on top of leaves of type 'Absence'.",
+        "line": 174
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_elligible_for_accrual_rate",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "elligible_for_accrual_rate"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "leaves of type 'Worked Time' should be always eligible for accrual rate.",
+        "line": 180
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_overlapping_public_holidays",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "include_public_holidays_in_duration"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot modify the 'Public Holiday Included' setting since one or more leaves for that                         time off type are overlapping with public holidays, meaning that the balance of those employees would be affected by this change.",
+        "line": 211
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_valid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "requires_allocation",
+         "max_leaves",
+         "virtual_remaining_leaves"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_records_write",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_allocation_requirement_edit_validity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "requires_allocation"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The allocation requirement of a time off type cannot be changed once leaves of that type have been taken. You should create a new time off type instead.",
+        "line": 251
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_country_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_max_leaves",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_virtual_remaining_leaves",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_leaves",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "employee_id",
+         "default_employee_id",
+         "leave_date_from",
+         "default_date_from"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allocation_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_group_days_leave",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_accrual_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_used",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_leaves_count_by_leave_type_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_allocations_count_by_leave_type_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "requested_display_name",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "requires_allocation",
+         "virtual_remaining_leaves",
+         "max_leaves",
+         "request_unit"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "holiday_status_display_name",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "overtime_deductible",
+         "requires_allocation"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "request_type",
+         "leave",
+         "holiday_status_display_name",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_eligible_for_accrual_rate",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "time_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "offset",
+     "limit",
+     "order",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override _search to order the results, according to some employee.\nThe order is the following\n\n - allocation fixed first, then allowing allocation, then free allocation\n - virtual remaining leaves (higher the better, so using reverse on sorted)\n\nThis override is necessary because those fields are not stored and depends\non an employee_id given in context. This sort will be done when there\nis an employee_id in context and that no other order has been given\nto the method.",
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_see_days_allocated",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_see_group_leaves",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_see_accrual_plans",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "has_accrual_allocation",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_allocation_data_request",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "target_date",
+     "hidden_allocations"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_allocation_data",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "employees",
+     "target_date"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 130,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_closest_expiring_leaves_date_and_count",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "allocations",
+     "remaining_leaves",
+     "target_date"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_carried_over_days_expiration_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "allocations",
+     "target_date"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_allow_request_on_top",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "You cannot allow requests on top of leaves of type 'Absence'."
+   },
+   {
+    "operation": "_check_elligible_for_accrual_rate",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "leaves of type 'Worked Time' should be always eligible for accrual rate."
+   },
+   {
+    "operation": "_check_overlapping_public_holidays",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "You cannot modify the 'Public Holiday Included' setting since one or more leaves for that                         time off type are overlapping with public holidays, meaning that the balance of those employees would be affected by this change."
+   },
+   {
+    "operation": "check_allocation_requirement_edit_validity",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "The allocation requirement of a time off type cannot be changed once leaves of that type have been taken. You should create a new time off type instead."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_status_manager",
+    "package": "hr_holidays",
+    "name": "hr.holidays.status manager",
+    "entity": "hr.leave.type",
+    "group": "hr_holidays.group_hr_holidays_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_status_user",
+    "package": "hr_holidays",
+    "name": "hr.holidays.status user",
+    "entity": "hr.leave.type",
+    "group": "hr_holidays.group_hr_holidays_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_holidays.access_hr_holidays_status_employee",
+    "package": "hr_holidays",
+    "name": "hr.holidays.status employee",
+    "entity": "hr.leave.type",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_holidays.hr_holidays_status_rule_multi_company",
+    "package": "hr_holidays",
+    "name": "Time Off multi company rule",
+    "entity": "hr.leave.type",
+    "domain": "[\n            '|', \n                ('company_id', 'in', company_ids),\n                '&',\n                    ('company_id', '=', False),\n                    ('country_id', 'in', user.env.companies.country_id.ids + [False])\n        ]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_holidays.view_holidays_status_filter",
+    "package": "hr_holidays",
+    "name": "hr.leave.type.filter",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Time Off Type"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Time Off Types"
+      },
+      {
+       "name": "create_calendar_meeting"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "country",
+       "string": "Country",
+       "context": "{'group_by': 'country_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.edit_holiday_status_form",
+    "package": "hr_holidays",
+    "name": "hr.leave.type.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Time Off Type"
+     },
+     "fields": [
+      {
+       "name": "allocation_count"
+      },
+      {
+       "name": "group_days_leave"
+      },
+      {
+       "name": "accrual_count"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Yearly Vacation"
+      },
+      {
+       "name": "request_unit",
+       "widget": "radio",
+       "options": "{'horizontal': True}"
+      },
+      {
+       "name": "time_type",
+       "required": "1",
+       "string": "Count as"
+      },
+      {
+       "name": "responsible_ids",
+       "widget": "many2many_tags",
+       "invisible": "leave_validation_type in ['no_validation', 'manager'] and (not requires_allocation or allocation_validation_type not in ['hr', 'both'])",
+       "placeholder": "Nobody to notify"
+      },
+      {
+       "name": "company_id",
+       "readonly": "is_used",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "country_id",
+       "readonly": "company_id or is_used",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "country_id",
+       "invisible": "1"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "leave_validation_type",
+       "widget": "radio",
+       "string": "Approval"
+      },
+      {
+       "name": "requires_allocation",
+       "widget": "checkbox"
+      },
+      {
+       "name": "employee_requests",
+       "widget": "checkbox",
+       "invisible": "not requires_allocation"
+      },
+      {
+       "name": "allocation_validation_type",
+       "widget": "radio",
+       "invisible": "not requires_allocation",
+       "string": "Approval"
+      },
+      {
+       "name": "include_public_holidays_in_duration",
+       "nolabel": "1"
+      },
+      {
+       "name": "hide_on_dashboard",
+       "nolabel": "1"
+      },
+      {
+       "name": "support_document",
+       "nolabel": "1"
+      },
+      {
+       "name": "elligible_for_accrual_rate",
+       "readonly": "time_type != 'leave'",
+       "nolabel": "1"
+      },
+      {
+       "name": "allow_request_on_top",
+       "invisible": "time_type == 'leave'",
+       "nolabel": "1"
+      },
+      {
+       "name": "create_calendar_meeting",
+       "nolabel": "1"
+      },
+      {
+       "name": "allows_negative",
+       "nolabel": "1"
+      },
+      {
+       "name": "max_allowed_negative"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "icon_id",
+       "widget": "hr_holidays_radio_image",
+       "options": "{'horizontal': true}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_see_days_allocated",
+       "type": "object",
+       "invisible": "not requires_allocation or not id",
+       "class": "oe_stat_button",
+       "icon": "fa-calendar"
+      },
+      {
+       "name": "action_see_group_leaves",
+       "type": "object",
+       "invisible": "not id",
+       "class": "oe_stat_button",
+       "icon": "fa-calendar"
+      },
+      {
+       "name": "action_see_accrual_plans",
+       "type": "object",
+       "invisible": "not id or accrual_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-calendar"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 3,
+      "many2many_tags": 1,
+      "checkbox": 2,
+      "color_picker": 1,
+      "hr_holidays_radio_image": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "type": "object",
+       "name": "action_see_days_allocated",
+       "icon": "fa-calendar",
+       "invisible": "not requires_allocation or not id",
+       "help": "Count of allocations for this time off type (approved or waiting for approbation) with a validity period starting this year."
+      },
+      {
+       "class": "oe_stat_button",
+       "type": "object",
+       "name": "action_see_group_leaves",
+       "icon": "fa-calendar",
+       "invisible": "not id",
+       "help": "Count of time off requests for this time off type (approved or waiting for approbation) with a start date in the current year."
+      },
+      {
+       "class": "oe_stat_button",
+       "type": "object",
+       "name": "action_see_accrual_plans",
+       "icon": "fa-calendar",
+       "invisible": "not id or accrual_count == 0",
+       "help": "Count of plans linked to this time off type."
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_holiday_status_view_kanban",
+    "package": "hr_holidays",
+    "name": "hr.leave.type.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "max_leaves"
+      },
+      {
+       "name": "leaves_taken"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.view_holiday_status_normal_tree",
+    "package": "hr_holidays",
+    "name": "hr.leave.type.normal.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Time Off Type",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "request_unit",
+       "optional": "hide"
+      },
+      {
+       "name": "leave_validation_type",
+       "string": "Time Off Approval",
+       "optional": "hide"
+      },
+      {
+       "name": "responsible_ids",
+       "widget": "many2many_tags",
+       "invisible": "leave_validation_type in ['no_validation', 'manager'] and (not requires_allocation or allocation_validation_type != 'hr')",
+       "optional": "hide"
+      },
+      {
+       "name": "requires_allocation",
+       "optional": "hide"
+      },
+      {
+       "name": "allocation_validation_type",
+       "string": "Allocation Approval"
+      },
+      {
+       "name": "employee_requests",
+       "optional": "hide"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "readonly": "is_used",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "country_id",
+       "readonly": "company_id or is_used",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.hr_leave_type_view_form",
+    "package": "hr_holidays_attendance",
+    "name": "hr.leave.type.view.form.inherit",
+    "view_type": "label",
+    "inherits_view": "hr_holidays.edit_holiday_status_form",
+    "mode": null,
+    "priority": "30",
+    "groups": null,
+    "structure": {
+     "root": "label",
+     "root_attributes": {
+      "for": "support_document",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "label",
+       "attributes": {
+        "for": "support_document",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry_holidays.work_entry_type_leave_form_inherit",
+    "package": "hr_work_entry_holidays",
+    "name": "work_entry.type.leave.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.edit_holiday_status_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='negative_cap']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "work_entry_type_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='negative_cap']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry_holidays.view_holiday_status_normal_tree",
+    "package": "hr_work_entry_holidays",
+    "name": null,
+    "view_type": "field",
+    "inherits_view": "hr_holidays.view_holiday_status_normal_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "employee_requests",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "employee_requests",
+       "position": "after"
+      },
+      {
+       "name": "work_entry_type_id",
+       "optional": "show"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_in_hr_holidays.hr_leave_type_view_form_inherit",
+    "package": "l10n_in_hr_holidays",
+    "name": "hr.leave.type.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.edit_holiday_status_form",
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='configuration']//label[@for='support_document']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='configuration']//label[@for='support_document']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_holidays.open_view_holiday_status",
+    "package": "hr_holidays",
+    "name": "Time Off Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.leave.type"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,219 @@
+{
+ "catalog": {
+  "name": "views:hr.timesheet.attendance.report",
+  "description": "View declarations for entity hr.timesheet.attendance.report.",
+  "record_count": 3,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr_timesheet_attendance.view_hr_timesheet_attendance_report_search",
+   "package": "hr_timesheet_attendance",
+   "name": "Search for HR timesheet attendance report",
+   "entity": "hr.timesheet.attendance.report",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Timesheet Attendance"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "string": "Employee"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_team",
+      "string": "My Team",
+      "domain": "[('employee_id.parent_id.user_id', '=', uid)]"
+     },
+     {
+      "name": "my_department",
+      "string": "My Department",
+      "domain": "[('employee_id.member_of_department', '=', True)]"
+     },
+     {
+      "name": "month",
+      "string": "Date",
+      "date": "date"
+     },
+     {
+      "name": "date_this_week",
+      "string": "This Week",
+      "domain": "[                             ('date', '>=', '=week_start'),                             ('date', '<', '=week_start +1w'),                         ]"
+     },
+     {
+      "name": "date_today",
+      "string": "Today",
+      "domain": "[('date', '>=', 'today'), ('date', '<', 'today +1d')]"
+     },
+     {
+      "name": "date_last_week",
+      "string": "Last Week",
+      "domain": "[                             ('date', '>=', '=week_start -1w'),                             ('date', '<', '=week_start'),                         ]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_by_user",
+      "string": "Employee",
+      "context": "{'group_by': 'employee_id'}"
+     },
+     {
+      "name": "group_by_month",
+      "string": "Date",
+      "context": "{'group_by': 'date'}",
+      "date": "date"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Timesheet Attendance\">\n                    <field name=\"employee_id\" string=\"Employee\"/>\n                    <filter string=\"My Team\" name=\"my_team\" domain=\"[('employee_id.parent_id.user_id', '=', uid)]\"/>\n                    <filter string=\"My Department\" name=\"my_department\" domain=\"[('employee_id.member_of_department', '=', True)]\"/>\n                    <separator/>\n                    <filter name=\"month\" string=\"Date\" date=\"date\">\n                        <filter name=\"date_this_week\" string=\"This Week\" domain=\"[                             ('date', '&gt;=', '=week_start'),                             ('date', '&lt;', '=week_start +1w'),                         ]\"/>\n                        <filter name=\"date_today\" string=\"Today\" domain=\"[('date', '&gt;=', 'today'), ('date', '&lt;', 'today +1d')]\"/>\n                        <filter name=\"date_last_week\" string=\"Last Week\" domain=\"[                             ('date', '&gt;=', '=week_start -1w'),                             ('date', '&lt;', '=week_start'),                         ]\"/>\n                    </filter>\n                    <filter name=\"group_by_user\" string=\"Employee\" context=\"{'group_by': 'employee_id'}\"/>\n                    <filter name=\"group_by_month\" string=\"Date\" date=\"date\" context=\"{'group_by': 'date'}\"/>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet_attendance.view_hr_timesheet_attendance_report_pivot",
+   "package": "hr_timesheet_attendance",
+   "name": "HR timesheet attendance report: Pivot",
+   "entity": "hr.timesheet.attendance.report",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Timesheet Attendance",
+     "disable_linking": "1",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "total_attendance",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "total_timesheet",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "total_difference",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "timesheets_cost"
+     },
+     {
+      "name": "attendance_cost"
+     },
+     {
+      "name": "cost_difference"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 3
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date",
+      "interval": "month",
+      "type": "row"
+     },
+     {
+      "name": "total_attendance",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "total_timesheet",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "total_difference",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "timesheets_cost"
+     },
+     {
+      "name": "attendance_cost"
+     },
+     {
+      "name": "cost_difference"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <pivot string=\"Timesheet Attendance\" disable_linking=\"1\" sample=\"1\">\n                    <field name=\"date\" interval=\"month\" type=\"row\"/>\n                    <field name=\"total_attendance\" type=\"measure\" widget=\"timesheet_uom\"/>\n                    <field name=\"total_timesheet\" type=\"measure\" widget=\"timesheet_uom\"/>\n                    <field name=\"total_difference\" type=\"measure\" widget=\"timesheet_uom\"/>\n                    <field name=\"timesheets_cost\"/>\n                    <field name=\"attendance_cost\"/>\n                    <field name=\"cost_difference\"/>\n                </pivot>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet_attendance.hr_timesheet_attendance_report_view_graph",
+   "package": "hr_timesheet_attendance",
+   "name": "hr.timesheet.attendance.report.view.graph",
+   "entity": "hr.timesheet.attendance.report",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Timesheet Attendance",
+     "sample": "1",
+     "disable_linking": "1"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "total_difference",
+      "widget": "timesheet_uom"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date",
+      "interval": "month"
+     },
+     {
+      "name": "total_difference",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <graph string=\"Timesheet Attendance\" sample=\"1\" disable_linking=\"1\">\n                    <field name=\"date\" interval=\"month\"/>\n                    <field name=\"total_difference\" type=\"measure\" widget=\"timesheet_uom\"/>\n                </graph>\n            </field>\n        "
+  }
+ ]
+}

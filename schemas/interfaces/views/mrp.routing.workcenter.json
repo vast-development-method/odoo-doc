@@ -1,0 +1,380 @@
+{
+ "catalog": {
+  "name": "views:mrp.routing.workcenter",
+  "description": "View declarations for entity mrp.routing.workcenter.",
+  "record_count": 6,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "mrp.mrp_routing_workcenter_tree_view",
+   "package": "mrp",
+   "name": "mrp.routing.workcenter.list",
+   "entity": "mrp.routing.workcenter",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Routing Work Centers",
+     "multi_edit": "1"
+    },
+    "fields": [
+     {
+      "name": "active",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "bom_id",
+      "column_invisible": "context.get('bom_id_invisible', False)"
+     },
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "time_cycle",
+      "widget": "float_time",
+      "string": "Duration (minutes)"
+     },
+     {
+      "name": "time_total",
+      "widget": "float_time",
+      "string": "Total Duration (minutes)",
+      "optional": "hide"
+     },
+     {
+      "name": "company_id",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "possible_bom_product_template_attribute_value_ids",
+      "column_invisible": "True"
+     },
+     {
+      "name": "bom_product_template_attribute_value_ids",
+      "widget": "many2many_tags",
+      "options": "{'no_create': True}",
+      "optional": "hide",
+      "groups": "product.group_product_variant"
+     },
+     {
+      "name": "blocked_by_operation_ids",
+      "widget": "many2many_tags",
+      "optional": "hide",
+      "groups": "mrp.group_mrp_workorder_dependencies"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "float_time": 2,
+     "many2many_tags": 2
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Routing Work Centers\" multi_edit=\"1\">\n                    <field name=\"active\" column_invisible=\"True\"/>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"name\"/>\n                    <field name=\"bom_id\" column_invisible=\"context.get('bom_id_invisible', False)\"/>\n                    <field name=\"workcenter_id\"/>\n                    <field name=\"time_cycle\" widget=\"float_time\" string=\"Duration (minutes)\"/>\n                    <field name=\"time_total\" widget=\"float_time\" string=\"Total Duration (minutes)\" optional=\"hide\"/>\n                    <field name=\"company_id\" optional=\"hide\" groups=\"base.group_multi_company\"/>\n                    <field name=\"possible_bom_product_template_attribute_value_ids\" column_invisible=\"True\"/>\n                    <field name=\"bom_product_template_attribute_value_ids\" optional=\"hide\" widget=\"many2many_tags\" options=\"{'no_create': True}\" groups=\"product.group_product_variant\"/>\n                    <field name=\"blocked_by_operation_ids\" widget=\"many2many_tags\" optional=\"hide\" groups=\"mrp.group_mrp_workorder_dependencies\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_routing_workcenter_bom_tree_view",
+   "package": "mrp",
+   "name": "mrp.routing.workcenter.bom.list",
+   "entity": "mrp.routing.workcenter",
+   "view_type": "xpath",
+   "inherits_view": "mrp_routing_workcenter_tree_view",
+   "mode": "primary",
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [
+     {
+      "name": "action_open_operation_form",
+      "string": "Add a line",
+      "type": "object",
+      "class": "btn-link",
+      "context": "{'default_bom_id': parent.id}"
+     },
+     {
+      "name": "copy_existing_operations",
+      "string": "Copy Existing Operations",
+      "type": "object",
+      "class": "btn-link",
+      "context": "{'bom_id': parent.id}"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//list\" position=\"inside\">\n                    <control>\n                        <button name=\"action_open_operation_form\" class=\"btn-link\" type=\"object\" string=\"Add a line\" context=\"{'default_bom_id': parent.id}\"/>\n                        <button name=\"copy_existing_operations\" class=\"btn-link\" type=\"object\" string=\"Copy Existing Operations\" context=\"{'bom_id': parent.id}\"/>\n                    </control>\n                </xpath>\n                <xpath expr=\"//field[@name='name']\" position=\"before\">\n                    <field name=\"sequence\" widget=\"handle\"/>\n                </xpath>\n                <xpath expr=\"//field[@name='bom_id']\" position=\"replace\"/>\n                <xpath expr=\"//field[@name='time_total']\" position=\"attributes\">\n                    <attribute name=\"sum\">Total Duration</attribute>\n                </xpath>\n                <xpath expr=\"//field[@name='bom_product_template_attribute_value_ids']\" position=\"attributes\">\n                    <attribute name=\"column_invisible\">parent.product_id</attribute>\n                </xpath>\n                <xpath expr=\"//field[@name='blocked_by_operation_ids']\" position=\"replace\">\n                </xpath>\n                <xpath expr=\"//field[@name='name']\" position=\"after\">\n                    <field name=\"bom_id\" column_invisible=\"True\"/>\n                    <field name=\"blocked_by_operation_ids\" widget=\"many2many_tags\" optional=\"hide\" column_invisible=\"not parent.allow_operation_dependencies\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_routing_workcenter_copy_to_bom_tree_view",
+   "package": "mrp",
+   "name": "mrp.routing.workcenter.copy_to_bom.list",
+   "entity": "mrp.routing.workcenter",
+   "view_type": "xpath",
+   "inherits_view": "mrp_routing_workcenter_tree_view",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//list\" position=\"attributes\">\n                    <attribute name=\"create\">0</attribute>\n                    <attribute name=\"delete\">0</attribute>\n                    <attribute name=\"export_xlsx\">0</attribute>\n                    <attribute name=\"multi_edit\">0</attribute>\n                </xpath>\n                <xpath expr=\"//field[@name='name']\" position=\"before\">\n                    <header>\n                        <button name=\"copy_to_bom\" type=\"object\" string=\"Copy selected operations\"/>\n                    </header>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_routing_workcenter_form_view",
+   "package": "mrp",
+   "name": "mrp.routing.workcenter.form",
+   "entity": "mrp.routing.workcenter",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Routing Work Centers",
+     "class": "o_mrp_routing_form"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "widget": "text",
+      "options": "{'line_breaks': False}",
+      "placeholder": "Operation..."
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "bom_id",
+      "invisible": "context.get('bom_id_invisible', False)",
+      "readonly": "context.get('default_bom_id', False)",
+      "domain": "[]"
+     },
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "possible_bom_product_template_attribute_value_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "bom_product_template_attribute_value_ids",
+      "widget": "many2many_tags",
+      "options": "{'no_create': True}",
+      "groups": "product.group_product_variant"
+     },
+     {
+      "name": "cost_mode",
+      "widget": "radio",
+      "options": "{'horizontal': true}"
+     },
+     {
+      "name": "allow_operation_dependencies",
+      "invisible": "1"
+     },
+     {
+      "name": "blocked_by_operation_ids",
+      "widget": "many2many_tags",
+      "invisible": "not allow_operation_dependencies",
+      "context": "{'default_bom_id':bom_id}"
+     },
+     {
+      "name": "workorder_count",
+      "invisible": "1"
+     },
+     {
+      "name": "time_mode",
+      "widget": "radio",
+      "options": "{'horizontal': true}"
+     },
+     {
+      "name": "time_cycle_manual",
+      "widget": "float_time",
+      "invisible": "time_mode == 'auto' and workorder_count != 0"
+     },
+     {
+      "name": "time_mode_batch",
+      "invisible": "time_mode == 'manual'"
+     },
+     {
+      "name": "cycle_number",
+      "invisible": "cycle_number < 2"
+     },
+     {
+      "name": "show_time_total",
+      "invisible": "1"
+     },
+     {
+      "name": "time_total",
+      "widget": "float_time"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "text": 1,
+     "many2many_tags": 2,
+     "radio": 2,
+     "float_time": 2
+    },
+    "inheritance_operations": [],
+    "chatter": true,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Routing Work Centers\" class=\"o_mrp_routing_form\">\n                    <sheet>\n                        <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                        <div class=\"d-flex\">\n                            <h1 class=\"d-flex w-100\">\n                                <field name=\"name\" options=\"{'line_breaks': False}\" widget=\"text\" class=\"o_task_name text-truncate w-md-75 w-100 pe-2\" placeholder=\"Operation...\"/>\n                            </h1>\n                        </div>\n                        <group>\n                            <group name=\"description\">\n                                <field name=\"active\" invisible=\"1\"/>\n                                <field name=\"company_id\" invisible=\"1\"/>\n                                <field name=\"bom_id\" invisible=\"context.get('bom_id_invisible', False)\" domain=\"[]\" readonly=\"context.get('default_bom_id', False)\"/>\n                                <field name=\"workcenter_id\"/>\n                                <field name=\"possible_bom_product_template_attribute_value_ids\" invisible=\"1\"/>\n                                <field name=\"bom_product_template_attribute_value_ids\" widget=\"many2many_tags\" options=\"{'no_create': True}\" groups=\"product.group_product_variant\"/>\n                                <field name=\"cost_mode\" widget=\"radio\" options=\"{'horizontal': true}\"/>\n                                <field name=\"allow_operation_dependencies\" invisible=\"1\"/>\n                                <field name=\"blocked_by_operation_ids\" widget=\"many2many_tags\" context=\"{'default_bom_id':bom_id}\" invisible=\"not allow_operation_dependencies\"/>\n                            </group><group name=\"workorder\">\n                                <field name=\"workorder_count\" invisible=\"1\"/>\n                                <field name=\"time_mode\" widget=\"radio\" options=\"{'horizontal': true}\"/>\n                                <label for=\"time_cycle_manual\" string=\"Default Duration\"/>\n                                <div>\n                                    <field name=\"time_cycle_manual\" widget=\"float_time\" class=\"oe_inline\" invisible=\"time_mode == 'auto' and workorder_count != 0\"/>\n                                    <span invisible=\"time_mode == 'auto' and workorder_count != 0\">minutes</span>\n                                    <span invisible=\"time_mode == 'manual'\"> / last </span>\n                                    <field name=\"time_mode_batch\" class=\"oe_inline o_small_integer\" invisible=\"time_mode == 'manual'\"/>\n                                    <span invisible=\"time_mode == 'manual'\">work orders</span>\n                                </div>\n                                <field name=\"cycle_number\" class=\"oe_inline\" invisible=\"cycle_number &lt; 2\"/>\n                                <field name=\"show_time_total\" invisible=\"1\"/>\n                                <label for=\"time_total\" string=\"Total Duration\" invisible=\"not show_time_total\"/>\n                                <div invisible=\"not show_time_total\">\n                                    <field name=\"time_total\" widget=\"float_time\" class=\"oe_inline\"/>\n                                    <span>minutes</span>\n                                </div>\n                                <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n                            </group>\n                        </group>\n                    </sheet>\n                    <chatter/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_routing_workcenter_kanban_view",
+   "package": "mrp",
+   "name": "mrp.routing.workcenter.kanban",
+   "entity": "mrp.routing.workcenter",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "workcenter_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban>\n                    <templates>\n                        <t t-name=\"card\">\n                            <div class=\"d-flex\">\n                                <field name=\"name\" class=\"fw-bold fs-5 mb-1\"/>\n                            </div>\n                            <footer class=\"pt-0\">\n                                <field name=\"workcenter_id\"/>\n                            </footer>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_routing_workcenter_filter",
+   "package": "mrp",
+   "name": "mrp.routing.workcenter.filter",
+   "entity": "mrp.routing.workcenter",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Operations Search Filters"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "bom_id"
+     },
+     {
+      "name": "workcenter_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "bom",
+      "string": "Bill of Material",
+      "context": "{'group_by': 'bom_id'}"
+     },
+     {
+      "name": "workcenter",
+      "string": "Workcenter",
+      "context": "{'group_by': 'workcenter_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Operations Search Filters\">\n                    <field name=\"name\"/>\n                    <field name=\"bom_id\"/>\n                    <field name=\"workcenter_id\"/>\n                    <filter string=\"Archived\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n                    <group>\n                        <filter string=\"Bill of Material\" name=\"bom\" context=\"{'group_by': 'bom_id'}\"/>\n                        <filter string=\"Workcenter\" name=\"workcenter\" context=\"{'group_by': 'workcenter_id'}\"/>\n                    </group>\n                </search>\n            </field>\n        "
+  }
+ ]
+}

@@ -1,0 +1,283 @@
+{
+ "catalog": {
+  "name": "entity:ir.sequence.date_range",
+  "description": "Complete definition of entity Sequence Date Range (ir.sequence.date_range).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.sequence.date_range",
+  "storage_name": "ir_sequence_date_range",
+  "full_name": "Sequence Date Range",
+  "kind": "persistent",
+  "description": "Sequence Date Range",
+  "defined_by_package": "base",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "sequence_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_allow_sudo_commands": false
+  },
+  "fields": [
+   {
+    "name": "date_from",
+    "type": "Date",
+    "string": "From",
+    "required": true,
+    "defined_in_package": "base",
+    "full_name": "From"
+   },
+   {
+    "name": "date_to",
+    "type": "Date",
+    "string": "To",
+    "required": true,
+    "defined_in_package": "base",
+    "full_name": "To"
+   },
+   {
+    "name": "sequence_id",
+    "type": "Many2one",
+    "comodel": "ir.sequence",
+    "string": "Main Sequence",
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "base",
+    "full_name": "Main Sequence",
+    "target_entity": "ir.sequence"
+   },
+   {
+    "name": "number_next",
+    "type": "Integer",
+    "string": "Next Number",
+    "required": true,
+    "default": 1,
+    "help": "Next number of this sequence",
+    "defined_in_package": "base",
+    "full_name": "Next Number"
+   },
+   {
+    "name": "number_next_actual",
+    "type": "Integer",
+    "compute": "_get_number_next_actual",
+    "inverse": "_set_number_next_actual",
+    "string": "Actual Next Number",
+    "help": "Next number that will be used. This number can be incremented frequently so the displayed value might already be obsolete",
+    "defined_in_package": "base",
+    "full_name": "Actual Next Number"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_range_per_sequence",
+    "kind": "Constraint",
+    "definition": "UNIQUE(sequence_id, date_from, date_to)",
+    "message": "You cannot create two date ranges for the same sequence with the same date range.",
+    "defined_in_package": "base"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_get_number_next_actual",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return number from ir_sequence row when no_gap implementation,\nand number from postgres sequence when standard implementation.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_number_next_actual",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_next",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alter_sequence",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "number_increment",
+     "number_next"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create a sequence, in implementation == standard a fast gaps-allowed PostgreSQL sequence is used.\n        ",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_sequence_date_range_group_user",
+    "package": "base",
+    "name": "ir_sequence_date_range group_user",
+    "entity": "ir.sequence.date_range",
+    "group": "group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "base.access_ir_sequence_date_range_group_system",
+    "package": "base",
+    "name": "ir_sequence_date_range group_system",
+    "entity": "ir.sequence.date_range",
+    "group": "group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

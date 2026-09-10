@@ -1,0 +1,889 @@
+{
+ "catalog": {
+  "name": "entity:slide.channel.partner",
+  "description": "Complete definition of entity Channel / Partners (Members) (slide.channel.partner).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "slide.channel.partner",
+  "storage_name": "slide_channel_partner",
+  "full_name": "Channel / Partners (Members)",
+  "kind": "persistent",
+  "description": "Channel / Partners (Members)",
+  "defined_by_package": "website_slides",
+  "extended_by_packages": [
+   "hr_skills_slides",
+   "website_slides_survey"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "partner_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Active"
+   },
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "slide.channel",
+    "string": "Course",
+    "index": true,
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "website_slides",
+    "full_name": "Course",
+    "target_entity": "slide.channel"
+   },
+   {
+    "name": "member_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "invited",
+      "Invite Sent"
+     ],
+     [
+      "joined",
+      "Joined"
+     ],
+     [
+      "ongoing",
+      "Ongoing"
+     ],
+     [
+      "completed",
+      "Finished"
+     ]
+    ],
+    "string": "Attendee Status",
+    "readonly": true,
+    "required": true,
+    "default": "joined",
+    "defined_in_package": "website_slides",
+    "full_name": "Attendee Status"
+   },
+   {
+    "name": "completion",
+    "type": "Integer",
+    "string": "% Completed Contents",
+    "default": 0,
+    "aggregator": "avg",
+    "defined_in_package": "website_slides",
+    "full_name": "% Completed Contents"
+   },
+   {
+    "name": "completed_slides_count",
+    "type": "Integer",
+    "string": "# Completed Contents",
+    "default": 0,
+    "defined_in_package": "website_slides",
+    "full_name": "# Completed Contents"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "index": true,
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "website_slides",
+    "string": "Partner",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_email",
+    "type": "Char",
+    "related": "partner_id.email",
+    "readonly": true,
+    "defined_in_package": "website_slides",
+    "string": "Partner Email",
+    "full_name": "Partner Email"
+   },
+   {
+    "name": "channel_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "related": "channel_id.user_id",
+    "defined_in_package": "website_slides",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "channel_type",
+    "type": "Selection",
+    "related": "channel_id.channel_type",
+    "defined_in_package": "website_slides",
+    "string": "Channel Type",
+    "full_name": "Channel Type"
+   },
+   {
+    "name": "channel_visibility",
+    "type": "Selection",
+    "related": "channel_id.visibility",
+    "defined_in_package": "website_slides",
+    "string": "Channel Visibility",
+    "full_name": "Channel Visibility"
+   },
+   {
+    "name": "channel_enroll",
+    "type": "Selection",
+    "related": "channel_id.enroll",
+    "defined_in_package": "website_slides",
+    "string": "Channel Enroll",
+    "full_name": "Channel Enroll"
+   },
+   {
+    "name": "channel_website_id",
+    "type": "Many2one",
+    "comodel": "website",
+    "string": "Website",
+    "related": "channel_id.website_id",
+    "defined_in_package": "website_slides",
+    "full_name": "Website",
+    "target_entity": "website"
+   },
+   {
+    "name": "next_slide_id",
+    "type": "Many2one",
+    "comodel": "slide.slide",
+    "string": "Next Lesson",
+    "compute": "_compute_next_slide_id",
+    "defined_in_package": "website_slides",
+    "full_name": "Next Lesson",
+    "target_entity": "slide.slide"
+   },
+   {
+    "name": "invitation_link",
+    "type": "Char",
+    "string": "Invitation Link",
+    "compute": "_compute_invitation_link",
+    "defined_in_package": "website_slides",
+    "full_name": "Invitation Link"
+   },
+   {
+    "name": "last_invitation_date",
+    "type": "Datetime",
+    "string": "Last Invitation Date",
+    "defined_in_package": "website_slides",
+    "full_name": "Last Invitation Date"
+   },
+   {
+    "name": "nbr_certification",
+    "type": "Integer",
+    "related": "channel_id.nbr_certification",
+    "defined_in_package": "website_slides_survey",
+    "string": "Nbr Certification",
+    "full_name": "Nbr Certification"
+   },
+   {
+    "name": "survey_certification_success",
+    "type": "Boolean",
+    "string": "Certified",
+    "defined_in_package": "website_slides_survey",
+    "full_name": "Certified"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_channel_partner_uniq",
+    "kind": "Constraint",
+    "definition": "unique(channel_id, partner_id)",
+    "message": "A partner membership to a channel must be unique!",
+    "defined_in_package": "website_slides"
+   },
+   {
+    "name": "_check_completion",
+    "kind": "Constraint",
+    "definition": "check(completion >= 0 and completion <= 100)",
+    "message": "The completion of a channel is a percentage and should be between 0% and 100.",
+    "defined_in_package": "website_slides"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_invitation_link",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "This sets the url used as hyperlink in the channel invitation email in template mail_notification_channel_invite.\nThe partner_id is given in the url, as well as a hash based on the partner and channel id. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_next_slide_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_recompute_completion",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "This method computes the completion and member_status of attendees that are neither\n'invited' nor 'completed'. Indeed, once completed, membership should remain so.\nWe do not do any update on the 'invited' records.\nOne should first set member_status to 'joined' before recomputing those values\nwhen enrolling an invited or archived attendee.\nIt takes into account the previous completion value to add or remove karma for\ncompleting the course to the attendee (see _post_completion_update_hook)",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Override unlink method :\nRemove attendee from a channel, then also remove slide.slide.partner related to.",
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invitation_hash",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Returns the invitation hash of the attendee, used to access courses as invited / joined. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_completion_update_hook",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "completed"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Post hook of _recompute_completion. Adds or removes\nkarma given for completing the course.\n\n:param completed:\n    True if course is completed.\n    False if we remove an existing course completion.",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_skills_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_completed_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Send an email to the attendee when they have successfully completed a course. ",
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_skills_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_slide_channel_partner",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "The invitations of 'invited' attendees are only valid for 3 months. Remove outdated invitations\nwith no completion. A missing last_invitation_date is also considered as expired.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "member_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "website_slides.access_slide_channel_partners_all",
+    "package": "website_slides",
+    "name": "slide.channel.users.all",
+    "entity": "slide.channel.partner",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_channel_partners_system",
+    "package": "website_slides",
+    "name": "slide.channel.users.system",
+    "entity": "slide.channel.partner",
+    "group": "website_slides.group_website_slides_officer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_slides.rule_slide_channel_partner_officer",
+    "package": "website_slides",
+    "name": "Channel Partner: officer: create/write/unlink own only",
+    "entity": "slide.channel.partner",
+    "domain": "[('channel_id.user_id', '=', user.id)]",
+    "groups": "[(4, ref('group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": "0",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_channel_partner_manager",
+    "package": "website_slides",
+    "name": "Channel Partner: manager: crud all",
+    "entity": "slide.channel.partner",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_website_slides_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "website_slides.slide_channel_partner_view_search",
+    "package": "website_slides",
+    "name": "slide.channel.partner.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Course Member"
+     },
+     "fields": [
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "partner_email"
+      },
+      {
+       "name": "channel_id",
+       "string": "Course"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_archived",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      },
+      {
+       "name": "filter_invited",
+       "string": "Invite Sent",
+       "domain": "[('member_status', '=', 'invited')]"
+      },
+      {
+       "name": "filter_joined",
+       "string": "Joined",
+       "domain": "[('member_status', '=', 'joined')]"
+      },
+      {
+       "name": "filter_ongoing",
+       "string": "Ongoing",
+       "domain": "[('member_status', '=', 'ongoing')]"
+      },
+      {
+       "name": "filter_completed",
+       "string": "Completed",
+       "domain": "[('member_status', '=', 'completed')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_channel_id",
+       "string": "Course",
+       "context": "{'group_by': 'channel_id'}"
+      },
+      {
+       "name": "groupby_member_status",
+       "string": "Status",
+       "context": "{'group_by': 'member_status'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_channel_partner_view_tree",
+    "package": "website_slides",
+    "name": "slide.channel.partner.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Attendees",
+      "js_class": "slide_channel_partner_enroll_tree",
+      "create": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "channel_id",
+       "string": "Course Name"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "partner_email",
+       "string": "Email"
+      },
+      {
+       "name": "create_date",
+       "string": "Added On"
+      },
+      {
+       "name": "write_date",
+       "string": "Last Action On"
+      },
+      {
+       "name": "last_invitation_date",
+       "string": "Last Invitation",
+       "optional": "hide"
+      },
+      {
+       "name": "member_status",
+       "widget": "badge",
+       "string": "Status",
+       "decoration-warning": "member_status == 'joined'",
+       "decoration-success": "member_status == 'completed'",
+       "decoration-info": "member_status == 'ongoing'",
+       "decoration-muted": "member_status == 'invited'"
+      },
+      {
+       "name": "completion",
+       "widget": "progressbar",
+       "string": "Progress"
+      },
+      {
+       "name": "next_slide_id"
+      },
+      {
+       "name": "channel_user_id",
+       "widget": "many2one_avatar_user",
+       "optional": "hide"
+      },
+      {
+       "name": "channel_type",
+       "optional": "hide"
+      },
+      {
+       "name": "channel_visibility",
+       "optional": "hide"
+      },
+      {
+       "name": "channel_enroll",
+       "widget": "badge",
+       "optional": "hide",
+       "decoration-warning": "channel_enroll == 'payment'",
+       "decoration-success": "channel_enroll == 'public'",
+       "decoration-info": "channel_enroll == 'invite'"
+      },
+      {
+       "name": "channel_website_id",
+       "optional": "hide",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "active",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_archive",
+       "type": "object",
+       "invisible": "not active",
+       "icon": "fa-times"
+      },
+      {
+       "name": "action_unarchive",
+       "type": "object",
+       "invisible": "active",
+       "icon": "fa-undo"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 2,
+      "progressbar": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_channel_partner_view_kanban",
+    "package": "website_slides",
+    "name": "slide.channel.partner.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "can_open": "0",
+      "string": "Attendees",
+      "class": "o_slide_attendee_kanban"
+     },
+     "fields": [
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "completion",
+       "widget": "progressbar"
+      },
+      {
+       "name": "channel_user_id",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "progressbar": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_channel_partner_view_graph",
+    "package": "website_slides",
+    "name": "slide.channel.partner.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Attendees",
+      "stacked": "0",
+      "sample": "1"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": []
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_channel_partner_view_pivot",
+    "package": "website_slides",
+    "name": "slide.channel.partner.view.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Attendees",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "completion",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "completion",
+       "invisible": "1"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_slides_survey.slide_channel_partner_view_tree",
+    "package": "website_slides_survey",
+    "name": "slide.channel.partner.view.list.inherit.survey",
+    "view_type": "xpath",
+    "inherits_view": "website_slides.slide_channel_partner_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='member_status']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "nbr_certification",
+       "column_invisible": "True"
+      },
+      {
+       "name": "survey_certification_success",
+       "invisible": "nbr_certification == 0",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='member_status']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_slides_survey.slide_channel_partner_view_search",
+    "package": "website_slides_survey",
+    "name": "slide.channel.partner.view.search.inherit.survey",
+    "view_type": "xpath",
+    "inherits_view": "website_slides.slide_channel_partner_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='filter_completed']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_certified",
+       "string": "Certified",
+       "domain": "[('survey_certification_success', '=', True)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='filter_completed']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_slides.slide_channel_partner_action",
+    "package": "website_slides",
+    "name": "Attendees",
+    "view_mode": "list,kanban",
+    "view_id": null,
+    "search_view_id": "website_slides.slide_channel_partner_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    <strong>No Attendees Yet!</strong>\n                </p>\n                <p>\n                    From here you'll be able to monitor attendees and to track their progress.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "slide.channel.partner"
+   },
+   {
+    "external_identifier": "website_slides.slide_channel_partner_action_report",
+    "package": "website_slides",
+    "name": "Attendees",
+    "view_mode": "graph,pivot,list,kanban",
+    "view_id": null,
+    "search_view_id": "website_slides.slide_channel_partner_view_search",
+    "domain": null,
+    "context": "{'search_default_groupby_member_status': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    <strong>No Attendees Yet!</strong>\n                </p>\n                <p>\n                    From here you'll be able to monitor attendees and to track their progress.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "slide.channel.partner"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "website_slides.mail_template_channel_completed",
+    "package": "website_slides",
+    "name": "Elearning: Completed Course",
+    "subject": "Congratulations! You completed {{ object.channel_id.name }}"
+   },
+   {
+    "external_identifier": "website_slides.mail_template_slide_channel_enroll",
+    "package": "website_slides",
+    "name": "Elearning: Add Attendees to Course",
+    "subject": "You have been invited to join {{ object.channel_id.name }}"
+   },
+   {
+    "external_identifier": "website_slides.mail_template_slide_channel_invite",
+    "package": "website_slides",
+    "name": "Elearning: Promotional Course Invitation",
+    "subject": "You have been invited to check out {{ object.channel_id.name }}"
+   }
+  ]
+ }
+}

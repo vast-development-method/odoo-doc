@@ -1,0 +1,777 @@
+{
+ "catalog": {
+  "name": "entity:chatbot.script.step",
+  "description": "Complete definition of entity Chatbot Script Step (chatbot.script.step).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "chatbot.script.step",
+  "storage_name": "chatbot_script_step",
+  "full_name": "Chatbot Script Step",
+  "kind": "persistent",
+  "description": "Chatbot Script Step",
+  "defined_by_package": "im_livechat",
+  "extended_by_packages": [
+   "crm_livechat",
+   "website_livechat",
+   "website_crm_livechat"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "compute": "_compute_name",
+    "defined_in_package": "im_livechat",
+    "full_name": "Name"
+   },
+   {
+    "name": "message",
+    "type": "Html",
+    "string": "Message",
+    "translate": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Message"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "defined_in_package": "im_livechat",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "chatbot_script_id",
+    "type": "Many2one",
+    "comodel": "chatbot.script",
+    "string": "Chatbot",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "im_livechat",
+    "full_name": "Chatbot",
+    "target_entity": "chatbot.script"
+   },
+   {
+    "name": "step_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "text",
+      "Text"
+     ],
+     [
+      "question_selection",
+      "Question"
+     ],
+     [
+      "question_email",
+      "Email"
+     ],
+     [
+      "question_phone",
+      "Phone"
+     ],
+     [
+      "forward_operator",
+      "Forward to Operator"
+     ],
+     [
+      "free_input_single",
+      "Free Input"
+     ],
+     [
+      "free_input_multi",
+      "Free Input (Multi-Line)"
+     ],
+     [
+      "create_lead",
+      "Create Lead"
+     ],
+     [
+      "create_lead_and_forward",
+      "Create Lead & Forward"
+     ]
+    ],
+    "default": "text",
+    "required": true,
+    "defined_in_package": "im_livechat",
+    "selection_added_by": [
+     "crm_livechat"
+    ],
+    "ondelete": {
+     "create_lead": "cascade",
+     "create_lead_and_forward": "cascade"
+    },
+    "extended_in_packages": [
+     "crm_livechat"
+    ],
+    "string": "Step Type",
+    "full_name": "Step Type"
+   },
+   {
+    "name": "answer_ids",
+    "type": "One2many",
+    "comodel": "chatbot.script.answer",
+    "inverse_name": "script_step_id",
+    "copy": true,
+    "string": "Answers",
+    "defined_in_package": "im_livechat",
+    "full_name": "Answers",
+    "target_entity": "chatbot.script.answer"
+   },
+   {
+    "name": "triggering_answer_ids",
+    "type": "Many2many",
+    "comodel": "chatbot.script.answer",
+    "domain": "[('script_step_id.sequence', '<', sequence), ('script_step_id.chatbot_script_id', '=', chatbot_script_id)]",
+    "compute": "_compute_triggering_answer_ids",
+    "readonly": false,
+    "store": true,
+    "copy": false,
+    "string": "Only If",
+    "help": "Show this step only if all of these answers have been selected.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Only If",
+    "target_entity": "chatbot.script.answer"
+   },
+   {
+    "name": "is_forward_operator",
+    "type": "Boolean",
+    "compute": "_compute_is_forward_operator",
+    "defined_in_package": "im_livechat",
+    "string": "Is Forward Operator",
+    "full_name": "Is Forward Operator"
+   },
+   {
+    "name": "is_forward_operator_child",
+    "type": "Boolean",
+    "compute": "_compute_is_forward_operator_child",
+    "defined_in_package": "im_livechat",
+    "string": "Is Forward Operator Child",
+    "full_name": "Is Forward Operator Child"
+   },
+   {
+    "name": "operator_expertise_ids",
+    "type": "Many2many",
+    "comodel": "im_livechat.expertise",
+    "string": "Operator Expertise",
+    "help": "When forwarding live chat conversations, the chatbot will prioritize users with matching expertise.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Operator Expertise",
+    "target_entity": "im_livechat.expertise"
+   },
+   {
+    "name": "crm_team_id",
+    "type": "Many2one",
+    "comodel": "crm.team",
+    "string": "Sales Team",
+    "ondelete": "set null",
+    "index": "btree_not_null",
+    "help": "Used in combination with 'create_lead' step type in order to automatically assign the created lead/opportunity to the defined team",
+    "defined_in_package": "crm_livechat",
+    "full_name": "Sales Team",
+    "target_entity": "crm.team"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sequence",
+         "chatbot_script_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "lang"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_triggering_answer_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sequence"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_forward_operator",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "step_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_forward_operator_child",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "chatbot_script_id.script_step_ids.answer_ids",
+         "chatbot_script_id.script_step_ids.is_forward_operator",
+         "chatbot_script_id.script_step_ids.sequence",
+         "chatbot_script_id.script_step_ids.step_type",
+         "chatbot_script_id.script_step_ids.triggering_answer_ids",
+         "sequence",
+         "triggering_answer_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure we correctly assign sequences when creating steps.\nIndeed, sequences are very important within the script, and will break the whole flow if\nnot correctly defined.\n\nThis override will group created steps by chatbot_id and increment the sequence accordingly.\nIt will also look for an existing step for that chatbot and resume from the highest sequence.\n\nThis cannot be done in a default_value for the sequence field as we cannot search by\nrunbot_id.\nIt is also safer and more efficient to do it here (we can batch everything).\n\nIt is still possible to manually pass the 'sequence' in the values, which will take priority. ",
+      "size_in_lines": 45,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_chatbot_prepare_customer_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "discuss_channel",
+     "create_partner",
+     "update_partner"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Common method that allows retreiving default customer values from the discuss.channel\nfollowing a chatbot.script.\n\nThis method will return a dict containing the 'customer' values such as:\n{\n    'partner': The created partner (see 'create_partner') or the partner from the\n      environment if not public\n    'email': The email extracted from the discuss.channel messages\n      (see step_type 'question_email')\n    'phone': The phone extracted from the discuss.channel messages\n      (see step_type 'question_phone')\n    'description': A default description containing the \"Please contact me on\" and \"Please\n      call me on\" with the related email and phone numbers.\n      Can be used as a default description to create leads or tickets for example.\n}\n\n:param record discuss_channel: the discuss.channel holding the visitor's conversation with the bot.\n:param bool create_partner: whether or not to create a res.partner is the current user is public.\n  Defaults to True.\n:param bool update_partner: whether or not to set update the email and phone on the res.partner\n  from the environment (if not a public user) if those are not set yet. Defaults to True.\n\n:returns: a dict containing the customer values.",
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_first_user_free_input",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "discuss_channel"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Find the first message from the visitor responding to a free_input step.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_next_step",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "selected_answer_ids"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Fetch the next step depending on the user's selected answers.\nIf a step contains multiple triggering answers from the same step the condition between\nthem must be a 'OR'. If is contains multiple triggering answers from different steps the\ncondition between them must be a 'AND'.\n\ne.g:\n\nSTEP 1 : A B\nSTEP 2 : C D\nSTEP 3 : E\nSTEP 4 ONLY IF A B C E\n\nScenario 1 (A C E):\n\nA in (A B) -> OK\nC in (C)   -> OK\nE in (E)   -> OK\n\n-> OK\n\nScenario 2 (B D E):\n\nB in (A B) -> OK\nD in (C)   -> NOK\nE in (E)   -> OK\n\n-> NOK",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_parent_step",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "all_parent_steps"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Returns the first preceding step that matches either the triggering answers\nor the possible answers the user can select ",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_last_step",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "discuss_channel"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_answer",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "discuss_channel",
+     "message_body"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Method called when the user reacts to the current chatbot.script step.\nFor most chatbot.script.step#step_types it simply returns the next chatbot.script.step of\nthe script (see '_fetch_next_step').\n\nSome extra processing is done for steps of type 'question_email' and 'question_phone' where\nwe store the user raw answer (the mail message HTML body) into the chatbot.message in order\nto be able to recover it later (see '_chatbot_prepare_customer_values').\n\n:param discuss_channel:\n:param message_body:\n:return: script step to display next\n:rtype: 'chatbot.script.step' ",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "\"%s\" is not a valid email.",
+        "line": 324
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_process_step",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "discuss_channel"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "When we reach a chatbot.step in the script we need to do some processing on behalf of\nthe bot. Which is for most chatbot.script.step#step_types just posting the message field.\n\nSome extra processing may be required for special step types such as 'forward_operator',\n'create_lead', 'create_ticket' (in their related bridge modules).\nThose will have a dedicated processing method with specific docstrings.\n\nReturns the mail.message posted by the chatbot's operator_partner_id. ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_chatbot_crm_prepare_lead_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "discuss_channel",
+     "description"
+    ],
+    "definitions": [
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_step_create_lead",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "discuss_channel"
+    ],
+    "definitions": [
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": "When reaching a 'create_lead' step, we extract the relevant information: visitor's\nemail, phone and conversation history to create a crm.lead.\n\nWe use the email and phone to update the environment partner's information (if not a public\nuser) if they differ from the current values.\n\nThe whole conversation history will be saved into the lead's description for reference.\nThis also allows having a question of type 'free_input_multi' to let the visitor explain\ntheir interest / needs before creating the lead. ",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_step_create_lead_and_forward",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "discuss_channel"
+    ],
+    "definitions": [
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_process_answer",
+    "package": "im_livechat",
+    "kind": "ValidationError",
+    "message": "\"%s\" is not a valid email."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "im_livechat.access_chatbot_script_step_user",
+    "package": "im_livechat",
+    "name": "chatbot.script.step.user",
+    "entity": "chatbot.script.step",
+    "group": "im_livechat_group_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "crm_livechat.chatbot_script_step_view_form",
+    "package": "crm_livechat",
+    "name": "chatbot.script.step.view.form.inherit.crm.livechat",
+    "view_type": "field",
+    "inherits_view": "im_livechat.chatbot_script_step_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "step_type",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "step_type",
+       "position": "after"
+      },
+      {
+       "name": "crm_team_id",
+       "invisible": "step_type not in ['create_lead', 'create_lead_and_forward']",
+       "options": "{'no_open': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.chatbot_script_step_view_form",
+    "package": "im_livechat",
+    "name": "chatbot.script.step.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "disable_autofocus": "1"
+     },
+     "fields": [
+      {
+       "name": "is_forward_operator_child",
+       "invisible": "1"
+      },
+      {
+       "name": "sequence",
+       "invisible": "1"
+      },
+      {
+       "name": "message",
+       "required": "not is_forward_operator",
+       "placeholder": "e.g. 'How can I help you?'"
+      },
+      {
+       "name": "chatbot_script_id",
+       "invisible": "1"
+      },
+      {
+       "name": "step_type"
+      },
+      {
+       "name": "operator_expertise_ids",
+       "widget": "many2many_tags",
+       "invisible": "step_type != 'forward_operator'",
+       "options": "{'edit_tags': True}"
+      },
+      {
+       "name": "triggering_answer_ids",
+       "widget": "chatbot_triggering_answers_widget",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "display_name",
+       "column_invisible": "True"
+      },
+      {
+       "name": "answer_ids",
+       "invisible": "step_type != 'question_selection'",
+       "nolabel": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "display_name",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "redirect_link",
+       "string": "Optional Link"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1,
+      "chatbot_triggering_answers_widget": 1,
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.chatbot_script_step_view_tree",
+    "package": "im_livechat",
+    "name": "chatbot.script.step.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "default_order": "sequence asc"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "message"
+      },
+      {
+       "name": "step_type"
+      },
+      {
+       "name": "answer_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "triggering_answer_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 2
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

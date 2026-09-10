@@ -1,0 +1,204 @@
+{
+ "catalog": {
+  "name": "entity:myinvois.consolidate.invoice.wizard",
+  "description": "Complete definition of entity Consolidate Invoice Wizard (myinvois.consolidate.invoice.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "myinvois.consolidate.invoice.wizard",
+  "storage_name": "myinvois_consolidate_invoice_wizard",
+  "full_name": "Consolidate Invoice Wizard",
+  "kind": "transient",
+  "description": "Consolidate Invoice Wizard",
+  "defined_by_package": "l10n_my_edi",
+  "extended_by_packages": [
+   "l10n_my_edi_pos"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "date_from",
+    "type": "Date",
+    "string": "Date From",
+    "required": true,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Date From"
+   },
+   {
+    "name": "date_to",
+    "type": "Date",
+    "string": "Date To",
+    "required": true,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Date To"
+   },
+   {
+    "name": "consolidation_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "invoice",
+      "Invoice"
+     ],
+     [
+      "pos",
+      "PoS Order"
+     ]
+    ],
+    "required": true,
+    "defined_in_package": "l10n_my_edi",
+    "selection_added_by": [
+     "l10n_my_edi_pos"
+    ],
+    "ondelete": {
+     "pos": "cascade"
+    },
+    "extended_in_packages": [
+     "l10n_my_edi_pos"
+    ],
+    "string": "Consolidation Type",
+    "full_name": "Consolidation Type"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "button_consolidate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "By default, we only consolidated orders that are in the range, done and not invoiced.\nWe do allow to also consolidate invoices linked to a cancelled consolidated invoice.\n\nNote that doing so lock the cancelled invoice into its cancelled state.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_myinvois_document_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Prepare and return a list of dicts containing the values needed to create the consolidated invoices for the\nrecords inbetween the provided dates.\n:return: A list of dicts used to create the consolidated invoices.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "Prepare and return a list of dicts containing the values needed to create the consolidated invoices for the\nrecords inbetween the provided dates.\n:return: A list of dicts used to create the consolidated invoices.",
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid Operation. No order to consolidate.",
+        "line": 43
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_get_myinvois_document_vals",
+    "package": "l10n_my_edi_pos",
+    "kind": "ValidationError",
+    "message": "Invalid Operation. No order to consolidate."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_my_edi.access_myinvois_consolidate_invoice_wizard_user",
+    "package": "l10n_my_edi",
+    "name": "access_myinvois_consolidate_invoice_wizard_user",
+    "entity": "myinvois.consolidate.invoice.wizard",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_my_edi.myinvois_consolidate_invoice_wizard_form",
+    "package": "l10n_my_edi",
+    "name": "myinvois.consolidate.invoice.wizard.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "date_from"
+      },
+      {
+       "name": "date_to"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_consolidate",
+       "string": "Create Consolidated Invoices",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "string": "Close",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

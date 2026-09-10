@@ -1,0 +1,1204 @@
+{
+ "catalog": {
+  "name": "entity:peppol.registration",
+  "description": "Complete definition of entity Peppol Registration (peppol.registration).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "peppol.registration",
+  "storage_name": "peppol_registration",
+  "full_name": "Peppol Registration",
+  "kind": "transient",
+  "description": "Peppol Registration",
+  "defined_by_package": "account_peppol",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "account_peppol",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "parent_company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "compute": "_compute_parent_company_id",
+    "defined_in_package": "account_peppol",
+    "string": "Parent Company",
+    "full_name": "Parent Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "parent_company_name",
+    "type": "Char",
+    "related": "parent_company_id.name",
+    "defined_in_package": "account_peppol",
+    "string": "Parent Company Name",
+    "full_name": "Parent Company Name"
+   },
+   {
+    "name": "selected_company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "compute": "_compute_selected_company_id",
+    "defined_in_package": "account_peppol",
+    "string": "Selected Company",
+    "full_name": "Selected Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "display_use_parent_connection_selection",
+    "type": "Boolean",
+    "compute": "_compute_display_use_parent_connection_selection",
+    "defined_in_package": "account_peppol",
+    "string": "Display Use Parent Connection Selection",
+    "full_name": "Display Use Parent Connection Selection"
+   },
+   {
+    "name": "use_parent_connection_selection",
+    "type": "Selection",
+    "selection": [
+     [
+      "use_parent",
+      "Send from parent company"
+     ],
+     [
+      "use_self",
+      "Register this company on peppol"
+     ]
+    ],
+    "compute": "_compute_use_parent_connection_selection",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "account_peppol",
+    "string": "Use Parent Connection Selection",
+    "full_name": "Use Parent Connection Selection"
+   },
+   {
+    "name": "use_parent_connection",
+    "type": "Boolean",
+    "compute": "_compute_use_parent_connection",
+    "defined_in_package": "account_peppol",
+    "string": "Use Parent Connection",
+    "full_name": "Use Parent Connection"
+   },
+   {
+    "name": "is_branch_company",
+    "type": "Boolean",
+    "store": false,
+    "defined_in_package": "account_peppol",
+    "string": "Is Branch Company",
+    "full_name": "Is Branch Company"
+   },
+   {
+    "name": "active_parent_company",
+    "type": "Many2one",
+    "string": "Active Parent Company",
+    "related": "parent_company_id",
+    "defined_in_package": "account_peppol",
+    "full_name": "Active Parent Company"
+   },
+   {
+    "name": "active_parent_company_name",
+    "type": "Char",
+    "string": "Active Parent Company Name",
+    "related": "parent_company_name",
+    "defined_in_package": "account_peppol",
+    "full_name": "Active Parent Company Name"
+   },
+   {
+    "name": "can_use_parent_connection",
+    "type": "Boolean",
+    "string": "Can Use Parent Connection",
+    "related": "display_use_parent_connection_selection",
+    "defined_in_package": "account_peppol",
+    "full_name": "Can Use Parent Connection"
+   },
+   {
+    "name": "edi_mode",
+    "type": "Selection",
+    "string": "EDI mode",
+    "selection": [
+     [
+      "demo",
+      "Demo"
+     ],
+     [
+      "test",
+      "Test"
+     ],
+     [
+      "prod",
+      "Live"
+     ]
+    ],
+    "compute": "_compute_edi_mode",
+    "defined_in_package": "account_peppol",
+    "full_name": "electronic data interchange mode"
+   },
+   {
+    "name": "edi_user_id",
+    "type": "Many2one",
+    "comodel": "account_edi_proxy_client.user",
+    "string": "EDI user",
+    "compute": "_compute_edi_user_id",
+    "defined_in_package": "account_peppol",
+    "full_name": "electronic data interchange user",
+    "target_entity": "account_edi_proxy_client.user"
+   },
+   {
+    "name": "account_peppol_proxy_state",
+    "type": "Selection",
+    "related": "company_id.account_peppol_proxy_state",
+    "defined_in_package": "account_peppol",
+    "string": "Account the pan-European public procurement online network Proxy State",
+    "full_name": "Account the pan-European public procurement online network Proxy State"
+   },
+   {
+    "name": "peppol_eas",
+    "type": "Selection",
+    "compute": "_compute_peppol_eas",
+    "inverse": "_inverse_peppol_eas",
+    "readonly": false,
+    "required": true,
+    "store": false,
+    "selection_method": "_get_peppol_eas_selection",
+    "defined_in_package": "account_peppol",
+    "string": "the pan-European public procurement online network Eas",
+    "full_name": "the pan-European public procurement online network Eas"
+   },
+   {
+    "name": "peppol_warnings",
+    "type": "Json",
+    "string": "Peppol warnings",
+    "compute": "_compute_peppol_warnings",
+    "defined_in_package": "account_peppol",
+    "full_name": "Peppol warnings"
+   },
+   {
+    "name": "contact_email",
+    "type": "Char",
+    "related": "selected_company_id.account_peppol_contact_email",
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "account_peppol",
+    "string": "Contact Email",
+    "full_name": "Contact Email"
+   },
+   {
+    "name": "phone_number",
+    "type": "Char",
+    "related": "selected_company_id.account_peppol_phone_number",
+    "readonly": false,
+    "defined_in_package": "account_peppol",
+    "string": "Phone Number",
+    "full_name": "Phone Number"
+   },
+   {
+    "name": "peppol_endpoint",
+    "type": "Char",
+    "related": "selected_company_id.peppol_endpoint",
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "account_peppol",
+    "string": "the pan-European public procurement online network Endpoint",
+    "full_name": "the pan-European public procurement online network Endpoint"
+   },
+   {
+    "name": "smp_registration",
+    "type": "Boolean",
+    "string": "Register as a receiver",
+    "compute": "_compute_smp_registration_external_provider",
+    "defined_in_package": "account_peppol",
+    "full_name": "Register as a receiver"
+   },
+   {
+    "name": "peppol_external_provider",
+    "type": "Char",
+    "compute": "_compute_smp_registration_external_provider",
+    "defined_in_package": "account_peppol",
+    "string": "the pan-European public procurement online network External Provider",
+    "full_name": "the pan-European public procurement online network External Provider"
+   },
+   {
+    "name": "peppol_can_connect_data",
+    "type": "Json",
+    "compute": "_compute_peppol_can_connect_data",
+    "defined_in_package": "account_peppol",
+    "string": "the pan-European public procurement online network Can Connect Data",
+    "full_name": "the pan-European public procurement online network Can Connect Data"
+   },
+   {
+    "name": "display_itsme_login",
+    "type": "Boolean",
+    "compute": "_compute_peppol_can_connect_data",
+    "defined_in_package": "account_peppol",
+    "string": "Display Itsme Login",
+    "full_name": "Display Itsme Login"
+   },
+   {
+    "name": "display_no_auth_buttons",
+    "type": "Boolean",
+    "compute": "_compute_peppol_can_connect_data",
+    "defined_in_package": "account_peppol",
+    "string": "Display No Auth Buttons",
+    "full_name": "Display No Auth Buttons"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_onchange_peppol_endpoint",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "peppol_endpoint"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_phone_number",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "phone_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_parent_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_use_parent_connection_selection",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_parent_connection_selection",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "display_use_parent_connection_selection"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_parent_connection",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "use_parent_connection_selection"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_selected_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "use_parent_connection"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_edi_user_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "selected_company_id.account_edi_proxy_client_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_peppol_warnings",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "selected_company_id",
+         "peppol_eas",
+         "peppol_endpoint",
+         "smp_registration",
+         "peppol_external_provider",
+         "use_parent_connection"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_edi_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "selected_company_id",
+         "edi_user_id",
+         "peppol_eas"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_smp_registration_external_provider",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "selected_company_id",
+         "peppol_eas",
+         "peppol_endpoint"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_peppol_can_connect_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "peppol_eas",
+         "peppol_endpoint"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_peppol_eas",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "selected_company_id.peppol_eas"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_peppol_eas",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_peppol_eas_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_branch_with_same_address",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_mandatory_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please select a country for your company.",
+        "line": 275
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Contact email and phone number are required.",
+        "line": 277
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Peppol Address should be provided.",
+        "line": 279
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Peppol ID should be different from main company.",
+        "line": 281
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Cannot register a user with a %s application",
+        "line": 283
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_ensure_pdp_not_sent_through_peppol",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "RedirectWarning",
+        "message": null,
+        "line": 290
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_open_peppol_form",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reopen"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_notification",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "title",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_can_connect",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "can_connect_vals",
+     "selected_auth"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Checks the answer from the /can_connect endpoint and raises an error if it's invalid.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Could not connect to Proxy Server.",
+        "line": 342
+       },
+       {
+        "kind": "UserError",
+        "message": "Your identifier is invalid.",
+        "line": 349
+       },
+       {
+        "kind": "UserError",
+        "message": "The database you are trying to connect to is not suitable for Peppol.",
+        "line": 351
+       },
+       {
+        "kind": "UserError",
+        "message": "You need to authenticate to continue.",
+        "line": 353
+       },
+       {
+        "kind": "UserError",
+        "message": "Selected authentication method is not available.",
+        "line": 355
+       },
+       {
+        "kind": "UserError",
+        "message": "Your identifier you entered is invalid for Peppol.",
+        "line": 345
+       },
+       {
+        "kind": "UserError",
+        "message": "Your identifier does not have a valid format.%s",
+        "line": 348
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_generate_connect_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "peppol_identifier",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_decode_connect_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "token"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_connect",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "handle_demo",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_connection",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "peppol_identifier",
+     "db_uuid",
+     "company",
+     "auth_token"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "handle_demo",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_company_details",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_register_with_itsme",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_register_peppol_participant",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "selected_auth"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 62,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "A connection to '%s' already exists.",
+        "line": 488
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_ensure_mandatory_fields",
+    "package": "account_peppol",
+    "kind": "ValidationError",
+    "message": "Please select a country for your company."
+   },
+   {
+    "operation": "_ensure_mandatory_fields",
+    "package": "account_peppol",
+    "kind": "ValidationError",
+    "message": "Contact email and phone number are required."
+   },
+   {
+    "operation": "_ensure_mandatory_fields",
+    "package": "account_peppol",
+    "kind": "ValidationError",
+    "message": "Peppol Address should be provided."
+   },
+   {
+    "operation": "_ensure_mandatory_fields",
+    "package": "account_peppol",
+    "kind": "ValidationError",
+    "message": "Peppol ID should be different from main company."
+   },
+   {
+    "operation": "_ensure_mandatory_fields",
+    "package": "account_peppol",
+    "kind": "ValidationError",
+    "message": "Cannot register a user with a %s application"
+   },
+   {
+    "operation": "_ensure_can_connect",
+    "package": "account_peppol",
+    "kind": "UserError",
+    "message": "Could not connect to Proxy Server."
+   },
+   {
+    "operation": "_ensure_can_connect",
+    "package": "account_peppol",
+    "kind": "UserError",
+    "message": "Your identifier is invalid."
+   },
+   {
+    "operation": "_ensure_can_connect",
+    "package": "account_peppol",
+    "kind": "UserError",
+    "message": "The database you are trying to connect to is not suitable for Peppol."
+   },
+   {
+    "operation": "_ensure_can_connect",
+    "package": "account_peppol",
+    "kind": "UserError",
+    "message": "You need to authenticate to continue."
+   },
+   {
+    "operation": "_ensure_can_connect",
+    "package": "account_peppol",
+    "kind": "UserError",
+    "message": "Selected authentication method is not available."
+   },
+   {
+    "operation": "_ensure_can_connect",
+    "package": "account_peppol",
+    "kind": "UserError",
+    "message": "Your identifier you entered is invalid for Peppol."
+   },
+   {
+    "operation": "_ensure_can_connect",
+    "package": "account_peppol",
+    "kind": "UserError",
+    "message": "Your identifier does not have a valid format.%s"
+   },
+   {
+    "operation": "button_register_peppol_participant",
+    "package": "account_peppol",
+    "kind": "UserError",
+    "message": "A connection to '%s' already exists."
+   }
+  ],
+  "state_fields": [
+   "account_peppol_proxy_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "account_peppol.access_peppol_registration",
+    "package": "account_peppol",
+    "name": "access.peppol.registration",
+    "entity": "peppol.registration",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account_peppol.peppol_registration_form",
+    "package": "account_peppol",
+    "name": "peppol.registration.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "class": "form_peppol_registration"
+     },
+     "fields": [
+      {
+       "name": "peppol_warnings",
+       "widget": "actionable_errors"
+      },
+      {
+       "name": "parent_company_name",
+       "readonly": "1"
+      },
+      {
+       "name": "use_parent_connection_selection",
+       "widget": "radio"
+      },
+      {
+       "name": "peppol_eas",
+       "widget": "peppol_non_focusable_selection",
+       "readonly": "use_parent_connection",
+       "nolabel": "1",
+       "placeholder": "Peppol ID"
+      },
+      {
+       "name": "peppol_endpoint",
+       "readonly": "use_parent_connection",
+       "nolabel": "1"
+      },
+      {
+       "name": "contact_email",
+       "readonly": "use_parent_connection",
+       "string": "Email"
+      },
+      {
+       "name": "phone_number",
+       "readonly": "use_parent_connection",
+       "required": "edi_mode not in ('demo', 'test')",
+       "string": "Phone"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_register_with_itsme",
+       "type": "object",
+       "invisible": "not display_itsme_login",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "button_register_peppol_participant",
+       "string": "Activate Peppol",
+       "type": "object",
+       "invisible": "edi_mode != 'prod' or not display_no_auth_buttons",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_register_peppol_participant",
+       "string": "Activate Peppol (Test)",
+       "type": "object",
+       "invisible": "edi_mode != 'test' or not display_no_auth_buttons",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_register_peppol_participant",
+       "string": "Activate Peppol (Demo)",
+       "type": "object",
+       "invisible": "edi_mode != 'demo' or not display_no_auth_buttons",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "actionable_errors": 1,
+      "radio": 1,
+      "peppol_non_focusable_selection": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

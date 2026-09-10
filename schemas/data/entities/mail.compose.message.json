@@ -1,0 +1,2753 @@
+{
+ "catalog": {
+  "name": "entity:mail.compose.message",
+  "description": "Complete definition of entity Email composition wizard (mail.compose.message).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.compose.message",
+  "storage_name": "mail_compose_message",
+  "full_name": "Email composition wizard",
+  "kind": "transient",
+  "description": "Email composition wizard",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "mass_mailing",
+   "marketing_card"
+  ],
+  "mixins": [
+   "mail.composer.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_batch_size": 50
+  },
+  "fields": [
+   {
+    "name": "subject",
+    "type": "Char",
+    "string": "Subject",
+    "compute": "_compute_subject",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Subject"
+   },
+   {
+    "name": "body",
+    "type": "Html",
+    "string": "Contents",
+    "render_engine": "qweb",
+    "render_options": {
+     "post_process": true
+    },
+    "sanitize_style": true,
+    "compute": "_compute_body",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Contents"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "string": "Parent Message",
+    "ondelete": "set null",
+    "defined_in_package": "mail",
+    "full_name": "Parent Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "string": "Use template",
+    "domain": "[('model', '=', model), '|', ('user_id','=', False), ('user_id', '=', uid)]",
+    "defined_in_package": "mail",
+    "full_name": "Use template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "relation": "mail_compose_message_ir_attachments_rel",
+    "column1": "wizard_id",
+    "column2": "attachment_id",
+    "string": "Attachments",
+    "compute": "_compute_attachment_ids",
+    "readonly": false,
+    "store": true,
+    "bypass_search_access": true,
+    "defined_in_package": "mail",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "email_layout_xmlid",
+    "type": "Char",
+    "string": "Email Notification Layout",
+    "compute": "_compute_email_layout_xmlid",
+    "readonly": false,
+    "store": true,
+    "copy": false,
+    "compute_sudo": false,
+    "defined_in_package": "mail",
+    "full_name": "Email Notification Layout"
+   },
+   {
+    "name": "email_add_signature",
+    "type": "Boolean",
+    "string": "Add signature",
+    "compute": "_compute_email_add_signature",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Add signature"
+   },
+   {
+    "name": "email_from",
+    "type": "Char",
+    "string": "From",
+    "compute": "_compute_authorship",
+    "readonly": false,
+    "store": true,
+    "compute_sudo": false,
+    "help": "Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter.",
+    "defined_in_package": "mail",
+    "full_name": "From"
+   },
+   {
+    "name": "author_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Author",
+    "compute": "_compute_authorship",
+    "readonly": false,
+    "store": true,
+    "compute_sudo": false,
+    "help": "Author of the message. If not set, email_from may hold an email address that did not match any partner.",
+    "defined_in_package": "mail",
+    "full_name": "Author",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "composition_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "comment",
+      "Post on a document"
+     ],
+     [
+      "mass_mail",
+      "Email Mass Mailing"
+     ]
+    ],
+    "string": "Composition mode",
+    "default": "comment",
+    "defined_in_package": "mail",
+    "full_name": "Composition mode"
+   },
+   {
+    "name": "composition_batch",
+    "type": "Boolean",
+    "string": "Batch composition",
+    "compute": "_compute_composition_batch",
+    "defined_in_package": "mail",
+    "full_name": "Batch composition"
+   },
+   {
+    "name": "composition_comment_option",
+    "type": "Selection",
+    "selection": [
+     [
+      "reply_all",
+      "Reply-All"
+     ],
+     [
+      "forward",
+      "Forward"
+     ]
+    ],
+    "string": "Comment Options",
+    "defined_in_package": "mail",
+    "full_name": "Comment Options"
+   },
+   {
+    "name": "model",
+    "type": "Char",
+    "string": "Related Document Model",
+    "compute": "_compute_model",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Related Document Model"
+   },
+   {
+    "name": "model_is_thread",
+    "type": "Boolean",
+    "string": "Thread-Enabled",
+    "compute": "_compute_model_is_thread",
+    "defined_in_package": "mail",
+    "full_name": "Thread-Enabled"
+   },
+   {
+    "name": "res_ids",
+    "type": "Text",
+    "string": "Related Document IDs",
+    "compute": "_compute_res_ids",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Related Document identifiers"
+   },
+   {
+    "name": "res_domain",
+    "type": "Text",
+    "string": "Active domain",
+    "defined_in_package": "mail",
+    "full_name": "Active domain"
+   },
+   {
+    "name": "res_domain_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "help": "Used as context used to evaluate composer domain",
+    "defined_in_package": "mail",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "record_alias_domain_id",
+    "type": "Many2one",
+    "comodel": "mail.alias.domain",
+    "string": "Alias Domain",
+    "compute": "_compute_record_environment",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Alias Domain",
+    "target_entity": "mail.alias.domain"
+   },
+   {
+    "name": "record_company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "compute": "_compute_record_environment",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "message_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "auto_comment",
+      "Automated Targeted Notification"
+     ],
+     [
+      "comment",
+      "Comment"
+     ],
+     [
+      "notification",
+      "System notification"
+     ]
+    ],
+    "string": "Type",
+    "required": true,
+    "default": "comment",
+    "help": "Message type: email for email message, notification for system message, comment for other messages such as user replies",
+    "defined_in_package": "mail",
+    "full_name": "Type"
+   },
+   {
+    "name": "subtype_id",
+    "type": "Many2one",
+    "comodel": "mail.message.subtype",
+    "string": "Subtype",
+    "ondelete": "set null",
+    "compute": "_compute_subtype_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Subtype",
+    "target_entity": "mail.message.subtype"
+   },
+   {
+    "name": "subtype_is_log",
+    "type": "Boolean",
+    "string": "Is a log",
+    "compute": "_compute_subtype_is_log",
+    "defined_in_package": "mail",
+    "full_name": "Is a log"
+   },
+   {
+    "name": "mail_activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Mail Activity Type",
+    "ondelete": "set null",
+    "defined_in_package": "mail",
+    "full_name": "Mail Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "reply_to",
+    "type": "Char",
+    "string": "Reply To",
+    "compute": "_compute_reply_to",
+    "readonly": false,
+    "store": true,
+    "compute_sudo": false,
+    "help": "Reply email address. Setting the reply_to bypasses the automatic thread creation.",
+    "defined_in_package": "mail",
+    "full_name": "Reply To"
+   },
+   {
+    "name": "reply_to_force_new",
+    "type": "Boolean",
+    "string": "Considers answers as new thread",
+    "compute": "_compute_reply_to_force_new",
+    "readonly": false,
+    "store": true,
+    "help": "Manage answers as new incoming emails instead of replies going to the same thread.",
+    "defined_in_package": "mail",
+    "full_name": "Considers answers as new thread"
+   },
+   {
+    "name": "reply_to_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "update",
+      "Store email and replies in the chatter of each record"
+     ],
+     [
+      "new",
+      "Collect replies on a specific email address"
+     ]
+    ],
+    "string": "Replies",
+    "compute": "_compute_reply_to_mode",
+    "inverse": "_inverse_reply_to_mode",
+    "help": "Original Discussion: Answers go in the original document discussion thread. \n Another Email Address: Answers go to the email address mentioned in the tracking message-id instead of original document discussion thread. \n This has an impact on the generated message-id.",
+    "defined_in_package": "mail",
+    "full_name": "Replies"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "mail_compose_message_res_partner_rel",
+    "column1": "wizard_id",
+    "column2": "partner_id",
+    "string": "Additional Contacts",
+    "compute": "_compute_partner_ids",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Additional Contacts",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_ids_all_have_email",
+    "type": "Boolean",
+    "compute": "_compute_partner_ids_all_have_email",
+    "defined_in_package": "mail",
+    "string": "Partner Identifiers All Have Email",
+    "full_name": "Partner Identifiers All Have Email"
+   },
+   {
+    "name": "notified_bcc_contains_share",
+    "type": "Boolean",
+    "string": "Is an external partner follower of the document?",
+    "compute": "_compute_notified_bcc_contains_share",
+    "defined_in_package": "mail",
+    "full_name": "Is an external partner follower of the document?"
+   },
+   {
+    "name": "auto_delete",
+    "type": "Boolean",
+    "string": "Delete Emails",
+    "compute": "_compute_auto_delete",
+    "readonly": false,
+    "store": true,
+    "compute_sudo": false,
+    "help": "This option permanently removes any track of email after it's been sent, including from the Technical menu in the Settings, in order to preserve storage space of your the system database.",
+    "defined_in_package": "mail",
+    "full_name": "Delete Emails"
+   },
+   {
+    "name": "auto_delete_keep_log",
+    "type": "Boolean",
+    "string": "Keep Message Copy",
+    "compute": "_compute_auto_delete_keep_log",
+    "readonly": false,
+    "store": true,
+    "help": "Keep a copy of the email content if emails are removed (mass mailing only)",
+    "defined_in_package": "mail",
+    "full_name": "Keep Message Copy"
+   },
+   {
+    "name": "force_send",
+    "type": "Boolean",
+    "string": "Send mailing or notifications directly",
+    "compute": "_compute_force_send",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Send mailing or notifications directly"
+   },
+   {
+    "name": "mail_server_id",
+    "type": "Many2one",
+    "comodel": "ir.mail_server",
+    "string": "Outgoing mail server",
+    "compute": "_compute_mail_server_id",
+    "readonly": false,
+    "store": true,
+    "compute_sudo": false,
+    "defined_in_package": "mail",
+    "full_name": "Outgoing mail server",
+    "target_entity": "ir.mail_server"
+   },
+   {
+    "name": "notify_author",
+    "type": "Boolean",
+    "compute": "_compute_notify_author",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "string": "Notify Author",
+    "full_name": "Notify Author"
+   },
+   {
+    "name": "notify_author_mention",
+    "type": "Boolean",
+    "compute": "_compute_notify_author_mention",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "string": "Notify Author Mention",
+    "full_name": "Notify Author Mention"
+   },
+   {
+    "name": "notify_skip_followers",
+    "type": "Boolean",
+    "compute": "_compute_notify_skip_followers",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "string": "Notify Skip Followers",
+    "full_name": "Notify Skip Followers"
+   },
+   {
+    "name": "scheduled_date",
+    "type": "Char",
+    "string": "Scheduled Date",
+    "compute": "_compute_scheduled_date",
+    "readonly": false,
+    "store": true,
+    "compute_sudo": false,
+    "help": "In comment mode: if set, postpone notifications sending. In mass mail mode: if sent, send emails after that date. This date is considered as being in UTC timezone.",
+    "defined_in_package": "mail",
+    "full_name": "Scheduled Date"
+   },
+   {
+    "name": "use_exclusion_list",
+    "type": "Boolean",
+    "string": "Use Exclusion List",
+    "default": true,
+    "copy": false,
+    "help": "Prevent sending messages to blacklisted contacts. Disable only when absolutely necessary.",
+    "defined_in_package": "mail",
+    "full_name": "Use Exclusion List"
+   },
+   {
+    "name": "template_name",
+    "type": "Char",
+    "string": "Template Name",
+    "defined_in_package": "mail",
+    "full_name": "Template Name"
+   },
+   {
+    "name": "mass_mailing_id",
+    "type": "Many2one",
+    "comodel": "mailing.mailing",
+    "string": "Mass Mailing",
+    "ondelete": "cascade",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mass Mailing",
+    "target_entity": "mailing.mailing"
+   },
+   {
+    "name": "campaign_id",
+    "type": "Many2one",
+    "comodel": "utm.campaign",
+    "string": "Mass Mailing Campaign",
+    "ondelete": "set null",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mass Mailing Campaign",
+    "target_entity": "utm.campaign"
+   },
+   {
+    "name": "mass_mailing_name",
+    "type": "Char",
+    "string": "Mass Mailing Name",
+    "help": "If set, a mass mailing will be created so that you can track its results in the Email Marketing app.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mass Mailing Name"
+   },
+   {
+    "name": "mailing_list_ids",
+    "type": "Many2many",
+    "comodel": "mailing.list",
+    "string": "Mailing List",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mailing List",
+    "target_entity": "mailing.list"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Handle composition mode and contextual computation, until moving\nto computed fields. Support active_model / active_id(s) as valid default\nvalues, as this comes from standard web client usage.\n\nNote that supporting active_ids through composer is still done, as we\nmay have to give a huge list of IDs that won't fit into res_ids field.",
+      "size_in_lines": 39,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_res_ids",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check res_ids is a valid list of integers (or Falsy). ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_res_domain",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "res_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check domain is a valid domain if set (otherwise it is considered\nas a Falsy leaf. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_subject",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "model",
+         "parent_id",
+         "res_domain",
+         "res_ids",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either form template, either from context.\nWhen having a template with a value set, copy it (in batch mode) or\nrender it (in monorecord comment mode) on the composer. Otherwise\nit comes from the parent (if set), or computed based on the generic\n'_message_compute_subject' method or to the record display_name in\nmonorecord comment mode, or set to False. When removing the template,\nreset it. ",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_body",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "model",
+         "res_domain",
+         "res_ids",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either from template, either reset. When\nhaving a template with a value set, copy it (in batch mode) or render\nit (in monorecord comment mode) on the composer. When removing the\ntemplate, reset it. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_attachment_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "model",
+         "res_domain",
+         "res_ids",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is based on template and composition mode. In monorecord\ncomment mode, template is used to generate attachments based on both\nattachment_ids of template, and reports coming from report_template_ids.\nThose are generated based on the current record to display. As template\ngeneration returns a list of tuples, new attachments are created on\nthe fly during the compute.\n\nIn batch or email mode, only attachment_ids from template are used on\nthe composer. Reports will be generated at sending time.\n\nWhen template is removed, attachments are reset. ",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_email_add_signature",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When having a template, consider it defines completely body and\ndo not add signature. Without template, add signature by default\nin comment due to post processing for notification emails. Mailing\nmode does not handle signature. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_email_layout_xmlid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either from template, either reset. When\nhaving a template with a value set, set it on composer.When removing\nthe template, reset it. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_authorship",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "email_from",
+         "model",
+         "res_domain",
+         "res_ids",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either from template, either from context.\nWhen having a template with a value set, copy it (in batch mode) or\nrender it (in monorecord comment mode) on the composer. Otherwise\ntry to take current user's email. When removing the template, fallback\non default thread behavior (which is current user's email).\n\nAuthor is not controllable from the template currently. We therefore\ntry to synchronize it with the given email_from (in rendered mode to\navoid trying to find partner based on qweb expressions), or fallback\non current user. ",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_composition_batch",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_domain",
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Determine if batch mode is activated:\n\n* using res_domain: always batch (even if result is singleton at a\n  given time, it is user and time dependent, hence batch);\n* res_ids: if more than one item in the list (void and singleton are\n  not batch);",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Model can be set from parent or using 'active_model' context key\nfrequently used as the composer is most invoked from list or form\nviews. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_model_is_thread",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Determine if model is thread enabled. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_res_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation may come from parent in comment mode, if set. It takes\nthe parent message's res_id. Otherwise the composer uses the 'active_ids'\ncontext key, unless it is too big to be stored in database. Indeed\nwhen invoked for big mailings, 'active_ids' may be a very big list.\nSupport of 'active_ids' when sending is granted in order to not always\nrely on 'res_ids' field. When 'active_ids' is not present, fallback\non 'active_id'. ",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_record_environment",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "model",
+         "res_domain",
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "In monorecord mode, fetch record company and the linked alias domain,\neasing future processing notably at post and notification sending time.\n\nIn batch mode it makes no sense to compute a single company, it will be\ndynamically generated. ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_subtype_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation defaults from composition mode. Subtype is not used in\nmass mail mode, and is comment for comment mode. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_subtype_is_log",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "subtype_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "In comment mode, tells whether the subtype is a note. Subtype has\nno use in email mode, and this field will be False. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reply_to",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "model",
+         "res_domain",
+         "res_ids",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either from template, either reset. When\nhaving a template with a value set, copy it (in batch mode) or render\nit (in monorecord comment mode) on the composer. When removing the\ntemplate, reset it. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reply_to_force_new",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model",
+         "reply_to"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "If model does not inherit from MailThread, avoid replies to be\nconsidered as thread updates, they will instead follow the routing\nrules (alias, ...). Other models by default collect replies in the\nsame thread, unless a reply_to is forced, usually either throuh a\ntemplate, either because of mailing mode. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reply_to_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reply_to_force_new"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_reply_to_mode",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "model",
+         "parent_id",
+         "res_domain",
+         "res_ids",
+         "subtype_id",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either from template, either from context.\nWhen having a template it uses its 3 fields 'email_cc', 'email_to' and\n'partner_to', in monorecord comment mode. Emails are converted into\npartners, creating new ones when the email does not match any existing\npartner. Composer does not deal with emails but only with partners.\nWhen having a template in other modes, no recipients are computed\nas it is done at sending time. When removing the template, reset it.\n\nWhen not having a template, recipients may come from the parent in\ncomment mode, to be sure to notify the same people. ",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_ids_all_have_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_notified_bcc_contains_share",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_batch",
+         "composition_mode",
+         "message_type",
+         "model",
+         "res_ids",
+         "subtype_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When being in monorecord comment mode, compute 'bcc' which are\nfollowers that are going to be 'silently' notified by the message. ",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_auto_delete",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either from template, either from composition\nmode. When having a template, its value is copied. Without template it\nis True in comment mode to remove notification emails by default. In\nemail mode we keep emails (backward compatibility mode). ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_auto_delete_keep_log",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "auto_delete"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Keep logs is used only in email mode. It is used to keep the core\nmessage when unlinking sent emails. It allows to keep the message as\na trace in the record's chatter. In other modes it has no use and\ncan be set to False. When auto_delete is turned off it has no usage. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_force_send",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "model",
+         "res_domain",
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When being in single record mode, we force_send (post on a record\nor send a single email right away). In batch mode: comment always uses\nthe email queue (lot of potentially different emails to craft). Mass\nmailing mode depends on number of recipients and is configurable using\n'mail.mail.force.send.limit' configuration parameter (default=100).\nUsing a domain forces the email queue usage as it depends on actual\nevaluation and is generally used for big batches anyway. ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mail_server_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Copy value from template when updating it, if set on template. When\nremoving the template, reset it. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_notify_author",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Used only in 'comment' mode, controls 'notify_author' notification\nparameter ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_notify_author_mention",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Used only in 'comment' mode, controls 'notify_author_mention'\nnotification parameter. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_notify_skip_followers",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "composition_comment_option"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Used only in 'comment' mode, controls 'notify_skip_followers' notification\nparameter. 'Reply-All' behavior triggers skipping followers. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_scheduled_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "model",
+         "res_ids",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either from template, either reset. When\nhaving a template with a value set, copy it (in batch mode) or render\nit (in monorecord comment mode) on the composer. When removing the\ntemplate, reset it. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lang",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computation is coming either from template, either reset. When\nhaving a template with a value set, copy it (in batch mode) or render\nit (in monorecord comment mode) on the composer. When removing the\ntemplate, reset it. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_edit_body",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Can edit the body if we are not in \"mass_mail\" mode because the template is\nrendered before it's modified.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_field_value",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_lost_attachments",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Garbage collect lost mail attachments. Those are attachments\n- linked to res_model 'mail.compose.message', the composer wizard\n- with res_id 0, because they were created outside of an existing\n    wizard (typically user input through Chatter or reports\n    created on-the-fly by the templates)\n- unused since at least one day (create_date and write_date)",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_schedule_message",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_schedule_message_post_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "post_values"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Override this method to add additional values to the 'mail.scheduled.message' record creation.\nThis is useful for custom modules that need to add specific fields to the scheduled message.\n:param post_values: dict of post values to be used for the scheduled message\n:param wizard: mail.compose.message record that is used to schedule the message\n:return: dict of additional values to be added to the scheduled message creation",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_schedule_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Create a 'scheduled message' to be posted automatically later. ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "A message can only be scheduled in monocomment mode",
+        "line": 751
+       },
+       {
+        "kind": "UserError",
+        "message": "A scheduled date is needed to schedule a message",
+        "line": 761
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_send_mail",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Used for action button that do not accept arguments. ",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "auto_commit"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Process the wizard content and proceed with sending the related\n    email(s), rendering any template patterns on the fly if needed.\n\n:return: (\n    result_mails_su: in mass mode, sent emails (as sudo),\n    result_messages: in comment mode, posted messages\n)",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Override to generate the mass mailing in case only the name was\ngiven. It is used afterwards for traces generation. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_mail_comment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Send in comment mode. It calls message_post on model, or the generic\nimplementation of it if not available (as message_notify). ",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No recipient found.",
+        "line": 833
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_send_mail_mass_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "auto_commit"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Send in mass mail mode. Mails are sudo-ed, as when going through\n_prepare_mail_values standard access rights on related records will be\nchecked when browsing them to compute mail values. If people have\naccess to the records they have rights to create lots of emails in\nsudo as it is considered as a technical model. ",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_mail_notification_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "mails"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Prevent notification creation as traces are generated.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_template_creation_wizard",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "hit save as template button: opens a wizard that prompts for the template's subject.\n`create_mail_template` is called when saving the new wizard. ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_mail_template",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "creates a mail template with the current mail composer's fields ",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Template creation from composer requires a valid model.",
+        "line": 921
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "cancel_save_template",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Restore old subject when canceling the 'save as template' action\nas it was erased to let user give a more custom input. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_invalid_email_state",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Gives state of an email when the address is invalid or missing.\n\nWe consider that if not keeping logs, users will not care to correct record-wise errors as it was \"send and forget\".\nWhereas if they do keep logs, they will want to know that the message was not actually sent.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Always cancel invalid emails for mailings due to likely untractable number of failures.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mail_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Generate the values that will be used by send_mail to create either\n mail_messages or mail_mails depending on composition mode.\n\nSome summarized information on generation: mail versus message fields\n(or both), and static (never rendered) versus dynamic (raw or rendered).\n\nMAIL\n    STA - 'auto_delete',\n    DYN - 'body_html',\n    STA - 'force_send',  (notify parameter)\n    STA - 'model',\n    DYN - 'recipient_ids',  (from partner_ids)\n    DYN - 'res_id',\n    STA - 'is_notification',\n\nMESSAGE\n    DYN - 'body',\n    STA - 'email_add_signature',\n    STA - 'email_layout_xmlid',\n    DYN - 'force_email_lang',  # notify parameter\n    STA - 'record_alias_domain_id',  # monorecord only\n    STA - 'record_company_id',  # monorecord only\n\nBOTH\n    DYN - 'attachment_ids',\n    STA - 'author_id',  (to improve with template)\n    DYN - 'email_from',\n    STA - 'mail_activity_type_id',\n    STA - 'mail_server_id',\n    STA - 'message_type',\n    STA - 'parent_id',\n    DYN - 'partner_ids',\n    DYN - 'reply_to',\n    STA - 'reply_to_force_new',\n    DYN - 'scheduled_date',\n    DYN - 'subject',\n    STA - 'subtype_id',\n\n:param list res_ids: list of record IDs on which composer runs;\n\n:return: for each res_id, values to create the mail.mail or to\n  give to message_post, depending on composition mode;\n:rtype: dict",
+      "size_in_lines": 82,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_manage_mail_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "mail_values_all"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Meant to be overridden to filter out and handle mail that must not be sent.\n\n:param dict mail_values_all: mail values by res_id\n:return: filtered mail_vals_all\n:rtype: dict",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mail_values_static",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Prepare values always valid, not rendered or dynamic whatever the\ncomposition mode and related records.\n\n:returns: a dict of (field name, value) to be used to populate\n  values for each res_id in '_prepare_mail_values';\n:rtype: dict",
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mail_values_dynamic",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Generate values based on composer content as well as its template\nbased on records given by res_ids.\n\nPart of the advanced rendering is delegated to template, notably\nrecipients or attachments dynamic generation. See sub methods for\nmore details.\n\n:param list res_ids: list of record IDs on which composer runs;\n\n:returns: for each res_id, the generated values used to\n  populate in '_prepare_mail_values';\n:rtype: dict",
+      "size_in_lines": 193,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Replace generic card urls with the specific res_id url.",
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mail_values_rendered",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Generate values that are already rendered. This is used mainly in\nmonorecord mode, when the wizard contains value already generated\n(e.g. \"Send by email\" on a sale order, in form view).\n\n:param list res_ids: list of record IDs on which composer runs;\n\n:returns: for each res_id, the generated values used to\n  populate in '_prepare_mail_values';\n:rtype: dict",
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_mail_values_state",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "mail_values_dict"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "When being in mass mailing, avoid sending emails to void or invalid\nemails. For that purpose a processing of generated values allows to\ngive a state and a failure type to mail.mail records that will be\ncreated at sending time.\n\n:param dict mail_values_dict: as generated by '_prepare_mail_values';\n\n:return: updated mail_values_dict",
+      "size_in_lines": 61,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_template_for_composer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids",
+     "render_fields",
+     "allow_suggested",
+     "find_or_create_partners"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Generate values based on template and relevant values for the\nmail.compose.message wizard.\n\n:param list res_ids: list of record IDs on which template is rendered;\n:param list render_fields: list of fields to render on template;\n:param boolean allow_suggested: when computing default recipients,\n  include suggested recipients in addition to minimal defaults\n  (see ``Template._generate_template_recipients``);\n:param boolean find_or_create_partners: transform emails into partners\n  (see ``Template._generate_template_recipients``);\n\n:returns: a dict containing all asked fields for each record ID given by\n  res_ids. Note that\n\n  * 'body' comes from template 'body_html' generation;\n  * 'attachments' is an additional key coming with 'attachment_ids' due\n    to report generation (in the format [(report_name, data)] where data\n    is base64 encoded);\n  * 'partner_ids' is returned due to recipients generation that gives\n    partner ids coming from default computation as well as from email\n    to partner convert (see ``find_or_create_partners``);",
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_blacklist_record_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mail_values_dict",
+     "recipients_info"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_done_emails",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mail_values_dict"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Consider every target gets a different card, hence we don't want unique message per email address.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_optout_emails",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mail_values_dict"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recipients_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mail_values_dict"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_evaluate_res_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Parse composer domain, which can be: an already valid list or\ntuple (generally in code), a list or tuple as a string (coming from\nactions). Void strings are considered as a falsy domain.\n\n:return: an the system domain (list of leaves) ",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid domain “%(domain)s” (type “%(domain_type)s”)",
+        "line": 1569
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_evaluate_res_ids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Parse composer res_ids, which can be: an already valid list or\ntuple (generally in code), a list or tuple as a string (coming from\nactions). Void strings / missing values are evaluated as an empty list.\n\nNote that 'active_ids' context key is supported at this point as mailing\non big ID list would create issues if stored in database.\n\nAnother context key 'composer_force_res_ids' is temporarily supported\nto ease support of accounting wizard, while waiting to implement a\nproper solution to language management.\n\n:return: a list of IDs (empty list in case of falsy strings)",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_value_from_template",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "template_fname",
+     "composer_fname"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Set composer value from its template counterpart. In monorecord\ncomment mode, we get directly the rendered value, giving the real\nvalue to the user. Otherwise we get the raw (unrendered) value from\ntemplate, as it will be rendered at send time (for mass mail, whatever\nthe number of contextual records to mail) or before posting on records\n(for comment in batch).\n\n:param str template_fname: name of field on template model, used to\n  fetch the value (and maybe render it);\n:param str composer_fname: name of field on composer model, when field\n  names do not match (e.g. body_html on template used to populate body\n  on composer);",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mail_values_mailing_traces",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mail_values_all"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mailing_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_mass_mailing",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_generic_card_url_body",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "card_body_pairs"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Update the bodies with the specific card url for that res_id and create a card.\n\nexample: (1, \"/cards/9/preview\") -> (1, \"/cards/9/1/abchashtoken/preview\") + new card as side-effect\n\n:return: processed bodies in the order they were received",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_action_schedule_message",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "A message can only be scheduled in monocomment mode"
+   },
+   {
+    "operation": "_action_schedule_message",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "A scheduled date is needed to schedule a message"
+   },
+   {
+    "operation": "_action_send_mail_comment",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "No recipient found."
+   },
+   {
+    "operation": "create_mail_template",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Template creation from composer requires a valid model."
+   },
+   {
+    "operation": "_evaluate_res_domain",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Invalid domain “%(domain)s” (type “%(domain_type)s”)"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_compose_message",
+    "package": "mail",
+    "name": "access.mail.compose.message",
+    "entity": "mail.compose.message",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mail.mail_compose_message_rule",
+    "package": "mail",
+    "name": "Mail Compose Message Rule",
+    "entity": "mail.compose.message",
+    "domain": "[('create_uid', '=', user.id)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": "True",
+    "applies_to_write": "True",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mail.email_compose_message_wizard_form",
+    "package": "mail",
+    "name": "mail.compose.message.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Compose Email",
+      "class": "pt-0 pb-0 o_mail_composer_form",
+      "js_class": "mail_composer_form",
+      "disable_autofocus": "1"
+     },
+     "fields": [
+      {
+       "name": "author_id",
+       "invisible": "1"
+      },
+      {
+       "name": "auto_delete",
+       "invisible": "1"
+      },
+      {
+       "name": "auto_delete_keep_log",
+       "invisible": "1"
+      },
+      {
+       "name": "composition_batch",
+       "invisible": "1"
+      },
+      {
+       "name": "composition_comment_option",
+       "invisible": "1"
+      },
+      {
+       "name": "composition_mode",
+       "invisible": "1"
+      },
+      {
+       "name": "email_layout_xmlid",
+       "invisible": "1"
+      },
+      {
+       "name": "force_send",
+       "invisible": "1"
+      },
+      {
+       "name": "lang",
+       "invisible": "1"
+      },
+      {
+       "name": "mail_server_id",
+       "invisible": "1"
+      },
+      {
+       "name": "model",
+       "invisible": "1"
+      },
+      {
+       "name": "model_is_thread",
+       "invisible": "1"
+      },
+      {
+       "name": "notified_bcc_contains_share",
+       "invisible": "1"
+      },
+      {
+       "name": "notify_author",
+       "invisible": "1"
+      },
+      {
+       "name": "notify_author_mention",
+       "invisible": "1"
+      },
+      {
+       "name": "notify_skip_followers",
+       "invisible": "1"
+      },
+      {
+       "name": "parent_id",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_ids_all_have_email",
+       "invisible": "1"
+      },
+      {
+       "name": "record_alias_domain_id",
+       "invisible": "1"
+      },
+      {
+       "name": "record_company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "render_model",
+       "invisible": "1"
+      },
+      {
+       "name": "res_domain",
+       "invisible": "1"
+      },
+      {
+       "name": "res_domain_user_id",
+       "invisible": "1"
+      },
+      {
+       "name": "res_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "scheduled_date",
+       "invisible": "1"
+      },
+      {
+       "name": "subtype_id",
+       "invisible": "1"
+      },
+      {
+       "name": "subtype_is_log",
+       "invisible": "1"
+      },
+      {
+       "name": "use_exclusion_list",
+       "invisible": "1"
+      },
+      {
+       "name": "email_from",
+       "invisible": "composition_mode != 'mass_mail'"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags_email",
+       "invisible": "composition_comment_option == 'forward' or (composition_comment_option != 'reply_all' and not context.get('clicked_on_full_composer', False))",
+       "context": "{'form_view_ref': 'base.view_partner_simple_form'}",
+       "options": "{'edit_tags': True}",
+       "placeholder": "Followers only"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags_email",
+       "invisible": "composition_comment_option != 'forward' and (context.get('clicked_on_full_composer', False) or composition_comment_option == 'reply_all' )",
+       "required": "composition_comment_option == 'forward' or (composition_comment_option != 'reply_all' and not context.get('clicked_on_full_composer', False) and composition_mode == 'comment' and not notified_bcc_contains_share)",
+       "context": "{'force_email': True, 'show_email': True, 'form_view_ref': 'base.view_partner_simple_form', 'forward_mode': True}",
+       "options": "{'edit_tags': True}",
+       "placeholder": "Add recipients..."
+      },
+      {
+       "name": "subject",
+       "required": "True",
+       "placeholder": "e.g. Welcome to MyCompany!"
+      },
+      {
+       "name": "reply_to",
+       "invisible": "reply_to_mode == 'update'",
+       "required": "reply_to_mode != 'update'",
+       "placeholder": "e.g. info@company.com"
+      },
+      {
+       "name": "can_edit_body",
+       "invisible": "1"
+      },
+      {
+       "name": "body",
+       "widget": "html_composer_message",
+       "readonly": "not can_edit_body",
+       "options": "{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'render_model'}",
+       "placeholder": "Write your message here...",
+       "force_save": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "mail_composer_attachment_list"
+      },
+      {
+       "name": "body",
+       "widget": "html_composer_message",
+       "readonly": "not can_edit_body",
+       "options": "{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'render_model'}",
+       "placeholder": "Write your message here...",
+       "force_save": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "mail_composer_attachment_list"
+      },
+      {
+       "name": "reply_to_force_new",
+       "invisible": "1"
+      },
+      {
+       "name": "reply_to_mode",
+       "widget": "radio",
+       "invisible": "composition_mode != 'mass_mail'"
+      },
+      {
+       "name": "use_exclusion_list",
+       "invisible": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "mail_composer_attachment_selector",
+       "invisible": "not can_edit_body"
+      },
+      {
+       "name": "template_id",
+       "widget": "mail_composer_template_selector"
+      },
+      {
+       "name": "scheduled_date",
+       "widget": "text_scheduled_date",
+       "invisible": "composition_batch or composition_mode != 'comment'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send_mail",
+       "string": "Send",
+       "type": "object",
+       "invisible": "(subtype_is_log or composition_mode == 'comment' and not composition_batch and scheduled_date) or not partner_ids_all_have_email",
+       "class": "btn-primary o_mail_send",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_send_mail",
+       "string": "Log",
+       "type": "object",
+       "invisible": "(not subtype_is_log or composition_mode == 'comment' and not composition_batch and scheduled_date) or not partner_ids_all_have_email",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_schedule_message",
+       "string": "Schedule",
+       "type": "object",
+       "invisible": "(composition_mode != 'comment' or composition_batch or not scheduled_date) or not partner_ids_all_have_email",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_send_mail",
+       "string": "Send",
+       "type": "object",
+       "invisible": "(subtype_is_log or composition_mode == 'comment' and not composition_batch and scheduled_date) or partner_ids_all_have_email",
+       "class": "btn-primary o_mail_send",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_send_mail",
+       "string": "Log",
+       "type": "object",
+       "invisible": "(not subtype_is_log or composition_mode == 'comment' and not composition_batch and scheduled_date) or partner_ids_all_have_email",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_schedule_message",
+       "string": "Schedule",
+       "type": "object",
+       "invisible": "(composition_mode != 'comment' or composition_batch or not scheduled_date) or partner_ids_all_have_email",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary w-auto",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_content",
+       "string": "Content",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "page_settings",
+       "string": "Settings",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "many2many_tags_email": 2,
+      "html_composer_message": 2,
+      "mail_composer_attachment_list": 2,
+      "radio": 1,
+      "mail_composer_attachment_selector": 1,
+      "mail_composer_template_selector": 1,
+      "text_scheduled_date": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_compose_message_view_form_template_save",
+    "package": "mail",
+    "name": "mail.compose.message.view.form.template.save",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "js_class": "mail_composer_save_template_form",
+      "string": "Templates"
+     },
+     "fields": [
+      {
+       "name": "template_name",
+       "required": "1",
+       "placeholder": "e.g: Send order confirmation"
+      },
+      {
+       "name": "model",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "create_mail_template",
+       "string": "Save Template",
+       "type": "object",
+       "class": "btn btn-primary"
+      },
+      {
+       "string": "Discard",
+       "class": "btn btn-secondary",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.email_compose_form_mass_mailing",
+    "package": "mass_mailing",
+    "name": "mail.compose.message.form.mass_mailing",
+    "view_type": "xpath",
+    "inherits_view": "mail.email_compose_message_wizard_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='auto_delete_keep_log']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "campaign_id",
+       "invisible": "composition_mode != 'mass_mail' or not model_is_thread",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      },
+      {
+       "name": "mass_mailing_name",
+       "invisible": "composition_mode != 'mass_mail' or not model_is_thread"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='auto_delete_keep_log']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.account_send_payment_receipt_by_email_action",
+    "package": "account",
+    "name": "Send receipt by email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{                 'mail_post_autofollow': True,                 'default_composition_mode': 'comment',                 'default_template_id': ref('account.mail_template_data_payment_receipt'),                 'default_email_layout_xmlid': 'mail.mail_notification_light',             }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_account_payment",
+    "binding_type": null,
+    "binding_view_types": "form",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "account.account_send_payment_receipt_by_email_action_multi",
+    "package": "account",
+    "name": "Send receipts by email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{                 'mail_post_autofollow': True,                 'default_composition_mode': 'mass_mail',                 'default_template_id': ref('account.mail_template_data_payment_receipt'),                 'default_email_layout_xmlid': 'mail.mail_notification_light',             }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_account_payment",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "crm.action_lead_mail_compose",
+    "package": "crm",
+    "name": "Send email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n    'default_composition_mode': 'comment',\n                }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_crm_lead",
+    "binding_type": null,
+    "binding_view_types": "form",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "crm.action_lead_mass_mail",
+    "package": "crm",
+    "name": "Send email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n    'default_composition_mode': 'mass_mail',\n                }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_crm_lead",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "mail.action_email_compose_message_wizard",
+    "package": "mail",
+    "name": "Compose Email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "mail.model_mail_compose_message",
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "mail.action_partner_mass_mail",
+    "package": "mail",
+    "name": "Send email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n                'default_composition_mode': 'mass_mail',\n                'default_partner_to': '{{ object.id or \\'\\' }}',\n                'default_subtype_xmlid': 'mail.mt_comment',\n                'default_reply_to_force_new': True,\n            }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "base.model_res_partner",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "mail_group.mail_compose_message_action_mail_group",
+    "package": "mail_group",
+    "name": "Send email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'default_composition_mode': 'mass_mail',\n            'default_model': 'mail.group.member',\n            'default_res_ids': active_ids\n        }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_mail_group_member",
+    "binding_type": null,
+    "binding_view_types": "list",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "project.action_send_mail_project_project",
+    "package": "project",
+    "name": "Send Email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n                'default_composition_mode': 'mass_mail',\n            }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "project.model_project_project",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "project.action_send_mail_project_task",
+    "package": "project",
+    "name": "Send Email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n                'default_composition_mode': 'mass_mail',\n            }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "project.model_project_task",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   },
+   {
+    "external_identifier": "stock.action_lead_mass_mail",
+    "package": "stock",
+    "name": "Send email",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n                'default_composition_mode': 'mass_mail',\n            }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "stock.model_stock_picking",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.compose.message"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

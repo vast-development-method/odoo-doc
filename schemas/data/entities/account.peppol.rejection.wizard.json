@@ -1,0 +1,180 @@
+{
+ "catalog": {
+  "name": "entity:account.peppol.rejection.wizard",
+  "description": "Complete definition of entity Peppol Rejection wizard (account.peppol.rejection.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.peppol.rejection.wizard",
+  "storage_name": "account_peppol_rejection_wizard",
+  "full_name": "Peppol Rejection wizard",
+  "kind": "transient",
+  "description": "Peppol Rejection wizard",
+  "defined_by_package": "account_peppol_response",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "move_ids",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "required": true,
+    "defined_in_package": "account_peppol_response",
+    "string": "Move",
+    "full_name": "Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "reason_ids",
+    "type": "Many2many",
+    "comodel": "account.peppol.clarification",
+    "relation": "account_peppol_rejection_reason_rel",
+    "default": {
+     "dynamic": "lambda self: self.env.ref('account_peppol_response.peppol_clarification_reason_unr', raise_if_not_found=False)"
+    },
+    "domain": "[('list_identifier', '=', 'OPStatusReason')]",
+    "required": true,
+    "string": "Rejection reasons",
+    "help": "The reasons to reject the received PEPPOL document. These will be sent to the document's sender.",
+    "defined_in_package": "account_peppol_response",
+    "full_name": "Rejection reasons",
+    "target_entity": "account.peppol.clarification"
+   },
+   {
+    "name": "action_ids",
+    "type": "Many2many",
+    "comodel": "account.peppol.clarification",
+    "relation": "account_peppol_rejection_action_rel",
+    "domain": "[('list_identifier', '=', 'OPStatusAction')]",
+    "string": "Rejection actions",
+    "help": "The actions to be suggested to the document's sender in order for the document to be accepted when sent again (eventually). These will be sent to the document's sender. Not mandatory.",
+    "defined_in_package": "account_peppol_response",
+    "full_name": "Rejection actions",
+    "target_entity": "account.peppol.clarification"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "button_send",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol_response",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "At least one reason must be given when rejecting a Peppol invoice.",
+        "line": 34
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "button_send",
+    "package": "account_peppol_response",
+    "kind": "ValidationError",
+    "message": "At least one reason must be given when rejecting a Peppol invoice."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account_peppol_response.account_peppol_rejection_wizard",
+    "package": "account_peppol_response",
+    "name": "account.peppol.rejection.wizard",
+    "entity": "account.peppol.rejection.wizard",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account_peppol_response.account_peppol_rejection_wizard_view_form",
+    "package": "account_peppol_response",
+    "name": "account.peppol.rejection.wizard.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Reject Peppol Document"
+     },
+     "fields": [
+      {
+       "name": "reason_ids",
+       "widget": "many2many_tags",
+       "required": "1",
+       "string": "Reasons",
+       "options": "{'create': False}"
+      },
+      {
+       "name": "action_ids",
+       "widget": "many2many_tags",
+       "string": "Actions to suggest",
+       "options": "{'create': False}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_send",
+       "string": "Send Rejection",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

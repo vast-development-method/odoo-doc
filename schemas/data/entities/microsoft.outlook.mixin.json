@@ -1,0 +1,386 @@
+{
+ "catalog": {
+  "name": "entity:microsoft.outlook.mixin",
+  "description": "Complete definition of entity Microsoft Outlook Mixin (microsoft.outlook.mixin).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "microsoft.outlook.mixin",
+  "storage_name": "microsoft_outlook_mixin",
+  "full_name": "Microsoft Outlook Mixin",
+  "kind": "abstract",
+  "description": "Microsoft Outlook Mixin",
+  "defined_by_package": "microsoft_outlook",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_OUTLOOK_SCOPE": null,
+   "_DEFAULT_OUTLOOK_IAP_ENDPOINT": "https://outlook.api.the system.com"
+  },
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "microsoft_outlook",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "microsoft_outlook_refresh_token",
+    "type": "Char",
+    "string": "Outlook Refresh Token",
+    "groups": "base.group_system",
+    "copy": false,
+    "defined_in_package": "microsoft_outlook",
+    "full_name": "Outlook Refresh Token"
+   },
+   {
+    "name": "microsoft_outlook_access_token",
+    "type": "Char",
+    "string": "Outlook Access Token",
+    "groups": "base.group_system",
+    "copy": false,
+    "defined_in_package": "microsoft_outlook",
+    "full_name": "Outlook Access Token"
+   },
+   {
+    "name": "microsoft_outlook_access_token_expiration",
+    "type": "Integer",
+    "string": "Outlook Access Token Expiration Timestamp",
+    "groups": "base.group_system",
+    "copy": false,
+    "defined_in_package": "microsoft_outlook",
+    "full_name": "Outlook Access Token Expiration Timestamp"
+   },
+   {
+    "name": "microsoft_outlook_uri",
+    "type": "Char",
+    "compute": "_compute_outlook_uri",
+    "string": "Authentication URI",
+    "help": "The URL to generate the authorization code from Outlook",
+    "groups": "base.group_system",
+    "defined_in_package": "microsoft_outlook",
+    "full_name": "Authentication URI"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_outlook_uri",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_microsoft_outlook_uri",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Open the URL to accept the Outlook permission.\n\nThis is done with an action, so we can force the user the save the form.\nWe need him to save the form so the current mail server record exist in DB and\nwe can include the record ID in the URL.",
+      "size_in_lines": 68,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only the administrator can link an Outlook mail server.",
+        "line": 78
+       },
+       {
+        "kind": "UserError",
+        "message": "Please enter a valid email address.",
+        "line": 83
+       },
+       {
+        "kind": "UserError",
+        "message": "Please configure your Outlook credentials.",
+        "line": 129
+       },
+       {
+        "kind": "UserError",
+        "message": "Please configure your Outlook credentials.",
+        "line": 92
+       },
+       {
+        "kind": "UserError",
+        "message": "Oops, we could not authenticate you. Please try again later.",
+        "line": 116
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_fetch_outlook_refresh_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "authorization_code"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Request the refresh token and the initial access token from the authorization code.\n\n:return:\n    refresh_token, access_token, id_token, access_token_expiration",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_outlook_access_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "refresh_token"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Refresh the access token thanks to the refresh token.\n\n:return:\n    access_token, access_token_expiration",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_outlook_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "grant_type",
+     "**values"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Generic method to request an access token or a refresh token.\n\nReturn the JSON response of the Outlook API and manage the errors which can occur.\n\n:param grant_type: Depends the action we want to do (refresh_token or authorization_code)\n:param values: Additional parameters that will be given to the Outlook endpoint",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "An error occurred when fetching the access token. %s",
+        "line": 201
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_fetch_outlook_access_token_iap",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "refresh_token"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Fetch the access token using IAP.\n\nMake a HTTP request to IAP, that will make a HTTP request\nto the Outlook API and give us the result.\n\n:return:\n    access_token, access_token_expiration",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Oops, we could not authenticate you. Please try again later.",
+        "line": 228
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_raise_iap_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "error"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "get_iap_error_message(self.env, error)",
+        "line": 237
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_generate_outlook_oauth2_string",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "login"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Generate a OAuth2 string which can be used for authentication.\n\n:param login: Email address of the Outlook account to authenticate\n:return: The SASL argument for the OAuth2 mechanism.",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please connect with your Outlook account before using it.",
+        "line": 251
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_outlook_csrf_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [],
+      "documentation": "Generate a CSRF token that will be verified in `microsoft_outlook_callback`.\n\nThis will prevent a malicious person to make an admin user disconnect the mail servers.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_microsoft_endpoint",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "microsoft_outlook",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "open_microsoft_outlook_uri",
+    "package": "microsoft_outlook",
+    "kind": "AccessError",
+    "message": "Only the administrator can link an Outlook mail server."
+   },
+   {
+    "operation": "open_microsoft_outlook_uri",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Please enter a valid email address."
+   },
+   {
+    "operation": "open_microsoft_outlook_uri",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Please configure your Outlook credentials."
+   },
+   {
+    "operation": "open_microsoft_outlook_uri",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Please configure your Outlook credentials."
+   },
+   {
+    "operation": "open_microsoft_outlook_uri",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Oops, we could not authenticate you. Please try again later."
+   },
+   {
+    "operation": "_fetch_outlook_token",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "An error occurred when fetching the access token. %s"
+   },
+   {
+    "operation": "_fetch_outlook_access_token_iap",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Oops, we could not authenticate you. Please try again later."
+   },
+   {
+    "operation": "_raise_iap_error",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "get_iap_error_message(self.env, error)"
+   },
+   {
+    "operation": "_generate_outlook_oauth2_string",
+    "package": "microsoft_outlook",
+    "kind": "UserError",
+    "message": "Please connect with your Outlook account before using it."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

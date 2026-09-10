@@ -1,0 +1,425 @@
+{
+ "catalog": {
+  "name": "views:sale.order.line",
+  "description": "View declarations for entity sale.order.line.",
+  "record_count": 7,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "sale.view_order_line_tree",
+   "package": "sale",
+   "name": "sale.order.line.list",
+   "entity": "sale.order.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Sales Order Lines",
+     "create": "false"
+    },
+    "fields": [
+     {
+      "name": "order_id"
+     },
+     {
+      "name": "order_partner_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "salesman_id"
+     },
+     {
+      "name": "product_uom_qty",
+      "string": "Qty"
+     },
+     {
+      "name": "qty_delivered"
+     },
+     {
+      "name": "qty_invoiced"
+     },
+     {
+      "name": "qty_to_invoice"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "context": "{'product_id': product_id}",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "price_subtotal",
+      "widget": "monetary",
+      "sum": "Total"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1,
+     "monetary": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "false",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Sales Order Lines\" create=\"false\">\n                <field name=\"order_id\"/>\n                <field name=\"order_partner_id\"/>\n                <field name=\"name\"/>\n                <field name=\"salesman_id\"/>\n                <field name=\"product_uom_qty\" string=\"Qty\"/>\n                <field name=\"qty_delivered\"/>\n                <field name=\"qty_invoiced\"/>\n                <field name=\"qty_to_invoice\"/>\n                <field name=\"product_uom_id\" groups=\"uom.group_uom\" widget=\"many2one_uom\" context=\"{'product_id': product_id}\"/>\n                <field name=\"price_subtotal\" sum=\"Total\" widget=\"monetary\"/>\n                <field name=\"currency_id\" column_invisible=\"True\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.sale_order_line_view_form_readonly",
+   "package": "sale",
+   "name": "sale.order.line.form.readonly",
+   "entity": "sale.order.line",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Sales Order Item",
+     "edit": "false"
+    },
+    "fields": [
+     {
+      "name": "display_type",
+      "invisible": "1"
+     },
+     {
+      "name": "display_name"
+     },
+     {
+      "name": "order_id",
+      "readonly": "1",
+      "force_save": "1"
+     },
+     {
+      "name": "product_id",
+      "widget": "many2one_barcode",
+      "readonly": "id and not product_updatable",
+      "required": "not display_type",
+      "force_save": "1"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "product_uom_qty"
+     },
+     {
+      "name": "qty_delivered",
+      "invisible": "state not in ['sale', 'done']",
+      "readonly": "qty_delivered_method != 'manual'"
+     },
+     {
+      "name": "qty_invoiced",
+      "invisible": "state not in ['sale', 'done']"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "product_uom_readonly",
+      "required": "not display_type",
+      "groups": "uom.group_uom",
+      "force_save": "1"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "order_partner_id",
+      "invisible": "1"
+     },
+     {
+      "name": "price_unit"
+     },
+     {
+      "name": "technical_price_unit",
+      "invisible": "1"
+     },
+     {
+      "name": "discount",
+      "groups": "sale.group_discount_per_so_line"
+     },
+     {
+      "name": "price_subtotal",
+      "widget": "monetary",
+      "invisible": "company_price_include == 'tax_included'",
+      "string": "Amount"
+     },
+     {
+      "name": "price_total",
+      "widget": "monetary",
+      "invisible": "company_price_include == 'tax_excluded'",
+      "string": "Amount"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "readonly": "qty_invoiced > 0",
+      "domain": "[('type_tax_use', '=', 'sale'), ('company_id', '=', company_id), ('country_id', '=', tax_country_id)]",
+      "context": "{'search_view_ref': 'account.account_tax_view_search'}",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "price_tax",
+      "widget": "monetary"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_barcode": 1,
+     "many2one_uom": 1,
+     "monetary": 3,
+     "many2many_tax_tags": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Sales Order Item\" edit=\"false\">\n                <field name=\"display_type\" invisible=\"1\"/>\n                <sheet>\n                    <div class=\"oe_title\">\n                        <h1>\n                            <field name=\"display_name\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <group>\n                            <field name=\"order_id\" readonly=\"1\" force_save=\"1\"/>\n                            <field name=\"product_id\" readonly=\"id and not product_updatable\" required=\"not display_type\" force_save=\"1\" widget=\"many2one_barcode\"/>\n                            <field name=\"name\"/>\n                            <field name=\"product_uom_qty\"/>\n                            <field name=\"qty_delivered\" invisible=\"state not in ['sale', 'done']\" readonly=\"qty_delivered_method != 'manual'\"/>\n                            <field name=\"qty_invoiced\" invisible=\"state not in ['sale', 'done']\"/>\n                            <field name=\"product_uom_id\" force_save=\"1\" groups=\"uom.group_uom\" widget=\"many2one_uom\" readonly=\"product_uom_readonly\" required=\"not display_type\"/>\n                            <field name=\"company_id\" options=\"{'no_create': True}\" groups=\"base.group_multi_company\"/>\n                            <field name=\"order_partner_id\" invisible=\"1\"/>\n                        </group>\n                        <group>\n                            <field name=\"price_unit\"/>\n                            <field name=\"technical_price_unit\" invisible=\"1\"/>\n                            <field name=\"discount\" groups=\"sale.group_discount_per_so_line\"/>\n                            <field name=\"price_subtotal\" string=\"Amount\" widget=\"monetary\" invisible=\"company_price_include == 'tax_included'\"/>\n                            <field name=\"price_total\" string=\"Amount\" widget=\"monetary\" invisible=\"company_price_include == 'tax_excluded'\"/>\n                            <field name=\"tax_ids\" widget=\"many2many_tax_tags\" options=\"{'no_create': True}\" context=\"{'search_view_ref': 'account.account_tax_view_search'}\" domain=\"[('type_tax_use', '=', 'sale'), ('company_id', '=', company_id), ('country_id', '=', tax_country_id)]\" readonly=\"qty_invoiced &gt; 0\"/>\n                            <field name=\"price_tax\" widget=\"monetary\"/>\n                            <field name=\"currency_id\" invisible=\"1\"/>\n                        </group>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.view_sales_order_line_filter",
+   "package": "sale",
+   "name": "sale.order.line.select",
+   "entity": "sale.order.line",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Sales Order"
+    },
+    "fields": [
+     {
+      "name": "order_id"
+     },
+     {
+      "name": "order_partner_id",
+      "operator": "child_of"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "salesman_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "to_invoice",
+      "string": "To Invoice",
+      "domain": "[('qty_to_invoice', '!=', 0)]",
+      "help": "Sales Order Lines ready to be invoiced"
+     },
+     {
+      "name": "my_sales_order_lines",
+      "string": "My Sales Order Lines",
+      "domain": "[('salesman_id','=',uid)]",
+      "help": "Sales Order Lines related to a Sales Order of mine"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "product",
+      "string": "Product",
+      "context": "{'group_by':'product_id'}"
+     },
+     {
+      "name": "order",
+      "string": "Order",
+      "context": "{'group_by':'order_id'}"
+     },
+     {
+      "name": "salesperson",
+      "string": "Salesperson",
+      "context": "{'group_by':'salesman_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Sales Order\">\n                <filter string=\"To Invoice\" name=\"to_invoice\" domain=\"[('qty_to_invoice', '!=', 0)]\" help=\"Sales Order Lines ready to be invoiced\"/>\n                <separator/>\n                <filter string=\"My Sales Order Lines\" name=\"my_sales_order_lines\" domain=\"[('salesman_id','=',uid)]\" help=\"Sales Order Lines related to a Sales Order of mine\"/>\n                <field name=\"order_id\"/>\n                <field name=\"order_partner_id\" operator=\"child_of\"/>\n                <field name=\"product_id\"/>\n                <field name=\"salesman_id\"/>\n                <group>\n                    <filter string=\"Product\" name=\"product\" context=\"{'group_by':'product_id'}\"/>\n                    <filter string=\"Order\" name=\"order\" context=\"{'group_by':'order_id'}\"/>\n                    <filter string=\"Salesperson\" name=\"salesperson\" context=\"{'group_by':'salesman_id'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.sale_order_line_view_kanban",
+   "package": "sale",
+   "name": "sale.order.line.kanban",
+   "entity": "sale.order.line",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile"
+    },
+    "fields": [
+     {
+      "name": "display_name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\">\n                <templates>\n                    <t t-name=\"card\">\n                        <field name=\"display_name\"/>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.view_order_line_tree_with_create",
+   "package": "sale_project",
+   "name": "sale.order.line.list.with.create",
+   "entity": "sale.order.line",
+   "view_type": "list",
+   "inherits_view": "sale.view_order_line_tree",
+   "mode": "primary",
+   "priority": "999",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "list",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list position=\"attributes\">\n                <attribute name=\"create\">true</attribute>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_project.sale_order_line_view_form_editable",
+   "package": "sale_project",
+   "name": "sale.order.line.view.form.editable",
+   "entity": "sale.order.line",
+   "view_type": "form",
+   "inherits_view": "sale.sale_order_line_view_form_readonly",
+   "mode": "primary",
+   "priority": "999",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "form",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form position=\"attributes\">\n                <attribute name=\"edit\">true</attribute>\n            </form>\n            <field name=\"product_id\" position=\"attributes\">\n                <attribute name=\"domain\">[('type', '=', 'service')]</attribute>\n                <attribute name=\"context\">{\n                    'default_type': 'service',\n                    'default_service_policy': 'ordered_prepaid',\n                    'form_view_ref': 'sale_project.product_product_form_view_inherit_sale_project',\n                }</attribute>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_stock.view_order_line_tree_inherit_sale_stock",
+   "package": "sale_stock",
+   "name": "sale.order.line.list.sale.stock.location",
+   "entity": "sale.order.line",
+   "view_type": "field",
+   "inherits_view": "sale.view_order_line_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "price_subtotal",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "price_subtotal",
+      "position": "before"
+     },
+     {
+      "name": "route_ids",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_adv_location"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"price_subtotal\" position=\"before\">\n                <field name=\"route_ids\" groups=\"stock.group_adv_location\" options=\"{'no_create': True}\"/>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

@@ -1,0 +1,1098 @@
+{
+ "catalog": {
+  "name": "entity:report.mrp.report_bom_structure",
+  "description": "Complete definition of entity bill of materials Overview Report (report.mrp.report_bom_structure).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "report.mrp.report_bom_structure",
+  "storage_name": "report_mrp_report_bom_structure",
+  "full_name": "bill of materials Overview Report",
+  "kind": "abstract",
+  "description": "BOM Overview Report",
+  "defined_by_package": "mrp",
+  "extended_by_packages": [
+   "mrp_subcontracting",
+   "purchase_mrp",
+   "mrp_subcontracting_purchase"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "get_html",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "bom_id",
+     "searchQty",
+     "searchVariant"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_warehouses",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_production_capacity",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "bom_data"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_report_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "docids",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pdf_doc",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "bom_id",
+     "data",
+     "quantity",
+     "product_variant_id"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_report_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "bom_id",
+     "searchQty",
+     "searchVariant"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_components_closest_forecasted",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "lines",
+     "line_quantities",
+     "parent_bom",
+     "product_info",
+     "parent_product",
+     "ignore_stock"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a dict mapping products to a dict of their corresponding BoM lines,\nwhich are mapped to their closest date in the forecast report where consumed quantity >= forecasted quantity.\n\nE.g. {'product_1_id': {'line_1_id': date_1, line_2_id: date_2}, 'product_2': {line_3_id: date_3}, ...}.\n\nNote that\n    - if a product is unavailable + not forecasted for a specific bom line => its date will be `date.max`\n    - if a product's type is not `product` or is already in stock for a specific bom line => its date will be `date.min`.",
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_bom_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "bom",
+     "warehouse",
+     "product",
+     "line_qty",
+     "bom_line",
+     "level",
+     "parent_bom",
+     "parent_product",
+     "index",
+     "product_info",
+     "ignore_stock",
+     "simulated_leaves_per_workcenter"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Gets recursively the BoM and all its subassemblies and computes availibility estimations for each component and their disponibility in stock.\nAccepts specific keys in context that will affect the data computed :\n- 'minimized': Will cut all data not required to compute availability estimations.\n- 'from_date': Gives a single value for 'today' across the functions, as well as using this date in products quantity computes.",
+      "size_in_lines": 163,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_component_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "parent_bom",
+     "parent_product",
+     "warehouse",
+     "bom_line",
+     "line_quantity",
+     "level",
+     "index",
+     "product_info",
+     "ignore_stock"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_quantities_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "bom_uom",
+     "product_info",
+     "parent_bom",
+     "parent_product"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_product_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product",
+     "bom_key",
+     "product_info",
+     "warehouse",
+     "quantity",
+     "bom",
+     "parent_bom",
+     "parent_product"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_byproducts_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "bom",
+     "bom_quantity",
+     "level",
+     "total",
+     "index"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_operation_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "bom",
+     "qty",
+     "level",
+     "index",
+     "bom_report_line",
+     "simulated_leaves_per_workcenter"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pdf_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "bom_id",
+     "product_id",
+     "qty",
+     "unfolded_ids",
+     "unfolded"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_bom_array_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "data",
+     "level",
+     "unfolded_ids",
+     "unfolded",
+     "parent_unfolded"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 78,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_resupply_route_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "warehouse",
+     "product",
+     "quantity",
+     "product_info",
+     "bom",
+     "parent_bom",
+     "parent_product"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_resupply_rules",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "rules",
+     "bom"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_need_special_rules",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_info",
+     "parent_bom",
+     "parent_product"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_special_rules",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product",
+     "product_info",
+     "current_bom",
+     "parent_bom",
+     "parent_product"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_route_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "rules",
+     "rules_delay",
+     "warehouse",
+     "product",
+     "bom",
+     "quantity"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_availabilities",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "quantity",
+     "product_info",
+     "bom_key",
+     "quantities_info",
+     "level",
+     "ignore_stock",
+     "components",
+     "bom_line",
+     "report_line"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_stock_availability",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "quantity",
+     "product_info",
+     "quantities_info",
+     "bom_line"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_resupply_availability",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "route_info",
+     "components"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting_purchase",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_max_component_delay",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "components"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_date_display",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "state",
+     "delay"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_merge_components",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "component_1",
+     "component_2"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_last_availability",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "report_line"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_availability",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "component"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_simulate_bom_planning",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bom",
+     "product",
+     "start_date",
+     "quantity",
+     "simulated_leaves_per_workcenter"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Simulate planning of all the operations depending on the workcenters work schedule.\n(see '_plan_workorders' & '_link_workorders_and_moves')",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_simulate_operation_planning",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "operation",
+     "product",
+     "start_date",
+     "quantity",
+     "planning_per_operation",
+     "simulated_leaves_per_workcenter"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Simulate planning of an operation depending on its workcenter/alternatives work schedule.\n(see '_plan_workorder')",
+      "size_in_lines": 48,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Impossible to plan. Please check the workcenter availabilities.",
+        "line": 851
+       },
+       {
+        "kind": "UserError",
+        "message": "There is no defined calendar on workcenter %s.",
+        "line": 835
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_subcontracting_line",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "bom",
+     "seller",
+     "level",
+     "bom_quantity"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_buy_route",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "rules",
+     "product",
+     "bom"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_mrp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting_purchase",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_simulate_operation_planning",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "Impossible to plan. Please check the workcenter availabilities."
+   },
+   {
+    "operation": "_simulate_operation_planning",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "There is no defined calendar on workcenter %s."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

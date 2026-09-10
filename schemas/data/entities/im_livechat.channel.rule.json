@@ -1,0 +1,381 @@
+{
+ "catalog": {
+  "name": "entity:im_livechat.channel.rule",
+  "description": "Complete definition of entity Livechat Channel Rules (im_livechat.channel.rule).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "im_livechat.channel.rule",
+  "storage_name": "im_livechat_channel_rule",
+  "full_name": "Livechat Channel Rules",
+  "kind": "persistent",
+  "description": "Livechat Channel Rules",
+  "defined_by_package": "im_livechat",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence asc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "regex_url",
+    "type": "Char",
+    "string": "URL Regex",
+    "help": "Regular expression specifying the web pages this rule will be applied on.",
+    "defined_in_package": "im_livechat",
+    "full_name": "uniform resource locator Regex"
+   },
+   {
+    "name": "action",
+    "type": "Selection",
+    "selection": [
+     [
+      "display_button",
+      "Show"
+     ],
+     [
+      "display_button_and_text",
+      "Show with notification"
+     ],
+     [
+      "auto_popup",
+      "Open automatically"
+     ],
+     [
+      "hide_button",
+      "Hide"
+     ]
+    ],
+    "string": "Live Chat Button",
+    "required": true,
+    "default": "display_button",
+    "help": "* 'Show' displays the chat button on the pages.\n* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n* 'Open automatically' displays the button and automatically opens the conversation pane on larger screens. On small screens, this behaves like 'Show'.\n* 'Hide' hides the chat button on the pages.\n",
+    "defined_in_package": "im_livechat",
+    "full_name": "Live Chat Button"
+   },
+   {
+    "name": "auto_popup_timer",
+    "type": "Integer",
+    "string": "Time to Open",
+    "default": 0,
+    "help": "Delay (in seconds) to automatically open the conversation window. Note: the selected action must be 'Open automatically' otherwise this parameter will not be taken into account.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Time to Open"
+   },
+   {
+    "name": "chatbot_script_id",
+    "type": "Many2one",
+    "comodel": "chatbot.script",
+    "string": "Chatbot",
+    "defined_in_package": "im_livechat",
+    "full_name": "Chatbot",
+    "target_entity": "chatbot.script"
+   },
+   {
+    "name": "chatbot_enabled_condition",
+    "type": "Selection",
+    "string": "Enable ChatBot",
+    "selection": [
+     [
+      "always",
+      "Always"
+     ],
+     [
+      "only_if_no_operator",
+      "Only when no operator is available"
+     ],
+     [
+      "only_if_operator",
+      "Only when an operator is available"
+     ]
+    ],
+    "required": true,
+    "default": "always",
+    "defined_in_package": "im_livechat",
+    "full_name": "Enable ChatBot"
+   },
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "im_livechat.channel",
+    "string": "Channel",
+    "index": "btree_not_null",
+    "help": "The channel of the rule",
+    "defined_in_package": "im_livechat",
+    "full_name": "Channel",
+    "target_entity": "im_livechat.channel"
+   },
+   {
+    "name": "country_ids",
+    "type": "Many2many",
+    "comodel": "res.country",
+    "relation": "im_livechat_channel_country_rel",
+    "column1": "channel_id",
+    "column2": "country_id",
+    "string": "Countries",
+    "help": "The rule will only be applied for these countries. Example: if you select 'Belgium' and 'United States' and that you set the action to 'Hide', the chat button will be hidden on the specified URL from the visitors located in these 2 countries. This feature requires GeoIP installed on your server.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Countries",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Matching order",
+    "default": 10,
+    "help": "Given the order to find a matching rule. If 2 rules are matching for the given url/country, the one with the lowest sequence will be chosen.",
+    "defined_in_package": "im_livechat",
+    "full_name": "Matching order"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "match_rule",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "channel_id",
+     "url",
+     "country_id"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "determine if a rule of the given channel matches with the given url\n:param channel_id : the identifier of the channel_id\n:param url : the url to match with a rule\n:param country_id : the identifier of the country\n:returns the rule that matches the given condition. False otherwise.\n:rtype : im_livechat.channel.rule",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_bot_configured",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "im_livechat.access_livechat_channel_rule_user",
+    "package": "im_livechat",
+    "name": "im_livechat.channel.rule",
+    "entity": "im_livechat.channel.rule",
+    "group": "im_livechat_group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "im_livechat.access_livechat_channel_rule_manager",
+    "package": "im_livechat",
+    "name": "im_livechat.channel.rule",
+    "entity": "im_livechat.channel.rule",
+    "group": "im_livechat_group_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "im_livechat.im_livechat_channel_rule_view_tree",
+    "package": "im_livechat",
+    "name": "im.livechat.channel.rule.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Rules"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "action"
+      },
+      {
+       "name": "chatbot_script_id"
+      },
+      {
+       "name": "regex_url"
+      },
+      {
+       "name": "country_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "im_livechat.im_livechat_channel_rule_view_kanban",
+    "package": "im_livechat",
+    "name": "im_livechat.channel.rule.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "action"
+      },
+      {
+       "name": "regex_url"
+      },
+      {
+       "name": "country_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "im_livechat.im_livechat_channel_rule_view_form",
+    "package": "im_livechat",
+    "name": "im_livechat.channel.rule.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Channel Rule",
+      "class": "o_livechat_rules_form"
+     },
+     "fields": [
+      {
+       "name": "action",
+       "widget": "radio"
+      },
+      {
+       "name": "auto_popup_timer"
+      },
+      {
+       "name": "chatbot_script_id",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "chatbot_enabled_condition",
+       "widget": "radio",
+       "invisible": "not chatbot_script_id"
+      },
+      {
+       "name": "regex_url",
+       "placeholder": "e.g. /contactus"
+      },
+      {
+       "name": "country_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_open': True, 'no_create': True}",
+       "placeholder": "All countries"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 2,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

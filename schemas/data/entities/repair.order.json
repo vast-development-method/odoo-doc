@@ -1,0 +1,3194 @@
+{
+ "catalog": {
+  "name": "entity:repair.order",
+  "description": "Complete definition of entity Repair Order (repair.order).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "repair.order",
+  "storage_name": "repair_order",
+  "full_name": "Repair Order",
+  "kind": "persistent",
+  "description": "Repair Order",
+  "defined_by_package": "repair",
+  "extended_by_packages": [
+   "l10n_din5008_repair",
+   "mrp_repair",
+   "purchase_repair"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "product.catalog.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "priority desc, create_date desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Repair Reference",
+    "default": {
+     "dynamic": "lambda self: _('New')"
+    },
+    "index": "trigram",
+    "copy": false,
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "repair",
+    "full_name": "Repair Reference"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "readonly": true,
+    "required": true,
+    "index": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "repair",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "New"
+     ],
+     [
+      "confirmed",
+      "Confirmed"
+     ],
+     [
+      "under_repair",
+      "Under Repair"
+     ],
+     [
+      "done",
+      "Repaired"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "copy": false,
+    "default": "draft",
+    "readonly": true,
+    "tracking": true,
+    "index": true,
+    "help": "* The 'New' status is used when a user is encoding a new and unconfirmed repair order.\n* The 'Confirmed' status is used when a user confirms the repair order.\n* The 'Under Repair' status is used when the repair is ongoing.\n* The 'Repaired' status is set when repairing is completed.\n* The 'Cancelled' status is used when user cancel repair order.",
+    "defined_in_package": "repair",
+    "full_name": "Status"
+   },
+   {
+    "name": "priority",
+    "type": "Selection",
+    "selection": [
+     [
+      "0",
+      "Normal"
+     ],
+     [
+      "1",
+      "Urgent"
+     ]
+    ],
+    "default": "0",
+    "string": "Priority",
+    "defined_in_package": "repair",
+    "full_name": "Priority"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Customer",
+    "index": true,
+    "check_company": true,
+    "change_default": true,
+    "compute": "_compute_partner_id",
+    "readonly": false,
+    "store": true,
+    "help": "Choose partner for whom the order will be invoiced and delivered. You can find a partner by its Name, TIN, Email or Internal Reference.",
+    "defined_in_package": "repair",
+    "full_name": "Customer",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "check_company": true,
+    "defined_in_package": "repair",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "internal_notes",
+    "type": "Html",
+    "string": "Internal Notes",
+    "defined_in_package": "repair",
+    "full_name": "Internal Notes"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "repair.tags",
+    "string": "Tags",
+    "defined_in_package": "repair",
+    "full_name": "Tags",
+    "target_entity": "repair.tags"
+   },
+   {
+    "name": "under_warranty",
+    "type": "Boolean",
+    "string": "Under Warranty",
+    "help": "If ticked, the sales price will be set to 0 for all products transferred from the repair order.",
+    "defined_in_package": "repair",
+    "full_name": "Under Warranty"
+   },
+   {
+    "name": "schedule_date",
+    "type": "Datetime",
+    "string": "Scheduled Date",
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "index": true,
+    "required": true,
+    "copy": false,
+    "defined_in_package": "repair",
+    "full_name": "Scheduled Date"
+   },
+   {
+    "name": "search_date_category",
+    "type": "Selection",
+    "selection": [
+     [
+      "before",
+      "Before"
+     ],
+     [
+      "yesterday",
+      "Yesterday"
+     ],
+     [
+      "today",
+      "Today"
+     ],
+     [
+      "day_1",
+      "Tomorrow"
+     ],
+     [
+      "day_2",
+      "The day after tomorrow"
+     ],
+     [
+      "after",
+      "After"
+     ]
+    ],
+    "string": "Date Category",
+    "store": false,
+    "search": "_search_date_category",
+    "readonly": true,
+    "defined_in_package": "repair",
+    "full_name": "Date Category"
+   },
+   {
+    "name": "repair_properties",
+    "type": "Properties",
+    "string": "Properties",
+    "definition": "picking_type_id.repair_properties_definition",
+    "copy": true,
+    "defined_in_package": "repair",
+    "full_name": "Properties"
+   },
+   {
+    "name": "move_id",
+    "type": "Many2one",
+    "comodel": "stock.move",
+    "string": "Inventory Move",
+    "copy": false,
+    "readonly": true,
+    "tracking": true,
+    "check_company": true,
+    "defined_in_package": "repair",
+    "full_name": "Inventory Move",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product to Repair",
+    "domain": "[('type', '=', 'consu'), '|', ('company_id', '=', company_id), ('company_id', '=', False), '|', ('id', 'in', picking_product_ids), ('id', '=?', picking_product_id)]",
+    "check_company": true,
+    "defined_in_package": "repair",
+    "full_name": "Product to Repair",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_qty",
+    "type": "Float",
+    "string": "Product Quantity",
+    "compute": "_compute_product_qty",
+    "readonly": false,
+    "store": true,
+    "default": 1.0,
+    "digits": "Product Unit",
+    "defined_in_package": "repair",
+    "full_name": "Product Quantity"
+   },
+   {
+    "name": "allowed_uom_ids",
+    "type": "Many2many",
+    "comodel": "uom.uom",
+    "compute": "_compute_allowed_uom_ids",
+    "defined_in_package": "repair",
+    "string": "Allowed Unit of measure",
+    "full_name": "Allowed Unit of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "product_uom",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "domain": "[('id', 'in', allowed_uom_ids)]",
+    "compute": "compute_product_uom",
+    "store": true,
+    "precompute": true,
+    "readonly": false,
+    "defined_in_package": "repair",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "lot_id",
+    "type": "Many2one",
+    "comodel": "stock.lot",
+    "string": "Lot/Serial",
+    "compute": "compute_lot_id",
+    "store": true,
+    "domain": "[('id', 'in', allowed_lot_ids)]",
+    "check_company": true,
+    "help": "Products repaired are all belonging to this lot",
+    "defined_in_package": "repair",
+    "full_name": "Lot/Serial",
+    "target_entity": "stock.lot"
+   },
+   {
+    "name": "tracking",
+    "type": "Selection",
+    "string": "Product Tracking",
+    "related": "product_id.tracking",
+    "readonly": false,
+    "defined_in_package": "repair",
+    "full_name": "Product Tracking"
+   },
+   {
+    "name": "picking_type_id",
+    "type": "Many2one",
+    "comodel": "stock.picking.type",
+    "string": "Operation Type",
+    "copy": true,
+    "readonly": false,
+    "compute": "_compute_picking_type_id",
+    "store": true,
+    "default": {
+     "dynamic": "_default_picking_type_id"
+    },
+    "domain": "[('code', '=', 'repair_operation'), ('company_id', '=', company_id)]",
+    "required": true,
+    "precompute": true,
+    "check_company": true,
+    "index": true,
+    "defined_in_package": "repair",
+    "full_name": "Operation Type",
+    "target_entity": "stock.picking.type"
+   },
+   {
+    "name": "reference_ids",
+    "type": "Many2many",
+    "comodel": "stock.reference",
+    "relation": "stock_reference_repair_rel",
+    "column1": "repair_id",
+    "column2": "reference_id",
+    "string": "References",
+    "copy": false,
+    "defined_in_package": "repair",
+    "full_name": "References",
+    "target_entity": "stock.reference"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Component Source Location",
+    "compute": "_compute_location_id",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "index": true,
+    "check_company": true,
+    "help": "This is the location where the components of product to repair is located.",
+    "defined_in_package": "repair",
+    "full_name": "Component Source Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "product_location_src_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Product Source Location",
+    "compute": "_compute_product_location_src_id",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "index": true,
+    "check_company": true,
+    "help": "This is the location where the product to repair is located.",
+    "defined_in_package": "repair",
+    "full_name": "Product Source Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "product_location_dest_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Product Destination Location",
+    "compute": "_compute_product_location_dest_id",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "index": true,
+    "check_company": true,
+    "help": "This is the location where the repaired product is located.",
+    "defined_in_package": "repair",
+    "full_name": "Product Destination Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "location_dest_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Added Parts Destination Location",
+    "related": "picking_type_id.default_location_dest_id",
+    "depends": [
+     "picking_type_id"
+    ],
+    "store": true,
+    "readonly": true,
+    "required": true,
+    "precompute": true,
+    "index": true,
+    "check_company": true,
+    "help": "This is the location where the repaired product is located.",
+    "defined_in_package": "repair",
+    "full_name": "Added Parts Destination Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "parts_location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Removed Parts Destination Location",
+    "related": "picking_type_id.default_remove_location_dest_id",
+    "depends": [
+     "picking_type_id"
+    ],
+    "store": true,
+    "readonly": true,
+    "required": true,
+    "precompute": true,
+    "index": true,
+    "check_company": true,
+    "help": "This is the location where the repair parts are located.",
+    "defined_in_package": "repair",
+    "full_name": "Removed Parts Destination Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "recycle_location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Recycled Parts Destination Location",
+    "compute": "_compute_recycle_location_id",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "precompute": true,
+    "index": true,
+    "check_company": true,
+    "help": "This is the location where the repair parts are located.",
+    "defined_in_package": "repair",
+    "full_name": "Recycled Parts Destination Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "move_ids",
+    "type": "One2many",
+    "comodel": "stock.move",
+    "inverse_name": "repair_id",
+    "string": "Parts",
+    "check_company": true,
+    "copy": true,
+    "domain": [
+     [
+      "repair_line_type",
+      "!=",
+      false
+     ]
+    ],
+    "defined_in_package": "repair",
+    "full_name": "Parts",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "parts_availability",
+    "type": "Char",
+    "string": "Component Status",
+    "compute": "_compute_parts_availability",
+    "help": "Latest parts availability status for this RO. If green, then the RO's readiness status is ready.",
+    "defined_in_package": "repair",
+    "full_name": "Component Status"
+   },
+   {
+    "name": "parts_availability_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "available",
+      "Available"
+     ],
+     [
+      "expected",
+      "Expected"
+     ],
+     [
+      "late",
+      "Late"
+     ]
+    ],
+    "compute": "_compute_parts_availability",
+    "defined_in_package": "repair",
+    "string": "Parts Availability State",
+    "full_name": "Parts Availability State"
+   },
+   {
+    "name": "is_parts_available",
+    "type": "Boolean",
+    "string": "All Parts are available",
+    "default": false,
+    "store": true,
+    "compute": "_compute_availability_boolean",
+    "defined_in_package": "repair",
+    "full_name": "All Parts are available"
+   },
+   {
+    "name": "is_parts_late",
+    "type": "Boolean",
+    "string": "Any Part is late",
+    "default": false,
+    "store": true,
+    "compute": "_compute_availability_boolean",
+    "defined_in_package": "repair",
+    "full_name": "Any Part is late"
+   },
+   {
+    "name": "sale_order_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "string": "Sale Order",
+    "check_company": true,
+    "readonly": true,
+    "index": "btree_not_null",
+    "copy": false,
+    "help": "Sale Order from which the Repair Order comes from.",
+    "defined_in_package": "repair",
+    "full_name": "Sale Order",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "sale_order_line_id",
+    "type": "Many2one",
+    "comodel": "sale.order.line",
+    "check_company": true,
+    "readonly": true,
+    "copy": false,
+    "help": "Sale Order Line from which the Repair Order comes from.",
+    "defined_in_package": "repair",
+    "string": "Sale Order Line",
+    "full_name": "Sale Order Line",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "repair_request",
+    "type": "Text",
+    "related": "sale_order_line_id.name",
+    "string": "Repair Request",
+    "help": "Sale Order Line Description.",
+    "defined_in_package": "repair",
+    "full_name": "Repair Request"
+   },
+   {
+    "name": "picking_id",
+    "type": "Many2one",
+    "comodel": "stock.picking",
+    "string": "Transfer",
+    "check_company": true,
+    "index": "btree_not_null",
+    "domain": "[('return_id', '!=', False), ('product_id', '=?', product_id)]",
+    "copy": false,
+    "help": "Transfer from which the product to be repaired is picked",
+    "defined_in_package": "repair",
+    "full_name": "Transfer",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "picking_product_ids",
+    "type": "One2many",
+    "comodel": "product.product",
+    "compute": "_compute_picking_product_ids",
+    "defined_in_package": "repair",
+    "string": "Picking Product",
+    "full_name": "Picking Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "picking_product_id",
+    "type": "Many2one",
+    "related": "picking_id.product_id",
+    "defined_in_package": "repair",
+    "string": "Picking Product",
+    "full_name": "Picking Product"
+   },
+   {
+    "name": "allowed_lot_ids",
+    "type": "One2many",
+    "comodel": "stock.lot",
+    "compute": "_compute_allowed_lot_ids",
+    "defined_in_package": "repair",
+    "string": "Allowed Lot",
+    "full_name": "Allowed Lot",
+    "target_entity": "stock.lot"
+   },
+   {
+    "name": "has_uncomplete_moves",
+    "type": "Boolean",
+    "compute": "_compute_has_uncomplete_moves",
+    "defined_in_package": "repair",
+    "string": "Has Uncomplete Moves",
+    "full_name": "Has Uncomplete Moves"
+   },
+   {
+    "name": "unreserve_visible",
+    "type": "Boolean",
+    "string": "Allowed to Unreserve Production",
+    "compute": "_compute_unreserve_visible",
+    "help": "Technical field to check when we can unreserve",
+    "defined_in_package": "repair",
+    "full_name": "Allowed to Unreserve Production"
+   },
+   {
+    "name": "reserve_visible",
+    "type": "Boolean",
+    "string": "Allowed to Reserve Production",
+    "compute": "_compute_unreserve_visible",
+    "help": "Technical field to check when we can reserve quantities",
+    "defined_in_package": "repair",
+    "full_name": "Allowed to Reserve Production"
+   },
+   {
+    "name": "picking_type_visible",
+    "type": "Boolean",
+    "compute": "_compute_picking_type_visible",
+    "defined_in_package": "repair",
+    "string": "Picking Type Visible",
+    "full_name": "Picking Type Visible"
+   },
+   {
+    "name": "l10n_din5008_printing_date",
+    "type": "Date",
+    "default": {
+     "dynamic": "fields.Date.today"
+    },
+    "store": false,
+    "defined_in_package": "l10n_din5008_repair",
+    "string": "Localization Din5008 Printing Date",
+    "full_name": "Localization Din5008 Printing Date"
+   },
+   {
+    "name": "production_count",
+    "type": "Integer",
+    "string": "Count of MOs generated",
+    "compute": "_compute_production_count",
+    "groups": "mrp.group_mrp_user",
+    "defined_in_package": "mrp_repair",
+    "full_name": "Count of manufacturing orders generated"
+   },
+   {
+    "name": "purchase_count",
+    "type": "Integer",
+    "string": "Count of generated POs",
+    "compute": "_compute_purchase_count",
+    "groups": "purchase.group_purchase_user",
+    "defined_in_package": "purchase_repair",
+    "full_name": "Count of generated purchase orders"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_picking_type_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_picking_type_visible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "picking_id",
+         "lot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_uom_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.uom_id",
+         "product_id.uom_ids",
+         "product_id.seller_ids",
+         "product_id.seller_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_picking_product_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_lot_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "company_id",
+         "picking_id",
+         "picking_id.move_ids",
+         "picking_id.move_ids.lot_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "compute_product_uom",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "compute_lot_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "lot_id",
+         "lot_id.product_id",
+         "picking_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_picking_type_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_location_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_location_src_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_location_dest_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_recycle_location_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_parts_availability",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "schedule_date",
+         "move_ids",
+         "move_ids.forecast_availability",
+         "move_ids.forecast_expected_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_availability_boolean",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parts_availability_state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_uncomplete_moves",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids.quantity",
+         "move_ids.product_uom_qty",
+         "move_ids.product_uom.rounding"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_unreserve_visible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids",
+         "state",
+         "move_ids.product_uom_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_date_category",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "onchange_product_uom",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_uom"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_location_picking",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "location_id",
+         "picking_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_repair",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_confirmed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_generate_serial",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please set the first Serial Number or a default sequence",
+        "line": 440
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_assign",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_sale_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_repair_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot cancel a Repair Order that's already been completed",
+        "line": 452
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_repair_cancel_draft",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_repair_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": "Creates stock move for final product of repair order.\nWrites move_id and move_ids state to 'done'.\nWrites repair order state to 'Repaired'.\n@return: True",
+      "size_in_lines": 76,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Serial number is required for product to repair : %s",
+        "line": 495
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_repair_end",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": "Checks before action_repair_done.\n@return: True",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Repair must be under repair in order to end reparation.",
+        "line": 550
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_repair_start",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": "Writes repair order state to 'Under Repair'\n        ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_unreserve",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_validate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can not enter negative quantities.",
+        "line": 573
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_view_sale_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "print_repair_order",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_repair_confirm",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": "Repair order state is set to 'Confirmed'.\n@param *arg: Arguments\n@return: True",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_location",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_picking_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_sale_order_line_price",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sale_order_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_sale_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot create a quotation for a repair order that is already linked to an existing sale order.\nConcerned repair order(s):\n%(ref_str)s",
+        "line": 691
+       },
+       {
+        "kind": "UserError",
+        "message": "You need to define a customer for a repair order in order to create an associated quotation.\nConcerned repair order(s):\n%(ref_str)s",
+        "line": 700
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_add_from_catalog",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_order_line_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "child_field"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_order_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "products",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_price_and_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_catalog_record_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_ids",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_display_stock_in_catalog",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_order_line_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "quantity",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "message_post",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_production_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reference_ids.production_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_explode",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_mrp_productions",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_action_add_from_catalog_extra_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_purchase_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_repair",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids.created_purchase_line_ids.order_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_purchase_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_repair",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_generate_serial",
+    "package": "repair",
+    "kind": "UserError",
+    "message": "Please set the first Serial Number or a default sequence"
+   },
+   {
+    "operation": "action_repair_cancel",
+    "package": "repair",
+    "kind": "UserError",
+    "message": "You cannot cancel a Repair Order that's already been completed"
+   },
+   {
+    "operation": "action_repair_done",
+    "package": "repair",
+    "kind": "ValidationError",
+    "message": "Serial number is required for product to repair : %s"
+   },
+   {
+    "operation": "action_repair_end",
+    "package": "repair",
+    "kind": "UserError",
+    "message": "Repair must be under repair in order to end reparation."
+   },
+   {
+    "operation": "action_validate",
+    "package": "repair",
+    "kind": "UserError",
+    "message": "You can not enter negative quantities."
+   },
+   {
+    "operation": "_create_sale_order",
+    "package": "repair",
+    "kind": "UserError",
+    "message": "You cannot create a quotation for a repair order that is already linked to an existing sale order.\nConcerned repair order(s):\n%(ref_str)s"
+   },
+   {
+    "operation": "_create_sale_order",
+    "package": "repair",
+    "kind": "UserError",
+    "message": "You need to define a customer for a repair order in order to create an associated quotation.\nConcerned repair order(s):\n%(ref_str)s"
+   }
+  ],
+  "state_fields": [
+   "state",
+   "parts_availability_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "repair.access_repair_user",
+    "package": "repair",
+    "name": "Repair user",
+    "entity": "repair.order",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp_repair.view_repair_order_form_inherit",
+    "package": "mrp_repair",
+    "name": "repair.order.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "repair.view_repair_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_view_sale_order']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "production_count",
+       "widget": "statinfo",
+       "string": "Manufacturing"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_mrp_productions",
+       "type": "object",
+       "invisible": "production_count == 0 or state == 'draft'",
+       "class": "oe_stat_button",
+       "groups": "mrp.group_mrp_user",
+       "icon": "fa-wrench"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_view_sale_order']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_repair.view_repair_order_form_inherit",
+    "package": "purchase_repair",
+    "name": "repair.order.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "repair.view_repair_order_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_view_sale_order']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "purchase_count",
+       "widget": "statinfo",
+       "string": "Purchase Orders"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_purchase_orders",
+       "type": "object",
+       "invisible": "purchase_count == 0 or state == 'draft'",
+       "class": "oe_stat_button",
+       "groups": "purchase.group_purchase_user",
+       "icon": "fa-credit-card"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_view_sale_order']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "repair.repair_order_view_activity",
+    "package": "repair",
+    "name": "repair.order.view.activity",
+    "view_type": "activity",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "activity",
+     "root_attributes": {
+      "string": "Activity view"
+     },
+     "fields": [
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "schedule_date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "repair.view_repair_order_tree",
+    "package": "repair",
+    "name": "repair.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Repairs order",
+      "multi_edit": "1",
+      "sample": "1",
+      "decoration-info": "state == 'draft'"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "priority",
+       "widget": "priority",
+       "optional": "show",
+       "nolabel": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "schedule_date",
+       "widget": "remaining_days",
+       "optional": "show"
+      },
+      {
+       "name": "product_id",
+       "readonly": "1",
+       "optional": "show"
+      },
+      {
+       "name": "parts_availability_state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "parts_availability",
+       "invisible": "state not in ['confirmed', 'under_repair']",
+       "optional": "show",
+       "decoration-danger": "parts_availability_state == 'late'",
+       "decoration-warning": "parts_availability_state == 'expected'",
+       "decoration-success": "parts_availability_state == 'available'"
+      },
+      {
+       "name": "product_qty",
+       "readonly": "state != 'draft'",
+       "string": "Quantity",
+       "optional": "hide"
+      },
+      {
+       "name": "product_uom",
+       "widget": "many2one_uom",
+       "readonly": "1",
+       "optional": "hide",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "optional": "hide"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "1",
+       "optional": "show"
+      },
+      {
+       "name": "picking_id",
+       "optional": "hide"
+      },
+      {
+       "name": "sale_order_id",
+       "optional": "show"
+      },
+      {
+       "name": "location_id",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "optional": "show",
+       "decoration-danger": "state == 'cancel'",
+       "decoration-warning": "state == 'under_repair'",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state == 'confirmed'",
+       "decoration-muted": "state == 'draft'"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "priority": 1,
+      "remaining_days": 1,
+      "many2one_uom": 1,
+      "many2one_avatar_user": 1,
+      "badge": 1,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state == 'draft'"
+     }
+    }
+   },
+   {
+    "external_identifier": "repair.view_repair_order_form",
+    "package": "repair",
+    "name": "repair.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Repair Order"
+     },
+     "fields": [
+      {
+       "name": "has_uncomplete_moves",
+       "invisible": "1"
+      },
+      {
+       "name": "unreserve_visible",
+       "invisible": "1"
+      },
+      {
+       "name": "reserve_visible",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "sale_order_id",
+       "widget": "statinfo",
+       "nolabel": "1"
+      },
+      {
+       "name": "priority",
+       "widget": "priority"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "allowed_lot_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "repair_request",
+       "invisible": "not sale_order_line_id"
+      },
+      {
+       "name": "partner_id",
+       "widget": "res_partner_many2one",
+       "readonly": "sale_order_id",
+       "context": "{'res_partner_search_mode': 'customer', 'show_vat': True}"
+      },
+      {
+       "name": "product_id",
+       "readonly": "state in ['cancel', 'done']"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "tracking not in ['serial', 'lot']",
+       "readonly": "state == 'done'",
+       "required": "state=='done' and tracking in ['serial', 'lot']",
+       "context": "{'default_product_id': product_id}",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "product_qty",
+       "readonly": "tracking == 'serial' or state in ('done', 'cancel')"
+      },
+      {
+       "name": "product_uom",
+       "widget": "many2one_uom",
+       "readonly": "state != 'draft'",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "picking_id",
+       "invisible": "not picking_id",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "under_warranty",
+       "readonly": "state in ['cancel', 'done']"
+      },
+      {
+       "name": "schedule_date",
+       "readonly": "state in ['done', 'cancel']"
+      },
+      {
+       "name": "user_id",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color', 'no_create_edit': True}"
+      },
+      {
+       "name": "parts_availability_state",
+       "invisible": "True"
+      },
+      {
+       "name": "parts_availability",
+       "invisible": "state not in ['confirmed', 'under_repair']",
+       "decoration-danger": "parts_availability_state == 'late'",
+       "decoration-warning": "parts_availability_state == 'expected'",
+       "decoration-success": "parts_availability_state == 'available'"
+      },
+      {
+       "name": "picking_type_id",
+       "invisible": "not picking_type_visible",
+       "readonly": "state in ('done', 'cancel')",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "repair_properties",
+       "nolabel": "1"
+      },
+      {
+       "name": "move_ids",
+       "readonly": "state == 'cancel' or state == 'done'",
+       "context": "{'default_repair_id': id, 'default_product_uom_qty': 1, 'default_company_id': company_id, 'default_date': schedule_date, 'default_repair_line_type': 'add', 'active_repair_id': id}"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "repair_line_type",
+       "required": "1"
+      },
+      {
+       "name": "picking_type_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_dest_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "state == 'done'",
+       "column_invisible": "True"
+      },
+      {
+       "name": "picking_code",
+       "column_invisible": "True"
+      },
+      {
+       "name": "show_details_visible",
+       "column_invisible": "True"
+      },
+      {
+       "name": "additional",
+       "column_invisible": "True"
+      },
+      {
+       "name": "move_lines_count",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_locked",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_storable",
+       "column_invisible": "True"
+      },
+      {
+       "name": "has_tracking",
+       "column_invisible": "True"
+      },
+      {
+       "name": "display_assign_serial",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_id",
+       "readonly": "(state != 'draft' and not additional) or move_lines_count > 0",
+       "required": "1",
+       "context": "{'default_is_storable': True}"
+      },
+      {
+       "name": "forecast_availability",
+       "widget": "forecast_widget",
+       "string": "",
+       "column_invisible": "parent.state == 'done'"
+      },
+      {
+       "name": "description_picking",
+       "string": "Description",
+       "optional": "hide"
+      },
+      {
+       "name": "date",
+       "optional": "hide"
+      },
+      {
+       "name": "date_deadline",
+       "optional": "hide"
+      },
+      {
+       "name": "product_uom_qty",
+       "readonly": "state in ('done', 'cancel')",
+       "string": "Demand"
+      },
+      {
+       "name": "forecast_expected_date",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_qty",
+       "readonly": "1",
+       "column_invisible": "True"
+      },
+      {
+       "name": "quantity",
+       "readonly": "not product_id",
+       "string": "Quantity"
+      },
+      {
+       "name": "product_uom",
+       "widget": "many2one_uom",
+       "readonly": "state != 'draft' and not additional",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "picked",
+       "string": "Picked",
+       "optional": "hide"
+      },
+      {
+       "name": "lot_ids",
+       "widget": "many2many_tags",
+       "invisible": "not show_details_visible or has_tracking != 'serial'",
+       "readonly": "not id",
+       "domain": "[('product_id','=',product_id)]",
+       "context": "{'default_product_id': product_id}",
+       "optional": "hide",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "internal_notes",
+       "placeholder": "Add internal notes."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_validate",
+       "string": "Confirm Repair",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_repair_start",
+       "string": "Start Repair",
+       "type": "object",
+       "invisible": "state != 'confirmed'",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_repair_end",
+       "string": "End Repair",
+       "type": "object",
+       "invisible": "state != 'under_repair' or not has_uncomplete_moves",
+       "class": "oe_highlight",
+       "confirm": "For some of the parts, there is a difference between the initial demand and the actual quantity that was used. Are you sure you want to confirm ?",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_repair_end",
+       "string": "End Repair",
+       "type": "object",
+       "invisible": "state != 'under_repair' or has_uncomplete_moves",
+       "class": "oe_highlight",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_assign",
+       "string": "Check availability",
+       "type": "object",
+       "invisible": "not reserve_visible"
+      },
+      {
+       "name": "action_unreserve",
+       "string": "Unreserve",
+       "type": "object",
+       "invisible": "not unreserve_visible",
+       "data-hotkey": "w"
+      },
+      {
+       "name": "action_create_sale_order",
+       "string": "Create Quotation",
+       "type": "object",
+       "invisible": "not partner_id or (state == 'cancel' or sale_order_id)"
+      },
+      {
+       "name": "action_repair_cancel",
+       "string": "Cancel Repair",
+       "type": "object",
+       "invisible": "state in ('done', 'cancel')",
+       "data-hotkey": "l"
+      },
+      {
+       "name": "action_repair_cancel_draft",
+       "string": "Set to Draft",
+       "type": "object",
+       "invisible": "state != 'cancel'",
+       "data-hotkey": "z"
+      },
+      {
+       "name": "action_view_sale_order",
+       "string": "Sale Order",
+       "type": "object",
+       "invisible": "not sale_order_id",
+       "class": "oe_stat_button",
+       "icon": "fa-dollar"
+      },
+      {
+       "name": "%(action_repair_move_lines)d",
+       "string": "Product Moves",
+       "type": "action",
+       "invisible": "state not in ['done', 'cancel']",
+       "class": "oe_stat_button",
+       "icon": "fa-exchange"
+      },
+      {
+       "name": "action_generate_serial",
+       "type": "object",
+       "invisible": "lot_id",
+       "class": "btn btn-primary fa fa-plus-square-o"
+      },
+      {
+       "name": "action_add_from_catalog_repair",
+       "string": "Catalog",
+       "type": "object",
+       "class": "px-4 btn-link",
+       "context": "{'order_id': parent.id}"
+      },
+      {
+       "name": "action_show_details",
+       "string": "Details",
+       "type": "object",
+       "invisible": "not show_details_visible",
+       "context": "{'default_location_dest_id': location_dest_id}"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "parts",
+       "string": "Parts",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "repair_notes",
+       "string": "Repair Notes",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 1,
+      "priority": 1,
+      "res_partner_many2one": 1,
+      "many2one_uom": 2,
+      "many2many_tags": 2,
+      "forecast_widget": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_validate",
+       "invisible": "state != 'draft'",
+       "type": "object",
+       "string": "Confirm Repair",
+       "class": "oe_highlight",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_repair_start",
+       "invisible": "state != 'confirmed'",
+       "type": "object",
+       "string": "Start Repair",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_repair_end",
+       "invisible": "state != 'under_repair' or not has_uncomplete_moves",
+       "type": "object",
+       "string": "End Repair",
+       "class": "oe_highlight",
+       "data-hotkey": "x",
+       "confirm": "For some of the parts, there is a difference between the initial demand and the actual quantity that was used. Are you sure you want to confirm ?"
+      },
+      {
+       "name": "action_repair_end",
+       "invisible": "state != 'under_repair' or has_uncomplete_moves",
+       "type": "object",
+       "string": "End Repair",
+       "class": "oe_highlight",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_assign",
+       "invisible": "not reserve_visible",
+       "string": "Check availability",
+       "type": "object"
+      },
+      {
+       "name": "action_unreserve",
+       "type": "object",
+       "string": "Unreserve",
+       "invisible": "not unreserve_visible",
+       "data-hotkey": "w"
+      },
+      {
+       "name": "action_create_sale_order",
+       "type": "object",
+       "string": "Create Quotation",
+       "invisible": "not partner_id or (state == 'cancel' or sale_order_id)"
+      },
+      {
+       "name": "action_repair_cancel",
+       "string": "Cancel Repair",
+       "type": "object",
+       "invisible": "state in ('done', 'cancel')",
+       "data-hotkey": "l"
+      },
+      {
+       "name": "action_repair_cancel_draft",
+       "invisible": "state != 'cancel'",
+       "string": "Set to Draft",
+       "type": "object",
+       "data-hotkey": "z"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,confirmed,under_repair,done",
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "action_view_sale_order",
+       "type": "object",
+       "string": "Sale Order",
+       "icon": "fa-dollar",
+       "class": "oe_stat_button",
+       "invisible": "not sale_order_id"
+      },
+      {
+       "name": "%(action_repair_move_lines)d",
+       "type": "action",
+       "string": "Product Moves",
+       "class": "oe_stat_button",
+       "icon": "fa-exchange",
+       "invisible": "state not in ['done', 'cancel']"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "repair.view_repair_kanban",
+    "package": "repair",
+    "name": "repair.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1",
+      "quick_create": "false"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "options": "{'classes': {'draft': 'info', 'cancel': 'danger', 'done': 'success', 'under_repair': 'secondary'}}"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "partner_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "label_selection": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": "false",
+     "progressbar": [
+      {
+       "field": "activity_state",
+       "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "repair.view_repair_order_form_filter",
+    "package": "repair",
+    "name": "repair.select",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Repair Orders"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Repair Order",
+       "filter_domain": "['|', ('name', 'ilike', self), ('product_id', 'ilike', self)]"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "partner_id",
+       "filter_domain": "[('partner_id', 'child_of', self)]"
+      },
+      {
+       "name": "sale_order_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_draft",
+       "string": "New",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "filter_confirmed",
+       "string": "Confirmed",
+       "domain": "[('state', '=', 'confirmed')]"
+      },
+      {
+       "name": "filter_under_repair",
+       "string": "Under Repair",
+       "domain": "[('state', '=', 'under_repair')]"
+      },
+      {
+       "name": "filter_done",
+       "string": "Repaired",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "filter_cancel",
+       "string": "Cancelled",
+       "domain": "[('state', '=', 'cancel')]"
+      },
+      {
+       "name": "returned",
+       "string": "Returned",
+       "domain": "[('picking_id', '!=', False), ('picking_id.state', '=', 'done')]"
+      },
+      {
+       "name": "before",
+       "string": "Before",
+       "domain": "[('search_date_category', '=', 'before')]",
+       "invisible": "1"
+      },
+      {
+       "name": "yesterday",
+       "string": "Yesterday",
+       "domain": "[('search_date_category', '=', 'yesterday')]",
+       "invisible": "1"
+      },
+      {
+       "name": "today",
+       "string": "Today",
+       "domain": "[('search_date_category', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "day_1",
+       "string": "Tomorrow",
+       "domain": "[('search_date_category', '=', 'day_1')]",
+       "invisible": "1"
+      },
+      {
+       "name": "day_2",
+       "string": "The day after tomorrow",
+       "domain": "[('search_date_category', '=', 'day_2')]",
+       "invisible": "1"
+      },
+      {
+       "name": "after",
+       "string": "After",
+       "domain": "[('search_date_category', '=', 'after')]",
+       "invisible": "1"
+      },
+      {
+       "name": "ready",
+       "string": "Ready",
+       "domain": "[('state', '=', 'confirmed'), ('is_parts_available', '=', True)]",
+       "invisible": "True"
+      },
+      {
+       "name": "filter_late",
+       "string": "Late",
+       "domain": "[('state', '=', 'confirmed'), ('schedule_date', '<', 'today')]"
+      },
+      {
+       "name": "filter_create_date",
+       "date": "create_date"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "partner",
+       "string": "Customer",
+       "domain": "[]",
+       "context": "{'group_by': 'partner_id'}"
+      },
+      {
+       "name": "product",
+       "string": "Product",
+       "domain": "[]",
+       "context": "{'group_by': 'product_id'}"
+      },
+      {
+       "name": "status",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by': 'company_id'}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "group_by_repair_properties",
+       "string": "Properties",
+       "context": "{'group_by': 'repair_properties'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "repair.view_repair_graph",
+    "package": "repair",
+    "name": "repair.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Repair Orders",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "product_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "product_id"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "repair.view_repair_pivot",
+    "package": "repair",
+    "name": "repair.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Repair Orders",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "product_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "create_date",
+       "type": "row"
+      },
+      {
+       "name": "product_id",
+       "type": "col"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "repair.action_repair_order_form",
+    "package": "repair",
+    "name": "Repair Orders",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "repair.order"
+   },
+   {
+    "external_identifier": "repair.action_repair_order_tree",
+    "package": "repair",
+    "name": "Repair Orders",
+    "view_mode": "list,kanban,graph,pivot,form,activity",
+    "view_id": null,
+    "search_view_id": "view_repair_order_form_filter",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                No repair order found. Let's create one!\n              </p><p>\n                In a repair order, you can detail the components you remove,\n                add or replace and record the time you spent on the different\n                operations.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "repair.order"
+   },
+   {
+    "external_identifier": "repair.action_repair_order_graph",
+    "package": "repair",
+    "name": "Repair Orders Analysis",
+    "view_mode": "list,kanban,graph,pivot,form",
+    "view_id": "view_repair_graph",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n                'search_default_product': 1,\n                'search_default_createDate': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "repair.order"
+   },
+   {
+    "external_identifier": "repair.action_picking_repair",
+    "package": "repair",
+    "name": "Repair Orders",
+    "view_mode": "list,kanban,form",
+    "view_id": "False",
+    "search_view_id": "view_repair_order_form_filter",
+    "domain": "[('picking_type_id', '=', active_id)]",
+    "context": "{'default_picking_type_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "repair.order"
+   },
+   {
+    "external_identifier": "repair.action_picking_repair_graph",
+    "package": "repair",
+    "name": "Repair Orders",
+    "view_mode": "list,kanban,form",
+    "view_id": "False",
+    "search_view_id": "view_repair_order_form_filter",
+    "domain": "[]",
+    "context": "{'search_default_filter_confirmed': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "repair.order"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "repair.action_report_repair_order",
+    "package": "repair",
+    "name": "Repair Order",
+    "report_type": "qweb-pdf",
+    "report_name": "repair.report_repairorder2",
+    "report_file": "repair.report_repairorder",
+    "print_report_name": "('Repair Order - %s' % (object.name))",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_repair_order",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "repair.order"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

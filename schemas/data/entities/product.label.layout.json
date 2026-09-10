@@ -1,0 +1,523 @@
+{
+ "catalog": {
+  "name": "entity:product.label.layout",
+  "description": "Complete definition of entity Choose the sheet layout to print the labels (product.label.layout).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.label.layout",
+  "storage_name": "product_label_layout",
+  "full_name": "Choose the sheet layout to print the labels",
+  "kind": "transient",
+  "description": "Choose the sheet layout to print the labels",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "stock"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "print_format",
+    "type": "Selection",
+    "selection": [
+     [
+      "dymo",
+      "Dymo"
+     ],
+     [
+      "2x7xprice",
+      "2 x 7 with price"
+     ],
+     [
+      "4x7xprice",
+      "4 x 7 with price"
+     ],
+     [
+      "4x12",
+      "4 x 12"
+     ],
+     [
+      "4x12xprice",
+      "4 x 12 with price"
+     ],
+     [
+      "zpl",
+      "ZPL Labels"
+     ],
+     [
+      "zplxprice",
+      "ZPL Labels with price"
+     ]
+    ],
+    "string": "Format",
+    "default": "2x7xprice",
+    "required": true,
+    "defined_in_package": "product",
+    "selection_added_by": [
+     "stock"
+    ],
+    "ondelete": {
+     "zpl": "set default",
+     "zplxprice": "set default"
+    },
+    "extended_in_packages": [
+     "stock"
+    ],
+    "full_name": "Format"
+   },
+   {
+    "name": "custom_quantity",
+    "type": "Integer",
+    "string": "Copies",
+    "default": 1,
+    "required": true,
+    "defined_in_package": "product",
+    "full_name": "Copies"
+   },
+   {
+    "name": "product_ids",
+    "type": "Many2many",
+    "comodel": "product.product",
+    "defined_in_package": "product",
+    "string": "Product",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_tmpl_ids",
+    "type": "Many2many",
+    "comodel": "product.template",
+    "defined_in_package": "product",
+    "string": "Product Tmpl",
+    "full_name": "Product Tmpl",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "extra_html",
+    "type": "Html",
+    "string": "Extra Content",
+    "default": "",
+    "defined_in_package": "product",
+    "full_name": "Extra Content"
+   },
+   {
+    "name": "rows",
+    "type": "Integer",
+    "compute": "_compute_dimensions",
+    "defined_in_package": "product",
+    "string": "Rows",
+    "full_name": "Rows"
+   },
+   {
+    "name": "columns",
+    "type": "Integer",
+    "compute": "_compute_dimensions",
+    "defined_in_package": "product",
+    "string": "Columns",
+    "full_name": "Columns"
+   },
+   {
+    "name": "pricelist_id",
+    "type": "Many2one",
+    "comodel": "product.pricelist",
+    "string": "Pricelist",
+    "defined_in_package": "product",
+    "full_name": "Pricelist",
+    "target_entity": "product.pricelist"
+   },
+   {
+    "name": "move_ids",
+    "type": "Many2many",
+    "comodel": "stock.move",
+    "defined_in_package": "stock",
+    "string": "Move",
+    "full_name": "Move",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "move_quantity",
+    "type": "Selection",
+    "selection": [
+     [
+      "move",
+      "Operation Quantities"
+     ],
+     [
+      "custom",
+      "Custom"
+     ]
+    ],
+    "string": "Quantity to print",
+    "required": true,
+    "default": "custom",
+    "defined_in_package": "stock",
+    "full_name": "Quantity to print"
+   },
+   {
+    "name": "zpl_template",
+    "type": "Selection",
+    "selection": [
+     [
+      "normal",
+      "Normal (2.25\" x 1.25\")"
+     ],
+     [
+      "small",
+      "Small (1.25\" x 1.00\")"
+     ],
+     [
+      "alternative",
+      "Alternative (2.00\" x 1.00\")"
+     ],
+     [
+      "jewelry",
+      "Jewelry (2.20\" x 0.50\")"
+     ]
+    ],
+    "string": "ZPL Template",
+    "default": "normal",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "ZPL Template"
+   },
+   {
+    "name": "zpl_preview",
+    "type": "Image",
+    "string": "ZPL Preview",
+    "readonly": true,
+    "default": {
+     "dynamic": "_get_zpl_label_placeholder"
+    },
+    "defined_in_package": "stock",
+    "full_name": "ZPL Preview"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_dimensions",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "print_format"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_report_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You need to set a positive quantity.",
+        "line": 39
+       },
+       {
+        "kind": "UserError",
+        "message": "No product to print, if the product is archived please unarchive it before printing its label.",
+        "line": 59
+       }
+      ]
+     },
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "process",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to find report template for %s format",
+        "line": 74
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_zpl_label_placeholder",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_prepare_report_data",
+    "package": "product",
+    "kind": "UserError",
+    "message": "You need to set a positive quantity."
+   },
+   {
+    "operation": "_prepare_report_data",
+    "package": "product",
+    "kind": "UserError",
+    "message": "No product to print, if the product is archived please unarchive it before printing its label."
+   },
+   {
+    "operation": "process",
+    "package": "product",
+    "kind": "UserError",
+    "message": "Unable to find report template for %s format"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "product.access_product_label_layout_user",
+    "package": "product",
+    "name": "product.label.layout.user",
+    "entity": "product.label.layout",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "product.product_label_layout_form",
+    "package": "product",
+    "name": "product.label.layout.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "product_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "product_tmpl_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "custom_quantity"
+      },
+      {
+       "name": "print_format",
+       "widget": "radio"
+      },
+      {
+       "name": "pricelist_id",
+       "groups": "product.group_product_pricelist"
+      },
+      {
+       "name": "extra_html",
+       "invisible": "print_format != '2x7xprice'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "process",
+       "string": "Print",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "stock.product_label_layout_form_picking",
+    "package": "stock",
+    "name": "product.label.layout.form",
+    "view_type": "xpath",
+    "inherits_view": "product.product_label_layout_form",
+    "mode": "primary",
+    "priority": "25",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name=\"custom_quantity\"]",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "move_quantity"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name=\"custom_quantity\"]",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.product_label_layout_form_stock",
+    "package": "stock",
+    "name": "product.label.layout.form.stock",
+    "view_type": "xpath",
+    "inherits_view": "product.product_label_layout_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name=\"pricelist_id\"]",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "zpl_template",
+       "invisible": "'zpl' not in print_format"
+      },
+      {
+       "name": "zpl_preview",
+       "widget": "image",
+       "invisible": "'zpl' not in print_format",
+       "options": "{'img_class': 'border'}",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name=\"pricelist_id\"]",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "product.action_open_label_layout",
+    "package": "product",
+    "name": "Print Labels",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "product.label.layout"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

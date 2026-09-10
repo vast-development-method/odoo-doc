@@ -1,0 +1,883 @@
+{
+ "catalog": {
+  "name": "entity:payment.method",
+  "description": "Complete definition of entity Payment Method (payment.method).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "payment.method",
+  "storage_name": "payment_method",
+  "full_name": "Payment Method",
+  "kind": "persistent",
+  "description": "Payment Method",
+  "defined_by_package": "payment",
+  "extended_by_packages": [
+   "l10n_ec_sale"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "active desc, sequence, name",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "payment",
+    "full_name": "Name"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "string": "Code",
+    "help": "The technical code of this payment method.",
+    "required": true,
+    "defined_in_package": "payment",
+    "full_name": "Code"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 1,
+    "defined_in_package": "payment",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "primary_payment_method_id",
+    "type": "Many2one",
+    "string": "Primary Payment Method",
+    "help": "The primary payment method of the current payment method, if the latter is a brand.\nFor example, \"Card\" is the primary payment method of the card brand \"VISA\".",
+    "comodel": "payment.method",
+    "index": "btree_not_null",
+    "defined_in_package": "payment",
+    "full_name": "Primary Payment Method",
+    "target_entity": "payment.method"
+   },
+   {
+    "name": "brand_ids",
+    "type": "One2many",
+    "string": "Brands",
+    "help": "The brands of the payment methods that will be displayed on the payment form.",
+    "comodel": "payment.method",
+    "inverse_name": "primary_payment_method_id",
+    "defined_in_package": "payment",
+    "full_name": "Brands",
+    "target_entity": "payment.method"
+   },
+   {
+    "name": "is_primary",
+    "type": "Boolean",
+    "string": "Is Primary Payment Method",
+    "compute": "_compute_is_primary",
+    "search": "_search_is_primary",
+    "defined_in_package": "payment",
+    "full_name": "Is Primary Payment Method"
+   },
+   {
+    "name": "provider_ids",
+    "type": "Many2many",
+    "string": "Providers",
+    "help": "The list of providers supporting this payment method.",
+    "comodel": "payment.provider",
+    "defined_in_package": "payment",
+    "full_name": "Providers",
+    "target_entity": "payment.provider"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "payment",
+    "full_name": "Active"
+   },
+   {
+    "name": "image",
+    "type": "Image",
+    "string": "Image",
+    "help": "The base image used for this payment method; in a 64x64 px format.",
+    "max_width": 64,
+    "max_height": 64,
+    "required": true,
+    "defined_in_package": "payment",
+    "full_name": "Image"
+   },
+   {
+    "name": "image_payment_form",
+    "type": "Image",
+    "string": "The resized image displayed on the payment form.",
+    "related": "image",
+    "store": true,
+    "max_width": 45,
+    "max_height": 30,
+    "defined_in_package": "payment",
+    "full_name": "The resized image displayed on the payment form."
+   },
+   {
+    "name": "support_tokenization",
+    "type": "Boolean",
+    "string": "Tokenization",
+    "help": "Tokenization is the process of saving the payment details as a token that can later be reused without having to enter the payment details again.",
+    "defined_in_package": "payment",
+    "full_name": "Tokenization"
+   },
+   {
+    "name": "support_express_checkout",
+    "type": "Boolean",
+    "string": "Express Checkout",
+    "help": "Express checkout allows customers to pay faster by using a payment method that provides all required billing and shipping information, thus allowing to skip the checkout process.",
+    "defined_in_package": "payment",
+    "full_name": "Express Checkout"
+   },
+   {
+    "name": "support_manual_capture",
+    "type": "Selection",
+    "string": "Manual Capture",
+    "help": "The payment is authorized and captured in two steps instead of one.",
+    "selection": [
+     [
+      "none",
+      "Unsupported"
+     ],
+     [
+      "full_only",
+      "Full Only"
+     ],
+     [
+      "partial",
+      "Full & Partial"
+     ]
+    ],
+    "required": true,
+    "default": "none",
+    "defined_in_package": "payment",
+    "full_name": "Manual Capture"
+   },
+   {
+    "name": "support_refund",
+    "type": "Selection",
+    "string": "Refund",
+    "help": "Refund is a feature allowing to refund customers directly from the payment in the system.",
+    "selection": [
+     [
+      "none",
+      "Unsupported"
+     ],
+     [
+      "full_only",
+      "Full Only"
+     ],
+     [
+      "partial",
+      "Full & Partial"
+     ]
+    ],
+    "required": true,
+    "default": "none",
+    "defined_in_package": "payment",
+    "full_name": "Refund"
+   },
+   {
+    "name": "supported_country_ids",
+    "type": "Many2many",
+    "string": "Countries",
+    "comodel": "res.country",
+    "help": "The list of countries in which this payment method can be used (if the provider allows it). In other countries, this payment method is not available to customers.",
+    "defined_in_package": "payment",
+    "full_name": "Countries",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "supported_currency_ids",
+    "type": "Many2many",
+    "string": "Currencies",
+    "comodel": "res.currency",
+    "help": "The list of currencies for that are supported by this payment method (if the provider allows it). When paying with another currency, this payment method is not available to customers.",
+    "context": {
+     "active_test": false
+    },
+    "defined_in_package": "payment",
+    "full_name": "Currencies",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "l10n_ec_sri_payment_id",
+    "type": "Many2one",
+    "comodel": "l10n_ec.sri.payment",
+    "string": "SRI Payment Method",
+    "defined_in_package": "l10n_ec_sale",
+    "full_name": "SRI Payment Method",
+    "target_entity": "l10n_ec.sri.payment"
+   },
+   {
+    "name": "fiscal_country_codes",
+    "type": "Char",
+    "store": false,
+    "default": {
+     "dynamic": "_get_fiscal_country_codes"
+    },
+    "defined_in_package": "l10n_ec_sale",
+    "string": "Fiscal Country Codes",
+    "full_name": "Fiscal Country Codes"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_is_primary",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_primary",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_warn_before_disabling_tokens",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "active",
+         "provider_ids",
+         "support_tokenization"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Display a warning about the consequences of archiving the payment method, detaching it\nfrom a provider, or removing its support for tokenization.\n\nLet the user know that the related tokens will be archived.\n\n:return: A client action with the warning message, if any.\n:rtype: dict",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_provider_ids_warn_before_attaching_payment_method",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "provider_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Display a warning before attaching a payment method to a provider.\n\n:return: A client action with the warning message, if any.\n:rtype: dict",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_manual_capture_supported_by_providers",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "active",
+         "support_manual_capture"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The following payment methods cannot be enabled because their payment provider has manual capture activated: %s",
+        "line": 186
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This payment method needs a partner in crime; you should enable a payment provider supporting this method first.",
+        "line": 215
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_not_default_payment_method",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete the default payment method.",
+        "line": 226
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_compatible_payment_methods",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "provider_ids",
+     "partner_id",
+     "currency_id",
+     "force_tokenization",
+     "is_express_checkout",
+     "report",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Search and return the payment methods matching the compatibility criteria.\n\nThe compatibility criteria are that payment methods must: be supported by at least one of\nthe providers; support the country of the partner if it exists; be primary payment methods\n(not a brand). If provided, the optional keyword arguments further refine the criteria.\n\n:param list provider_ids: The list of providers by which the payment methods must be at\n                          least partially supported to be considered compatible, as a list\n                          of `payment.provider` ids.\n:param int partner_id: The partner making the payment, as a `res.partner` id.\n:param int currency_id: The payment currency, if known beforehand, as a `res.currency` id.\n:param bool force_tokenization: Whether only payment methods supporting tokenization can be\n                                matched.\n:param bool is_express_checkout: Whether the payment is made through express checkout.\n:param dict report: The report in which each provider's availability status and reason must\n                    be logged.\n:param dict kwargs: Optional data. This parameter is not used here.\n:return: The compatible payment methods.\n:rtype: payment.method",
+      "size_in_lines": 96,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_from_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "code",
+     "mapping"
+    ],
+    "definitions": [
+     {
+      "package": "payment",
+      "decorators": [],
+      "documentation": "Get the payment method corresponding to the given provider-specific code.\n\nIf a mapping is given, the search uses the generic payment method code that corresponds to\nthe given provider-specific code.\n\n:param str code: The provider-specific code of the payment method to get.\n:param dict mapping: A non-exhaustive mapping of generic payment method codes to\n                     provider-specific codes.\n:return: The corresponding payment method, if any.\n:rtype: payment.method",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fiscal_country_codes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ec_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_manual_capture_supported_by_providers",
+    "package": "payment",
+    "kind": "ValidationError",
+    "message": "The following payment methods cannot be enabled because their payment provider has manual capture activated: %s"
+   },
+   {
+    "operation": "write",
+    "package": "payment",
+    "kind": "UserError",
+    "message": "This payment method needs a partner in crime; you should enable a payment provider supporting this method first."
+   },
+   {
+    "operation": "_unlink_if_not_default_payment_method",
+    "package": "payment",
+    "kind": "UserError",
+    "message": "You cannot delete the default payment method."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "payment.payment_method_public",
+    "package": "payment",
+    "name": "payment.method.all",
+    "entity": "payment.method",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "payment.payment_method_portal",
+    "package": "payment",
+    "name": "payment.method.all",
+    "entity": "payment.method",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "payment.payment_method_employee",
+    "package": "payment",
+    "name": "payment.method.all",
+    "entity": "payment.method",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "payment.payment_method_system",
+    "package": "payment",
+    "name": "payment.method.system",
+    "entity": "payment.method",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_ec_sale.payment_method_form",
+    "package": "l10n_ec_sale",
+    "name": "l10n_ec_sale.payment.method.form",
+    "view_type": "xpath",
+    "inherits_view": "payment.payment_method_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='supported_currency_ids']/..",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "fiscal_country_codes",
+       "invisible": "True"
+      },
+      {
+       "name": "l10n_ec_sri_payment_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='supported_currency_ids']/..",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "payment.payment_method_form",
+    "package": "payment",
+    "name": "payment.method.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Payment Method"
+     },
+     "fields": [
+      {
+       "name": "is_primary",
+       "invisible": "True"
+      },
+      {
+       "name": "image",
+       "widget": "image"
+      },
+      {
+       "name": "name",
+       "placeholder": "Name"
+      },
+      {
+       "name": "code",
+       "invisible": "id"
+      },
+      {
+       "name": "code",
+       "invisible": "not id",
+       "readonly": "id",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "primary_payment_method_id",
+       "invisible": "is_primary"
+      },
+      {
+       "name": "active"
+      },
+      {
+       "name": "supported_country_ids",
+       "widget": "many2many_tags",
+       "readonly": "1"
+      },
+      {
+       "name": "supported_currency_ids",
+       "widget": "many2many_tags",
+       "readonly": "1"
+      },
+      {
+       "name": "provider_ids",
+       "readonly": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "brand_ids"
+      },
+      {
+       "name": "support_tokenization"
+      },
+      {
+       "name": "support_manual_capture"
+      },
+      {
+       "name": "support_express_checkout"
+      },
+      {
+       "name": "support_refund"
+      },
+      {
+       "name": "supported_country_ids",
+       "widget": "many2many_tags",
+       "placeholder": "Select countries. Leave empty to allow any."
+      },
+      {
+       "name": "supported_currency_ids",
+       "widget": "many2many_tags",
+       "placeholder": "Select currencies. Leave empty to allow any."
+      },
+      {
+       "name": "provider_ids",
+       "widget": "many2many_tags",
+       "string": "Supported by"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "providers",
+       "string": "Providers",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "brands",
+       "string": "Brands",
+       "invisible": "not is_primary",
+       "groups": null
+      },
+      {
+       "name": "configuration",
+       "string": "Configuration",
+       "invisible": null,
+       "groups": "base.group_no_one"
+      }
+     ],
+     "widgets": {
+      "image": 1,
+      "many2many_tags": 5
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "payment.payment_method_tree",
+    "package": "payment",
+    "name": "payment.method.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "multi_edit": "True",
+      "decoration-muted": "not active"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "not active"
+     }
+    }
+   },
+   {
+    "external_identifier": "payment.payment_method_kanban",
+    "package": "payment",
+    "name": "payment.method.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "image",
+       "widget": "image"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "payment.payment_method_search",
+    "package": "payment",
+    "name": "payment.method.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "available_pms",
+       "string": "Available methods",
+       "domain": "[('provider_ids.state', '!=', 'disabled')]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "payment.action_payment_method",
+    "package": "payment",
+    "name": "Payment Methods",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('is_primary', '=', True)]",
+    "context": "{'active_test': False, 'search_default_available_pms': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No payment methods found for your payment providers.\n            </p>\n            <p>\n                <a type=\"action\" class=\"text-primary\" name=\"%(payment.action_payment_provider)d\">\n                    <i class=\"oi oi-arrow-right me-1\"></i> Configure a payment provider\n                </a>\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "payment.method"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "account_payment.payment_method_menu",
+    "package": "account_payment",
+    "name": null,
+    "parent_id": "account.root_payment_menu",
+    "action": "payment.action_payment_method",
+    "sequence": "15",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.payment_method_menu",
+    "package": "sale",
+    "name": null,
+    "parent_id": null,
+    "action": "payment.action_payment_method",
+    "sequence": "20",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "website_sale.menu_ecommerce_payment_methods",
+    "package": "website_sale",
+    "name": "Payment Methods",
+    "parent_id": null,
+    "action": "payment.action_payment_method",
+    "sequence": "20",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

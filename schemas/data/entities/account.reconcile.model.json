@@ -1,0 +1,768 @@
+{
+ "catalog": {
+  "name": "entity:account.reconcile.model",
+  "description": "Complete definition of entity Preset to create journal entries during a invoices and payments matching (account.reconcile.model).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.reconcile.model",
+  "storage_name": "account_reconcile_model",
+  "full_name": "Preset to create journal entries during a invoices and payments matching",
+  "kind": "persistent",
+  "description": "Preset to create journal entries during a invoices and payments matching",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "account",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "account",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "required": true,
+    "default": 10,
+    "defined_in_package": "account",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "account",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "trigger",
+    "type": "Selection",
+    "selection": [
+     [
+      "manual",
+      "Manual"
+     ],
+     [
+      "auto_reconcile",
+      "Automated"
+     ]
+    ],
+    "default": "manual",
+    "required": true,
+    "tracking": true,
+    "help": "Validate the statement line automatically (reconciliation based on your rule).",
+    "defined_in_package": "account",
+    "string": "Trigger",
+    "full_name": "Trigger"
+   },
+   {
+    "name": "next_activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Next Activity",
+    "defined_in_package": "account",
+    "full_name": "Next Activity",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "can_be_proposed",
+    "type": "Boolean",
+    "compute": "_compute_can_be_proposed",
+    "store": true,
+    "copy": false,
+    "defined_in_package": "account",
+    "string": "Can Be Proposed",
+    "full_name": "Can Be Proposed"
+   },
+   {
+    "name": "mapped_partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "compute": "_compute_partner_mapping",
+    "store": true,
+    "copy": false,
+    "defined_in_package": "account",
+    "string": "Mapped Partner",
+    "full_name": "Mapped Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "match_journal_ids",
+    "type": "Many2many",
+    "comodel": "account.journal",
+    "string": "Journals",
+    "domain": "[('type', 'in', ('bank', 'cash', 'credit'))]",
+    "check_company": true,
+    "help": "The reconciliation model will only be available from the selected journals.",
+    "defined_in_package": "account",
+    "full_name": "Journals",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "match_amount",
+    "type": "Selection",
+    "selection": [
+     [
+      "lower",
+      "Is lower than or equal to"
+     ],
+     [
+      "greater",
+      "Is greater than or equal to"
+     ],
+     [
+      "between",
+      "Is between"
+     ]
+    ],
+    "string": "Amount",
+    "tracking": true,
+    "help": "The reconciliation model will only be applied when the amount being lower than, greater than or between specified amount(s).",
+    "defined_in_package": "account",
+    "full_name": "Amount"
+   },
+   {
+    "name": "match_amount_min",
+    "type": "Float",
+    "string": "Amount Min Parameter",
+    "tracking": true,
+    "defined_in_package": "account",
+    "full_name": "Amount Min Parameter"
+   },
+   {
+    "name": "match_amount_max",
+    "type": "Float",
+    "string": "Amount Max Parameter",
+    "tracking": true,
+    "defined_in_package": "account",
+    "full_name": "Amount Max Parameter"
+   },
+   {
+    "name": "match_label",
+    "type": "Selection",
+    "selection": [
+     [
+      "contains",
+      "Contains"
+     ],
+     [
+      "not_contains",
+      "Not Contains"
+     ],
+     [
+      "match_regex",
+      "Match Regex"
+     ]
+    ],
+    "string": "Label",
+    "tracking": true,
+    "help": "The reconciliation model will only be applied when either the statement line label, the transaction details or the note matches the following:\n        * Contains: The statement line must contains this string (case insensitive).\n        * Not Contains: Negation of \"Contains\".\n        * Match Regex: Define your own regular expression.",
+    "defined_in_package": "account",
+    "full_name": "Label"
+   },
+   {
+    "name": "match_label_param",
+    "type": "Char",
+    "string": "Label Parameter",
+    "tracking": true,
+    "defined_in_package": "account",
+    "full_name": "Label Parameter"
+   },
+   {
+    "name": "match_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "string": "Partners",
+    "help": "The reconciliation model will only be applied to the selected customers/vendors.",
+    "defined_in_package": "account",
+    "full_name": "Partners",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "line_ids",
+    "type": "One2many",
+    "comodel": "account.reconcile.model.line",
+    "inverse_name": "model_id",
+    "copy": true,
+    "defined_in_package": "account",
+    "string": "Line",
+    "full_name": "Line",
+    "target_entity": "account.reconcile.model.line"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_match_label_param",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "match_label",
+         "match_label_param"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The regex is not valid",
+        "line": 159
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_be_proposed",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mapped_partner_id",
+         "match_label",
+         "match_amount",
+         "match_partner_ids",
+         "trigger"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_mapping",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "match_label",
+         "line_ids.partner_id",
+         "line_ids.account_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_manual",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_auto_reconcile",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reconcile_stat",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_match_label_param",
+    "package": "account",
+    "kind": "UserError",
+    "message": "The regex is not valid"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_reconcile_model_readonly",
+    "package": "account",
+    "name": "account.reconcile.model.readonly",
+    "entity": "account.reconcile.model",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_reconcile_model_billing",
+    "package": "account",
+    "name": "account.reconcile.model.billing",
+    "entity": "account.reconcile.model",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_reconcile_model",
+    "package": "account",
+    "name": "account.reconcile.model",
+    "entity": "account.reconcile.model",
+    "group": "account.group_account_basic",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.account_reconcile_model_template_comp_rule",
+    "package": "account",
+    "name": "Account reconcile model template company rule",
+    "entity": "account.reconcile.model",
+    "domain": "[('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.view_account_reconcile_model_tree",
+    "package": "account",
+    "name": "account.reconcile.model.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Bank Reconciliation Move Presets"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "trigger"
+      },
+      {
+       "name": "match_journal_ids",
+       "widget": "many2many_tags",
+       "optional": "hidden"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "account.view_account_reconcile_model_form",
+    "package": "account",
+    "name": "account.reconcile.model.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Operation Templates"
+     },
+     "fields": [
+      {
+       "name": "trigger",
+       "widget": "statusbar"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Bank Fees"
+      },
+      {
+       "name": "match_journal_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_create': True}",
+       "placeholder": "All bank & cash journals"
+      },
+      {
+       "name": "match_partner_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_quick_create': True}",
+       "placeholder": "All partners"
+      },
+      {
+       "name": "match_amount",
+       "placeholder": "Any amount"
+      },
+      {
+       "name": "match_amount_min",
+       "invisible": "match_amount in (False, 'lower')",
+       "required": "match_amount"
+      },
+      {
+       "name": "match_amount_max",
+       "invisible": "match_amount in (False, 'greater')",
+       "required": "match_amount == 'between'"
+      },
+      {
+       "name": "match_label",
+       "placeholder": "Any label"
+      },
+      {
+       "name": "match_label_param",
+       "invisible": "not match_label",
+       "required": "match_label",
+       "placeholder": "BRT *([\\d,\\.]+)"
+      },
+      {
+       "name": "next_activity_type_id",
+       "placeholder": "Nothing to do"
+      },
+      {
+       "name": "line_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "account_id",
+       "required": "not partner_id"
+      },
+      {
+       "name": "amount_type"
+      },
+      {
+       "name": "amount_string"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "optional": "hide"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "string": "Analytic",
+       "options": "{'account_field': 'account_id', 'business_domain': 'general'}",
+       "groups": "analytic.group_analytic_accounting"
+      },
+      {
+       "name": "label"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_set_manual",
+       "string": "Set Manual",
+       "type": "object",
+       "invisible": "trigger == 'manual'",
+       "class": "oe_highlight",
+       "data-hotkey": "y"
+      },
+      {
+       "name": "action_set_auto_reconcile",
+       "string": "Automate",
+       "type": "object",
+       "invisible": "trigger == 'auto_reconcile'",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_reconcile_stat",
+       "string": "Journal Entries",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-book"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "counterpart_items",
+       "string": "Counterpart Items",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "many2many_tags": 2,
+      "handle": 1,
+      "many2many_tax_tags": 1,
+      "analytic_distribution": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_set_manual",
+       "type": "object",
+       "string": "Set Manual",
+       "invisible": "trigger == 'manual'",
+       "class": "oe_highlight",
+       "data-hotkey": "y"
+      },
+      {
+       "name": "action_set_auto_reconcile",
+       "string": "Automate",
+       "class": "oe_highlight",
+       "type": "object",
+       "data-hotkey": "q",
+       "invisible": "trigger == 'auto_reconcile'"
+      }
+     ],
+     "statusbar_field": "trigger",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": [
+      {
+       "type": "object",
+       "name": "action_reconcile_stat",
+       "string": "Journal Entries",
+       "class": "oe_stat_button",
+       "icon": "fa-book"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.view_account_reconcile_model_search",
+    "package": "account",
+    "name": "account.reconcile.model.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Bank Reconciliation Move preset"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "auto_validate",
+       "string": "Automated",
+       "domain": "[('trigger', '=', 'auto_reconcile')]"
+      },
+      {
+       "name": "withtax",
+       "string": "With tax",
+       "domain": "[('line_ids.tax_ids', '!=', False)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_journal",
+       "string": "Journals Availability",
+       "context": "{'group_by': 'match_journal_ids'}"
+      },
+      {
+       "name": "group_by_auto_validate",
+       "string": "Automation",
+       "context": "{'group_by': 'trigger'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_account_reconcile_model",
+    "package": "account",
+    "name": "Reconciliation Models",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_account_reconcile_model_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a new reconciliation model\n              </p><p>\n                Those can be used to quickly create a journal items when reconciling\n                a bank statement or an account.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.reconcile.model"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

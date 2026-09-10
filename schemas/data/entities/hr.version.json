@@ -1,0 +1,3516 @@
+{
+ "catalog": {
+  "name": "entity:hr.version",
+  "description": "Complete definition of entity Version (hr.version).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.version",
+  "storage_name": "hr_version",
+  "full_name": "Version",
+  "kind": "persistent",
+  "description": "Version",
+  "defined_by_package": "hr",
+  "extended_by_packages": [
+   "hr_attendance",
+   "hr_holidays",
+   "hr_work_entry",
+   "hr_work_entry_holidays",
+   "l10n_fr_hr_work_entry_holidays"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "date_version",
+  "display_name_field": "name",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": "read",
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "compute": "_compute_company_id",
+    "readonly": false,
+    "store": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "tracking": true,
+    "defined_in_package": "hr",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "tracking": true,
+    "domain": "['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+    "index": true,
+    "defined_in_package": "hr",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "display_name",
+    "type": "Char",
+    "compute": "_compute_display_name",
+    "defined_in_package": "hr",
+    "string": "Display Name",
+    "full_name": "Display Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "tracking": true,
+    "defined_in_package": "hr",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "date_version",
+    "type": "Date",
+    "required": true,
+    "default": {
+     "dynamic": "fields.Date.today"
+    },
+    "tracking": true,
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "string": "Date Version",
+    "full_name": "Date Version"
+   },
+   {
+    "name": "last_modified_uid",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Last Modified by",
+    "default": {
+     "dynamic": "lambda self: self.env.uid"
+    },
+    "required": true,
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "full_name": "Last Modified by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "last_modified_date",
+    "type": "Datetime",
+    "string": "Last Modified on",
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "required": true,
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "full_name": "Last Modified on"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Nationality (Country)",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Nationality (Country)",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "identification_id",
+    "type": "Char",
+    "string": "Identification No",
+    "help": "Enter the employee's National Identification Number issued by the government (e.g., Aadhaar, SIN, NIN). This is used for official records and statutory compliance.",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Identification No"
+   },
+   {
+    "name": "ssnid",
+    "type": "Char",
+    "string": "SSN No",
+    "help": "Social Security Number",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "social security number No"
+   },
+   {
+    "name": "passport_id",
+    "type": "Char",
+    "string": "Passport No",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Passport No"
+   },
+   {
+    "name": "passport_expiration_date",
+    "type": "Date",
+    "string": "Passport Expiration Date",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Passport Expiration Date"
+   },
+   {
+    "name": "sex",
+    "type": "Selection",
+    "selection": [
+     [
+      "male",
+      "Male"
+     ],
+     [
+      "female",
+      "Female"
+     ],
+     [
+      "other",
+      "Other"
+     ]
+    ],
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "help": "This is the legal sex recognized by the state.",
+    "string": "Gender",
+    "defined_in_package": "hr",
+    "full_name": "Gender"
+   },
+   {
+    "name": "private_street",
+    "type": "Char",
+    "string": "Private Street",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Private Street"
+   },
+   {
+    "name": "private_street2",
+    "type": "Char",
+    "string": "Private Street2",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Private Street2"
+   },
+   {
+    "name": "private_city",
+    "type": "Char",
+    "string": "Private City",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Private City"
+   },
+   {
+    "name": "allowed_country_state_ids",
+    "type": "Many2many",
+    "comodel": "res.country.state",
+    "compute": "_compute_allowed_country_state_ids",
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "string": "Allowed Country State",
+    "full_name": "Allowed Country State",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "private_state_id",
+    "type": "Many2one",
+    "comodel": "res.country.state",
+    "string": "Private State",
+    "domain": "[('id', 'in', allowed_country_state_ids)]",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Private State",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "private_zip",
+    "type": "Char",
+    "string": "Private Zip",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Private Zip"
+   },
+   {
+    "name": "private_country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Private Country",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Private Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "distance_home_work",
+    "type": "Integer",
+    "string": "Home-Work Distance",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Home-Work Distance"
+   },
+   {
+    "name": "km_home_work",
+    "type": "Integer",
+    "string": "Home-Work Distance in Km",
+    "groups": "hr.group_hr_user",
+    "compute": "_compute_km_home_work",
+    "inverse": "_inverse_km_home_work",
+    "store": true,
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Home-Work Distance in Km"
+   },
+   {
+    "name": "distance_home_work_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "kilometers",
+      "km"
+     ],
+     [
+      "miles",
+      "mi"
+     ]
+    ],
+    "string": "Home-Work Distance unit",
+    "groups": "hr.group_hr_user",
+    "default": "kilometers",
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Home-Work Distance unit"
+   },
+   {
+    "name": "marital",
+    "type": "Selection",
+    "string": "Marital Status",
+    "groups": "hr.group_hr_user",
+    "default": "single",
+    "required": true,
+    "tracking": true,
+    "selection_method": "_get_marital_status_selection",
+    "defined_in_package": "hr",
+    "full_name": "Marital Status"
+   },
+   {
+    "name": "spouse_complete_name",
+    "type": "Char",
+    "string": "Spouse Legal Name",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Spouse Legal Name"
+   },
+   {
+    "name": "spouse_birthdate",
+    "type": "Date",
+    "string": "Spouse Birthdate",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Spouse Birthdate"
+   },
+   {
+    "name": "children",
+    "type": "Integer",
+    "string": "Dependent Children",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Dependent Children"
+   },
+   {
+    "name": "employee_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "employee",
+      "Employee"
+     ],
+     [
+      "worker",
+      "Worker"
+     ],
+     [
+      "student",
+      "Student"
+     ],
+     [
+      "trainee",
+      "Trainee"
+     ],
+     [
+      "contractor",
+      "Contractor"
+     ],
+     [
+      "freelance",
+      "Freelancer"
+     ]
+    ],
+    "string": "Employee Type",
+    "default": "employee",
+    "required": true,
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Employee Type"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "check_company": true,
+    "tracking": true,
+    "index": true,
+    "defined_in_package": "hr",
+    "string": "Department",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "member_of_department",
+    "type": "Boolean",
+    "string": "Member of department",
+    "compute": "_compute_part_of_department",
+    "search": "_search_part_of_department",
+    "help": "Whether the employee is a member of the active user's department or one of it's child department.",
+    "defined_in_package": "hr",
+    "full_name": "Member of department"
+   },
+   {
+    "name": "job_id",
+    "type": "Many2one",
+    "comodel": "hr.job",
+    "check_company": true,
+    "tracking": true,
+    "index": true,
+    "defined_in_package": "hr",
+    "string": "Job",
+    "full_name": "Job",
+    "target_entity": "hr.job"
+   },
+   {
+    "name": "job_title",
+    "type": "Char",
+    "compute": "_compute_job_title",
+    "inverse": "_inverse_job_title",
+    "store": true,
+    "readonly": false,
+    "string": "Job Title",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Job Title"
+   },
+   {
+    "name": "is_custom_job_title",
+    "type": "Boolean",
+    "compute": "_compute_is_custom_job_title",
+    "store": true,
+    "default": false,
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "string": "Is Custom Job Title",
+    "full_name": "Is Custom Job Title"
+   },
+   {
+    "name": "address_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Work Address",
+    "default": {
+     "dynamic": "_get_default_address_id"
+    },
+    "store": true,
+    "readonly": false,
+    "check_company": true,
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Work Address",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "work_location_id",
+    "type": "Many2one",
+    "comodel": "hr.work.location",
+    "string": "Work Location",
+    "domain": "[('address_id', '=', address_id)]",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Work Location",
+    "target_entity": "hr.work.location"
+   },
+   {
+    "name": "departure_reason_id",
+    "type": "Many2one",
+    "comodel": "hr.departure.reason",
+    "string": "Departure Reason",
+    "groups": "hr.group_hr_user",
+    "copy": false,
+    "ondelete": "restrict",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Departure Reason",
+    "target_entity": "hr.departure.reason"
+   },
+   {
+    "name": "departure_description",
+    "type": "Html",
+    "string": "Additional Information",
+    "groups": "hr.group_hr_user",
+    "copy": false,
+    "defined_in_package": "hr",
+    "full_name": "Additional Information"
+   },
+   {
+    "name": "departure_date",
+    "type": "Date",
+    "string": "Departure Date",
+    "groups": "hr.group_hr_user",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Departure Date"
+   },
+   {
+    "name": "resource_calendar_id",
+    "type": "Many2one",
+    "comodel": "resource.calendar",
+    "inverse": "_inverse_resource_calendar_id",
+    "check_company": true,
+    "string": "Working Hours",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Working Hours",
+    "target_entity": "resource.calendar"
+   },
+   {
+    "name": "is_flexible",
+    "type": "Boolean",
+    "compute": "_compute_is_flexible",
+    "store": true,
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "string": "Is Flexible",
+    "full_name": "Is Flexible"
+   },
+   {
+    "name": "is_fully_flexible",
+    "type": "Boolean",
+    "compute": "_compute_is_flexible",
+    "store": true,
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "string": "Is Fully Flexible",
+    "full_name": "Is Fully Flexible"
+   },
+   {
+    "name": "tz",
+    "type": "Selection",
+    "related": "employee_id.tz",
+    "defined_in_package": "hr",
+    "string": "Tz",
+    "full_name": "Tz"
+   },
+   {
+    "name": "contract_date_start",
+    "type": "Date",
+    "string": "Contract Start Date",
+    "tracking": true,
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "full_name": "Contract Start Date"
+   },
+   {
+    "name": "contract_date_end",
+    "type": "Date",
+    "string": "Contract End Date",
+    "tracking": true,
+    "help": "End date of the contract (if it's a fixed-term contract).",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "full_name": "Contract End Date"
+   },
+   {
+    "name": "trial_date_end",
+    "type": "Date",
+    "string": "End of Trial Period",
+    "help": "End date of the trial period (if there is one).",
+    "groups": "hr.group_hr_manager",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "End of Trial Period"
+   },
+   {
+    "name": "date_start",
+    "type": "Date",
+    "compute": "_compute_dates",
+    "groups": "hr.group_hr_manager",
+    "search": "_search_start_date",
+    "defined_in_package": "hr",
+    "string": "Date Start",
+    "full_name": "Date Start"
+   },
+   {
+    "name": "date_end",
+    "type": "Date",
+    "compute": "_compute_dates",
+    "groups": "hr.group_hr_manager",
+    "search": "_search_end_date",
+    "defined_in_package": "hr",
+    "string": "Date End",
+    "full_name": "Date End"
+   },
+   {
+    "name": "is_current",
+    "type": "Boolean",
+    "compute": "_compute_is_current",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "string": "Is Current",
+    "full_name": "Is Current"
+   },
+   {
+    "name": "is_past",
+    "type": "Boolean",
+    "compute": "_compute_is_past",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "string": "Is Past",
+    "full_name": "Is Past"
+   },
+   {
+    "name": "is_future",
+    "type": "Boolean",
+    "compute": "_compute_is_future",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "string": "Is Future",
+    "full_name": "Is Future"
+   },
+   {
+    "name": "is_in_contract",
+    "type": "Boolean",
+    "compute": "_compute_is_in_contract",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "string": "Is In Contract",
+    "full_name": "Is In Contract"
+   },
+   {
+    "name": "contract_template_id",
+    "type": "Many2one",
+    "comodel": "hr.version",
+    "string": "Contract Template",
+    "groups": "hr.group_hr_user",
+    "domain": "[('company_id', '=', company_id), ('employee_id', '=', False)]",
+    "tracking": true,
+    "help": "Select a contract template to auto-fill the contract form with predefined values. You can still edit the fields as needed after applying the template.",
+    "defined_in_package": "hr",
+    "full_name": "Contract Template",
+    "target_entity": "hr.version"
+   },
+   {
+    "name": "structure_type_id",
+    "type": "Many2one",
+    "comodel": "hr.payroll.structure.type",
+    "string": "Salary Structure Type",
+    "compute": "_compute_structure_type_id",
+    "readonly": false,
+    "store": true,
+    "tracking": true,
+    "groups": "hr.group_hr_manager",
+    "default": {
+     "dynamic": "_default_salary_structure"
+    },
+    "defined_in_package": "hr",
+    "full_name": "Salary Structure Type",
+    "target_entity": "hr.payroll.structure.type"
+   },
+   {
+    "name": "active_employee",
+    "type": "Boolean",
+    "related": "employee_id.active",
+    "string": "Active Employee",
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "full_name": "Active Employee"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "string": "Currency",
+    "related": "company_id.currency_id",
+    "readonly": true,
+    "defined_in_package": "hr",
+    "full_name": "Currency"
+   },
+   {
+    "name": "wage",
+    "type": "Monetary",
+    "string": "Wage",
+    "tracking": true,
+    "help": "Employee's monthly gross wage.",
+    "aggregator": "avg",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "full_name": "Wage"
+   },
+   {
+    "name": "contract_wage",
+    "type": "Monetary",
+    "string": "Contract Wage",
+    "compute": "_compute_contract_wage",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "full_name": "Contract Wage"
+   },
+   {
+    "name": "company_country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Company country",
+    "related": "company_id.country_id",
+    "readonly": true,
+    "defined_in_package": "hr",
+    "full_name": "Company country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_country_id.code",
+    "depends": [
+     "company_country_id"
+    ],
+    "readonly": true,
+    "defined_in_package": "hr",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "contract_type_id",
+    "type": "Many2one",
+    "comodel": "hr.contract.type",
+    "string": "Contract Type",
+    "tracking": true,
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr",
+    "full_name": "Contract Type",
+    "target_entity": "hr.contract.type"
+   },
+   {
+    "name": "additional_note",
+    "type": "Text",
+    "string": "Additional Note",
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "copy": false,
+    "defined_in_package": "hr",
+    "full_name": "Additional Note"
+   },
+   {
+    "name": "hr_responsible_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "HR Responsible",
+    "tracking": true,
+    "help": "Person responsible for validating the employee's contracts.",
+    "domain": {
+     "dynamic": "_get_hr_responsible_domain"
+    },
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "required": true,
+    "groups": "hr.group_hr_user",
+    "defined_in_package": "hr",
+    "full_name": "human resources Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "ruleset_id",
+    "type": "Many2one",
+    "comodel": "hr.attendance.overtime.ruleset",
+    "domain": {
+     "dynamic": "_domain_current_countries"
+    },
+    "groups": "hr.group_hr_manager",
+    "tracking": true,
+    "default": {
+     "dynamic": "lambda self: self.env.ref('hr_attendance.hr_attendance_default_ruleset', raise_if_not_found=False)"
+    },
+    "defined_in_package": "hr_attendance",
+    "string": "Ruleset",
+    "full_name": "Ruleset",
+    "target_entity": "hr.attendance.overtime.ruleset"
+   },
+   {
+    "name": "date_generated_from",
+    "type": "Datetime",
+    "string": "Generated From",
+    "readonly": true,
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)"
+    },
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Generated From"
+   },
+   {
+    "name": "date_generated_to",
+    "type": "Datetime",
+    "string": "Generated To",
+    "readonly": true,
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)"
+    },
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Generated To"
+   },
+   {
+    "name": "last_generation_date",
+    "type": "Date",
+    "string": "Last Generation Date",
+    "readonly": true,
+    "groups": "hr.group_hr_user",
+    "tracking": true,
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Last Generation Date"
+   },
+   {
+    "name": "work_entry_source",
+    "type": "Selection",
+    "selection": [
+     [
+      "calendar",
+      "Working Schedule"
+     ]
+    ],
+    "required": true,
+    "default": "calendar",
+    "tracking": true,
+    "help": "\n        Defines the source for work entries generation\n\n        Working Schedule: Work entries will be generated from the working hours below.\n        Attendances: Work entries will be generated from the employee's attendances. (requires Attendance app)\n        Planning: Work entries will be generated from the employee's planning. (requires Planning app)\n    ",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr_work_entry",
+    "string": "Work Entry Source",
+    "full_name": "Work Entry Source"
+   },
+   {
+    "name": "work_entry_source_calendar_invalid",
+    "type": "Boolean",
+    "compute": "_compute_work_entry_source_calendar_invalid",
+    "groups": "hr.group_hr_manager",
+    "defined_in_package": "hr_work_entry",
+    "string": "Work Entry Source Calendar Invalid",
+    "full_name": "Work Entry Source Calendar Invalid"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_contract_start_date_defined",
+    "kind": "Constraint",
+    "definition": "CHECK(contract_date_end IS NULL OR contract_date_start IS NOT NULL)",
+    "message": "The contract must have a start date.",
+    "defined_in_package": "hr"
+   },
+   {
+    "name": "_check_unique_date_version",
+    "kind": "UniqueIndex",
+    "definition": "(employee_id, date_version) WHERE active = TRUE AND employee_id IS NOT NULL",
+    "message": "An employee cannot have multiple active versions sharing the same effective date.",
+    "defined_in_package": "hr"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_get_default_address_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_salary_structure",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_hr_responsible_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id.company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_job_title",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "job_id.name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_job_title",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_custom_job_title",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "job_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_country_state_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "private_country_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_dates",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "employee_id",
+         "contract_date_start",
+         "contract_date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Start date (%(start)s) must be earlier than contract end date (%(end)s).",
+        "line": 257
+       },
+       {
+        "kind": "ValidationError",
+        "message": "%s already has a contract running during the selected period.\n\nPlease either:\n\n- Change the start date so that it doesn't overlap with the existing contract, or\n- Create a new employee if this employee should have multiple active contracts.",
+        "line": 271
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "check_contract_finished",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Before creating a new contract, close the current one by setting an end date.",
+        "line": 282
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Changing the contract on this employee changes their working schedule in a period they already took leaves. Changing this working schedule changes the duration of these leaves in such a way the employee no longer has the required allocation for them. Please review these leaves and/or allocations before changing the contract.\n\nThis error has been triggered by:\n",
+        "line": 60
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_last_version",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Employee %s must always have at least one active version.",
+        "line": 298
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 64,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Cannot unassign all the active versions of an employee.",
+        "line": 306
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Cannot archive all the active versions of an employee.",
+        "line": 309
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Cannot modify multiple versions contract dates with different contracts at once.",
+        "line": 316
+       }
+      ]
+     },
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 53,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Changing the contract on this employee changes their working schedule in a period they already took leaves. Changing this working schedule changes the duration of these leaves in such a way the employee no longer has the required allocation for them. Please review these leaves and/or allocations before changing the contract.\n\nThis error has been triggered by:\n",
+        "line": 93
+       }
+      ]
+     },
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_formview_action",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "access_uid"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": "Override this method in order to redirect many2one towards the right model\n    - Contract template -> hr.version\n    - Employee record -> hr.employee(.public) with version_id in context",
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "lang"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_version"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_current",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_past",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_future",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_in_contract",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_in_contract",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_overlapping_period",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date_from",
+     "date_to"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": "Return True if the employee is at least in contract one day during the period given\n:param date date_from: the start of the period\n:param date date_to: the stop of the period",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_fully_flexible",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": "return True if the version has a fully flexible working calendar ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_flexible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "resource_calendar_id.flexible_hours"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_whitelist_fields_from_template",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_values_from_contract_template",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "contract_template_id"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_contract_wage",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "wage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_contract_wage",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_contract_wage_field",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_normalized_wage",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": "This method is overridden in hr_payroll, as without that module, nothing allows to know\nthere's no way to determine the employee's pay frequency.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_valid_employee_for_user",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_ssnid",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "ssnid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_part_of_department",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid",
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "department_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_part_of_department",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_structure_type_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_km_home_work",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "distance_home_work",
+         "distance_home_work_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_km_home_work",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dates",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "contract_date_start",
+         "contract_date_end",
+         "date_version",
+         "employee_id",
+         "employee_id.version_ids.date_version"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_start_date",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_end_date",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_marital_status_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_resource_calendar_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_salary_costs_factor",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_struct_from_country",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "country_code"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_tz",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_version",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_version_form_view",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_current_countries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_versions_by_employee_and_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "employee_dates"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_contracts",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "contract_date_start",
+         "contract_date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leaves",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "extra_domain"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leaves_from_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_overlapping_contract",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "leave"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_refuse_leave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "leave",
+     "leaves_state"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_leave_draft",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "leave",
+     "leaves_state"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_populate_all_new_leave_vals_from_split_leave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "all_new_leave_origin",
+     "all_new_leave_vals",
+     "overlapping_contracts",
+     "leave",
+     "leaves_state"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_all_new_leave",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "all_new_leave_origin",
+     "all_new_leave_vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_leave_state",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "leave",
+     "leaves_state",
+     "refuse_leave"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_work_entry_source_calendar_invalid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "work_entry_source",
+         "resource_calendar_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_work_entry_type_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "ormcache",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_work_entry_type_overtime_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "ormcache",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leave_work_entry_type_dates",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "leave",
+     "date_from",
+     "date_to",
+     "employee"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leave_work_entry_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "leave"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_more_vals_attendance_interval",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "interval"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_more_vals_leave_interval",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "interval",
+     "leaves"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_bypassing_work_entry_type_codes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_interval_leave_work_entry_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "interval",
+     "leaves",
+     "bypassing_codes"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sub_leave_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leave_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_resource_calendar_leaves",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_attendance_intervals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lunch_intervals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_interval_work_entry_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "interval"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_valid_leave_intervals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attendances",
+     "interval"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_real_attendance_work_entry_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "intervals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_version_work_entries_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_start",
+     "date_stop"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 168,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_hr_work_entry_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 57,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_real_attendances",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attendances",
+     "leaves",
+     "worked_leaves"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_work_entries_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_start",
+     "date_stop"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": "Generate a work_entries list between date_start and date_stop for one version.\n:return: list of dictionnary.",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "has_static_work_entries",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "generate_work_entries",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "date_start",
+     "date_stop",
+     "force"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_work_entries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date_start",
+     "date_stop",
+     "force"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 78,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_work_entries_postprocess_adapt_to_calendar",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_work_entries_postprocess",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 119,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Missing timezone for work entries generation.",
+        "line": 520
+       },
+       {
+        "kind": "UserError",
+        "message": "Missing date or duration on work entry",
+        "line": 532
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_remove_work_entries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": "Remove all work_entries that are outside contract period (function used after writing new start or/and end date) ",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cancel_work_entries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_recompute_work_entries",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date_from",
+     "date_to"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_fields_that_recompute_we",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_generate_missing_work_entries",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_dates",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "Start date (%(start)s) must be earlier than contract end date (%(end)s)."
+   },
+   {
+    "operation": "_check_dates",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "%s already has a contract running during the selected period.\n\nPlease either:\n\n- Change the start date so that it doesn't overlap with the existing contract, or\n- Create a new employee if this employee should have multiple active contracts."
+   },
+   {
+    "operation": "check_contract_finished",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "Before creating a new contract, close the current one by setting an end date."
+   },
+   {
+    "operation": "_unlink_except_last_version",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "Employee %s must always have at least one active version."
+   },
+   {
+    "operation": "write",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "Cannot unassign all the active versions of an employee."
+   },
+   {
+    "operation": "write",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "Cannot archive all the active versions of an employee."
+   },
+   {
+    "operation": "write",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "Cannot modify multiple versions contract dates with different contracts at once."
+   },
+   {
+    "operation": "create",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "Changing the contract on this employee changes their working schedule in a period they already took leaves. Changing this working schedule changes the duration of these leaves in such a way the employee no longer has the required allocation for them. Please review these leaves and/or allocations before changing the contract.\n\nThis error has been triggered by:\n"
+   },
+   {
+    "operation": "write",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "Changing the contract on this employee changes their working schedule in a period they already took leaves. Changing this working schedule changes the duration of these leaves in such a way the employee no longer has the required allocation for them. Please review these leaves and/or allocations before changing the contract.\n\nThis error has been triggered by:\n"
+   },
+   {
+    "operation": "_generate_work_entries_postprocess",
+    "package": "hr_work_entry",
+    "kind": "UserError",
+    "message": "Missing timezone for work entries generation."
+   },
+   {
+    "operation": "_generate_work_entries_postprocess",
+    "package": "hr_work_entry",
+    "kind": "UserError",
+    "message": "Missing date or duration on work entry"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr.access_hr_version_manager",
+    "package": "hr",
+    "name": "hr.version.manager",
+    "entity": "hr.version",
+    "group": "group_hr_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr.access_hr_version_user",
+    "package": "hr",
+    "name": "hr.version.user",
+    "entity": "hr.version",
+    "group": "group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr.ir_rule_hr_contract_manager",
+    "package": "hr",
+    "name": "HR Contract: Contract Manager",
+    "entity": "hr.version",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_hr_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr.ir_rule_hr_contract_multi_company",
+    "package": "hr",
+    "name": "HR Contract: Multi Company",
+    "entity": "hr.version",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr.hr_version_list_view",
+    "package": "hr",
+    "name": "hr.version.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Records",
+      "multi_edit": "1",
+      "default_order": "date_version DESC",
+      "create": "0",
+      "action": "action_open_version",
+      "type": "object",
+      "class": "o_hr_version_list_view"
+     },
+     "fields": [
+      {
+       "name": "date_version",
+       "readonly": "False",
+       "string": "Effective Date"
+      },
+      {
+       "name": "contract_date_start",
+       "string": "Start"
+      },
+      {
+       "name": "contract_date_end",
+       "string": "End"
+      },
+      {
+       "name": "employee_id",
+       "optional": "show"
+      },
+      {
+       "name": "additional_note",
+       "string": "Note",
+       "optional": "show"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "1"
+      },
+      {
+       "name": "wage",
+       "widget": "monetary",
+       "optional": "hide"
+      },
+      {
+       "name": "contract_type_id",
+       "optional": "show"
+      },
+      {
+       "name": "structure_type_id",
+       "optional": "hide"
+      },
+      {
+       "name": "job_id",
+       "optional": "show"
+      },
+      {
+       "name": "department_id",
+       "optional": "show"
+      },
+      {
+       "name": "hr_responsible_id",
+       "optional": "hide"
+      },
+      {
+       "name": "resource_calendar_id",
+       "optional": "show"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "create_uid",
+       "optional": "hide"
+      },
+      {
+       "name": "create_date",
+       "optional": "hide"
+      },
+      {
+       "name": "last_modified_uid",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "last_modified_date",
+       "readonly": "1",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_version_form_view",
+       "string": "View",
+       "type": "object",
+       "class": "btn-link",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr.hr_version_graph_view",
+    "package": "hr",
+    "name": "hr.version.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Employee Records",
+      "type": "bar",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date_version"
+      },
+      {
+       "name": "wage",
+       "widget": "monetary"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date_version",
+       "type": "row"
+      },
+      {
+       "name": "wage",
+       "widget": "monetary",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr.hr_version_pivot_view",
+    "package": "hr",
+    "name": "hr.version.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Employee Records",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date_version"
+      },
+      {
+       "name": "wage",
+       "widget": "monetary"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date_version",
+       "type": "row"
+      },
+      {
+       "name": "wage",
+       "widget": "monetary"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr.hr_version_search_view",
+    "package": "hr",
+    "name": "hr.version.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "job_id"
+      },
+      {
+       "name": "department_id",
+       "operator": "child_of"
+      },
+      {
+       "name": "resource_calendar_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "running_contract",
+       "string": "Running Contract",
+       "domain": "[                             '&',                                 '|',                                     ('contract_date_start', '=', False),                                     ('contract_date_start', '<', 'today'),                                 '|',                                     ('contract_date_end', '=', False),                                     ('contract_date_end', '>=', 'today')                         ]"
+      },
+      {
+       "name": "expired_contracts",
+       "string": "Expired Contracts",
+       "domain": "[                             ('contract_date_end', '!=', False),                             ('contract_date_end', '<', 'today')                         ]"
+      },
+      {
+       "name": "future_contracts",
+       "string": "Future Contracts",
+       "domain": "[                             ('contract_date_start', '!=', False),                             ('contract_date_start', '>', 'today'),                         ]"
+      },
+      {
+       "name": "contract_date_start",
+       "string": "Contract Start Date",
+       "groups": "hr.group_hr_manager",
+       "date": "contract_date_start"
+      },
+      {
+       "name": "contract_date_end",
+       "string": "Contract End Date",
+       "groups": "hr.group_hr_manager",
+       "date": "contract_date_end"
+      },
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', context_today().strftime('%Y-%m-%d'))]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', context_today().strftime('%Y-%m-%d'))]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_employee",
+       "string": "Employee",
+       "domain": "[]",
+       "context": "{'group_by': 'employee_id'}"
+      },
+      {
+       "name": "group_by_job",
+       "string": "Job Position",
+       "domain": "[]",
+       "context": "{'group_by': 'job_id'}"
+      },
+      {
+       "name": "group_by_department",
+       "string": "Department",
+       "domain": "[]",
+       "context": "{'group_by': 'department_id'}"
+      },
+      {
+       "name": "group_by_resource_calendar_id",
+       "string": "Working Schedule",
+       "domain": "[]",
+       "context": "{'group_by': 'resource_calendar_id'}"
+      },
+      {
+       "name": "group_by_structure_type_id",
+       "string": "Salary Structure Type",
+       "domain": "[]",
+       "context": "{'group_by': 'structure_type_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr.hr_contract_template_form_view",
+    "package": "hr",
+    "name": "hr.contract.template.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Contract Template"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "required": "1",
+       "placeholder": "Template Name"
+      },
+      {
+       "name": "job_id",
+       "groups": "hr.group_hr_manager"
+      },
+      {
+       "name": "department_id",
+       "groups": "hr.group_hr_manager"
+      },
+      {
+       "name": "hr_responsible_id",
+       "widget": "many2one_avatar_user",
+       "groups": "hr.group_hr_user"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "wage"
+      },
+      {
+       "name": "contract_type_id",
+       "string": "Contract Type",
+       "placeholder": "Contract Type"
+      },
+      {
+       "name": "structure_type_id",
+       "string": "Pay Category",
+       "domain": "['|', ('country_id', '=', False), ('country_id', '=', company_country_id)]",
+       "placeholder": "Employee will be excluded from Pay Runs"
+      },
+      {
+       "name": "resource_calendar_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "information",
+       "string": "Salary Information",
+       "invisible": null,
+       "groups": "hr.group_hr_manager"
+      }
+     ],
+     "widgets": {
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr.hr_contract_template_list_view",
+    "package": "hr",
+    "name": "hr.contract.template.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Contract Templates",
+      "default_order": "name"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "job_id"
+      },
+      {
+       "name": "department_id",
+       "optional": "show"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "1"
+      },
+      {
+       "name": "wage",
+       "widget": "monetary",
+       "optional": "show"
+      },
+      {
+       "name": "contract_type_id",
+       "optional": "show"
+      },
+      {
+       "name": "structure_type_id",
+       "optional": "show"
+      },
+      {
+       "name": "resource_calendar_id",
+       "optional": "show"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "optional": "hidden",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "create_uid",
+       "optional": "hidden"
+      },
+      {
+       "name": "create_date",
+       "optional": "hidden"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_work_entry.hr_contract_template_view_form",
+    "package": "hr_work_entry",
+    "name": "hr.contract.template.view.form.inherit.hr_work_entry",
+    "view_type": "separator",
+    "inherits_view": "hr.hr_contract_template_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "separator",
+     "root_attributes": {
+      "name": "schedule",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "work_entry_source",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "separator",
+       "attributes": {
+        "name": "schedule",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr.action_hr_version",
+    "package": "hr",
+    "name": "Employee Records",
+    "view_mode": "list,graph,pivot",
+    "view_id": null,
+    "search_view_id": "hr.hr_version_search_view",
+    "domain": "[('employee_id', '!=', False)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.version"
+   },
+   {
+    "external_identifier": "hr.action_hr_contract_templates",
+    "package": "hr",
+    "name": "Contract Templates",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('employee_id', '=', False)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n              No Template found</p><p>\n                Let's create one\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.version"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "hr_work_entry.ir_cron_generate_missing_work_entries",
+    "package": "hr_work_entry",
+    "name": "Generate Missing Work Entries",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": "True",
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "hr.version",
+    "operation": "_cron_generate_missing_work_entries",
+    "operation_call": "model._cron_generate_missing_work_entries()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}
